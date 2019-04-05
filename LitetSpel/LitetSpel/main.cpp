@@ -1,5 +1,7 @@
 #include <Windows.h>
 #include <chrono>
+#include <d3d11.h>
+#include "Graphics.h"
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -24,7 +26,7 @@ HWND InitWindow(HINSTANCE hInstance)
 	if (!RegisterClassEx(&wcex))
 		return false;
 
-	RECT rc = { 0, 0, 640, 480 };
+	RECT rc = { 0, 0, 1600, 900 };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 	
 	HWND handle = CreateWindowEx(
@@ -47,8 +49,11 @@ HWND InitWindow(HINSTANCE hInstance)
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	HWND wndHandle = InitWindow(hInstance);
-	ShowWindow(wndHandle, nCmdShow);
 	MSG msg = { 0 };
+	Graphics graphics;
+	HRESULT hr = graphics.init(wndHandle, true);
+	if (FAILED(hr)) return 2;
+	ShowWindow(wndHandle, nCmdShow);
 	
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message)
@@ -64,7 +69,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
 
-
+			graphics.swapBuffer();
 		}
 	}
 }
