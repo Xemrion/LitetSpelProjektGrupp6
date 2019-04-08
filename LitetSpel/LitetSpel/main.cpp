@@ -15,7 +15,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-HWND InitWindow(HINSTANCE hInstance)
+HWND InitWindow(HINSTANCE hInstance, int width, int height)
 {
 	WNDCLASSEX wcex = { 0 };
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -26,7 +26,7 @@ HWND InitWindow(HINSTANCE hInstance)
 	if (!RegisterClassEx(&wcex))
 		return false;
 
-	RECT rc = { 0, 0, 1600, 900 };
+	RECT rc = { 0, 0, width, height };
 	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
 	
 	HWND handle = CreateWindowEx(
@@ -48,7 +48,7 @@ HWND InitWindow(HINSTANCE hInstance)
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	HWND wndHandle = InitWindow(hInstance);
+	HWND wndHandle = InitWindow(hInstance, 1280, 720);
 	MSG msg = { 0 };
 	Graphics graphics;
 	HRESULT hr = graphics.init(wndHandle, true);
