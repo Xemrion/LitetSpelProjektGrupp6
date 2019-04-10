@@ -1,16 +1,17 @@
 #pragma once
 #include <d3d11.h>
-#include <SimpleMath.h>
+#include "../../INCLUDE/glm/glm/glm.hpp"
+#include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
+#include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 
-using namespace DirectX::SimpleMath;
 
 class Sphere {
 public:
-	Vector4 centerRadius;
+	glm::vec4 centerRadius;
 };
 
 class Box {
 public:
-	Vector4 center;
-	Vector4 halfLengths;
+	glm::vec4  center;
+	glm::vec4  halfLengths;
 };

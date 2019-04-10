@@ -3,7 +3,9 @@
 #include <d3d11.h>
 #include "Graphics.h"
 #include "game.h"
+#include "KeyboardInput.h"
 
+KeyboardInput keyboard;
 Game game;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -14,29 +16,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 	case WM_KEYDOWN:
-		switch (lParam)
-		case VK_LEFT: {
-			game.keys[0] = true;
-		} break;
-		case VK_RIGHT: {
-			game.keys[1] = true;
-		} break;
-		case VK_UP: {
-			game.keys[2] = true;
-		} break;
-		case VK_DOWN: {
-			game.keys[3] = true;
-		} break;
-	case WM_CHAR:
-		switch (wParam)
-		{
-		case (int)'a': {
-			game.keys[0] = true;
-		} break;
-		case (int)'d': {
-			game.keys[1] = true;
-		} break;
+	case WM_SYSKEYDOWN:
+		if (!(lParam & 0x40000000) || keyboard.IsAutoRepeatEnabled()) { //Does it one time unless auto-repeat is enabled.
+			keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
 		}
+		break;
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
+		break;
+	case WM_CHAR:
+		keyboard.OnChar(static_cast<unsigned char>(wParam));
+		break;
 	}
 
 	return DefWindowProc(hWnd, message, wParam, lParam);
@@ -100,6 +91,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
+			//Movement
+			if (keyboard.KeyIsPressed('D'))
+			{
+				game.currentLevel.player.move(dt, glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			if (keyboard.KeyIsPressed('A'))
+			{
+				game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
+			}
 		}
 	}
 }

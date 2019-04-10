@@ -1,5 +1,8 @@
 #include "Graphics.h"
-#include "SimpleMath.h"
+
+#include "../../INCLUDE/glm/glm/glm.hpp"
+#include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
+#include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"d3d11.lib")
