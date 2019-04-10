@@ -30,21 +30,33 @@ float testScene(float3 p)
 {
 	float minDist = 10000000.0;
 
-	minDist = min(length(spheres[0].centerRadius.xyz - p) - spheres[0].centerRadius.w, sdBox(p + boxes[0].center, boxes[0].halfLengths.xyz));
+	// sphere loop
+	for (int i = 0; i < 100; ++i)
+	{
+		if (spheres[i].centerRadius.w <= 0.0) break;
+		minDist = min(minDist, length(spheres[i].centerRadius.xyz - p) - spheres[i].centerRadius.w);
+	}
+
+	// box loop
+	for (int i = 0; i < 100; ++i)
+	{
+		if (boxes[i].halfLengths.x <= 0.0) break;
+		minDist = min(minDist, sdBox(p + boxes[i].center.xyz, boxes[i].halfLengths.xyz));
+	}
 
 	return minDist;
 }
 
 float3 castRay(float3 ro, float3 rd)
 {
-	float dist = 0.0;
+	float dist = 80.0;
 	float3 color = float3(1.0, 1.0, 1.0);
 
-	for (float i = 0.0; i < 400.0; i += 1.0)
+	for (float i = 0.0; i < 100.0; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
 		dist += currentDist;
-		if (dist > 1000.0) {
+		if (dist > 200.0) {
 			return float3(0.0, 1.0, 0.0);
 		}
 		if (currentDist < 0.1) {
