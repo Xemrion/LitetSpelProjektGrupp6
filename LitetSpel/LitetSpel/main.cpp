@@ -27,6 +27,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case VK_DOWN: {
 			game.keys[3] = true;
 		} break;
+	case WM_CHAR:
+		switch (wParam)
+		{
+		case (int)'a': {
+			game.keys[0] = true;
+		} break;
+		case (int)'d': {
+			game.keys[1] = true;
+		} break;
+		}
 	}
 
 	return DefWindowProc(hWnd, message, wParam, lParam);

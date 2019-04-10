@@ -11,7 +11,7 @@ class Player {
 private:
 public:
 	Vector3 pos = Vector3(0, 0, 0);
-	float speed = 10.0;
+	float speed = 100.0;
 	void move(double dt, Vector3 dir) { pos += dir * speed * dt; };
 };
 

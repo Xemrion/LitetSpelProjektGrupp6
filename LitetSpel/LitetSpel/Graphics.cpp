@@ -355,7 +355,7 @@ void Graphics::queueBoxes(vector<Box> boxes) {
 
 	if (boxes.size() > 0) {
 		deviceContext->Map(boxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-		memcpy(mr.pData, &boxes.cbegin(), boxes.size());
+		memcpy(mr.pData, &boxes[0], sizeof(Box));
 		deviceContext->Unmap(boxBuffer, 0);
 	}
 }
@@ -366,7 +366,7 @@ void Graphics::queueMetaballs(vector<Sphere> metaballs) {
 
 	if (metaballs.size() > 0) {
 		deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-		memcpy(mr.pData, &metaballs.cbegin(), metaballs.size());
+		memcpy(mr.pData, &metaballs[0], sizeof(Sphere));
 		deviceContext->Unmap(metaballBuffer, 0);
 	}
 }
