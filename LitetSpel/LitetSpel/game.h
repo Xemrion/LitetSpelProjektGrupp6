@@ -1,18 +1,19 @@
 #pragma once
 #include <d3d11.h>
-#include <SimpleMath.h>
+#include "../../INCLUDE/glm/glm/glm.hpp"
+#include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
+#include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include <vector>
 #include "Geometry.h"
 
 using namespace std;
-using namespace DirectX::SimpleMath;
 
 class Player {
 private:
 public:
-	Vector3 pos = Vector3(0, 0, 0);
+	glm::vec3 pos = glm::vec3(0, 0, 0);
 	float speed = 100.0;
-	void move(double dt, Vector3 dir) { pos += dir * speed * dt; };
+	void move(float dt, glm::vec3 dir) { pos += dir * speed * dt; };
 };
 
 class Level {

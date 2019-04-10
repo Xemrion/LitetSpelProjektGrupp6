@@ -3,12 +3,12 @@
 void Game::init()
 {
 	Box groundBox;
-	groundBox.center = Vector4(-10, -10, 10, 0);
-	groundBox.halfLengths = Vector4(100, 10, 10, 0);
+	groundBox.center = glm::vec4(-10, -10, 10, 0);
+	groundBox.halfLengths = glm::vec4(100, 10, 10, 0);
 	currentLevel.boxes.push_back(groundBox);
 	
 	Sphere playerSphere;
-	playerSphere.centerRadius = Vector4(
+	playerSphere.centerRadius = glm::vec4(
 		currentLevel.player.pos.x,
 		currentLevel.player.pos.y,
 		currentLevel.player.pos.z,
@@ -19,10 +19,10 @@ void Game::init()
 void Game::update(double dt)
 {
 	if (keys[0]) {
-		currentLevel.player.move(dt, Vector3(-1, 0, 0));
+		currentLevel.player.move(dt, glm::vec3(-1, 0, 0));
 	}
 	if (keys[1]) {
-		currentLevel.player.move(dt, Vector3(1, 0, 0));
+		currentLevel.player.move(dt, glm::vec3(1, 0, 0));
 	}
 
 
@@ -32,7 +32,7 @@ void Game::update(double dt)
 	}
 
 	Sphere playerSphere;
-	playerSphere.centerRadius = Vector4(
+	playerSphere.centerRadius = glm::vec4(
 		currentLevel.player.pos.x,
 		currentLevel.player.pos.y,
 		currentLevel.player.pos.z,

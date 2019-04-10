@@ -1,5 +1,4 @@
 #include "Graphics.h"
-//#include "SimpleMath.h"
 
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
