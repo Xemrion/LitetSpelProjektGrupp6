@@ -201,7 +201,30 @@ HRESULT Graphics::createResources(HWND wndHandle)
 		deviceContext->OMSetRenderTargets(1, &backBufferView, nullptr);
 	}
 
+	createGeometryBuffers();
+
 	return hr;
+}
+
+void Graphics::createGeometryBuffers() {
+	D3D11_BUFFER_DESC constBufferDesc;
+	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
+	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufferDesc.ByteWidth = sizeof(Box) * 100;
+	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	device->CreateBuffer(&constBufferDesc, NULL, &boxBuffer);
+
+
+
+	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
+	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufferDesc.ByteWidth = sizeof(metaballBuffer) * 100;
+	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	device->CreateBuffer(&constBufferDesc, NULL, &metaballBuffer);
 }
 
 HRESULT Graphics::createShaders()
@@ -326,6 +349,28 @@ HRESULT Graphics::createQuadData()
 	return hr;
 }
 
+void Graphics::queueBoxes(vector<Box> boxes) {
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+	if (boxes.size() > 0) {
+		deviceContext->Map(boxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+		memcpy(mr.pData, &boxes.cbegin(), boxes.size());
+		deviceContext->Unmap(boxBuffer, 0);
+	}
+}
+
+void Graphics::queueMetaballs(vector<Sphere> metaballs) {
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+	if (metaballs.size() > 0) {
+		deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+		memcpy(mr.pData, &metaballs.cbegin(), metaballs.size());
+		deviceContext->Unmap(metaballBuffer, 0);
+	}
+}
+
 void Graphics::swapBuffer()
 {
 	float clearColor[] = { 0.0, 0.0, 0.0, 1.0 };
@@ -334,6 +379,9 @@ void Graphics::swapBuffer()
 	
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
+
+	deviceContext->PSSetConstantBuffers(0, 1, &boxBuffer);
+	deviceContext->PSSetConstantBuffers(1, 1, &metaballBuffer);
 
 	UINT32 vertexSize = sizeof(float) * 3;
 	UINT32 offset = 0;

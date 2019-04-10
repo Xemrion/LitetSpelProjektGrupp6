@@ -2,6 +2,9 @@
 #include <chrono>
 #include <d3d11.h>
 #include "Graphics.h"
+#include "game.h"
+
+Game game;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -10,6 +13,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	case WM_KEYDOWN:
+		switch (lParam)
+		case VK_LEFT: {
+			game.keys[0] = true;
+		} break;
+		case VK_RIGHT: {
+			game.keys[1] = true;
+		} break;
+		case VK_UP: {
+			game.keys[2] = true;
+		} break;
+		case VK_DOWN: {
+			game.keys[3] = true;
+		} break;
 	}
 
 	return DefWindowProc(hWnd, message, wParam, lParam);
@@ -53,6 +70,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	Graphics graphics;
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
+	game.init();
 	ShowWindow(wndHandle, nCmdShow);
 	
 	auto prevFrameTime = std::chrono::steady_clock::now();
@@ -68,7 +86,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
-
+			game.update(dt);
+			graphics.queueBoxes(game.currentLevel.boxes);
+			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
 		}
 	}
