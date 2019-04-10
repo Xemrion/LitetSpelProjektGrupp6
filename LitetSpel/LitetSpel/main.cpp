@@ -3,7 +3,7 @@
 #include <d3d11.h>
 #include "Graphics.h"
 #include "game.h"
-#include"KeyboardInput.h"
+#include "KeyboardInput.h"
 
 KeyboardInput keyboard;
 Game game;
@@ -91,7 +91,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
-			//if (keyboard.KeyIsPressed('A')){}
+			//Movement
+			if (keyboard.KeyIsPressed('D'))
+			{
+				game.currentLevel.player.move(dt, glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			if (keyboard.KeyIsPressed('A'))
+			{
+				game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
+			}
 		}
 	}
 }
