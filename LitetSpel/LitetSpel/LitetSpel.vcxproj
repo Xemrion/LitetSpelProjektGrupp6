@@ -119,6 +119,7 @@
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="KeyboardInput.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MouseInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -128,6 +129,7 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="KeyboardInput.h" />
+    <ClInclude Include="MouseInput.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="ps.hlsl">
