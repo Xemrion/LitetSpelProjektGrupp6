@@ -109,7 +109,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
 
-			//keyboardFunc();
+			keyboardFunc();
 
 			game.update(dt);
 			//graphics.queueBoxes(game.currentLevel.boxes);
