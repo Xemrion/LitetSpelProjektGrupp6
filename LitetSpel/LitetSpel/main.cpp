@@ -64,6 +64,27 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	return handle;
 }
 
+void keyboardFunc()
+{
+	//Movement
+	if (keyboard.KeyIsPressed('D'))
+	{
+		game.keys[1] = true;
+	}
+	if (keyboard.KeyIsPressed('A'))
+	{
+		game.keys[0] = true;
+	}
+	if (keyboard.KeyIsPressed('W'))
+	{
+		game.keys[2] = true;
+	}
+	if (keyboard.KeyIsPressed('S'))
+	{
+		game.keys[3] = true;
+	}
+}
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
@@ -88,33 +109,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
 
-			//Movement
-			if (keyboard.KeyIsPressed('D'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(1.0f, 0.0f, 0.0f));
-				game.keys[1] = true;
-			}
-			if (keyboard.KeyIsPressed('A'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
-				game.keys[0] = true;
-			}
-			if (keyboard.KeyIsPressed('W'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
-				game.keys[2] = true;
-			}
-			if (keyboard.KeyIsPressed('S'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
-				game.keys[3] = true;
-			}
+			//keyboardFunc();
 
 			game.update(dt);
 			//graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
-
 		}
 	}
 }
