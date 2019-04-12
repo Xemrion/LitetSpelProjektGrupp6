@@ -12,7 +12,8 @@ class Player {
 private:
 public:
 	glm::vec3 pos = glm::vec3(0, 0, 0);
-	float speed = 100.0;
+	float speed = 100.0f;
+	float jumpSpeed = 0.0f;
 	void move(float dt, glm::vec3 dir) { pos += dir * speed * dt; };
 };
 

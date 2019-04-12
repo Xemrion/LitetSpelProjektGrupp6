@@ -24,12 +24,20 @@ void Game::update(double dt)
 	if (keys[1]) {
 		currentLevel.player.move(dt, glm::vec3(1, 0, 0));
 	}
-
-
+	if (keys[2]) {
+		//currentLevel.player.move(dt, glm::vec3(0, -1, 0));
+		currentLevel.player.jumpSpeed = -100.0f * float(dt);
+	}
+	if (keys[3]) {
+		currentLevel.player.move(dt, glm::vec3(0, 1, 0));
+	}
 
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}
+
+	currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (1 * 50.0f * float(dt))/100;
+	currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
 
 	Sphere playerSphere;
 	playerSphere.centerRadius = glm::vec4(
