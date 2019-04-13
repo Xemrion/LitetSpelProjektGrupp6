@@ -356,10 +356,6 @@ void Graphics::queueBoxes(vector<Box> boxes) {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-	//Box boxArray[100];
-	//ZeroMemory(boxArray, sizeof(Box) * 100);
-	//memcpy(boxArray, boxes.data(), sizeof(Box) * boxes.size());
-	//std::copy(boxes.begin(), boxes.end(), boxArray);
 	deviceContext->Map(boxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, boxes.data(), sizeof(Box) * boxes.size());
 	deviceContext->Unmap(boxBuffer, 0);
@@ -368,10 +364,6 @@ void Graphics::queueBoxes(vector<Box> boxes) {
 void Graphics::queueMetaballs(vector<Sphere> metaballs) {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	
-	//Sphere metaballArray[100];
-	//ZeroMemory(metaballArray, sizeof(Sphere) * 100);
-	//memcpy(metaballArray, metaballs.data(), metaballs.size() * sizeof(Sphere));
 
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, metaballs.data(), sizeof(Sphere) * metaballs.size());
