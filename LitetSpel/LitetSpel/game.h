@@ -11,7 +11,7 @@ using namespace std;
 class Player {
 private:
 public:
-	glm::vec3 pos = glm::vec3(0, 0, 0);
+	glm::vec3 pos = glm::vec3(0, 5, 0);
 	float speed = 100.0;
 	void move(float dt, glm::vec3 dir) { pos += dir * speed * dt; };
 };
