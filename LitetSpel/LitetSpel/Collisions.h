@@ -27,6 +27,13 @@
 //             }
 //         }; break;
 //     }
+//
+//     // for powerups it doesn't matter which of the players hitbox collided with it,
+//     // so the check can be outside of the switch case.
+//     if ( otherHitbox == CollisionId::powerup_bouncy ) {
+//         _bouncyProjectiles = true;
+//         ((BouncyPowerup&)other).destroy(); // or via some EntityManager
+//     }
 // }
 
 
