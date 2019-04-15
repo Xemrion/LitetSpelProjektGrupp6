@@ -4,8 +4,11 @@
 #include "Graphics.h"
 #include "game.h"
 #include "KeyboardInput.h"
+#include "MouseInput.h"
 
 KeyboardInput keyboard;
+MouseInput mouse;
+int xMus = 0;
 Game game;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -27,6 +30,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CHAR:
 		keyboard.OnChar(static_cast<unsigned char>(wParam));
+		break;
+	case(WM_MOUSEMOVE):
+		const POINTS pointMove = MAKEPOINTS(lParam);
+		if (pointMove.x >= 0 && pointMove.x < 1280 && pointMove.y >= 0 && pointMove.y < 720) {
+			mouse.OnMouseMove(pointMove.x, pointMove.y);
+			if (!mouse.IsInWindow()) {
+				SetCapture(hWnd);
+				mouse.OnMouseEnter();
+			}
+		}
+		else {
+			//If either left or right button is pressed while leaving the window, keep track of position
+			if (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) {
+				mouse.OnMouseMove(pointMove.x, pointMove.y);
+			}
+			else {
+				//If left of right button is not pressed while leaving, don't track position
+				ReleaseCapture();
+				mouse.OnMouseLeave();
+			}
+		}
+		break;
+	case(WM_MOUSEWHEEL):
+		const POINTS pointWheel = MAKEPOINTS(lParam);
+		mouse.OnWheelDelta(pointWheel.x, pointWheel.y, GET_WHEEL_DELTA_WPARAM(wParam));
+		break;
+	case(WM_LBUTTONDOWN):
+		const POINTS pointLDown = MAKEPOINTS(lParam);
+		mouse.OnLeftPressed(pointLDown.x, pointLDown.y);
+		break;
+	case(WM_LBUTTONUP):
+		const POINTS pointLUp = MAKEPOINTS(lParam);
+		mouse.OnLeftReleased(pointLUp.x, pointLUp.y);
+		break;
+	case(WM_RBUTTONDOWN):
+		const POINTS pointRDown = MAKEPOINTS(lParam);
+		mouse.OnRightPressed(pointRDown.x, pointRDown.y);
+		break;
+	case(WM_RBUTTONUP):
+		const POINTS pointRUp = MAKEPOINTS(lParam);
+		mouse.OnRightReleased(pointRUp.x, pointRUp.y);
+		break;
+	case(WM_MBUTTONDOWN):
+		const POINTS pointMDown = MAKEPOINTS(lParam);
+		mouse.OnMiddlePressed(pointMDown.x, pointMDown.y);
+		break;
+	case(WM_MBUTTONUP):
+		const POINTS pointMUP = MAKEPOINTS(lParam);
+		mouse.OnMiddleReleased(pointMUP.x, pointMUP.y);
 		break;
 	}
 
@@ -64,6 +116,27 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	return handle;
 }
 
+void keyboardFunc()
+{
+	//Movement
+	if (keyboard.KeyIsPressed('D'))
+	{
+		game.keys[1] = true;
+	}
+	if (keyboard.KeyIsPressed('A'))
+	{
+		game.keys[0] = true;
+	}
+	if (keyboard.KeyIsPressed('W'))
+	{
+		game.keys[2] = true;
+	}
+	if (keyboard.KeyIsPressed('S'))
+	{
+		game.keys[3] = true;
+	}
+}
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
@@ -88,33 +161,23 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
 
-			//Movement
-			if (keyboard.KeyIsPressed('D'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(1.0f, 0.0f, 0.0f));
-				game.keys[1] = true;
-			}
-			if (keyboard.KeyIsPressed('A'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
-				game.keys[0] = true;
-			}
-			if (keyboard.KeyIsPressed('W'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
-				game.keys[2] = true;
-			}
-			if (keyboard.KeyIsPressed('S'))
-			{
-				//game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
-				game.keys[3] = true;
-			}
+			keyboardFunc();
+			
 
 			game.update(dt);
 			//graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
-
+			if (mouse.ReadEvent().GetType() == MouseInput::Event::Type::Move) {
+				if (mouse.GetXPos() > xMus) {
+					game.currentLevel.player.move(dt, glm::vec3(1, 0, 0));
+					xMus = mouse.GetXPos();
+				}
+				else if (mouse.GetXPos() < xMus) {
+					game.currentLevel.player.move(dt, glm::vec3(-1, 0, 0));
+					xMus = mouse.GetXPos();
+				}
+			}
 		}
 	}
 }
