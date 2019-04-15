@@ -3,7 +3,7 @@
 
 
 bool IObject::operator!=( IObject const &other ) const noexcept {
-    return this->_id != other._id;
+    return _id != other._id;
 }
 
 
@@ -47,17 +47,20 @@ void CollisionManager::register_entry( IObject &parent, CollisionId id, Sphere c
     auto constexpr r { 3U };
     auto const    &s = a.centerRadius;
 
+    // distance between box and sphere centers
     auto sDist = glm::vec2( abs(s[x]-b[y]), abs(s[y]-b[y]) );
 
-    if ( sDist[x] > (b.halfLengths[x]+s[r])
+    // check if they're too far apart to intersect
+    if (    sDist[x] > (b.halfLengths[x]+s[r])
          or sDist[y] > (b.halfLengths[y]+s[r]) ) return false;
 
-    if ( sDist[x] <= b.halfLengths[x]
+    // check if they're too close not to intersect
+    if (    sDist[x] <= b.halfLengths[x]
          or sDist[y] <= b.halfLengths[y] ) return true;
 
+    // else handle the corner cases:
     auto sqrVertDist = sqr(sDist[x]-b.halfLengths[x])
         + sqr(sDist[y]-b.halfLengths[y]);
-
     return sqr(s[r]) > sqrVertDist;
 }
 
@@ -72,7 +75,7 @@ void CollisionManager::register_entry( IObject &parent, CollisionId id, Sphere c
     auto constexpr y { 1U };
     auto constexpr r { 3U };
     auto constexpr sqr = []( auto n ) { return n*n; };
-    return sqr(a[x]-b[x]) + sqr(a[y]-b[y])  <  sqr(a[r]+b[r])
+    return sqr(a[x]-b[x]) + sqr(a[y]-b[y])  <  sqr(a[r]+b[r]);
 }
  
 // possibilities: cull distant objects based off of a preliminary spatial eligibility test
