@@ -8,8 +8,10 @@
 
 KeyboardInput keyboard;
 MouseInput mouse;
-int xMus = 0;
 Game game;
+
+int xMus = 0;
+float powerCoolDown = 0.0;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -116,6 +118,14 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	return handle;
 }
 
+void mouseFunc() 
+{
+	if (mouse.ReadEvent().GetType() == MouseInput::Event::Type::Move)
+	{
+
+	}
+}
+
 void keyboardFunc()
 {
 	//Movement
@@ -133,7 +143,37 @@ void keyboardFunc()
 	}
 	if (keyboard.KeyIsPressed('S'))
 	{
-		game.keys[3] = true;
+		//game.keys[3] = true;
+	}
+	if (keyboard.KeyIsPressed('B')) 
+	{
+		if (powerCoolDown <= 0) 
+		{
+			if (game.currentLevel.player.status == 0)
+			{
+				game.currentLevel.player.status = 1;
+			}
+			else
+			{
+				game.currentLevel.player.status = 0;
+			}
+			powerCoolDown = 0.2;
+		}
+	}
+	if (keyboard.KeyIsPressed('H'))
+	{
+		if (powerCoolDown <= 0)
+		{
+			if (game.currentLevel.player.status == 0)
+			{
+				game.currentLevel.player.status = 2;
+			}
+			else
+			{
+				game.currentLevel.player.status = 0;
+			}
+			powerCoolDown = 0.2;
+		}
 	}
 }
 
@@ -162,22 +202,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			prevFrameTime = currentFrameTime;
 
 			keyboardFunc();
-			
+			mouseFunc();
 
 			game.update(dt);
 			//graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
-			if (mouse.ReadEvent().GetType() == MouseInput::Event::Type::Move) {
-				if (mouse.GetXPos() > xMus) {
-					game.currentLevel.player.move(dt, glm::vec3(1, 0, 0));
-					xMus = mouse.GetXPos();
-				}
-				else if (mouse.GetXPos() < xMus) {
-					game.currentLevel.player.move(dt, glm::vec3(-1, 0, 0));
-					xMus = mouse.GetXPos();
-				}
-			}
+
+			powerCoolDown -= dt;
 		}
+		
 	}
 }

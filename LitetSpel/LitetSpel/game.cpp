@@ -18,15 +18,53 @@ void Game::init()
 
 void Game::update(double dt)
 {
+
 	if (keys[0]) {
-		currentLevel.player.move(dt, glm::vec3(-1, 0, 0));
+		if (currentLevel.player.status == 2) 
+		{
+			currentLevel.player.move(dt, glm::vec3(-0.2, 0, 0));
+		}
+		else 
+		{
+			currentLevel.player.move(dt, glm::vec3(-1, 0, 0));
+		}
+
 	}
 	if (keys[1]) {
-		currentLevel.player.move(dt, glm::vec3(1, 0, 0));
+		if (currentLevel.player.status == 2)
+		{
+			currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
+		}
+		else
+		{
+			currentLevel.player.move(dt, glm::vec3(1, 0, 0));
+		}
 	}
 	if (keys[2]) {
-		//currentLevel.player.move(dt, glm::vec3(0, -1, 0));
-		currentLevel.player.jumpSpeed = -100.0f * float(dt);
+
+		if(currentLevel.player.standing == true && currentLevel.player.jumpCoolDown <= 0 && currentLevel.player.status != 2)
+		{
+			currentLevel.player.jumpSpeed = -100.0f * float(dt);
+			currentLevel.player.standing = false;
+			gravity = 50.0f;
+			currentLevel.player.jumpCoolDown = 0.2;
+			currentLevel.player.move(dt, glm::vec3(10, 0, 0));
+		}
+		else if (currentLevel.player.pos.y < -0.1f && currentLevel.player.status == 1 && currentLevel.player.extraJump == true && currentLevel.player.standing == false && currentLevel.player.jumpCoolDown <= 0)
+		{
+			currentLevel.player.extraJump = false;
+			currentLevel.player.jumpSpeed = -100.0f * float(dt);
+			currentLevel.player.jumpCoolDown = 0.2;
+			currentLevel.player.move(dt, glm::vec3(10, 0, 0));
+		}
+
+		else if (currentLevel.player.status == 2 && currentLevel.player.standing == true)
+		{
+			currentLevel.player.jumpSpeed = -50.0f * float(dt);
+			currentLevel.player.standing = false;
+			gravity = 50.0f;
+			currentLevel.player.jumpCoolDown = 0.2;
+		}
 	}
 	if (keys[3]) {
 		currentLevel.player.move(dt, glm::vec3(0, 1, 0));
@@ -35,9 +73,23 @@ void Game::update(double dt)
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}
+	//##########################################################
+	if (currentLevel.player.pos.y <= 0.0f)
+	{
+		currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (gravity * float(dt)) / 100;
+		currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
+	}
+	else if (currentLevel.player.pos.y > 0.0f)
+	{
+		currentLevel.player.pos.y = 0;
+		currentLevel.player.standing = true;
+		currentLevel.player.extraJump = true;
+		gravity = 0.0f;
+		currentLevel.player.jumpSpeed = 0;
+	}
+	//##########################################################
 
-	currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (1 * 50.0f * float(dt))/100;
-	currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
+	currentLevel.player.jumpCoolDown -= dt;
 
 	Sphere playerSphere;
 	playerSphere.centerRadius = glm::vec4(
