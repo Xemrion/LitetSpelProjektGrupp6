@@ -9,8 +9,10 @@ bool IObject::operator!=( IObject const &other ) const noexcept {
 
 
 CollisionManager::CollisionManager() {
-    _static.reserve( 200 ); // arbitrary constants to minimize vector copying
-    _mobile.reserve(  25 ); // arbitrary constants to minimize vector copying
+    _staticBoxes.reserve(  200 ); // arbitrary constants to minimize vector copying
+    _mobileBoxes.reserve(   25 ); // arbitrary constants to minimize vector copying
+    _staticSpheres.reserve( 10 ); // arbitrary constants to minimize vector copying
+    _mobileSpheres.reserve(  5 ); // arbitrary constants to minimize vector copying
 }
 
 // possibility: separate base classes for mobiles and statics and use function specialization instead of the final bool
