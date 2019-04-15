@@ -31,6 +31,14 @@ void CollisionManager::register_entry( IObject &parent, CollisionId id, Sphere c
     else _mobileSpheres.push_back( e ); 
 }
 
+void CollisionManager::unregister_entry( IObject const &parent ) noexcept {
+    auto unary_predicate = [&parent]( auto const &e ) { return e.object != parent };
+    std::remove_if( _staticBoxes.begin(),   _staticBoxes.end(),   unary_predicate );
+    std::remove_if( _mobileBoxes.begin(),   _mobileBoxes.end(),   unary_predicate );
+    std::remove_if( _staticSpheres.begin(), _staticSpheres.end(), unary_predicate );
+    std::remove_if( _mobileSpheres.begin(), _mobileSpheres.end(), unary_predicate );
+}
+
 [[nodiscard]] bool CollisionManager::intersect( Box const &a, Box const &b ) noexcept {
     auto constexpr x { 0U };
     auto constexpr y { 1U };
@@ -59,8 +67,7 @@ void CollisionManager::register_entry( IObject &parent, CollisionId id, Sphere c
          or sDist[y] <= b.halfLengths[y] ) return true;
 
     // else handle the corner cases:
-    auto sqrVertDist = sqr(sDist[x]-b.halfLengths[x])
-        + sqr(sDist[y]-b.halfLengths[y]);
+    auto sqrVertDist = sqr(sDist[x]-b.halfLengths[x]) + sqr(sDist[y]-b.halfLengths[y]);
     return sqr(s[r]) > sqrVertDist;
 }
 

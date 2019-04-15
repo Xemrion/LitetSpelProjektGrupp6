@@ -82,6 +82,8 @@ public:
     void register_entry( IObject &parent, CollisionId id,    Box const &hitbox,    bool is_static ) noexcept; // call from object constructor
     void register_entry( IObject &parent, CollisionId id, Sphere const &hitsphere, bool is_static ) noexcept; // call from object constructor
 
+    void unregister_entry( IObject const &parent ) noexcept;
+
     // evaluates whether two hitboxes are intersecting or not
     [[nodiscard]]        bool intersect(    Box const &a,    Box const &b ) noexcept;
     [[nodiscard]]        bool intersect( Sphere const &a,    Box const &b ) noexcept;
