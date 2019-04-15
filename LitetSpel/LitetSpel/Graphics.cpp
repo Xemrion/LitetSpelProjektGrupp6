@@ -402,4 +402,11 @@ Graphics::~Graphics()
 	SAFE_RELEASE(debugger);
 	SAFE_RELEASE(backBufferView);
 	SAFE_RELEASE(depthStencilView);
+
+	SAFE_RELEASE(vertexShader);
+	SAFE_RELEASE(pixelShader);
+	SAFE_RELEASE(vertexLayout);
+	SAFE_RELEASE(quadBuffer);
+	SAFE_RELEASE(boxBuffer);
+	SAFE_RELEASE(metaballBuffer);
 }
