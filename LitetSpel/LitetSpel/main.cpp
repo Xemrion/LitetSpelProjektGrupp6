@@ -209,8 +209,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
 
-			powerCoolDown -= dt;
+			powerCoolDown -= (float)dt;
 		}
 		
 	}
+
+	return 0;
 }
