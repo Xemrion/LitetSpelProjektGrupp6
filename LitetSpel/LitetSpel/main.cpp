@@ -4,9 +4,16 @@
 #include "Graphics.h"
 #include "game.h"
 #include "KeyboardInput.h"
+#include "MouseInput.h"
 
 KeyboardInput keyboard;
+MouseInput mouse;
 Game game;
+
+double dt;
+
+int xMus = 0;
+float powerCoolDown = 0.0;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -27,6 +34,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_CHAR:
 		keyboard.OnChar(static_cast<unsigned char>(wParam));
+		break;
+	case(WM_MOUSEMOVE):
+		const POINTS pointMove = MAKEPOINTS(lParam);
+		if (pointMove.x >= 0 && pointMove.x < 1280 && pointMove.y >= 0 && pointMove.y < 720) {
+			mouse.OnMouseMove(pointMove.x, pointMove.y);
+			if (!mouse.IsInWindow()) {
+				SetCapture(hWnd);
+				mouse.OnMouseEnter();
+			}
+		}
+		else {
+			//If either left or right button is pressed while leaving the window, keep track of position
+			if (wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) {
+				mouse.OnMouseMove(pointMove.x, pointMove.y);
+			}
+			else {
+				//If left of right button is not pressed while leaving, don't track position
+				ReleaseCapture();
+				mouse.OnMouseLeave();
+			}
+		}
+		break;
+	case(WM_MOUSEWHEEL):
+		const POINTS pointWheel = MAKEPOINTS(lParam);
+		mouse.OnWheelDelta(pointWheel.x, pointWheel.y, GET_WHEEL_DELTA_WPARAM(wParam));
+		break;
+	case(WM_LBUTTONDOWN):
+		const POINTS pointLDown = MAKEPOINTS(lParam);
+		mouse.OnLeftPressed(pointLDown.x, pointLDown.y);
+		break;
+	case(WM_LBUTTONUP):
+		const POINTS pointLUp = MAKEPOINTS(lParam);
+		mouse.OnLeftReleased(pointLUp.x, pointLUp.y);
+		break;
+	case(WM_RBUTTONDOWN):
+		const POINTS pointRDown = MAKEPOINTS(lParam);
+		mouse.OnRightPressed(pointRDown.x, pointRDown.y);
+		break;
+	case(WM_RBUTTONUP):
+		const POINTS pointRUp = MAKEPOINTS(lParam);
+		mouse.OnRightReleased(pointRUp.x, pointRUp.y);
+		break;
+	case(WM_MBUTTONDOWN):
+		const POINTS pointMDown = MAKEPOINTS(lParam);
+		mouse.OnMiddlePressed(pointMDown.x, pointMDown.y);
+		break;
+	case(WM_MBUTTONUP):
+		const POINTS pointMUP = MAKEPOINTS(lParam);
+		mouse.OnMiddleReleased(pointMUP.x, pointMUP.y);
 		break;
 	}
 
@@ -64,6 +120,65 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	return handle;
 }
 
+void mouseFunc() 
+{
+	if (mouse.ReadEvent().GetType() == MouseInput::Event::Type::Move)
+	{
+
+	}
+}
+
+void keyboardFunc()
+{
+	//Movement
+	if (keyboard.KeyIsPressed('D'))
+	{
+		game.keys[1] = true;
+	}
+	if (keyboard.KeyIsPressed('A'))
+	{
+		game.keys[0] = true;
+	}
+	if (keyboard.KeyIsPressed('W'))
+	{
+		game.keys[2] = true;
+	}
+	if (keyboard.KeyIsPressed('S'))
+	{
+		//game.keys[3] = true;
+	}
+	if (keyboard.KeyIsPressed('B')) 
+	{
+		if (powerCoolDown <= 0) 
+		{
+			if (game.currentLevel.player.status == 0)
+			{
+				game.currentLevel.player.status = 1;
+			}
+			else
+			{
+				game.currentLevel.player.status = 0;
+			}
+			powerCoolDown = 0.2f;
+		}
+	}
+	if (keyboard.KeyIsPressed('H'))
+	{
+		if (powerCoolDown <= 0)
+		{
+			if (game.currentLevel.player.status == 0)
+			{
+				game.currentLevel.player.status = 2;
+			}
+			else
+			{
+				game.currentLevel.player.status = 0;
+			}
+			powerCoolDown = 0.2f;
+		}
+	}
+}
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
@@ -85,22 +200,20 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		else
 		{
 			auto currentFrameTime = std::chrono::steady_clock::now();
-			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
+			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
+
+			keyboardFunc();
+			mouseFunc();
+
 			game.update(dt);
 			graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
-			//Movement
-			if (keyboard.KeyIsPressed('D'))
-			{
-				game.currentLevel.player.move((float)dt, glm::vec3(1.0f, 0.0f, 0.0f));
-			}
-			if (keyboard.KeyIsPressed('A'))
-			{
-				game.currentLevel.player.move((float)dt, glm::vec3(-1.0f, 0.0f, 0.0f));
-			}
+
+			powerCoolDown -= (float)dt;
 		}
+		
 	}
 
 	return 0;
