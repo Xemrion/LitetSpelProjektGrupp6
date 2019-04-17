@@ -125,6 +125,8 @@
     <ClCompile Include="KeyboardInput.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MouseInput.cpp" />
+    <ClCompile Include="Platform.cpp" />
+    <ClCompile Include="PowerUp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -135,7 +137,10 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="KeyboardInput.h" />
+    <ClInclude Include="Library.h" />
     <ClInclude Include="MouseInput.h" />
+    <ClInclude Include="Platform.h" />
+    <ClInclude Include="PowerUp.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="ps.hlsl">

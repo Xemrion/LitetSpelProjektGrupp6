@@ -159,7 +159,7 @@ void keyboardFunc()
 			{
 				game.currentLevel.player.status = 0;
 			}
-			powerCoolDown = 0.2;
+			powerCoolDown = 0.2f;
 		}
 	}
 	if (keyboard.KeyIsPressed('H'))
@@ -174,7 +174,7 @@ void keyboardFunc()
 			{
 				game.currentLevel.player.status = 0;
 			}
-			powerCoolDown = 0.2;
+			powerCoolDown = 0.2f;
 		}
 	}
 }
@@ -211,8 +211,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
 
-			powerCoolDown -= dt;
+			powerCoolDown -= (float)dt;
 		}
 		
 	}
+
+	return 0;
 }
