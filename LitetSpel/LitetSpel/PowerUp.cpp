@@ -28,11 +28,16 @@ PowerUp::~PowerUp()
 }
 
 void PowerUp::setType(PowerType type) {
-	if (this->typeOfPowerUp != type) {
-		this->typeOfPowerUp = type;
+	if (type != PowerType::None) {
+		if (this->typeOfPowerUp != type) {
+			this->typeOfPowerUp = type;
+		}
+		else {
+			//Already has that type
+		}
 	}
 	else {
-		//Already has that type
+		//Cannot set power type to none
 	}
 }
 void PowerUp::setTypeByInt(int type) {
