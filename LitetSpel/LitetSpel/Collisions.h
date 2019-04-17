@@ -3,7 +3,10 @@
 #include <vector>
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "geometry.h"
+#include <algorithm>
 
+constexpr bool debugCollisions = true;
+#include <cstdio>
 
 // use case example:
 //
@@ -53,10 +56,10 @@ class IObject { // Interface / abstract base class
 public:
     IObject(): _id( _generateId() ) {}
 
-    IObject( IObject const  & )         = delete;
-    IObject( IObject       && )         = delete;
-    auto& operator=( IObject const  & ) = delete;
-    auto& operator=( IObject       && ) = delete;
+    //IObject( IObject const  & )         = delete;
+    //IObject( IObject       && )         = delete;
+    //auto& operator=( IObject const  & ) = delete;
+    //auto& operator=( IObject       && ) = delete;
 
     virtual ~IObject() noexcept {}
 
@@ -97,15 +100,15 @@ public:
 
 private:
     struct _HitboxEntry { // POD
-        IObject            &object; // parent object   (multiple hitboxes can share the same parent)
-        Box const          &hitbox; // the hitbox itself
-        CollisionId const   id;     // enum identifier (provided to the parent of a hitbox on collision)
+        IObject            *object; // parent object   (multiple hitboxes can share the same parent)
+        Box const          *hitbox; // the hitbox itself
+        CollisionId         id;     // enum identifier (provided to the parent of a hitbox on collision)
     };
 
     struct _HitsphereEntry { // POD
-        IObject            &object;    // parent object   (multiple hitboxes/hitspheres can share the same parent)
-        Sphere const       &hitsphere; // the hitsphere itself
-        CollisionId const   id;        // enum identifier (provided to the parent of a hitbox on collision)
+        IObject           *object;    // parent object   (multiple hitboxes/hitspheres can share the same parent)
+        Sphere const      *hitsphere; // the hitsphere itself
+        CollisionId        id;        // enum identifier (provided to the parent of a hitbox on collision)
     };
 
     std::vector<_HitboxEntry>    _mobileBoxes;   // stores the dynamic hitboxes

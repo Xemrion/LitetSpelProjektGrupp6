@@ -10,6 +10,8 @@ KeyboardInput keyboard;
 MouseInput mouse;
 Game game;
 
+double dt;
+
 int xMus = 0;
 float powerCoolDown = 0.0;
 
@@ -198,14 +200,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		else
 		{
 			auto currentFrameTime = std::chrono::steady_clock::now();
-			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
+			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
 
 			keyboardFunc();
 			mouseFunc();
 
 			game.update(dt);
-			//graphics.queueBoxes(game.currentLevel.boxes);
+			graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
 
