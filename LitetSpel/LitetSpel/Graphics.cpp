@@ -356,22 +356,18 @@ void Graphics::queueBoxes(vector<Box> boxes) {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-	if (boxes.size() > 0) {
-		deviceContext->Map(boxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-		memcpy(mr.pData, &boxes[0], sizeof(Box));
-		deviceContext->Unmap(boxBuffer, 0);
-	}
+	deviceContext->Map(boxBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, boxes.data(), sizeof(Box) * boxes.size());
+	deviceContext->Unmap(boxBuffer, 0);
 }
 
 void Graphics::queueMetaballs(vector<Sphere> metaballs) {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-	if (metaballs.size() > 0) {
-		deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-		memcpy(mr.pData, &metaballs[0], sizeof(Sphere));
-		deviceContext->Unmap(metaballBuffer, 0);
-	}
+	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, metaballs.data(), sizeof(Sphere) * metaballs.size());
+	deviceContext->Unmap(metaballBuffer, 0);
 }
 
 void Graphics::swapBuffer()
