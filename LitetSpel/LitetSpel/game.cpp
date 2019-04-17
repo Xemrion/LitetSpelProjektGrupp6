@@ -1,14 +1,9 @@
 #include "game.h"
 #define GRAVITY_CONSTANT 50.0f
 
-void Platform::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {
-    int i = 0; // temp
-}
-
-
 void Game::init() {
-	groundBox.hitbox.center = glm::vec4(-10, -30, 10, 0);
-	groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
+    groundBox.hitbox.center = glm::vec4(-10, -30, 10, 0);
+    groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
 	currentLevel.boxes.push_back(groundBox.hitbox);
 	
     currentLevel.colManager.register_entry( groundBox, CollisionId::platform, groundBox.hitbox, true );

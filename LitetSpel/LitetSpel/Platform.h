@@ -1,18 +1,22 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 #include"Geometry.h"
+#include "Collisions.h"
 
-class Platform
-{
+class Platform : public IObject  {
 public:
 	Platform();
 	Platform(glm::vec4 center, glm::vec4 halfLengths);
 	~Platform();
 
-	Box getPlatformBox() const { return this->platformBox; };
+	//Box& getPlatformBox() const { return this->hitbox; };
+
+    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {}
+    Box hitbox;
+
 private:
 
-	Box platformBox;
+
 	//Hitbox
 
 	

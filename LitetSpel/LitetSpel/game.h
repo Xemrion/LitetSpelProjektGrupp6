@@ -6,6 +6,7 @@
 #include <vector>
 #include "Geometry.h"
 #include "Collisions.h"
+#include  "Platform.h"
 
 using namespace std;
 
@@ -27,11 +28,11 @@ public:
     int        status; // TODO: enum!  powerup indicator: 0 = none 1 = bouncy 2 = heavy
 };
 
-class Platform : public IObject {
-public:
-    Box hitbox;
-    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other );
-};
+//class Platform : public IObject {
+//public:
+//    Box hitbox;
+//    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other );
+//};
 
 
 struct LevelData { // POD

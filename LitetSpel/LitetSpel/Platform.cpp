@@ -1,15 +1,16 @@
 #include"Platform.h"
 
-Platform::Platform()
+Platform::Platform():
+    IObject()
 {
-	this->platformBox.center;
-	this->platformBox.halfLengths;
+	this->hitbox.center;
+	this->hitbox.halfLengths;
 }
 
 Platform::Platform(glm::vec4 center, glm::vec4 halfLengths)
 {
-	this->platformBox.center = center;
-	this->platformBox.halfLengths = halfLengths;
+	this->hitbox.center = center;
+	this->hitbox.halfLengths = halfLengths;
 }
 
 Platform::~Platform()
