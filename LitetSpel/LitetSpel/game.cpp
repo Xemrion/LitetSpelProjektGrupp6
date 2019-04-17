@@ -1,5 +1,5 @@
 #include "game.h"
-#define GRAVITY_CONSTANT 50.0f
+#define GRAVITY_CONSTANT -50.0f
 
 void Game::init() {
     groundBox.hitbox.center = glm::vec4(-10, -30, 10, 0);
@@ -95,19 +95,19 @@ void Game::update(double dt) {
 	}
 	if (keys[2]) {
 		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != 2) {
-			currentLevel.player.jumpSpeed = -100.0f * float(dt);
+			currentLevel.player.jumpSpeed = 100.0f * float(dt);
 			currentLevel.player.isStanding = false;
             currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = 0.2;
 		}
 		else if (currentLevel.player.posCurr.y < -0.1f && currentLevel.player.status == 1 && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
 			currentLevel.player.hasExtraJump = false;
-			currentLevel.player.jumpSpeed = -100.0f * float(dt);
+			currentLevel.player.jumpSpeed = 100.0f * float(dt);
 			currentLevel.player.jumpCooldown = 0.2;
 		}
 
 		else if (currentLevel.player.status == 2 && currentLevel.player.isStanding == true) {
-			currentLevel.player.jumpSpeed = -50.0f * float(dt);
+			currentLevel.player.jumpSpeed = 50.0f * float(dt);
 			currentLevel.player.isStanding = false;
             currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = 0.2;
