@@ -157,7 +157,7 @@ void keyboardFunc()
 			{
 				game.currentLevel.player.status = 0;
 			}
-			powerCoolDown = 0.2;
+			powerCoolDown = 0.2f;
 		}
 	}
 	if (keyboard.KeyIsPressed('H'))
@@ -172,7 +172,7 @@ void keyboardFunc()
 			{
 				game.currentLevel.player.status = 0;
 			}
-			powerCoolDown = 0.2;
+			powerCoolDown = 0.2f;
 		}
 	}
 }
