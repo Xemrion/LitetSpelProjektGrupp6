@@ -94,12 +94,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			//Movement
 			if (keyboard.KeyIsPressed('D'))
 			{
-				game.currentLevel.player.move(dt, glm::vec3(1.0f, 0.0f, 0.0f));
+				game.currentLevel.player.move((float)dt, glm::vec3(1.0f, 0.0f, 0.0f));
 			}
 			if (keyboard.KeyIsPressed('A'))
 			{
-				game.currentLevel.player.move(dt, glm::vec3(-1.0f, 0.0f, 0.0f));
+				game.currentLevel.player.move((float)dt, glm::vec3(-1.0f, 0.0f, 0.0f));
 			}
 		}
 	}
+
+	return 0;
 }
