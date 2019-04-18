@@ -72,7 +72,6 @@ void Player::update() {
 	}
 }
 
-
 void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {
 	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_bottom) 
 	{
@@ -178,8 +177,8 @@ void Game::updatePlayerCollision()
 		currentLevel.player.posCurr.z,
 		0);
 	currentLevel.player.HitboxBottom.halfLengths = glm::vec4(
-		playerSphere.centerRadius.w*0.3,
-		playerSphere.centerRadius.w*0.5,
+		playerSphere.centerRadius.w*0.6,
+		playerSphere.centerRadius.w*0.6,
 		playerSphere.centerRadius.w*0.8,
 		0);
 	//####################################################################Top
@@ -189,7 +188,7 @@ void Game::updatePlayerCollision()
 		currentLevel.player.posCurr.z,
 		0);
 	currentLevel.player.HitboxTop.halfLengths = glm::vec4(
-		playerSphere.centerRadius.w*0.3,
+		playerSphere.centerRadius.w*0.6,
 		playerSphere.centerRadius.w*0.5,
 		playerSphere.centerRadius.w*0.1,
 		0);
