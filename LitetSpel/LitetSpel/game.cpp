@@ -33,8 +33,6 @@ void Game::update(double dt)
 		currentLevel.player.move(dt, glm::vec3(1, 0, 0));
 	}
 
-
-
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}

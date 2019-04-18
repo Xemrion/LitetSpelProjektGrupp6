@@ -91,6 +91,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				graphics.queueBoxes(game.currentLevel.boxes);
 
 			graphics.queueMetaballs(game.currentLevel.spheres);
+			graphics.setCameraPos(game.currentLevel.player.pos + glm::vec3(0, 0, -200));
 			graphics.swapBuffer();
 			//Movement
 			if (keyboard.KeyIsPressed('D'))

@@ -48,5 +48,7 @@
   <ItemGroup>
     <FxCompile Include="vs.hlsl" />
     <FxCompile Include="ps.hlsl" />
+    <FxCompile Include="raster_vs.hlsl" />
+    <FxCompile Include="raster_ps.hlsl" />
   </ItemGroup>
 </Project>
