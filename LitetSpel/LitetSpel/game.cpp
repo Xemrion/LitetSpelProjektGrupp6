@@ -14,7 +14,11 @@ void Game::init() {
 	testPlat.hitbox.halfLengths = glm::vec4(10.0f, 20.0f, 10.0f, 0.0f);
 	currentLevel.boxes.push_back(testPlat.hitbox);
 	currentLevel.colManager.register_entry(testPlat, CollisionId::platform, testPlat.hitbox, true);
-
+	for (int i = 0; i < currentLevel.player.blobCharges; i++)
+	{
+		currentLevel.player.blobs.push_back(Blob(currentLevel.player.posCurr));
+		currentLevel.spheres.push_back(currentLevel.player.blobs[i].blobSphere);
+	}
 	updatePlayerCollision();
 
     currentLevel.colManager.register_entry(currentLevel.player,  CollisionId::player_bottom, currentLevel.player.HitboxBottom, false);
@@ -94,6 +98,13 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 }
 
 void Game::update(double dt) {
+	
+	if (leftButtonDown
+		&& currentLevel.player.nrOfActiveBlobs < currentLevel.player.blobCharges
+		&&  currentLevel.player.shootCooldown <= 0)
+	{
+		currentLevel.player.shoot(mousePos);
+	}
 	if (keys[0]) {
 		currentLevel.player.moveSpeed = 100.0f;
 		if (currentLevel.player.status == 2) {
@@ -149,19 +160,39 @@ void Game::update(double dt) {
 	currentLevel.player.posCurr.y += currentLevel.player.jumpSpeed;
 
 	currentLevel.player.jumpCooldown -= dt;
-
+	currentLevel.player.shootCooldown -= dt;
+	for (int i = 0; i < currentLevel.player.blobCharges; i++)
+	{
+		if (!currentLevel.player.blobs[i].isActive)
+		{
+			currentLevel.player.blobs[i].pos = currentLevel.player.posCurr;		
+			currentLevel.player.blobs[i].blobSphere.centerRadius = glm::vec4(currentLevel.player.posCurr, 2);
+		}
+	}
 	updatePlayerCollision();
 
 	currentLevel.spheres = vector<Sphere>();
 	currentLevel.spheres.push_back(playerSphere);
-
+	for (int i = 0; i < currentLevel.player.blobs.size(); i++)
+	{
+		currentLevel.player.blobs[i].move(dt);
+		currentLevel.spheres.push_back(currentLevel.player.blobs[i].blobSphere);
+	}
 	
 	currentLevel.player.isStanding = false;
     currentLevel.colManager.update();
     currentLevel.player.update();
 	
 }
-
+void Player::shoot(glm::vec3 mousePos)
+{
+	mousePos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
+	glm::vec3 dir = glm::normalize(mousePos - posCurr);
+	blobs[nrOfActiveBlobs].dir = dir;
+	blobs[nrOfActiveBlobs].isActive = true;
+	shootCooldown = 1;
+	nrOfActiveBlobs++;
+}
 void Game::updatePlayerCollision()
 {
 	playerSphere.centerRadius = glm::vec4(

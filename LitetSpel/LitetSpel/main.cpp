@@ -122,10 +122,13 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 
 void mouseFunc() 
 {
-	if (mouse.ReadEvent().GetType() == MouseInput::Event::Type::Move)
+	if (mouse.LeftIsPressed())
 	{
-
+		game.leftButtonDown = true;
+		game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
 	}
+	else
+		game.leftButtonDown = false;
 }
 
 void keyboardFunc()
