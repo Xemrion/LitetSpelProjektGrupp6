@@ -42,9 +42,11 @@ constexpr bool debugCollisions = true;
 
 
 // TODO: contemplate placement;
-enum CollisionId { player_top,
-                   player_bottom,
-                   player_side,
+enum CollisionId {
+				   player_top,
+				   player_bottom,
+				   player_left,
+				   player_right,
                    platform,
                    wall,
                    powerup_bouncy,

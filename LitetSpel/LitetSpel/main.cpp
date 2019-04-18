@@ -202,7 +202,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
-
+			/*
+			char title[64];
+			_itoa_s(1/dt, title, 64, 10);
+			SetWindowTextA(wndHandle, title);
+			*/
 			keyboardFunc();
 			mouseFunc();
 

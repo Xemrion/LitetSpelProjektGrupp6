@@ -26,6 +26,8 @@ public:
     float      moveSpeed, jumpSpeed, jumpCooldown, gravity;
     bool       hasExtraJump, isStanding;
     int        status; // TODO: enum!  powerup indicator: 0 = none 1 = bouncy 2 = heavy
+
+	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
 //class Platform : public IObject {
@@ -59,9 +61,11 @@ public:
 	
 	void init();
 	void update(double dt);
+	void updatePlayerCollision();
 
 	//float gravity = 50.0f;
 
     Sphere playerSphere;
     Platform groundBox;
+	Platform testPlat;
 };
