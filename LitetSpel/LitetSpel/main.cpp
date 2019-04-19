@@ -145,7 +145,7 @@ void keyboardFunc()
 	}
 	if (keyboard.KeyIsPressed('S'))
 	{
-		//game.keys[3] = true;
+		game.keys[3] = true;
 	}
 	if (keyboard.KeyIsPressed('B')) 
 	{
@@ -169,6 +169,21 @@ void keyboardFunc()
 			if (game.currentLevel.player.status == 0)
 			{
 				game.currentLevel.player.status = 2;
+			}
+			else
+			{
+				game.currentLevel.player.status = 0;
+			}
+			powerCoolDown = 0.2f;
+		}
+	}
+	if (keyboard.KeyIsPressed('Y'))
+	{
+		if (powerCoolDown <= 0)
+		{
+			if (game.currentLevel.player.status == 0)
+			{
+				game.currentLevel.player.status = 3;
 			}
 			else
 			{

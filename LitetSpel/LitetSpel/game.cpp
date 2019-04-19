@@ -15,6 +15,12 @@ void Game::init() {
 	currentLevel.boxes.push_back(testPlat.hitbox);
 	currentLevel.colManager.register_entry(testPlat, CollisionId::platform, testPlat.hitbox, true);
 
+
+	testplat2.hitbox.center = glm::vec4(-30.0f, 10.0f, 0.0f, 0.0f);
+	testplat2.hitbox.halfLengths = glm::vec4(10.0f, 2.0f, 10.0f, 0.0f);
+	currentLevel.boxes.push_back(testplat2.hitbox);
+	currentLevel.colManager.register_entry(testplat2, CollisionId::platform, testplat2.hitbox, true);
+
 	updatePlayerCollision();
 
     currentLevel.colManager.register_entry(currentLevel.player,  CollisionId::player_bottom, currentLevel.player.HitboxBottom, false);
@@ -41,6 +47,7 @@ Player::Player( glm::vec3 position ):
     gravity      (GRAVITY_CONSTANT),
     hasExtraJump (true),
     isStanding   (false),
+	isStuck      (false),
     status       (0) // TODO: enum!
 {
     // skapa fyra hitboxar
@@ -68,7 +75,11 @@ void Player::update() {
     }
 	else
 	{
-		gravity = GRAVITY_CONSTANT;
+		if (isStuck == false) 
+		{
+			gravity = GRAVITY_CONSTANT;
+		}
+
 	}
 }
 
@@ -79,16 +90,34 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_top)
 	{
+		if (status == 3)
+		{
+			gravity = 0;
+			jumpSpeed = 0;
+			isStuck = true;
+		}
 		jumpSpeed = 0;
 		//posCurr.y -= 1;
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_left)
 	{
+		if (status == 3 && isStanding == false)
+		{
+			gravity = 0;
+			jumpSpeed = 0;
+			isStuck = true;
+		}
 		posCurr.x += moveSpeed*dt;
 
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_right)
 	{
+		if (status == 3 && isStanding == false)
+		{
+			gravity = 0;
+			jumpSpeed = 0;
+			isStuck = true;
+		}
 		posCurr.x -= moveSpeed * dt;
 	}
 }
@@ -96,26 +125,33 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 void Game::update(double dt) {
 	if (keys[0]) {
 		currentLevel.player.moveSpeed = 100.0f;
-		if (currentLevel.player.status == 2) {
-			//currentLevel.player.move(dt, glm::vec3(-0.2, 0, 0));
-			currentLevel.player.posCurr.x -= currentLevel.player.moveSpeed*dt/3;
-		}
-		else {
-			//currentLevel.player.move(dt, glm::vec3(-1, 0, 0));
-			currentLevel.player.posCurr.x -= currentLevel.player.moveSpeed*dt;
+		if (currentLevel.player.isStuck == false)
+		{
+			if (currentLevel.player.status == 2) {
+				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
+				currentLevel.player.posCurr.x = currentLevel.player.moveSpeed*dt / 3;
+			}
+			else {
+				//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
+				currentLevel.player.posCurr.x -= currentLevel.player.moveSpeed*dt;
+			}
 		}
 
 	}
 	if (keys[1]) {
 		currentLevel.player.moveSpeed = 100.0f;
-		if (currentLevel.player.status == 2) {
-			//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
-			currentLevel.player.posCurr.x += currentLevel.player.moveSpeed*dt/3;
+		if (currentLevel.player.isStuck == false) 
+		{
+			if (currentLevel.player.status == 2) {
+				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
+				currentLevel.player.posCurr.x += currentLevel.player.moveSpeed*dt / 3;
+			}
+			else {
+				//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
+				currentLevel.player.posCurr.x += currentLevel.player.moveSpeed*dt;
+			}
 		}
-		else {
-			//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
-			currentLevel.player.posCurr.x += currentLevel.player.moveSpeed*dt;
-		}
+
 	}
 	if (keys[2]) {
 		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != 2) {
@@ -138,7 +174,14 @@ void Game::update(double dt) {
 		}
 	}
 	if (keys[3]) {
-		//currentLevel.player.move(dt, glm::vec3(0, 1, 0));
+		if (currentLevel.player.status == 3) 
+		{
+			currentLevel.player.isStuck = false;
+			if (currentLevel.player.isStanding == false) 
+			{
+				currentLevel.player.gravity = GRAVITY_CONSTANT;
+			}
+		}
 	}
 
 	for (int i = 0; i < 4; ++i) {
