@@ -88,10 +88,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
 			game.update(dt);
-				graphics.queueBoxes(game.currentLevel.boxes);
-
+			graphics.setCameraPos(game.currentLevel.player.pos + glm::vec3(0, 20, -200));
+			graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
-			graphics.setCameraPos(game.currentLevel.player.pos + glm::vec3(0, 0, -200));
+
 			graphics.swapBuffer();
 			//Movement
 			if (keyboard.KeyIsPressed('D'))

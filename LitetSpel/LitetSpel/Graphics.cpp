@@ -30,7 +30,7 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 	createQuadData();
 	createBoxData();
 
-	float c = 1.0 / glm::tan(glm::radians(45.f));
+	float c = 1.0 / glm::tan(glm::radians(22.5f));
 	float a = 16.f / 9.f;
 	float f = 500.f;
 	float n = 100.f;
@@ -43,7 +43,7 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 	);
 
 	camera = glm::vec3(0, 0, -200);
-	viewProj = glm::transpose(glm::lookAtLH(camera, glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 1.0, 0.0))) * proj;
+	viewProj = glm::transpose(glm::lookAtLH(camera, camera + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 1.0, 0.0))) * proj;
 	return hr;
 }
 
@@ -309,7 +309,7 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(glm::mat4) * 100;
+	constBufferDesc.ByteWidth = sizeof(glm::mat4) * 200;
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &boxTransformBuffer);
@@ -343,6 +343,16 @@ void Graphics::createCBuffers() {
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &cameraBuffer);
+
+
+
+	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
+	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufferDesc.ByteWidth = sizeof(glm::vec4) * 4;
+	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	device->CreateBuffer(&constBufferDesc, NULL, &cornerBuffer);
 }
 
 HRESULT Graphics::createShaders()
@@ -437,13 +447,13 @@ HRESULT Graphics::createShaders()
 
 	/*** RASTERIZATION PASS SHADERS ***/
 
-	SAFE_RELEASE(rasterVertexShader);
-	SAFE_RELEASE(rasterPixelShader);
+	SAFE_RELEASE(boxRasterVertexShader);
+	SAFE_RELEASE(boxRasterPixelShader);
 
 	ID3DBlob* rVS = nullptr;
 
 	result = D3DCompileFromFile(
-		L"raster_vs.hlsl",
+		L"box_raster_vs.hlsl",
 		nullptr,
 		nullptr,
 		"main",
@@ -453,7 +463,7 @@ HRESULT Graphics::createShaders()
 		&rVS,
 		&errorBlob
 	);
-
+	 
 	if (FAILED(result))
 	{
 		if (errorBlob)
@@ -470,7 +480,7 @@ HRESULT Graphics::createShaders()
 		rVS->GetBufferPointer(),
 		rVS->GetBufferSize(),
 		nullptr,
-		&rasterVertexShader
+		&boxRasterVertexShader
 	);
 
 	D3D11_INPUT_ELEMENT_DESC rasterInputDesc[] = {
@@ -504,7 +514,7 @@ HRESULT Graphics::createShaders()
 	errorBlob = nullptr;
 
 	result = D3DCompileFromFile(
-		L"raster_ps.hlsl",
+		L"box_raster_ps.hlsl",
 		nullptr,
 		nullptr,
 		"main",
@@ -527,7 +537,7 @@ HRESULT Graphics::createShaders()
 		return result;
 	}
 
-	device->CreatePixelShader(rPS->GetBufferPointer(), rPS->GetBufferSize(), nullptr, &rasterPixelShader);
+	device->CreatePixelShader(rPS->GetBufferPointer(), rPS->GetBufferSize(), nullptr, &boxRasterPixelShader);
 	rPS->Release();
 
 	return S_OK;
@@ -578,12 +588,12 @@ HRESULT Graphics::createBoxData()
 	for (int i = 0; i < 4; ++i)
 	{
 		glm::mat4 rotation = glm::rotate(glm::mat4(1.f), glm::radians(90.f * i), glm::vec3(0.f, 1.f, 0.f));
-		boxVertices[i * 12 + 0] = (glm::vec4(quadVertices[0], 0.0) * rotation);
-		boxVertices[i * 12 + 1] = (glm::vec4(quadVertices[1], 0.0) * rotation);
-		boxVertices[i * 12 + 2] = (glm::vec4(quadVertices[2], 0.0) * rotation);
-		boxVertices[i * 12 + 3] = (glm::vec4(quadVertices[3], 0.0) * rotation);
-		boxVertices[i * 12 + 4] = (glm::vec4(quadVertices[4], 0.0) * rotation);
-		boxVertices[i * 12 + 5] = (glm::vec4(quadVertices[5], 0.0) * rotation);
+		boxVertices[i * 12 + 0] = (glm::vec4(quadVertices[0], 1.0) * rotation);
+		boxVertices[i * 12 + 1] = (glm::vec4(quadVertices[1], 1.0) * rotation);
+		boxVertices[i * 12 + 2] = (glm::vec4(quadVertices[2], 1.0) * rotation);
+		boxVertices[i * 12 + 3] = (glm::vec4(quadVertices[3], 1.0) * rotation);
+		boxVertices[i * 12 + 4] = (glm::vec4(quadVertices[4], 1.0) * rotation);
+		boxVertices[i * 12 + 5] = (glm::vec4(quadVertices[5], 1.0) * rotation);
 		boxVertices[i * 12 + 6] = (glm::vec4(quadVertices[6], 0.0) * rotation);
 		boxVertices[i * 12 + 7] = (glm::vec4(quadVertices[7], 0.0) * rotation);
 		boxVertices[i * 12 + 8] = (glm::vec4(quadVertices[8], 0.0) * rotation);
@@ -593,12 +603,12 @@ HRESULT Graphics::createBoxData()
 	}
 	
 	glm::mat4 rotation = glm::rotate(glm::mat4(1.f), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f));
-	boxVertices[4 * 12 + 0] = (glm::vec4(quadVertices[0], 0.0) * rotation);
-	boxVertices[4 * 12 + 1] = (glm::vec4(quadVertices[1], 0.0) * rotation);
-	boxVertices[4 * 12 + 2] = (glm::vec4(quadVertices[2], 0.0) * rotation);
-	boxVertices[4 * 12 + 3] = (glm::vec4(quadVertices[3], 0.0) * rotation);
-	boxVertices[4 * 12 + 4] = (glm::vec4(quadVertices[4], 0.0) * rotation);
-	boxVertices[4 * 12 + 5] = (glm::vec4(quadVertices[5], 0.0) * rotation);
+	boxVertices[4 * 12 + 0] = (glm::vec4(quadVertices[0], 1.0) * rotation);
+	boxVertices[4 * 12 + 1] = (glm::vec4(quadVertices[1], 1.0) * rotation);
+	boxVertices[4 * 12 + 2] = (glm::vec4(quadVertices[2], 1.0) * rotation);
+	boxVertices[4 * 12 + 3] = (glm::vec4(quadVertices[3], 1.0) * rotation);
+	boxVertices[4 * 12 + 4] = (glm::vec4(quadVertices[4], 1.0) * rotation);
+	boxVertices[4 * 12 + 5] = (glm::vec4(quadVertices[5], 1.0) * rotation);
 	boxVertices[4 * 12 + 6] = (glm::vec4(quadVertices[6], 0.0) * rotation);
 	boxVertices[4 * 12 + 7] = (glm::vec4(quadVertices[7], 0.0) * rotation);
 	boxVertices[4 * 12 + 8] = (glm::vec4(quadVertices[8], 0.0) * rotation);
@@ -607,12 +617,12 @@ HRESULT Graphics::createBoxData()
 	boxVertices[4 * 12 + 11] = (glm::vec4(quadVertices[11], 0.0) * rotation);
 
 	rotation = glm::rotate(glm::mat4(1.f), glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f));
-	boxVertices[5 * 12 + 0] = (glm::vec4(quadVertices[0], 0.0) * rotation);
-	boxVertices[5 * 12 + 1] = (glm::vec4(quadVertices[1], 0.0) * rotation);
-	boxVertices[5 * 12 + 2] = (glm::vec4(quadVertices[2], 0.0) * rotation);
-	boxVertices[5 * 12 + 3] = (glm::vec4(quadVertices[3], 0.0) * rotation);
-	boxVertices[5 * 12 + 4] = (glm::vec4(quadVertices[4], 0.0) * rotation);
-	boxVertices[5 * 12 + 5] = (glm::vec4(quadVertices[5], 0.0) * rotation);
+	boxVertices[5 * 12 + 0] = (glm::vec4(quadVertices[0], 1.0) * rotation);
+	boxVertices[5 * 12 + 1] = (glm::vec4(quadVertices[1], 1.0) * rotation);
+	boxVertices[5 * 12 + 2] = (glm::vec4(quadVertices[2], 1.0) * rotation);
+	boxVertices[5 * 12 + 3] = (glm::vec4(quadVertices[3], 1.0) * rotation);
+	boxVertices[5 * 12 + 4] = (glm::vec4(quadVertices[4], 1.0) * rotation);
+	boxVertices[5 * 12 + 5] = (glm::vec4(quadVertices[5], 1.0) * rotation);
 	boxVertices[5 * 12 + 6] = (glm::vec4(quadVertices[6], 0.0) * rotation);
 	boxVertices[5 * 12 + 7] = (glm::vec4(quadVertices[7], 0.0) * rotation);
 	boxVertices[5 * 12 + 8] = (glm::vec4(quadVertices[8], 0.0) * rotation);
@@ -639,18 +649,21 @@ void Graphics::queueBoxes(vector<Box> boxes)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	vector<glm::mat4> boxTransforms;
-	boxTransforms.reserve(100);
+
+	struct Transforms {
+		glm::mat4 WVP[100];
+	} transforms;
+	memset(&transforms, 0, sizeof(glm::mat4) * 100);
 
 	for (int i = 0; i < boxes.size(); ++i)
 	{
 		glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
 		t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
-		boxTransforms.push_back(transpose(t));
+		transforms.WVP[i] = transpose(t) * viewProj;
 	}
 
 	deviceContext->Map(boxTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, boxTransforms.data(), sizeof(glm::mat4) * boxTransforms.size());
+	memcpy(mr.pData, &transforms, sizeof(glm::mat4) * 100);
 	deviceContext->Unmap(boxTransformBuffer, 0);
 
 	boxInstances = boxes.size();
@@ -679,18 +692,12 @@ void Graphics::swapBuffer()
 	deviceContext->ClearRenderTargetView(geometryBufferView, clearColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
 
-	// update view projection matrix
-	D3D11_MAPPED_SUBRESOURCE mr;
-	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	deviceContext->Map(viewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, glm::value_ptr(viewProj), sizeof(glm::mat4));
-	deviceContext->Unmap(viewProjBuffer, 0);
 
-	deviceContext->VSSetShader(rasterVertexShader, nullptr, 0);
-	deviceContext->PSSetShader(rasterPixelShader, nullptr, 0);
+
+	deviceContext->VSSetShader(boxRasterVertexShader, nullptr, 0);
+	deviceContext->PSSetShader(boxRasterPixelShader, nullptr, 0);
 
 	deviceContext->VSSetConstantBuffers(0, 1, &boxTransformBuffer);
-	deviceContext->VSSetConstantBuffers(1, 1, &viewProjBuffer);
 
 	UINT32 vertexSize = sizeof(glm::vec3) * 2;
 	UINT32 offset = 0;
@@ -701,18 +708,43 @@ void Graphics::swapBuffer()
 	deviceContext->IASetInputLayout(vertexLayout);
 	deviceContext->DrawInstanced(36, boxInstances, 0, 0);
 
+	// update view projection matrix buffer
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	deviceContext->Map(viewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, glm::value_ptr(viewProj), sizeof(glm::mat4));
+	deviceContext->Unmap(viewProjBuffer, 0);
 
+	// update camera buffer
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, glm::value_ptr(camera), sizeof(glm::vec3));
 	deviceContext->Unmap(cameraBuffer, 0);
 
+	glm::vec4 corners[4];
+	glm::mat4 invProj = glm::inverse(proj);
+	corners[0] = glm::vec4(-1.0, 1.0, 1.0, 1.0)  * invProj;
+	corners[1] = glm::vec4(1.0, 1.0, 1.0, 1.0) * invProj;
+	corners[2] = glm::vec4(-1.0, -1.0, 1.0, 1.0) * invProj;
+	corners[3] = glm::vec4(1.0, -1.0, 1.0, 1.0) * invProj;
+	corners[0] /= corners[0].w;
+	corners[1] /= corners[1].w;
+	corners[2] /= corners[2].w;
+	corners[3] /= corners[3].w;
+
+	//update corner buffer
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	deviceContext->Map(cornerBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, corners, sizeof(glm::vec4) * 4);
+	deviceContext->Unmap(cornerBuffer, 0);
 
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 
 	deviceContext->PSSetConstantBuffers(0, 1, &metaballBuffer);
 	deviceContext->PSSetConstantBuffers(1, 1, &cameraBuffer);
+	deviceContext->PSSetConstantBuffers(2, 1, &cornerBuffer);
+	deviceContext->PSSetConstantBuffers(3, 1, &viewProjBuffer);
 
 	vertexSize = sizeof(float) * 3;
 	offset = 0;
@@ -722,11 +754,13 @@ void Graphics::swapBuffer()
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	deviceContext->IASetInputLayout(quadVertexLayout);
 	deviceContext->PSSetShaderResources(0, 1, &geometryResourceView);
+	deviceContext->PSSetShaderResources(1, 1, &depthResourceView);
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
 	deviceContext->Draw(6, 0);
 	ID3D11ShaderResourceView* nullview = nullptr;
 	deviceContext->PSSetShaderResources(0, 1, &nullview);
+	deviceContext->PSSetShaderResources(1, 1, &nullview);
 	swapChain->Present(0, 0);
 }
 

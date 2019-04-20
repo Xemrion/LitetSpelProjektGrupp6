@@ -1,4 +1,5 @@
 Texture2D background : register(t0);
+Texture2D depthbuffer : register(t1);
 SamplerState samp;
 
 struct VS_OUT
@@ -21,8 +22,12 @@ cbuffer Camera {
 cbuffer Corners {
 	float4 upLeft;
 	float4 upRight;
-	float4 lowLeft;
-	float4 lowRight;
+	float4 downLeft;
+	float4 downRight;
+};
+
+cbuffer Matrices {
+	float4x4 viewProj;
 };
 
 float testSphere(float3 p, float4 s)
@@ -56,7 +61,7 @@ float castRay(float3 ro, float3 rd, out bool intersect)
 	for (i = 0.0; i < 80.0; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
-		dist += currentDist*1.00;
+		dist += currentDist * 1.00;
 		if (dist > 370.0) {
 			break;
 		}
@@ -74,9 +79,9 @@ float3 calcNormal(float3 p)
 	const float h = 0.0001;
 	const float2 k = float2(1, -1);
 	return normalize(k.xyy * testScene(p + k.xyy * h) +
-					 k.yyx * testScene(p + k.yyx * h) +
-					 k.yxy * testScene(p + k.yxy * h) +
-					 k.xxx * testScene(p + k.xxx * h));
+		k.yyx * testScene(p + k.yyx * h) +
+		k.yxy * testScene(p + k.yxy * h) +
+		k.xxx * testScene(p + k.xxx * h));
 }
 
 float3 getColor(float3 p)
@@ -98,26 +103,36 @@ float4 main(VS_OUT input) : SV_Target
 {
 	float2 resolution = float2(1280, 720);
 	float2 uv = input.pos.xy / resolution;
-	uv.y = 1 - uv.y;
 	float3 ro = cameraPos;
-	float3 rd = normalize(float3(uv - 0.5, 1.0));
+	float3 rd = normalize(lerp(
+		float3(lerp(upLeft.xyz, downLeft.xyz, uv.y)),
+		float3(lerp(upRight.xyz, downRight.xyz, uv.y)),
+		uv.x));
+
 	bool intersect;
 	float dist = castRay(ro, rd, intersect);
-	float3 color;
+	float3 color = float3(0.0, 0.0, 0.0);
+
 	if (!intersect) {
-		uv.y = 1 - uv.y;
 		color = background.Sample(samp, uv);
 	}
 	else {
-		float3 p = ro + rd * dist;
-		float3 objectColor = getColor(p);
-		float3 normal = calcNormal(p);
-		float3 lightPos = float3(100.0, 400.0, -0.0);
-		float3 lightVector = lightPos - p;
-		color = max(dot(normal, normalize(lightVector)), 0.0) * objectColor;
-		color += 0.5 * objectColor;
-		//color = float3(1.0, 0.0, 0.0);
+		float4 projected = mul(float4(ro + rd * dist, 1.0), viewProj);
+		projected.xyz /= projected.w;
+
+		if (projected.z > depthbuffer.Sample(samp, uv).x) {
+			color = background.Sample(samp, uv);
+		}
+		else {
+			float3 p = ro + rd * dist;
+			float3 objectColor = getColor(p);
+			float3 normal = calcNormal(p);
+			float3 lightPos = float3(100.0, 400.0, -0.0);
+			float3 lightVector = lightPos - p;
+			color = max(dot(normal, normalize(lightVector)), 0.0) * objectColor;
+			color += 0.5 * objectColor;
+		}
 	}
 
-	return float4(pow(color, 1.0/2.2), 1.0);
+	return float4(pow(color, 1.0 / 2.2), 1.0);
 }

@@ -7,7 +7,7 @@ void Game::init()
 	groundBox.halfLengths = glm::vec4(100, 10, 10, 0);
 	currentLevel.boxes.push_back(groundBox);
 
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 99; i++)
 	{
 		Box box;
 		box.center = glm::vec4((i-10) * 20, 10, 0, 0);

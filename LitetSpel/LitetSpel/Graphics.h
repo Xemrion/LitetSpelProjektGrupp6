@@ -20,8 +20,8 @@ private:
 	ID3D11SamplerState* samplerState;
 	ID3D11VertexShader* vertexShader = nullptr;
 	ID3D11PixelShader* pixelShader = nullptr;
-	ID3D11VertexShader* rasterVertexShader = nullptr;
-	ID3D11PixelShader* rasterPixelShader = nullptr;
+	ID3D11VertexShader* boxRasterVertexShader = nullptr;
+	ID3D11PixelShader* boxRasterPixelShader = nullptr;
 
 	ID3D11InputLayout* quadVertexLayout;
 	ID3D11Buffer* quadBuffer;
@@ -33,10 +33,12 @@ private:
 	ID3D11Buffer* metaballBuffer;
 	ID3D11Buffer* viewProjBuffer;
 	ID3D11Buffer* cameraBuffer;
+	ID3D11Buffer* cornerBuffer;
 
 	glm::vec3 camera;
 	glm::mat4 proj;
 	glm::mat4 viewProj;
+	glm::mat4 invTransposedWVP;
 
 	HRESULT createDeviceContext(HWND wndHandle, bool windowed);
 	HRESULT createResources(HWND wndHandle);
