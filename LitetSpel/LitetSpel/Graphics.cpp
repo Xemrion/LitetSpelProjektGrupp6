@@ -33,7 +33,7 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 	float c = 1.0 / glm::tan(glm::radians(22.5f));
 	float a = 16.f / 9.f;
 	float f = 500.f;
-	float n = 100.f;
+	float n = 10.f;
 
 	proj = glm::mat4(
 		c / a, 0., 0., 0.,

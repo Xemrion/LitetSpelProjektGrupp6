@@ -53,24 +53,39 @@ float testScene(float3 p)
 	return mbDist;
 }
 
-float castRay(float3 ro, float3 rd, out bool intersect)
+float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 {
-	float dist = 170.0;
+	float dist = -ro.z - 10.0;
 	float i;
+	float maxDist = -ro.z + 60.0;
 	intersect = false;
-	for (i = 0.0; i < 80.0; i += 1.0)
+
+	/* calculate ray entry */
+	for (i = 0.0; i < 80; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
-		dist += currentDist * 1.00;
-		if (dist > 370.0) {
+		dist += currentDist;
+		if (dist > maxDist) {
 			break;
 		}
-		else if (currentDist < 0.1) {
+		else if (currentDist < 0.01) {
 			intersect = true;
 			break;
 		}
 	}
 
+	/* calculate ray exit */
+	if (intersect) {
+		back = dist + 40.0;
+		for (i = 0.0; i < 180; i += 1.0)
+		{
+			float currentDist = testScene(ro + rd * back);
+			back -= currentDist;
+			if (currentDist < 0.01) {
+				break;
+			}
+		}
+	}
 	return dist;
 }
 
@@ -95,7 +110,7 @@ float3 getColor(float3 p)
 	float d5 = mb(p, spheres[4].centerRadius);
 	float mbDist = d1 + d2 + d3 + d4 + d5;
 
-	if (mbDist < 0.1) color = float3(1.0, 0.0, 0.0);
+	if (mbDist < 0.1) color = float3(0.0, 0.0, 1.0);
 	return color;
 }
 
@@ -110,13 +125,15 @@ float4 main(VS_OUT input) : SV_Target
 		uv.x));
 
 	bool intersect;
-	float dist = castRay(ro, rd, intersect);
+	float back;
+	float dist = castRay(ro, rd, intersect, back);
 	float3 color = float3(0.0, 0.0, 0.0);
 
 	if (!intersect) {
 		color = background.Sample(samp, uv);
 	}
 	else {
+		/* depth test */
 		float4 projected = mul(float4(ro + rd * dist, 1.0), viewProj);
 		projected.xyz /= projected.w;
 
@@ -124,13 +141,35 @@ float4 main(VS_OUT input) : SV_Target
 			color = background.Sample(samp, uv);
 		}
 		else {
+			/* lighting */
 			float3 p = ro + rd * dist;
 			float3 objectColor = getColor(p);
 			float3 normal = calcNormal(p);
-			float3 lightPos = float3(100.0, 400.0, -0.0);
-			float3 lightVector = lightPos - p;
-			color = max(dot(normal, normalize(lightVector)), 0.0) * objectColor;
-			color += 0.5 * objectColor;
+			float3 lightVector = normalize(float3(0.0, 400.0, 100.0));
+			float3 diffuseColor = float3(0, 0, 0);
+			float3 specularColor = float3(0, 0, 0);
+			
+			/* specular */
+			specularColor = pow(max(dot(normal, normalize(lightVector - rd)), 0.0), 32) * float3(1.0, 1.0, 1.0);
+			
+			/* absorbtion diffuse */
+			float3 absorbed = exp(-float3(0.35, 0.75, 2.35) * (back - dist));
+			diffuseColor = objectColor * absorbed;
+			diffuseColor = absorbed;
+
+			/* refraction diffuse */
+			float3 ref = refract(rd, normal, 0.75);
+			float3 samplePoint = p + ref * (-500.0 / ref.z);
+			float4 projectedSample = mul(float4(samplePoint, 1.0), viewProj);
+			samplePoint.xy = (samplePoint.xy / resolution) + 0.5;
+			if (projectedSample.z / projectedSample.w > depthbuffer.Sample(samp, samplePoint.xy).x)
+			{
+				diffuseColor += background.Sample(samp, samplePoint.xy) * absorbed;
+			}
+
+			/* final color */
+			float diffuseRatio = 0.99;
+			color = diffuseRatio * diffuseColor + (1 - diffuseRatio) * specularColor;
 		}
 	}
 
