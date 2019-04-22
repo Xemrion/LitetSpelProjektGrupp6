@@ -43,12 +43,12 @@ float mb(float3 p, float4 mb)
 
 float testScene(float3 p)
 {
-	float d1 = mb(p, spheres[0].centerRadius);
-	float d2 = mb(p, spheres[1].centerRadius);
-	float d3 = mb(p, spheres[2].centerRadius);
-	float d4 = mb(p, spheres[3].centerRadius);
-	float d5 = mb(p, spheres[4].centerRadius);
-	float mbDist = d1 + d2 + d3 + d4 + d5;
+	float d0 = mb(p, spheres[0].centerRadius);
+	float d1 = mb(p, spheres[1].centerRadius);
+	float d2 = mb(p, spheres[2].centerRadius);
+	float d3 = mb(p, spheres[3].centerRadius);
+	float d4 = mb(p, spheres[4].centerRadius);
+	float mbDist = d0 + d1 + d2 + d3 + d4;
 
 	return mbDist;
 }
@@ -61,10 +61,10 @@ float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 	intersect = false;
 
 	/* calculate ray entry */
-	for (i = 0.0; i < 80; i += 1.0)
+	for (i = 0.0; i < 30; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
-		dist += currentDist;
+		dist += currentDist + 0.05;
 		if (dist > maxDist) {
 			break;
 		}
@@ -76,11 +76,11 @@ float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 
 	/* calculate ray exit */
 	if (intersect) {
-		back = dist + 40.0;
-		for (i = 0.0; i < 180; i += 1.0)
+		back = dist + 30.0;
+		for (i = 0.0; i < 30; i += 1.0)
 		{
 			float currentDist = testScene(ro + rd * back);
-			back -= currentDist;
+			back -= currentDist + 0.1;
 			if (currentDist < 0.01) {
 				break;
 			}
@@ -97,21 +97,6 @@ float3 calcNormal(float3 p)
 		k.yyx * testScene(p + k.yyx * h) +
 		k.yxy * testScene(p + k.yxy * h) +
 		k.xxx * testScene(p + k.xxx * h));
-}
-
-float3 getColor(float3 p)
-{
-	float3 color = float3(0.0, 0.0, 0.0);
-
-	float d1 = mb(p, spheres[0].centerRadius);
-	float d2 = mb(p, spheres[1].centerRadius);
-	float d3 = mb(p, spheres[2].centerRadius);
-	float d4 = mb(p, spheres[3].centerRadius);
-	float d5 = mb(p, spheres[4].centerRadius);
-	float mbDist = d1 + d2 + d3 + d4 + d5;
-
-	if (mbDist < 0.1) color = float3(0.0, 0.0, 1.0);
-	return color;
 }
 
 float4 main(VS_OUT input) : SV_Target
@@ -143,7 +128,7 @@ float4 main(VS_OUT input) : SV_Target
 		else {
 			/* lighting */
 			float3 p = ro + rd * dist;
-			float3 objectColor = getColor(p);
+			float3 objectColor = float3(0.3, 0.3, 1.0);
 			float3 normal = calcNormal(p);
 			float3 lightVector = normalize(float3(0.0, 400.0, 100.0));
 			float3 diffuseColor = float3(0, 0, 0);
@@ -155,7 +140,6 @@ float4 main(VS_OUT input) : SV_Target
 			/* absorbtion diffuse */
 			float3 absorbed = exp(-float3(0.35, 0.75, 2.35) * (back - dist));
 			diffuseColor = objectColor * absorbed;
-			diffuseColor = absorbed;
 
 			/* refraction diffuse */
 			float3 ref = refract(rd, normal, 0.75);
@@ -172,6 +156,6 @@ float4 main(VS_OUT input) : SV_Target
 			color = diffuseRatio * diffuseColor + (1 - diffuseRatio) * specularColor;
 		}
 	}
-
+	
 	return float4(pow(color, 1.0 / 2.2), 1.0);
 }
