@@ -319,7 +319,7 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(Sphere) * 6;
+	constBufferDesc.ByteWidth = sizeof(Sphere) * 250;
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &metaballBuffer);

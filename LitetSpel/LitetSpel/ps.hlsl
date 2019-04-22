@@ -10,9 +10,9 @@ struct VS_OUT
 struct Sphere {
 	float4 centerRadius;
 };
-
+#define MAX_SPHERES 15
 cbuffer SphereBuffer {
-	Sphere spheres[5];
+	Sphere spheres[MAX_SPHERES];
 };
 
 cbuffer Camera {
@@ -38,37 +38,36 @@ float testSphere(float3 p, float4 s)
 float mb(float3 p, float4 mb)
 {
 	float3 d = mb.xyz - p;
-	return 0.35 - ((mb.w * mb.w) / dot(mb.xyz - p, mb.xyz - p));
+	return ((mb.w * mb.w) / dot(d, d));
 }
 
 float testScene(float3 p)
 {
-	float d0 = mb(p, spheres[0].centerRadius);
-	float d1 = mb(p, spheres[1].centerRadius);
-	float d2 = mb(p, spheres[2].centerRadius);
-	float d3 = mb(p, spheres[3].centerRadius);
-	float d4 = mb(p, spheres[4].centerRadius);
-	float mbDist = d0 + d1 + d2 + d3 + d4;
+	float mbDist = 0;
+	for (int i = 0; i < MAX_SPHERES; ++i)
+	{
+		mbDist += mb(p, spheres[i].centerRadius);
+	}
 
-	return mbDist;
+	return (2.5) - mbDist;
 }
 
 float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 {
-	float dist = -ro.z - 10.0;
+	float dist = -ro.z - (30.0 / rd.z);
 	float i;
-	float maxDist = -ro.z + 60.0;
+	float maxDist = -ro.z + (60.0 / rd.z);
 	intersect = false;
 
 	/* calculate ray entry */
 	for (i = 0.0; i < 30; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
-		dist += currentDist + 0.05;
+		dist += currentDist + 0.1;
 		if (dist > maxDist) {
 			break;
 		}
-		else if (currentDist < 0.01) {
+		else if (currentDist < 0.1) {
 			intersect = true;
 			break;
 		}
@@ -76,12 +75,12 @@ float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 
 	/* calculate ray exit */
 	if (intersect) {
-		back = dist + 30.0;
+		back = maxDist;
 		for (i = 0.0; i < 30; i += 1.0)
 		{
 			float currentDist = testScene(ro + rd * back);
 			back -= currentDist + 0.1;
-			if (currentDist < 0.01) {
+			if (currentDist < 0.1) {
 				break;
 			}
 		}
@@ -128,7 +127,7 @@ float4 main(VS_OUT input) : SV_Target
 		else {
 			/* lighting */
 			float3 p = ro + rd * dist;
-			float3 objectColor = float3(0.3, 0.3, 1.0);
+			float3 objectColor = float3(1.0, 1.0, 1.0);
 			float3 normal = calcNormal(p);
 			float3 lightVector = normalize(float3(0.0, 400.0, 100.0));
 			float3 diffuseColor = float3(0, 0, 0);
@@ -138,7 +137,7 @@ float4 main(VS_OUT input) : SV_Target
 			specularColor = pow(max(dot(normal, normalize(lightVector - rd)), 0.0), 32) * float3(1.0, 1.0, 1.0);
 			
 			/* absorbtion diffuse */
-			float3 absorbed = exp(-float3(0.35, 0.75, 2.35) * (back - dist));
+			float3 absorbed = exp(-float3(0.05, 0.15, 0.15) * (back - dist));
 			diffuseColor = objectColor * absorbed;
 
 			/* refraction diffuse */

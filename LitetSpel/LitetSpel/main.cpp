@@ -96,18 +96,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			//Movement
 			if (keyboard.KeyIsPressed('D'))
 			{
+				game.keys[1] = true;
 				game.currentLevel.player.move((float)dt, glm::vec3(1.0f, 0.0f, 0.0f));
 			}
 			if (keyboard.KeyIsPressed('A'))
 			{
+				game.keys[0] = true;
 				game.currentLevel.player.move((float)dt, glm::vec3(-1.0f, 0.0f, 0.0f));
 			}
 			if (keyboard.KeyIsPressed('W'))
 			{
+				game.keys[2] = true;
 				game.currentLevel.player.move(dt, glm::vec3(0.0f, 1.0f, 0.0f));
 			}
 			if (keyboard.KeyIsPressed('S'))
 			{
+				game.keys[3] = true;
 				game.currentLevel.player.move(dt, glm::vec3(0.0f, -1.0f, 0.0f));
 			}
 			if (keyboard.KeyIsPressed('P'))

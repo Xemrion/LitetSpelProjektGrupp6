@@ -26,30 +26,29 @@ void Game::init()
 
 void Game::update(double dt)
 {
-	if (keys[0]) {
-		currentLevel.player.move((float)dt, glm::vec3(-1, 0, 0));
-	}
-	if (keys[1]) {
-		currentLevel.player.move((float)dt, glm::vec3(1, 0, 0));
-	}
-
-	for (int i = 0; i < 4; ++i) {
-		keys[i] = false;
-	}
+	time += dt;
 
 	Sphere playerSphere;
 	playerSphere.centerRadius = glm::vec4(
 		currentLevel.player.pos.x,
 		currentLevel.player.pos.y,
 		currentLevel.player.pos.z,
-		5.0);
+		2.5);
 	currentLevel.spheres = vector<Sphere>();
 	currentLevel.spheres.push_back(playerSphere);
 
-	for (int i = 1; i < 5; ++i)
+	for (int i = 1; i < 250; ++i)
 	{
 		Sphere s;
-		s.centerRadius = glm::vec4((i - 2) * 15.0, 5, 0, 5);
+		s.centerRadius = glm::vec4(
+			playerSphere.centerRadius.x + sin(time * (i*0.1) + i) * 7.4,
+			playerSphere.centerRadius.y - cos(time * 0.3 + i) * 6.7,
+			playerSphere.centerRadius.z + sin(time * 0.3 + i) * 0.8,
+			2.5);
 		currentLevel.spheres.push_back(s);
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		keys[i] = false;
 	}
 }

@@ -27,6 +27,7 @@ public:
 class Game {
 private:
 public:
+	double time = 0.0;
 	//left/right/up/down
 	bool keys[4];
 	Level currentLevel;
