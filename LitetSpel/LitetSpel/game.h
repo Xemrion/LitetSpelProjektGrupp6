@@ -25,7 +25,7 @@ public:
 	int nrOfActiveBlobs = 0;
 	float shootCooldown = 0;
 	void shoot(glm::vec3 mousePos);
-
+	void recallBlobs();
     void update();
     [[nodiscard]] glm::vec3 const& getPosition() const noexcept;
     // TODO: accessors & mutations; refactor Player logic into >>Player<<; refactor member privacy

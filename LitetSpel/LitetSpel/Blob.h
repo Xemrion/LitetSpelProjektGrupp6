@@ -12,6 +12,7 @@ private:
 	float radius = 2;
 public:
 	bool isActive = false;
+	bool isBeingRecalled = false;
 	Sphere blobSphere;
 	Blob();
 	~Blob();

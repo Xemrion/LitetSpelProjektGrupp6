@@ -17,9 +17,16 @@ Blob::Blob(glm::vec3 pos)
 }
 void Blob::move(float dt)
 {
-	if (dir != glm::vec3(0, 0, 0))
+	if (this->isActive)
 	{
 		dir -= glm::vec3(1, 60, 0) * fallSpeed * dt;
+		pos += dir * speed * dt;
+		this->blobSphere.centerRadius = glm::vec4(
+			pos,
+			radius);
+	}
+	else if (this->isBeingRecalled)
+	{
 		pos += dir * speed * dt;
 		this->blobSphere.centerRadius = glm::vec4(
 			pos,

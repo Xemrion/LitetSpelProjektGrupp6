@@ -180,6 +180,8 @@ void keyboardFunc()
 			powerCoolDown = 0.2f;
 		}
 	}
+	if (keyboard.KeyIsPressed('R'))
+		game.currentLevel.player.recallBlobs();
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)

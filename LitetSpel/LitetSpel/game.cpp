@@ -4,13 +4,13 @@
 #define COOLDOWN_CONSTANT 0.1f
 
 void Game::init() {
-    groundBox.hitbox.center = glm::vec4(0, -30, 0, 0);
-    groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
+	groundBox.hitbox.center = glm::vec4(0, -30, 0, 0);
+	groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
 	currentLevel.boxes.push_back(groundBox.hitbox);
-	
-    currentLevel.colManager.register_entry( groundBox, CollisionId::platform, groundBox.hitbox, true );
 
-	testPlat.hitbox.center = glm::vec4(30.0f,0.0f,0.0f,0.0f);
+	currentLevel.colManager.register_entry(groundBox, CollisionId::platform, groundBox.hitbox, true);
+
+	testPlat.hitbox.center = glm::vec4(30.0f, 0.0f, 0.0f, 0.0f);
 	testPlat.hitbox.halfLengths = glm::vec4(10.0f, 20.0f, 10.0f, 0.0f);
 	currentLevel.boxes.push_back(testPlat.hitbox);
 	currentLevel.colManager.register_entry(testPlat, CollisionId::platform, testPlat.hitbox, true);
@@ -21,10 +21,10 @@ void Game::init() {
 	}
 	updatePlayerCollision();
 
-    currentLevel.colManager.register_entry(currentLevel.player,  CollisionId::player_bottom, currentLevel.player.HitboxBottom, false);
-	currentLevel.colManager.register_entry(currentLevel.player,  CollisionId::player_top,    currentLevel.player.HitboxTop,    false);
-	currentLevel.colManager.register_entry(currentLevel.player,  CollisionId::player_left,   currentLevel.player.HitboxLeft,   false);
-	currentLevel.colManager.register_entry(currentLevel.player,  CollisionId::player_right,   currentLevel.player.HitboxRight,  false);
+	currentLevel.colManager.register_entry(currentLevel.player, CollisionId::player_bottom, currentLevel.player.HitboxBottom, false);
+	currentLevel.colManager.register_entry(currentLevel.player, CollisionId::player_top, currentLevel.player.HitboxTop, false);
+	currentLevel.colManager.register_entry(currentLevel.player, CollisionId::player_left, currentLevel.player.HitboxLeft, false);
+	currentLevel.colManager.register_entry(currentLevel.player, CollisionId::player_right, currentLevel.player.HitboxRight, false);
 
 	//currentLevel.boxes.push_back(currentLevel.player.HitboxBottom);
 	//currentLevel.boxes.push_back(currentLevel.player.HitboxLeft);
@@ -35,49 +35,65 @@ void Game::init() {
 
 
 
-Player::Player( glm::vec3 position ):
-    IObject(),
-    posPrev      (position),
-    posCurr      (position),
-    moveSpeed    (10.0f),
-    jumpSpeed    (.0f),
-    jumpCooldown (.0f),
-    gravity      (GRAVITY_CONSTANT),
-    hasExtraJump (true),
-    isStanding   (false),
-    status       (0) // TODO: enum!
+Player::Player(glm::vec3 position) :
+	IObject(),
+	posPrev(position),
+	posCurr(position),
+	moveSpeed(10.0f),
+	jumpSpeed(.0f),
+	jumpCooldown(.0f),
+	gravity(GRAVITY_CONSTANT),
+	hasExtraJump(true),
+	isStanding(false),
+	status(0) // TODO: enum!
 {
-    // skapa fyra hitboxar
+	// skapa fyra hitboxar
 }
 
 Player::~Player() {}
 
 
-void Player::move( float dt, glm::vec3 dir ) noexcept {
-    // TODO: movea alla player hitboxar
-    posPrev = posCurr;
-    posCurr = posPrev + (dir * moveSpeed * dt);
+void Player::move(float dt, glm::vec3 dir) noexcept {
+	// TODO: movea alla player hitboxar
+	posPrev = posCurr;
+	posCurr = posPrev + (dir * moveSpeed * dt);
 }
 
 glm::vec3 const& Player::getPosition() const noexcept {
-    return posCurr;
+	return posCurr;
 }
 
 
 void Player::update() {
-    if (isStanding) {
-        gravity = 0;
-        jumpSpeed = 0;
-        hasExtraJump = true;
-    }
+	if (isStanding) {
+		gravity = 0;
+		jumpSpeed = 0;
+		hasExtraJump = true;
+	}
 	else
 	{
 		gravity = GRAVITY_CONSTANT;
 	}
+	for (int i = 0; i < blobs.size(); i++)
+	{
+		if (blobs[i].isBeingRecalled)
+		{
+			blobs[i].dir = glm::normalize(posCurr - blobs[i].pos);
+			if (glm::length((posCurr - blobs[i].pos)) < 0.1f)
+				blobs[i].isBeingRecalled = false;
+		}
+		else if (!blobs[i].isActive)
+		{
+			blobs[i].pos = posCurr;
+			blobs[i].blobSphere.centerRadius = glm::vec4(posCurr, 2);
+		}
+		blobs[i].move(dt);
+
+	}
 }
 
-void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {
-	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_bottom) 
+void Player::collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject &other) {
+	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_bottom)
 	{
 		isStanding = true;
 	}
@@ -88,7 +104,7 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_left)
 	{
-		posCurr.x += moveSpeed*dt;
+		posCurr.x += moveSpeed * dt;
 
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_right)
@@ -98,7 +114,7 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 }
 
 void Game::update(double dt) {
-	
+
 	if (leftButtonDown
 		&& currentLevel.player.nrOfActiveBlobs < currentLevel.player.blobCharges
 		&&  currentLevel.player.shootCooldown <= 0)
@@ -109,7 +125,7 @@ void Game::update(double dt) {
 		currentLevel.player.moveSpeed = 100.0f;
 		if (currentLevel.player.status == 2) {
 			//currentLevel.player.move(dt, glm::vec3(-0.2, 0, 0));
-			currentLevel.player.posCurr.x -= currentLevel.player.moveSpeed*dt/3;
+			currentLevel.player.posCurr.x -= currentLevel.player.moveSpeed*dt / 3;
 		}
 		else {
 			//currentLevel.player.move(dt, glm::vec3(-1, 0, 0));
@@ -121,7 +137,7 @@ void Game::update(double dt) {
 		currentLevel.player.moveSpeed = 100.0f;
 		if (currentLevel.player.status == 2) {
 			//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
-			currentLevel.player.posCurr.x += currentLevel.player.moveSpeed*dt/3;
+			currentLevel.player.posCurr.x += currentLevel.player.moveSpeed*dt / 3;
 		}
 		else {
 			//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
@@ -132,7 +148,7 @@ void Game::update(double dt) {
 		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != 2) {
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT * float(dt);
 			currentLevel.player.isStanding = false;
-            currentLevel.player.gravity = GRAVITY_CONSTANT;
+			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 		else if (currentLevel.player.status == 1 && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
@@ -142,9 +158,9 @@ void Game::update(double dt) {
 		}
 
 		else if (currentLevel.player.status == 2 && currentLevel.player.isStanding == true) {
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT/2 * float(dt);
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT / 2 * float(dt);
 			currentLevel.player.isStanding = false;
-            currentLevel.player.gravity = GRAVITY_CONSTANT;
+			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 	}
@@ -155,34 +171,28 @@ void Game::update(double dt) {
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}
-    // gravity
+	// gravity
 	currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (currentLevel.player.gravity * float(dt)) / 100;
 	currentLevel.player.posCurr.y += currentLevel.player.jumpSpeed;
 
 	currentLevel.player.jumpCooldown -= dt;
 	currentLevel.player.shootCooldown -= dt;
-	for (int i = 0; i < currentLevel.player.blobCharges; i++)
-	{
-		if (!currentLevel.player.blobs[i].isActive)
-		{
-			currentLevel.player.blobs[i].pos = currentLevel.player.posCurr;		
-			currentLevel.player.blobs[i].blobSphere.centerRadius = glm::vec4(currentLevel.player.posCurr, 2);
-		}
-	}
+
 	updatePlayerCollision();
 
 	currentLevel.spheres = vector<Sphere>();
 	currentLevel.spheres.push_back(playerSphere);
+
+
+	currentLevel.player.isStanding = false;
+	currentLevel.colManager.update();
+	currentLevel.player.update();
 	for (int i = 0; i < currentLevel.player.blobs.size(); i++)
 	{
-		currentLevel.player.blobs[i].move(dt);
 		currentLevel.spheres.push_back(currentLevel.player.blobs[i].blobSphere);
 	}
-	
-	currentLevel.player.isStanding = false;
-    currentLevel.colManager.update();
-    currentLevel.player.update();
-	
+
+
 }
 void Player::shoot(glm::vec3 mousePos)
 {
@@ -192,6 +202,15 @@ void Player::shoot(glm::vec3 mousePos)
 	blobs[nrOfActiveBlobs].isActive = true;
 	shootCooldown = 1;
 	nrOfActiveBlobs++;
+}
+void Player::recallBlobs()
+{
+	for (int i = 0; i < nrOfActiveBlobs; i++)
+	{
+		blobs[i].isActive = false;
+		blobs[i].isBeingRecalled = true;
+	}
+	nrOfActiveBlobs = 0;
 }
 void Game::updatePlayerCollision()
 {
