@@ -24,8 +24,10 @@ public:
     // TODO: accessors & mutations; refactor Player logic into >>Player<<; refactor member privacy
     glm::vec3  posPrev, posCurr;
     float      moveSpeed, jumpSpeed, jumpCooldown, gravity;
-    bool       hasExtraJump, isStanding;
-    int        status; // TODO: enum!  powerup indicator: 0 = none 1 = bouncy 2 = heavy
+    bool       hasExtraJump, isStanding, isStuck;
+    int        status; // TODO: enum!  powerup indicator: 0 = none |1 = bouncy |2 = heavy |3 = Sticky
+
+	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
 //class Platform : public IObject {
@@ -59,9 +61,12 @@ public:
 	
 	void init();
 	void update(double dt);
+	void updatePlayerCollision();
 
 	//float gravity = 50.0f;
 
     Sphere playerSphere;
     Platform groundBox;
+	Platform testPlat;
+	Platform testplat2;
 };

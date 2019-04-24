@@ -145,7 +145,7 @@ void keyboardFunc()
 	}
 	if (keyboard.KeyIsPressed('S'))
 	{
-		//game.keys[3] = true;
+		game.keys[3] = true;
 	}
 	if (keyboard.KeyIsPressed('B')) 
 	{
@@ -169,6 +169,21 @@ void keyboardFunc()
 			if (game.currentLevel.player.status == 0)
 			{
 				game.currentLevel.player.status = 2;
+			}
+			else
+			{
+				game.currentLevel.player.status = 0;
+			}
+			powerCoolDown = 0.2f;
+		}
+	}
+	if (keyboard.KeyIsPressed('Y'))
+	{
+		if (powerCoolDown <= 0)
+		{
+			if (game.currentLevel.player.status == 0)
+			{
+				game.currentLevel.player.status = 3;
 			}
 			else
 			{
@@ -202,7 +217,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
-
+			
+			char title[64];
+			_itoa_s(1/dt, title, 64, 10);
+			SetWindowTextA(wndHandle, title);
+			
 			keyboardFunc();
 			mouseFunc();
 
