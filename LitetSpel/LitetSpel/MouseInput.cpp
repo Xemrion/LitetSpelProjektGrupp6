@@ -60,12 +60,14 @@ void MouseInput::OnMouseEnter() noexcept {
 void MouseInput::OnLeftPressed(int x, int y) noexcept {
 	this->x = x;
 	this->y = y;
+	this->leftIsPressed = true;
 	buffer.push(MouseInput::Event(MouseInput::Event::Type::LeftPress, *this));
 	TrimBuffer();
 }
 void MouseInput::OnLeftReleased(int x, int y) noexcept {
 	this->x = x;
 	this->y = y;
+	this->leftIsPressed = false;
 	buffer.push(MouseInput::Event(MouseInput::Event::Type::LeftRelease, *this));
 	TrimBuffer();
 }

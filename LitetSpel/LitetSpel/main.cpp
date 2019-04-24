@@ -122,10 +122,13 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 
 void mouseFunc() 
 {
-	if (mouse.ReadEvent().GetType() == MouseInput::Event::Type::Move)
+	if (mouse.LeftIsPressed())
 	{
-
+		game.leftButtonDown = true;
+		game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
 	}
+	else
+		game.leftButtonDown = false;
 }
 
 void keyboardFunc()
@@ -192,6 +195,8 @@ void keyboardFunc()
 			powerCoolDown = 0.2f;
 		}
 	}
+	if (keyboard.KeyIsPressed('R'))
+		game.currentLevel.player.recallBlobs();
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)

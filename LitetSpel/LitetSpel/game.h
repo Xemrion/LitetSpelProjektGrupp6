@@ -7,6 +7,7 @@
 #include "Geometry.h"
 #include "Collisions.h"
 #include  "Platform.h"
+#include "Blob.h"
 
 using namespace std;
 
@@ -27,6 +28,12 @@ public:
     virtual ~Player();
     virtual void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override;
     void move(float dt, glm::vec3 dir) noexcept;
+	vector<Blob> blobs;
+	int blobCharges = 5;
+	int nrOfActiveBlobs = 0;
+	float shootCooldown = 0;
+	void shoot(glm::vec3 mousePos);
+	void recallBlobs();
     void update();
     [[nodiscard]] glm::vec3 const& getPosition() const noexcept;
     // TODO: accessors & mutations; refactor Player logic into >>Player<<; refactor member privacy
@@ -67,6 +74,9 @@ public:
 	bool keys[4];
 	LevelData currentLevel;
 	
+	glm::vec3 mousePos;
+	bool leftButtonDown = false;
+
 	void init();
 	void update(double dt);
 	void updatePlayerCollision();
