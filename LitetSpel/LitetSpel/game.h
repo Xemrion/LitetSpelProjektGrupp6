@@ -64,6 +64,8 @@ public:
 	void update(double dt);
 	void updatePlayerCollision();
 
+	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed);
+
 	//float gravity = 50.0f;
 
     Sphere playerSphere;
