@@ -51,6 +51,8 @@ public:
 	HRESULT createShaders();
 	void queueMetaballs(vector<Sphere> metaballs);
 	void setMetaballColorAbsorb(glm::vec3 colorAbsorb);
+	void setMetaballColorAbsorb(glm::vec4 colorAbsorb);
+	void setMetaballColorDefault();
 	void queueBoxes(vector<Box> boxes);
 	void setCameraPos(glm::vec3 pos);
 	void swapBuffer();

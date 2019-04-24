@@ -5,10 +5,78 @@
 #include "game.h"
 #include "KeyboardInput.h"
 #include "MouseInput.h"
+#include "Library.h"
 
 KeyboardInput keyboard;
 MouseInput mouse;
 Game game;
+
+glm::vec4 colours[12];
+int currentColour;
+void InitColours() {
+	colours[0] = glm::vec4(0.05f, 0.15f, 0.15f, 1.0f);
+	colours[1] = red;
+	colours[2] = green;
+	colours[3] = blue;
+	colours[4] = yellow;
+	colours[5] = magenta;
+	colours[6] = purple;
+	colours[7] = cyan;
+	colours[8] = black;
+	colours[9] = white;
+	colours[10] = grey;
+	colours[11] = olive;
+}
+void modifyColour(int &currentColour) {
+	if (keyboard.KeyIsPressed(VK_NUMPAD0))
+	{
+		currentColour = 0;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD1))
+	{
+		currentColour = 1;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD2))
+	{
+		currentColour = 2;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD3))
+	{
+		currentColour = 3;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD4))
+	{
+		currentColour = 4;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD5))
+	{
+		currentColour = 5;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD6))
+	{
+		currentColour = 6;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD7))
+	{
+		currentColour = 7;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD8))
+	{
+		currentColour = 8;
+	}
+	if (keyboard.KeyIsPressed(VK_NUMPAD9))
+	{
+		currentColour = 9;
+	}
+	if (keyboard.KeyIsPressed(VK_DOWN))
+	{
+		currentColour = 10;
+	}
+	if (keyboard.KeyIsPressed(VK_UP))
+	{
+		currentColour = 11;
+	}
+}
 
 double dt;
 
@@ -202,6 +270,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
 	game.init();
+	InitColours();
+	currentColour = 0;
+
 	ShowWindow(wndHandle, nCmdShow);
 	
 	auto prevFrameTime = std::chrono::steady_clock::now();
@@ -228,6 +299,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
 			graphics.queueBoxes(game.currentLevel.boxes);
+			modifyColour(currentColour);
+			graphics.setMetaballColorAbsorb(colours[currentColour]);
 			graphics.queueMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
 
