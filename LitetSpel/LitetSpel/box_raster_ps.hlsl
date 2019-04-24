@@ -2,11 +2,12 @@ struct VS_OUT
 {
 	float4 pos : SV_POSITION;
 	float4 normal : NORMAL;
+	float4 color : COLOR;
 };
 
 float4 main(VS_OUT input) : SV_Target
 {
-	float3 objectColor = float3(0.5, 0.5, 0.5);
+	float3 objectColor = input.color;
 	float3 lightPos = float3(100.0, 400.0, -200.0);
 	float3 lightVector = lightPos;
 	float3 normal = input.normal.xyz;

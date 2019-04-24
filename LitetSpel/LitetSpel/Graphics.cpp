@@ -652,18 +652,20 @@ void Graphics::queueBoxes(vector<Box> boxes)
 
 	struct Transforms {
 		glm::mat4 WVP[100];
+		glm::vec4 color[100];
 	} transforms;
-	memset(&transforms, 0, sizeof(glm::mat4) * 100);
+	memset(&transforms, 0, sizeof(glm::mat4) * 100 + sizeof(glm::vec4) * 100);
 
 	for (int i = 0; i < boxes.size(); ++i)
 	{
 		glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
 		t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
 		transforms.WVP[i] = transpose(t) * viewProj;
+		transforms.color[i] = boxes[i].color;
 	}
 
 	deviceContext->Map(boxTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, &transforms, sizeof(glm::mat4) * 100);
+	memcpy(mr.pData, &transforms, sizeof(Transforms));
 	deviceContext->Unmap(boxTransformBuffer, 0);
 
 	boxInstances = boxes.size();
