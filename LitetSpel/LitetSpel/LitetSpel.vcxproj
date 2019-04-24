@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Blob.cpp" />
     <ClCompile Include="Collisions.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Graphics.cpp" />
@@ -132,6 +133,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Blob.h" />
     <ClInclude Include="Collisions.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Geometry.h" />
