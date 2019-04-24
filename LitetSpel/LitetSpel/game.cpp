@@ -42,18 +42,18 @@ void Game::init() {
 
 
 
-Player::Player( glm::vec3 position ):
-    IObject(),
-    posPrev      (position),
-    posCurr      (position),
-    moveSpeed    (10.0f),
-    jumpSpeed    (.0f),
-    jumpCooldown (.0f),
-    gravity      (GRAVITY_CONSTANT),
-    hasExtraJump (true),
-    isStanding   (false),
-	isStuck      (false),
-    status       (PlayerStatus::None) // TODO: enum!
+Player::Player(glm::vec3 position) :
+	IObject(),
+	posPrev(position),
+	posCurr(position),
+	moveSpeed(10.0f),
+	jumpSpeed(.0f),
+	jumpCooldown(.0f),
+	gravity(GRAVITY_CONSTANT),
+	hasExtraJump(true),
+	isStanding(false),
+	isStuck(false),
+	status(PlayerStatus::None) // TODO: enum!
 {
 	// skapa fyra hitboxar
 }
@@ -95,14 +95,11 @@ void Player::update() {
 			blobs[i].blobSphere.centerRadius = glm::vec4(posCurr, 2);
 		}
 		blobs[i].move(dt);
-		if (isStuck == false) 
-		{
-			gravity = GRAVITY_CONSTANT;
-		}
 
 	}
-}
-
+	if (isStuck == false)
+	{
+		gravity = GRAVITY_CONSTANT;
 	}
 }
 
@@ -130,7 +127,7 @@ void Player::collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject &ot
 			jumpSpeed = 0;
 			isStuck = true;
 		}
-		posCurr.x += moveSpeed*dt;
+		posCurr.x += moveSpeed * dt;
 
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_right)
@@ -170,7 +167,7 @@ void Game::update(double dt) {
 	}
 	if (keys[1]) {
 		currentLevel.player.moveSpeed = 100.0f;
-		if (currentLevel.player.isStuck == false) 
+		if (currentLevel.player.isStuck == false)
 		{
 			if (currentLevel.player.status == PlayerStatus::Heavy) {
 				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
@@ -197,7 +194,7 @@ void Game::update(double dt) {
 		}
 
 		else if (currentLevel.player.status == PlayerStatus::Heavy && currentLevel.player.isStanding == true) {
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT/2;
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT / 2;
 			currentLevel.player.isStanding = false;
 			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
@@ -207,9 +204,9 @@ void Game::update(double dt) {
 		if (currentLevel.player.status == PlayerStatus::Sticky)
 		{
 			currentLevel.player.isStuck = false;
-			if (currentLevel.player.isStanding == false) 
+			if (currentLevel.player.isStanding == false)
 			{
-				currentLevel.player.gravity = GRAVITY_CONSTANT*2;
+				currentLevel.player.gravity = GRAVITY_CONSTANT * 2;
 			}
 		}
 	}
@@ -246,7 +243,7 @@ void Player::shoot(glm::vec3 mousePos)
 	glm::vec3 dir = glm::normalize(mousePos - posCurr);
 	for (int i = 0; i < blobs.size(); i++)
 	{
-		if (!blobs[nrOfActiveBlobs+i].isBeingRecalled)
+		if (!blobs[nrOfActiveBlobs + i].isBeingRecalled)
 		{
 			blobs[nrOfActiveBlobs + i].setDir(dir);
 			blobs[nrOfActiveBlobs + i].isActive = true;
@@ -255,7 +252,7 @@ void Player::shoot(glm::vec3 mousePos)
 			break;
 		}
 	}
-	
+
 }
 void Player::recallBlobs()
 {
