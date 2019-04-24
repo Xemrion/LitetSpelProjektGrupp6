@@ -1,6 +1,6 @@
 #include "game.h"
 #define GRAVITY_CONSTANT -200.0f
-#define JUMP_CONSTANT 200.0f
+#define JUMP_CONSTANT 1.5f
 #define COOLDOWN_CONSTANT 0.1f
 
 void Game::init() {
@@ -155,19 +155,19 @@ void Game::update(double dt) {
 	}
 	if (keys[2]) {
 		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != 2) {
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT * float(dt);
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.isStanding = false;
             currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 		else if (currentLevel.player.status == 1 && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
 			currentLevel.player.hasExtraJump = false;
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT * float(dt);
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 
 		else if (currentLevel.player.status == 2 && currentLevel.player.isStanding == true) {
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT/2 * float(dt);
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT/2;
 			currentLevel.player.isStanding = false;
             currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
