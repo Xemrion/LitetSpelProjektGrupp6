@@ -78,7 +78,13 @@ void Player::update() {
 		jumpSpeed = 0;
 		hasExtraJump = true;
 	}
-
+	else 
+	{
+		if (isStuck == false)
+		{
+			gravity = GRAVITY_CONSTANT;
+		}
+	}
 	for (int i = 0; i < blobs.size(); i++)
 	{
 		if (blobs[i].isBeingRecalled)
@@ -96,10 +102,6 @@ void Player::update() {
 		}
 		blobs[i].move(dt);
 
-	}
-	if (isStuck == false)
-	{
-		gravity = GRAVITY_CONSTANT;
 	}
 }
 
