@@ -127,6 +127,7 @@
     <ClCompile Include="MouseInput.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="PowerUp.cpp" />
+    <ClCompile Include="Sounds.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -141,6 +142,7 @@
     <ClInclude Include="MouseInput.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="PowerUp.h" />
+    <ClInclude Include="Sounds.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="ps.hlsl">
