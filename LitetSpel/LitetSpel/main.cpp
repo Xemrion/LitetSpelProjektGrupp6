@@ -5,7 +5,6 @@
 #include "game.h"
 #include "KeyboardInput.h"
 #include "MouseInput.h"
-#include "Sounds.h"
 
 KeyboardInput keyboard;
 MouseInput mouse;
@@ -190,6 +189,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (FAILED(hr)) return 2;
 	game.init();
 	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
+	game.gameSounds = &gameSounds;
 	ShowWindow(wndHandle, nCmdShow);
 	
 	auto prevFrameTime = std::chrono::steady_clock::now();

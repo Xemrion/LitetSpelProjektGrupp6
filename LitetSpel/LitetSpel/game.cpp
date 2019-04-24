@@ -137,3 +137,4 @@ void Game::update(double dt) {
     currentLevel.colManager.update();
     currentLevel.player.update();
 }
+

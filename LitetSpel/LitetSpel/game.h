@@ -6,6 +6,7 @@
 #include <vector>
 #include "Geometry.h"
 #include "Collisions.h"
+#include "Sounds.h"
 #include  "Platform.h"
 
 using namespace std;
@@ -61,7 +62,12 @@ public:
 	void update(double dt);
 
 	//float gravity = 50.0f;
-
+	Sounds* gameSounds;
     Sphere playerSphere;
     Platform groundBox;
+};
+
+struct SFX {
+	char* fileName;
+	IDirectSoundBuffer8* soundBuffer;
 };

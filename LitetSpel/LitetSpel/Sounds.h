@@ -50,7 +50,6 @@ private:
 	IDirectSound8* directSound;
 	IDirectSoundBuffer* firstBuffer;
 	IDirectSoundBuffer8* secondBuffer;
-
 };
 
 #endif // !SOUNDS_H
