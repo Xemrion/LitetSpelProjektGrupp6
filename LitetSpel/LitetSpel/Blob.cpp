@@ -27,10 +27,15 @@ void Blob::move(float dt)
 	}
 	else if (this->isBeingRecalled)
 	{
-		pos += dir * speed * dt;
+		pos += dir * recallSpeed * dt;
 		this->blobSphere.centerRadius = glm::vec4(
 			pos,
 			radius);
 	}
 
+}
+
+void Blob::setDir(glm::vec3 dir)
+{
+	this->dir = dir;
 }

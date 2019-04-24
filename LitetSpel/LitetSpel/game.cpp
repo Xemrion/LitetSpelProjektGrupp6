@@ -78,9 +78,11 @@ void Player::update() {
 	{
 		if (blobs[i].isBeingRecalled)
 		{
-			blobs[i].dir = glm::normalize(posCurr - blobs[i].pos);
-			if (glm::length((posCurr - blobs[i].pos)) < 0.1f)
+			blobs[i].setDir(glm::normalize(posCurr - blobs[i].pos));
+			if (glm::length((posCurr - blobs[i].pos)) < 0.2f)
+			{
 				blobs[i].isBeingRecalled = false;
+			}
 		}
 		else if (!blobs[i].isActive)
 		{
@@ -198,10 +200,18 @@ void Player::shoot(glm::vec3 mousePos)
 {
 	mousePos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
 	glm::vec3 dir = glm::normalize(mousePos - posCurr);
-	blobs[nrOfActiveBlobs].dir = dir;
-	blobs[nrOfActiveBlobs].isActive = true;
-	shootCooldown = 1;
-	nrOfActiveBlobs++;
+	for (int i = 0; i < blobs.size(); i++)
+	{
+		if (!blobs[nrOfActiveBlobs+i].isBeingRecalled)
+		{
+			blobs[nrOfActiveBlobs + i].setDir(dir);
+			blobs[nrOfActiveBlobs + i].isActive = true;
+			shootCooldown = 0.5f;
+			nrOfActiveBlobs++;
+			break;
+		}
+	}
+	
 }
 void Player::recallBlobs()
 {
@@ -210,6 +220,7 @@ void Player::recallBlobs()
 		blobs[i].isActive = false;
 		blobs[i].isBeingRecalled = true;
 	}
+	shootCooldown = 0.5f;
 	nrOfActiveBlobs = 0;
 }
 void Game::updatePlayerCollision()
