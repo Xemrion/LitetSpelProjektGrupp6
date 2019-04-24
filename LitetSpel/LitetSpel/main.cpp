@@ -88,8 +88,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			double dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
 			game.update(dt);
+			graphics.setCameraPos(game.currentLevel.player.pos + glm::vec3(0, 20, -100));
 			graphics.queueBoxes(game.currentLevel.boxes);
 			graphics.queueMetaballs(game.currentLevel.spheres);
+
 			graphics.swapBuffer();
 			//Movement
 			if (keyboard.KeyIsPressed('D'))
@@ -100,6 +102,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			{
 				game.currentLevel.player.move((float)dt, glm::vec3(-1.0f, 0.0f, 0.0f));
 			}
+			if (keyboard.KeyIsPressed('W'))
+			{
+				game.currentLevel.player.move(dt, glm::vec3(0.0f, 1.0f, 0.0f));
+			}
+			if (keyboard.KeyIsPressed('S'))
+			{
+				game.currentLevel.player.move(dt, glm::vec3(0.0f, -1.0f, 0.0f));
+			}
+			if (keyboard.KeyIsPressed('P'))
+			{
+				graphics.createShaders();
+			}
+
+			char title[100];
+			_itoa_s(1.f / dt, title, 100, 10);
+			SetWindowTextA(wndHandle, title);
 		}
 	}
 

@@ -1,15 +1,10 @@
+Texture2D background : register(t0);
+Texture2D depthbuffer : register(t1);
+SamplerState samp;
+
 struct VS_OUT
 {
 	float4 pos : SV_POSITION;
-};
-
-struct Box {
-	float4 center;
-	float4 halfLengths;
-};
-
-cbuffer BoxBuffer {
-	Box boxes[100];
 };
 
 struct Sphere {
@@ -17,77 +12,80 @@ struct Sphere {
 };
 
 cbuffer SphereBuffer {
-	Sphere spheres[100];
+	Sphere spheres[5];
 };
 
-struct HitRecord {
-	float3 normal;
-	float3 color;
+cbuffer Camera {
+	float3 cameraPos;
 };
 
-float testBox(float3 p, float3 b)
-{
-	float3 d = abs(p) - b;
-	return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);
-}
+cbuffer Corners {
+	float4 upLeft;
+	float4 upRight;
+	float4 downLeft;
+	float4 downRight;
+};
+
+cbuffer Matrices {
+	float4x4 viewProj;
+};
 
 float testSphere(float3 p, float4 s)
 {
 	return length(s.xyz - p) - s.w;
 }
 
-float testScene(float3 p, out float3 normal, out float3 color)
+float mb(float3 p, float4 mb)
 {
-	float minDist = 10000000.0;
-	normal = float3(0.0, 0.0, -1.0);
-	color = float3(0.0, 1.0, 0.0);
-	
-	// sphere loop
-	for (int i = 0; i < 100; ++i)
-	{
-		if (spheres[i].centerRadius.w <= 0.0) break;
-		float currentDist = testSphere(p, spheres[i].centerRadius);
-		if (minDist > currentDist)
-		{
-			minDist = currentDist;
-			//normal = normalize(p - spheres[i].centerRadius.xyz);
-			color = float3(0.0, 0.0, 1.0);
-		}
-	}
-
-	// box loop
-	for (int i = 0; i < 100; ++i)
-	{
-		if (boxes[i].halfLengths.x <= 0.0) break;
-		float currentDist = testBox(p - boxes[i].center.xyz, boxes[i].halfLengths.xyz);
-		if (minDist > currentDist)
-		{
-			minDist = currentDist;
-			color = float3(1.0, 0.0, 0.0);
-		}
-	}
-
-	return minDist;
+	float3 d = mb.xyz - p;
+	return 0.35 - ((mb.w * mb.w) / dot(mb.xyz - p, mb.xyz - p));
 }
 
-float castRay(float3 ro, float3 rd, out HitRecord rec)
+float testScene(float3 p)
 {
-	float dist = 170.0;
+	float d0 = mb(p, spheres[0].centerRadius);
+	float d1 = mb(p, spheres[1].centerRadius);
+	float d2 = mb(p, spheres[2].centerRadius);
+	float d3 = mb(p, spheres[3].centerRadius);
+	float d4 = mb(p, spheres[4].centerRadius);
+	float mbDist = d0 + d1 + d2 + d3 + d4;
+
+	return mbDist;
+}
+
+float castRay(float3 ro, float3 rd, out bool intersect, out float back)
+{
+	float dist = -ro.z - 10.0;
 	float i;
-	for (i = 0.0; i < 100.0; i += 1.0)
+	float maxDist = -ro.z + 60.0;
+	intersect = false;
+
+	/* calculate ray entry */
+	for (i = 0.0; i < 30; i += 1.0)
 	{
-		float currentDist = testScene(ro + rd * dist, rec.normal, rec.color);
-		dist += currentDist;
-		if (dist > 350.0) {
-			rec.color = float3(0.0, 0.0, 0.0);
-			rec.normal = float3(0.0, 0.0, -1.0);
+		float currentDist = testScene(ro + rd * dist);
+		dist += currentDist + 0.05;
+		if (dist > maxDist) {
 			break;
 		}
-		if (currentDist < 0.1) {
+		else if (currentDist < 0.01) {
+			intersect = true;
 			break;
 		}
 	}
 
+	/* calculate ray exit */
+	if (intersect) {
+		back = dist + 30.0;
+		for (i = 0.0; i < 30; i += 1.0)
+		{
+			float currentDist = testScene(ro + rd * back);
+			back -= currentDist + 0.1;
+			if (currentDist < 0.01) {
+				break;
+			}
+		}
+	}
 	return dist;
 }
 
@@ -95,29 +93,69 @@ float3 calcNormal(float3 p)
 {
 	const float h = 0.0001;
 	const float2 k = float2(1, -1);
-	float3 dn;
-	float3 dc;
-	return normalize(k.xyy * testScene(p + k.xyy * h, dn, dc) +
-					 k.yyx * testScene(p + k.yyx * h, dn, dc) +
-					 k.yxy * testScene(p + k.yxy * h, dn, dc) +
-					 k.xxx * testScene(p + k.xxx * h, dn, dc));
+	return normalize(k.xyy * testScene(p + k.xyy * h) +
+		k.yyx * testScene(p + k.yyx * h) +
+		k.yxy * testScene(p + k.yxy * h) +
+		k.xxx * testScene(p + k.xxx * h));
 }
 
 float4 main(VS_OUT input) : SV_Target
 {
 	float2 resolution = float2(1280, 720);
 	float2 uv = input.pos.xy / resolution;
-	uv.y = 1 - uv.y;
-	float3 ro = float3(spheres[0].centerRadius.x, spheres[0].centerRadius.y + 40.0, -200.0);
-	float3 rd = normalize(float3(uv - 0.5, 1.0));
-	HitRecord rec;
-	float dist = castRay(ro, rd, rec);
-	float3 p = ro + rd * dist;
-	rec.normal = calcNormal(p);
-	float3 lightPos = float3(100.0, 400.0, -400.0);
-	float3 lightVector = lightPos - p;
-	float3 color = max(dot(rec.normal, normalize(lightVector)), 0.0) * rec.color;
-	color += 0.5 * rec.color;
+	float3 ro = cameraPos;
+	float3 rd = normalize(lerp(
+		float3(lerp(upLeft.xyz, downLeft.xyz, uv.y)),
+		float3(lerp(upRight.xyz, downRight.xyz, uv.y)),
+		uv.x));
+
+	bool intersect;
+	float back;
+	float dist = castRay(ro, rd, intersect, back);
+	float3 color = float3(0.0, 0.0, 0.0);
+
+	if (!intersect) {
+		color = background.Sample(samp, uv);
+	}
+	else {
+		/* depth test */
+		float4 projected = mul(float4(ro + rd * dist, 1.0), viewProj);
+		projected.xyz /= projected.w;
+
+		if (projected.z > depthbuffer.Sample(samp, uv).x) {
+			color = background.Sample(samp, uv);
+		}
+		else {
+			/* lighting */
+			float3 p = ro + rd * dist;
+			float3 objectColor = float3(0.3, 0.3, 1.0);
+			float3 normal = calcNormal(p);
+			float3 lightVector = normalize(float3(0.0, 400.0, 100.0));
+			float3 diffuseColor = float3(0, 0, 0);
+			float3 specularColor = float3(0, 0, 0);
+			
+			/* specular */
+			specularColor = pow(max(dot(normal, normalize(lightVector - rd)), 0.0), 32) * float3(1.0, 1.0, 1.0);
+			
+			/* absorbtion diffuse */
+			float3 absorbed = exp(-float3(0.35, 0.75, 2.35) * (back - dist));
+			diffuseColor = objectColor * absorbed;
+
+			/* refraction diffuse */
+			float3 ref = refract(rd, normal, 0.75);
+			float3 samplePoint = p + ref * (-500.0 / ref.z);
+			float4 projectedSample = mul(float4(samplePoint, 1.0), viewProj);
+			samplePoint.xy = (samplePoint.xy / resolution) + 0.5;
+			if (projectedSample.z / projectedSample.w > depthbuffer.Sample(samp, samplePoint.xy).x)
+			{
+				diffuseColor += background.Sample(samp, samplePoint.xy) * absorbed;
+			}
+
+			/* final color */
+			float diffuseRatio = 0.99;
+			color = diffuseRatio * diffuseColor + (1 - diffuseRatio) * specularColor;
+		}
+	}
 	
-	return float4(pow(color, 1.0/2.2), 1.0);
+	return float4(pow(color, 1.0 / 2.2), 1.0);
 }
