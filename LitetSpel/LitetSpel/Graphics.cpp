@@ -319,7 +319,7 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(Sphere) * 15;
+	constBufferDesc.ByteWidth = sizeof(Sphere) * 15 + sizeof(glm::vec4);
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &metaballBuffer);
@@ -673,10 +673,21 @@ void Graphics::queueMetaballs(vector<Sphere> metaballs)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
+	struct MetaballStruct {
+		Sphere spheres[15];
+		glm::vec4 color;
+	} metaballStruct;
+	ZeroMemory(metaballStruct.spheres, sizeof(Sphere) * 15);
+	memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(15, (int)metaballs.size()));
+	metaballStruct.color = metaballColor;
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, metaballs.data(), sizeof(Sphere) * metaballs.size());
+	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * 15 + sizeof(glm::vec4));
 	deviceContext->Unmap(metaballBuffer, 0);
+}
+
+void Graphics::setMetaballColorAbsorb(glm::vec3 colorAbsorb)
+{
+	metaballColor = glm::vec4(colorAbsorb, 0.0);
 }
 
 void Graphics::setCameraPos(glm::vec3 pos)

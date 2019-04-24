@@ -13,6 +13,7 @@ struct Sphere {
 #define MAX_SPHERES 15
 cbuffer SphereBuffer {
 	Sphere spheres[MAX_SPHERES];
+	float4 sphereColor;
 };
 
 cbuffer Camera {
@@ -137,7 +138,7 @@ float4 main(VS_OUT input) : SV_Target
 			specularColor = pow(max(dot(normal, normalize(lightVector - rd)), 0.0), 32) * float3(1.0, 1.0, 1.0);
 			
 			/* absorbtion diffuse */
-			float3 absorbed = exp(-float3(0.05, 0.15, 0.15) * (back - dist));
+			float3 absorbed = exp(-sphereColor * (back - dist));
 			diffuseColor = objectColor * absorbed;
 
 			/* refraction diffuse */
