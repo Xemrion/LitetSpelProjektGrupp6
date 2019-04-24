@@ -5,23 +5,51 @@
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include <vector>
 #include "Geometry.h"
+#include "Collisions.h"
+#include  "Platform.h"
 
 using namespace std;
 
-class Player {
-private:
+
+extern double dt;
+
+class Player : public IObject {
 public:
-	glm::vec3 pos = glm::vec3(0, 5, 0);
-	float speed = 100.0;
-	void move(float dt, glm::vec3 dir) { pos += dir * speed * dt; };
+    Player( glm::vec3 position = {.0f, .0f, .0f} );
+    virtual ~Player();
+    virtual void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override;
+    void move(float dt, glm::vec3 dir) noexcept;
+    void update();
+    [[nodiscard]] glm::vec3 const& getPosition() const noexcept;
+    // TODO: accessors & mutations; refactor Player logic into >>Player<<; refactor member privacy
+    glm::vec3  posPrev, posCurr;
+    float      moveSpeed, jumpSpeed, jumpCooldown, gravity;
+    bool       hasExtraJump, isStanding, isStuck;
+    int        status; // TODO: enum!  powerup indicator: 0 = none |1 = bouncy |2 = heavy |3 = Sticky
+
+	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
-class Level {
-private:
-public:
-	Player player;
-	vector<Box> boxes;
-	vector<Sphere> spheres;
+//class Platform : public IObject {
+//public:
+//    Box hitbox;
+//    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other );
+//};
+
+
+struct LevelData { // POD
+    Player         player;
+    vector<Box>    boxes;
+    vector<Sphere> spheres;
+    CollisionManager colManager;
+
+    //void fun() {
+    //    colManager.register_entry( player, CollisionId::player_top,    pBoxTop   true );
+    //    colManager.register_entry( player, CollisionId::player_side,   pBoxLeft, true );
+    //    colManager.register_entry( player, CollisionId::player_side,   pBoxRight true );
+    //    colManager.register_entry( player, CollisionId::player_bottom, pBoxBot,  true );
+    //    colManager.register_entry( groundBox, CollisionId::platform, platBox,  false );
+    //}
 };
 
 class Game {
@@ -30,8 +58,16 @@ public:
 	double time = 0.0;
 	//left/right/up/down
 	bool keys[4];
-	Level currentLevel;
+	LevelData currentLevel;
 	
 	void init();
 	void update(double dt);
+	void updatePlayerCollision();
+
+	//float gravity = 50.0f;
+
+    Sphere playerSphere;
+    Platform groundBox;
+	Platform testPlat;
+	Platform testplat2;
 };
