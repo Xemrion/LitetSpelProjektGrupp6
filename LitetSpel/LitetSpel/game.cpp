@@ -1,7 +1,7 @@
 #include "game.h"
 #define GRAVITY_CONSTANT -200.0f
 #define JUMP_CONSTANT 1.5f
-#define COOLDOWN_CONSTANT 0.1f
+#define COOLDOWN_CONSTANT 0.2f
 
 void Game::init() {
     groundBox.hitbox.center = glm::vec4(0, -30, 0, 0);
@@ -90,7 +90,7 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_top)
 	{
-		if (status == 3)
+		if (status == PlayerStatus::Sticky)
 		{
 			gravity = 0;
 			isStuck = true;
@@ -101,7 +101,7 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_left)
 	{
-		if (status == 3 && isStanding == false)
+		if (status == PlayerStatus::Sticky && isStanding == false)
 		{
 			gravity = 0;
 			jumpSpeed = 0;
@@ -112,7 +112,7 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_right)
 	{
-		if (status == 3 && isStanding == false)
+		if (status == PlayerStatus::Sticky && isStanding == false)
 		{
 			gravity = 0;
 			jumpSpeed = 0;
@@ -127,7 +127,7 @@ void Game::update(double dt) {
 		currentLevel.player.moveSpeed = 100.0f;
 		if (currentLevel.player.isStuck == false)
 		{
-			if (currentLevel.player.status == 2) {
+			if (currentLevel.player.status == PlayerStatus::Heavy) {
 				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
 				currentLevel.player.posCurr.x = currentLevel.player.moveSpeed*dt / 3;
 			}
@@ -142,7 +142,7 @@ void Game::update(double dt) {
 		currentLevel.player.moveSpeed = 100.0f;
 		if (currentLevel.player.isStuck == false) 
 		{
-			if (currentLevel.player.status == 2) {
+			if (currentLevel.player.status == PlayerStatus::Heavy) {
 				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
 				currentLevel.player.posCurr.x += currentLevel.player.moveSpeed*dt / 3;
 			}
@@ -154,19 +154,19 @@ void Game::update(double dt) {
 
 	}
 	if (keys[2]) {
-		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != 2) {
+		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != PlayerStatus::Heavy) {
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.isStanding = false;
             currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
-		else if (currentLevel.player.status == 1 && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
+		else if (currentLevel.player.status == PlayerStatus::Bouncy && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
 			currentLevel.player.hasExtraJump = false;
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 
-		else if (currentLevel.player.status == 2 && currentLevel.player.isStanding == true) {
+		else if (currentLevel.player.status == PlayerStatus::Heavy && currentLevel.player.isStanding == true) {
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT/2;
 			currentLevel.player.isStanding = false;
             currentLevel.player.gravity = GRAVITY_CONSTANT;
@@ -174,7 +174,7 @@ void Game::update(double dt) {
 		}
 	}
 	if (keys[3]) {
-		if (currentLevel.player.status == 3) 
+		if (currentLevel.player.status == PlayerStatus::Sticky)
 		{
 			currentLevel.player.isStuck = false;
 			if (currentLevel.player.isStanding == false) 
@@ -216,45 +216,45 @@ void Game::updatePlayerCollision()
 	//####################################################################Bottom
 	currentLevel.player.HitboxBottom.center = glm::vec4(
 		currentLevel.player.posCurr.x,
-		currentLevel.player.posCurr.y - 0.5*playerSphere.centerRadius.w,
+		currentLevel.player.posCurr.y - 0.4*playerSphere.centerRadius.w,
 		currentLevel.player.posCurr.z,
 		0);
 	currentLevel.player.HitboxBottom.halfLengths = glm::vec4(
-		playerSphere.centerRadius.w*0.6,
-		playerSphere.centerRadius.w*0.6,
+		playerSphere.centerRadius.w*0.5,
+		playerSphere.centerRadius.w*0.4,
 		playerSphere.centerRadius.w*0.8,
 		0);
 	//####################################################################Top
 	currentLevel.player.HitboxTop.center = glm::vec4(
 		currentLevel.player.posCurr.x,
-		currentLevel.player.posCurr.y + 0.5*playerSphere.centerRadius.w,
+		currentLevel.player.posCurr.y + 0.4*playerSphere.centerRadius.w,
 		currentLevel.player.posCurr.z,
 		0);
 	currentLevel.player.HitboxTop.halfLengths = glm::vec4(
-		playerSphere.centerRadius.w*0.6,
 		playerSphere.centerRadius.w*0.5,
+		playerSphere.centerRadius.w*0.4,
 		playerSphere.centerRadius.w*0.1,
 		0);
 	//####################################################################Left
 	currentLevel.player.HitboxLeft.center = glm::vec4(
-		currentLevel.player.posCurr.x - 0.9*playerSphere.centerRadius.w,
+		currentLevel.player.posCurr.x - 0.5*playerSphere.centerRadius.w,
 		currentLevel.player.posCurr.y,
 		currentLevel.player.posCurr.z,
 		0);
 	currentLevel.player.HitboxLeft.halfLengths = glm::vec4(
-		playerSphere.centerRadius.w*0.3,
+		playerSphere.centerRadius.w*0.2,
 		playerSphere.centerRadius.w*0.8,
 		playerSphere.centerRadius.w*0.1,
 		0);
 
 	//####################################################################Right
 	currentLevel.player.HitboxRight.center = glm::vec4(
-		currentLevel.player.posCurr.x + 0.9*playerSphere.centerRadius.w,
+		currentLevel.player.posCurr.x + 0.5*playerSphere.centerRadius.w,
 		currentLevel.player.posCurr.y,
 		currentLevel.player.posCurr.z,
 		0);
 	currentLevel.player.HitboxRight.halfLengths = glm::vec4(
-		playerSphere.centerRadius.w*0.3,
+		playerSphere.centerRadius.w*0.2,
 		playerSphere.centerRadius.w*0.8,
 		playerSphere.centerRadius.w*0.1,
 		0);

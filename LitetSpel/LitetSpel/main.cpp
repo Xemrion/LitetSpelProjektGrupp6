@@ -151,13 +151,13 @@ void keyboardFunc()
 	{
 		if (powerCoolDown <= 0) 
 		{
-			if (game.currentLevel.player.status == 0)
+			if (game.currentLevel.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = 1;
+				game.currentLevel.player.status = PlayerStatus::Bouncy;
 			}
 			else
 			{
-				game.currentLevel.player.status = 0;
+				game.currentLevel.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -166,13 +166,13 @@ void keyboardFunc()
 	{
 		if (powerCoolDown <= 0)
 		{
-			if (game.currentLevel.player.status == 0)
+			if (game.currentLevel.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = 2;
+				game.currentLevel.player.status = PlayerStatus::Heavy;
 			}
 			else
 			{
-				game.currentLevel.player.status = 0;
+				game.currentLevel.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -181,13 +181,13 @@ void keyboardFunc()
 	{
 		if (powerCoolDown <= 0)
 		{
-			if (game.currentLevel.player.status == 0)
+			if (game.currentLevel.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = 3;
+				game.currentLevel.player.status = PlayerStatus::Sticky;
 			}
 			else
 			{
-				game.currentLevel.player.status = 0;
+				game.currentLevel.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}

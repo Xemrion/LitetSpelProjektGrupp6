@@ -13,6 +13,14 @@ using namespace std;
 
 extern double dt;
 
+enum PlayerStatus 
+{
+	None,
+	Bouncy,
+	Sticky,
+	Heavy
+};
+
 class Player : public IObject {
 public:
     Player( glm::vec3 position = {.0f, .0f, .0f} );
