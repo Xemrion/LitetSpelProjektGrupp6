@@ -38,15 +38,25 @@ public:
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
-//class Platform : public IObject {
-//public:
-//    Box hitbox;
-//    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other );
-//};
+class Enemy : public IObject 
+{
+public:
+	glm::vec3  posPrev, posCurr;
+	float      EmoveSpeed, EjumpSpeed, EjumpCooldown, Egravity;
+	bool enemyStanding, isJumping, canJump;
+	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+
+	Enemy(glm::vec3 position = {-20.0f, 40.0f, 0.0f});
+	virtual ~Enemy();
+	virtual void collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject &other) override;
+	void update();
+	void move();
+};
 
 
 struct LevelData { // POD
     Player         player;
+	Enemy          enemy;
     vector<Box>    boxes;
     vector<Sphere> spheres;
     CollisionManager colManager;
@@ -70,9 +80,11 @@ public:
 	void init();
 	void update(double dt);
 	void updatePlayerCollision();
+	void updateEnemyCollision();
 
 	//float gravity = 50.0f;
 
+	Box EnemyBox;
     Sphere playerSphere;
     Platform groundBox;
 	Platform testPlat;
