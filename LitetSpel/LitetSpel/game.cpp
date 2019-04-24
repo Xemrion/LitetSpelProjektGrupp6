@@ -93,11 +93,11 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 		if (status == 3)
 		{
 			gravity = 0;
-			jumpSpeed = 0;
 			isStuck = true;
+			posCurr.y -= 1;
 		}
 		jumpSpeed = 0;
-		//posCurr.y -= 1;
+		
 	}
 	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_left)
 	{
@@ -179,7 +179,7 @@ void Game::update(double dt) {
 			currentLevel.player.isStuck = false;
 			if (currentLevel.player.isStanding == false) 
 			{
-				currentLevel.player.gravity = GRAVITY_CONSTANT;
+				currentLevel.player.gravity = GRAVITY_CONSTANT*2;
 			}
 		}
 	}
