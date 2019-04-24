@@ -24,7 +24,6 @@ void Blob::move(float dt)
 		this->blobSphere.centerRadius = glm::vec4(
 			pos,
 			radius);
-	//AA
 	}
 	else if (this->isBeingRecalled)
 	{
