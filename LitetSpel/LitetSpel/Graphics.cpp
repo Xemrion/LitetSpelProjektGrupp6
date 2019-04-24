@@ -787,11 +787,23 @@ Graphics::~Graphics()
 	SAFE_RELEASE(debugger);
 	SAFE_RELEASE(backBufferView);
 	SAFE_RELEASE(depthStencilView);
+	SAFE_RELEASE(depthResourceView);
+	SAFE_RELEASE(geometryResourceView);
+	SAFE_RELEASE(samplerState);
 
 	SAFE_RELEASE(vertexShader);
 	SAFE_RELEASE(pixelShader);
+	SAFE_RELEASE(boxRasterVertexShader);
+	SAFE_RELEASE(boxRasterPixelShader);
+	
 	SAFE_RELEASE(quadVertexLayout);
 	SAFE_RELEASE(quadBuffer);
+	SAFE_RELEASE(vertexLayout);
+	SAFE_RELEASE(boxVertexBuffer);
 	SAFE_RELEASE(boxTransformBuffer);
 	SAFE_RELEASE(metaballBuffer);
+	SAFE_RELEASE(viewProjBuffer);
+	SAFE_RELEASE(cameraBuffer);
+	SAFE_RELEASE(cornerBuffer);
+
 }
