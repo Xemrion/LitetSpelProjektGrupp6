@@ -103,10 +103,11 @@ void Player::update() {
 			blobs[i].blobSphere.centerRadius = glm::vec4(posCurr, 2);
 		}
 		blobs[i].move(dt);
-
+	}
 }
 
-void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {
+void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) 
+{
 	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_bottom or otherHitbox == CollisionId::enemy_top && ownHitbox == CollisionId::player_bottom)
 	{
 		this->isStanding = true;
