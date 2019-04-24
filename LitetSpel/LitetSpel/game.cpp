@@ -48,7 +48,7 @@ Player::Player( glm::vec3 position ):
     hasExtraJump (true),
     isStanding   (false),
 	isStuck      (false),
-    status       (0) // TODO: enum!
+    status       (PlayerStatus::None) // TODO: enum!
 {
     // skapa fyra hitboxar
 }
@@ -129,7 +129,7 @@ void Game::update(double dt) {
 		{
 			if (currentLevel.player.status == PlayerStatus::Heavy) {
 				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
-				currentLevel.player.posCurr.x = currentLevel.player.moveSpeed*dt / 3;
+				currentLevel.player.posCurr.x -= currentLevel.player.moveSpeed*dt / 3;
 			}
 			else {
 				//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
