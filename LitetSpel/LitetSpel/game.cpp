@@ -41,7 +41,7 @@ Player::Player( glm::vec3 position ):
     IObject(),
     posPrev      (position),
     posCurr      (position),
-    moveSpeed    (10.0f),
+    moveSpeed    (0.0f),
     jumpSpeed    (.0f),
     jumpCooldown (.0f),
     gravity      (GRAVITY_CONSTANT),
@@ -123,6 +123,8 @@ void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &o
 }
 
 void Game::update(double dt) {
+	time += dt;
+	currentLevel.player.moveSpeed = 0.0f;
 	if (keys[0]) {
 		currentLevel.player.moveSpeed = 100.0f;
 		if (currentLevel.player.isStuck == false)
@@ -198,6 +200,38 @@ void Game::update(double dt) {
 	currentLevel.spheres = vector<Sphere>();
 	currentLevel.spheres.push_back(playerSphere);
 
+	/*** Animation of orbiting spheres ***/
+	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
+	// Offset the start rotation of the spheres to avoid them all starting at the same place
+	glm::vec3 offset = glm::vec3(0.2, 0.0, 0.0);
+	// Multiplier to animate faster when moving a certain direction. Not smooth.
+	glm::vec2 movementMultiplier = glm::vec2(
+		glm::clamp(abs(currentLevel.player.moveSpeed), 1.0f, 5.0f), 
+		glm::clamp(currentLevel.player.jumpSpeed, 1.0f, 2.0f)
+	);
+
+	// How far the spheres move away from the original sphere. Careful with the z axis, it can cause graphical glitches if it is too big
+	glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8);
+
+	Sphere playerSphere2;
+	playerSphere2.centerRadius = glm::vec4(
+		playerSphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,
+		playerSphere.centerRadius.y + sin(time * (rotationSpeed.y * movementMultiplier.y) + offset.y) * amplitude.y,
+		playerSphere.centerRadius.z + sin(time * rotationSpeed.z + offset.z) * amplitude.z,
+		2.5
+	);
+	currentLevel.spheres.push_back(playerSphere2);
+
+	offset = glm::vec3(0.45, 0.9, 1.1);
+	Sphere playerSphere3;
+	playerSphere3.centerRadius = glm::vec4(
+		playerSphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,
+		playerSphere.centerRadius.y + sin(time * (rotationSpeed.y * movementMultiplier.y) + offset.y) * amplitude.y,
+		playerSphere.centerRadius.z + sin(time * rotationSpeed.z + offset.z) * amplitude.z,
+		2.5
+	);
+	currentLevel.spheres.push_back(playerSphere3);
+	/*** ***/
 	
 	currentLevel.player.isStanding = false;
     currentLevel.colManager.update();
