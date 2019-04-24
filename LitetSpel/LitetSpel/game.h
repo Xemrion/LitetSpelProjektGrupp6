@@ -80,6 +80,7 @@ struct LevelData { // POD
 class Game {
 private:
 public:
+	double time = 0.0;
 	//left/right/up/down
 	bool keys[4];
 	LevelData currentLevel;
@@ -91,6 +92,8 @@ public:
 	void update(double dt);
 	void updatePlayerCollision();
 	void updateEnemyCollision();
+
+	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed);
 
 	//float gravity = 50.0f;
 

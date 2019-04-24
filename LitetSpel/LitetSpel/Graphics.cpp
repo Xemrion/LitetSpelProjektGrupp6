@@ -319,7 +319,7 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(Sphere) * 6;
+	constBufferDesc.ByteWidth = sizeof(Sphere) * 15 + sizeof(glm::vec4);
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &metaballBuffer);
@@ -652,18 +652,20 @@ void Graphics::queueBoxes(vector<Box> boxes)
 
 	struct Transforms {
 		glm::mat4 WVP[100];
+		glm::vec4 color[100];
 	} transforms;
-	memset(&transforms, 0, sizeof(glm::mat4) * 100);
+	memset(&transforms, 0, sizeof(glm::mat4) * 100 + sizeof(glm::vec4) * 100);
 
 	for (int i = 0; i < boxes.size(); ++i)
 	{
 		glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
 		t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
 		transforms.WVP[i] = transpose(t) * viewProj;
+		transforms.color[i] = boxes[i].color;
 	}
 
 	deviceContext->Map(boxTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, &transforms, sizeof(glm::mat4) * 100);
+	memcpy(mr.pData, &transforms, sizeof(Transforms));
 	deviceContext->Unmap(boxTransformBuffer, 0);
 
 	boxInstances = boxes.size();
@@ -673,10 +675,21 @@ void Graphics::queueMetaballs(vector<Sphere> metaballs)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-
+	struct MetaballStruct {
+		Sphere spheres[15];
+		glm::vec4 color;
+	} metaballStruct;
+	ZeroMemory(metaballStruct.spheres, sizeof(Sphere) * 15);
+	memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(15, (int)metaballs.size()));
+	metaballStruct.color = metaballColor;
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, metaballs.data(), sizeof(Sphere) * metaballs.size());
+	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * 15 + sizeof(glm::vec4));
 	deviceContext->Unmap(metaballBuffer, 0);
+}
+
+void Graphics::setMetaballColorAbsorb(glm::vec3 colorAbsorb)
+{
+	metaballColor = glm::vec4(colorAbsorb, 0.0);
 }
 
 void Graphics::setCameraPos(glm::vec3 pos)
@@ -774,11 +787,23 @@ Graphics::~Graphics()
 	SAFE_RELEASE(debugger);
 	SAFE_RELEASE(backBufferView);
 	SAFE_RELEASE(depthStencilView);
+	SAFE_RELEASE(depthResourceView);
+	SAFE_RELEASE(geometryResourceView);
+	SAFE_RELEASE(samplerState);
 
 	SAFE_RELEASE(vertexShader);
 	SAFE_RELEASE(pixelShader);
+	SAFE_RELEASE(boxRasterVertexShader);
+	SAFE_RELEASE(boxRasterPixelShader);
+	
 	SAFE_RELEASE(quadVertexLayout);
 	SAFE_RELEASE(quadBuffer);
+	SAFE_RELEASE(vertexLayout);
+	SAFE_RELEASE(boxVertexBuffer);
 	SAFE_RELEASE(boxTransformBuffer);
 	SAFE_RELEASE(metaballBuffer);
+	SAFE_RELEASE(viewProjBuffer);
+	SAFE_RELEASE(cameraBuffer);
+	SAFE_RELEASE(cornerBuffer);
+
 }

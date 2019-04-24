@@ -12,6 +12,7 @@ public:
 
 class Box {
 public:
-	glm::vec4  center;
-	glm::vec4  halfLengths;
+	glm::vec4 center;
+	glm::vec4 halfLengths;
+	glm::vec4 color;
 };
