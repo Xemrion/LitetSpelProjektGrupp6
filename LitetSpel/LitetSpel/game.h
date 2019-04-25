@@ -78,6 +78,11 @@ struct LevelData { // POD
     //}
 };
 
+struct SFX {
+	char* fileName;
+	IDirectSoundBuffer8* soundBuffer;
+};
+
 class Game {
 private:
 public:
@@ -107,7 +112,3 @@ public:
 };
 
 
-struct SFX {
-	char* fileName;
-	IDirectSoundBuffer8* soundBuffer;
-};
