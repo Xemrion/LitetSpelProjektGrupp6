@@ -56,7 +56,7 @@ void CollisionManager::unregister_entry( IObject const &parent ) noexcept {
     auto const    &s = a.centerRadius;
 
     // box center
-    auto bc = glm::vec2( b.center.x, -b.center.y );
+    auto bc = glm::vec2( b.center.x, b.center.y );
 
     auto constexpr sqr = []( auto n ) { return n*n; }; // TODO: use std or ppm
     // distance between box and sphere centers
