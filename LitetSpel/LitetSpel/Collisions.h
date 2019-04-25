@@ -198,7 +198,8 @@ enum CollisionId { player_top,
                    wall,
                    powerup_bouncy,
                    powerup_sticky,
-                   powerup_heavy
+                   powerup_heavy,
+                   level_goal
                    /* TODO: populate */ };
 
 // TODO: refactor into more suitable header/source?

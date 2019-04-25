@@ -6,12 +6,28 @@
 #include <vector>
 #include "Geometry.h"
 #include "Collisions.h"
-#include  "Platform.h"
+#include "Platform.h"
+#include <functional>
 
-using namespace std;
-
+using namespace std; // usch
 
 extern double dt;
+
+
+
+class LevelGoal : public IObject {
+public:
+    using TriggerCallback = std::function<void(void)>;
+    LevelGoal( CollisionManager &colManager, Box bounds, TriggerCallback cb=[](){} );
+    virtual ~LevelGoal() {}
+    virtual void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override;
+private:
+//  auto             _representation; // TODO
+    Box              _bounds;
+    TriggerCallback  _triggerCallback;
+};
+
+
 
 class Player : public IObject {
 public:
@@ -35,7 +51,13 @@ public:
 //};
 
 
-struct LevelData { // POD
+class Level { // POD
+
+public:
+    Level( glm::vec3 startPos = { .0f, .0f, .0f } ):
+        player ( startPos )
+    {}
+
     Player         player;
     vector<Box>    boxes;
     vector<Sphere> spheres;
@@ -55,7 +77,7 @@ private:
 public:
 	//left/right/up/down
 	bool keys[4];
-	LevelData currentLevel;
+	Level currentLevel { { .0f, .0f, .0f } };
 	
 	void init();
 	void update(double dt);

@@ -1,6 +1,33 @@
 #include "game.h"
 #define GRAVITY_CONSTANT -50.0f
 
+
+
+LevelGoal::LevelGoal( CollisionManager &colManager, Box bounds, TriggerCallback cb ):
+    _bounds(bounds),
+    _triggerCallback(cb)
+{
+    colManager.register_entry(*this, CollisionId::level_goal, _bounds, true );
+}
+
+void LevelGoal::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {
+    if (    otherHitbox == player_top
+         or otherHitbox == player_bottom
+         or otherHitbox == player_left
+         or otherHitbox == player_right)
+    {
+        _triggerCallback();
+        // TODO:
+        //    tone and blur screen?
+        //    display text?
+        //    wait for input?
+        //    load next level?
+    }
+}
+
+
+
+
 void Game::init() {
     groundBox.hitbox.center = glm::vec4(-10, -30, 10, 0);
     groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);

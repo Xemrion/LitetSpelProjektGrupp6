@@ -114,26 +114,34 @@ void CollisionManager::update() { /// yay for combinatoric explosions /s
         // test against all mobile hitspheres (that belong to another object)
         for ( auto &other : _mobileSpheres ) {
             auto &otherObject = *(other.object);
-            if ( mObject != otherObject  and  intersect( m.hitsphere, other.hitsphere ) )
+            if ( mObject != otherObject  and  intersect( m.hitsphere, other.hitsphere ) ) {
                 mObject.collide( m.id, other.id, otherObject );
+                otherObject.collide( other.id, m.id, *(m.object) );
+            }
         }
         // test against all mobile hitboxes (that belong to another object)
         for ( auto &other : _mobileBoxes ) {
             auto &otherObject = *(other.object);
-            if ( *(m.object) != otherObject  and  intersect( m.hitsphere, other.hitbox ) )
+            if ( *(m.object) != otherObject  and  intersect( m.hitsphere, other.hitbox ) ) {
                 mObject.collide( m.id, other.id, otherObject );
+                otherObject.collide( other.id, m.id, *(m.object) );
+            }
         }
         // test against all static environment hitspheres
         for ( auto &environment : _staticSpheres ) {
             auto &environmentObject = *(environment.object);
-            if ( intersect(m.hitsphere, environment.hitsphere ) )
+            if ( intersect(m.hitsphere, environment.hitsphere ) ) {
                 mObject.collide( m.id, environment.id, *(environment.object) );
+                environmentObject.collide( environment.id, m.id, *(m.object) );
+            }
         }
         // test against all static environment hitboxes
         for ( auto &environment : _staticBoxes ) {
             auto &environmentObject = *(environment.object);
-            if ( intersect( m.hitsphere, environment.hitbox ) )
+            if ( intersect( m.hitsphere, environment.hitbox ) ) {
                 mObject.collide( m.id, environment.id, *(environment.object) );
+                environmentObject.collide( environment.id, m.id, *(m.object) );
+            }
         }
     }
 }
