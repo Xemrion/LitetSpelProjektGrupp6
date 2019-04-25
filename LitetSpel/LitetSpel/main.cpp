@@ -244,6 +244,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		
 	}
 
-
+	gameSounds.Shutdown();
 	return 0;
 }

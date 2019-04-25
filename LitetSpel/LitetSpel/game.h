@@ -105,7 +105,7 @@ public:
 	Platform testPlat;
 	Platform testplat2;
 };
-};
+
 
 struct SFX {
 	char* fileName;

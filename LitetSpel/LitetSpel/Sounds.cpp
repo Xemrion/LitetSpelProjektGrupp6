@@ -42,7 +42,6 @@ void Sounds::Shutdown() {
 
 	if (fileName != nullptr) {
 		delete fileName;
-		fileName = nullptr;
 	}
 }
 
@@ -235,7 +234,6 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 	}
 
 	delete[]waveData;
-	waveData = nullptr;
 
 	return true;
 }
