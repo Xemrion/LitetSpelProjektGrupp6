@@ -491,7 +491,7 @@ void Enemy::move()
 }
 
 //Adds two orbiting spheres around a sphere for animation
-void Game::addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed) {
+void Game::addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude) {
 	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
 	// Offset the start rotation of the spheres to avoid them all starting at the same place
 	glm::vec3 offset = glm::vec3(0.2, 0.0, 0.0);
@@ -501,8 +501,7 @@ void Game::addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed) {
 		glm::clamp(abs(moveSpeed.y), 1.0f, 2.0f)
 	);
 
-	// How far the spheres move away from the original sphere. Careful with the z axis, it can cause graphical glitches if it is too big
-	glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8);
+	
 
 	Sphere sphere1(glm::vec4(
 		sphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,

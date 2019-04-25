@@ -645,7 +645,7 @@ HRESULT Graphics::createBoxData()
 	return hr;
 }
 
-void Graphics::queueBoxes(vector<Box> boxes)
+void Graphics::setBoxes(vector<Box> boxes)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -671,7 +671,7 @@ void Graphics::queueBoxes(vector<Box> boxes)
 	boxInstances = boxes.size();
 }
 
-void Graphics::queueMetaballs(vector<Sphere> metaballs)
+void Graphics::setMetaballs(vector<Sphere> metaballs)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -805,5 +805,4 @@ Graphics::~Graphics()
 	SAFE_RELEASE(viewProjBuffer);
 	SAFE_RELEASE(cameraBuffer);
 	SAFE_RELEASE(cornerBuffer);
-
 }

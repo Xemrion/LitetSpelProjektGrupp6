@@ -93,7 +93,7 @@ public:
 	void updatePlayerCollision();
 	void updateEnemyCollision();
 
-	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed);
+	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8));
 
 	//float gravity = 50.0f;
 
