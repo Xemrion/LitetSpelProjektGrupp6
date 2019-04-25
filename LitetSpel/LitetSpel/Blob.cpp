@@ -14,19 +14,19 @@ Blob::Blob(glm::vec3 pos)
 		pos,
 		radius);
 	this->pos = pos;
+	this->status = BlobStatus::Passive;
 }
 void Blob::move(float dt)
 {
-	if (this->isActive)
+	if (this->status == BlobStatus::Active)
 	{
 		dir -= glm::vec3(1, 60, 0) * fallSpeed * dt;
 		pos += dir * speed * dt;
 		this->blobSphere.centerRadius = glm::vec4(
 			pos,
 			radius);
-	//AA
 	}
-	else if (this->isBeingRecalled)
+	else if (this->status == BlobStatus::BeingRecalled)
 	{
 		pos += dir * recallSpeed * dt;
 		this->blobSphere.centerRadius = glm::vec4(

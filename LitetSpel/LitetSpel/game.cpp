@@ -92,15 +92,15 @@ void Player::update() {
 	}
 	for (int i = 0; i < blobs.size(); i++)
 	{
-		if (blobs[i].isBeingRecalled)
+		if (blobs[i].status == BlobStatus::BeingRecalled)
 		{
 			blobs[i].setDir(glm::normalize(posCurr - blobs[i].pos));
 			if (glm::length((posCurr - blobs[i].pos)) < 0.2f)
 			{
-				blobs[i].isBeingRecalled = false;
+				blobs[i].status = BlobStatus::Passive;
 			}
 		}
-		else if (!blobs[i].isActive)
+		else if (blobs[i].status == BlobStatus::Passive)
 		{
 			blobs[i].pos = posCurr;
 			blobs[i].blobSphere.centerRadius = glm::vec4(posCurr, 2);
@@ -280,10 +280,10 @@ void Player::shoot(glm::vec3 mousePos)
 	glm::vec3 dir = glm::normalize(mousePos - posCurr);
 	for (int i = 0; i < blobs.size(); i++)
 	{
-		if (!blobs[nrOfActiveBlobs + i].isBeingRecalled)
+		if (blobs[nrOfActiveBlobs + i].status != BlobStatus::BeingRecalled)
 		{
 			blobs[nrOfActiveBlobs + i].setDir(dir);
-			blobs[nrOfActiveBlobs + i].isActive = true;
+			blobs[nrOfActiveBlobs + i].status = BlobStatus::Active;
 			shootCooldown = 0.5f;
 			nrOfActiveBlobs++;
 			break;
@@ -295,8 +295,7 @@ void Player::recallBlobs()
 {
 	for (int i = 0; i < nrOfActiveBlobs; i++)
 	{
-		blobs[i].isActive = false;
-		blobs[i].isBeingRecalled = true;
+		blobs[i].status = BlobStatus::BeingRecalled;
 	}
 	shootCooldown = 0.5f;
 	nrOfActiveBlobs = 0;
