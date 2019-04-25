@@ -37,18 +37,18 @@ public:
     void update();
     [[nodiscard]] glm::vec3 const& getPosition() const noexcept;
     // TODO: accessors & mutations; refactor Player logic into >>Player<<; refactor member privacy
-    glm::vec3  posPrev, posCurr;
+    glm::vec3  posPrev, pos;
     float      moveSpeed, jumpSpeed, jumpCooldown, gravity;
     bool       hasExtraJump, isStanding, isStuck;
     int        status; // TODO: enum!  powerup indicator: 0 = none |1 = bouncy |2 = heavy |3 = Sticky
-
+	double radius = 5.0;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
 class Enemy : public IObject 
 {
 public:
-	glm::vec3  posPrev, posCurr;
+	glm::vec3  posPrev, pos;
 	float      EmoveSpeed, EjumpSpeed, EjumpCooldown, Egravity;
 	bool enemyStanding, isJumping, canJump;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;

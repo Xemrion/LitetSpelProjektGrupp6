@@ -7,7 +7,7 @@
 
 class Blob {
 private:
-	float speed = 150.0f;
+	float speed = 50.0f;
 	float recallSpeed = 200.0f;
 	float fallSpeed = 0.01f;
 	float radius = 2;
