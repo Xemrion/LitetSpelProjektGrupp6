@@ -20,11 +20,11 @@ results = InitializeDirectSound(handle);
 if (results == false) {
 	return false;
 }
+name = "sound02.wav";
+fileName = new char[name.size()];
+fileName = name.data();
 
-char* temp;
-temp = (char*)"../SFX/sound01.wav";
-
-results = LoadWaveFile(temp, &secondBuffer);
+results = LoadWaveFile(fileName, &secondBuffer);
 if(results == false){
 	return false;
 }
@@ -33,13 +33,17 @@ results = PlayWaveFile(secondBuffer);
 if (results == false) {
 	return false;
 }
-delete temp;
 
 return true;
 }
 void Sounds::Shutdown() {
 	ShutdownWaveFile(&secondBuffer);
 	ShutdownDirectSound();
+
+	if (fileName != nullptr) {
+		delete fileName;
+		fileName = nullptr;
+	}
 }
 
 bool Sounds::LoadWaveToBuffer(char* fileName, IDirectSoundBuffer8** soundBuffer) {
@@ -144,7 +148,7 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 	}
 
 	if ((waveFileHeader.subChunkId[0] != 'f') || (waveFileHeader.subChunkId[1] != 'm') ||
-		(waveFileHeader.subChunkId[2] != 't') || (waveFileHeader.subChunkId[3] != '\0'))
+		(waveFileHeader.subChunkId[2] != 't'))
 	{
 		return false;
 	}
@@ -153,7 +157,7 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 		return false;
 	}
 
-	if (waveFileHeader.numChannels = 2) {
+	if (waveFileHeader.numChannels != 2) {
 		return false;
 	}
 
@@ -191,7 +195,7 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 		return false;
 	}
 
-	hr = temp->QueryInterface(IID_IDirectSoundBuffer8, (void**)&*secondBuffer);
+	hr = temp->QueryInterface(IID_IDirectSoundBuffer8, (void**)&secondBuffer);
 	if (FAILED(hr)) {
 		return false;
 	}

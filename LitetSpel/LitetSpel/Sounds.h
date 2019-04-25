@@ -9,6 +9,7 @@
 #include<mmsystem.h>
 #include<dsound.h>
 #include<stdio.h>
+#include<string>
 
 class Sounds
 {
@@ -49,6 +50,9 @@ private:
 
 	IDirectSound8* directSound;
 	IDirectSoundBuffer* firstBuffer;
+
+	std::string name;
+	char* fileName;
 	IDirectSoundBuffer8* secondBuffer;
 };
 
