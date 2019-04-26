@@ -8,6 +8,12 @@
 constexpr bool debugCollisions = true;
 #include <cstdio>
 
+
+float     lerp( float src, float dest, float fac ) noexcept;
+glm::vec4 lerp( glm::vec4 const &src, glm::vec4 const &dest, float fac ) noexcept;
+Box       lerp( Box const &src, Box const &dest, float fac ) noexcept;
+Sphere    lerp( Sphere const &src, Sphere const &dest, float fac ) noexcept;
+
 // use case example:
 //
 // virtual void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override {
@@ -231,20 +237,68 @@ private:
 };
 
 class CollisionManager {
+    // step amount of the linear interpolation factor                                          
+    static float constexpr lerpFacStep = .1f;
+
 public:
+    using Ruleset = std::vector<CollisionId>;
+
     CollisionManager();
 
     // registers a new hitbox
     void register_entry( IObject &parent, CollisionId id,    Box const &hitbox,    bool is_static ) noexcept; // call from object constructor
     void register_entry( IObject &parent, CollisionId id, Sphere const &hitsphere, bool is_static ) noexcept; // call from object constructor
-
     void unregister_entry( IObject const &parent ) noexcept;
 
+    // tests whether the bounding box 'bounds' would be valid for object 'obj'
+    // in accordance to the bounds ruleset 'rules' (list of invalidating CollisionIds)
+    bool test( IObject const &obj,
+               Box     const &bounds,
+               Ruleset const &rules ) const noexcept
+    {
+        for ( auto const &e : _mobileBoxes )
+            if ( *(e.object) != obj && intersects(e.hitbox,    &bounds) )
+                return true;
+        for ( auto const &e : _mobileSpheres )
+            if ( *(e.object) != obj && intersects(e.hitsphere, &bounds) )
+                return true;
+        for ( auto const &e : _staticBoxes )
+            if ( *(e.object) != obj && intersects(e.hitbox,    &bounds) )
+                return true;
+        for ( auto const &e : _staticSpheres )
+            if ( *(e.object) != obj && intersects(e.hitsphere, &bounds) )
+                return true;
+        return false;
+    }
+
+    // args: obj       the moving object (needed to eliminate self-collisions)
+    //       src       current position; might be mutated
+    //       dest      target position
+    //       blockers  list of types of colliders that block movement
+    //
+    // pre-conditions:
+    //       the source 'src' must be valid
+    //
+    // side-effects:
+    //       mutates 'src' to the best match found
+    template <typename Geometry> // Box or Sphere
+    void move( IObject  const &obj,
+               Geometry       &src,
+               Geometry const &dest,
+               Ruleset  const &blockers ) const noexcept
+    {
+        for ( float fac = .0f;  fac <= 1.0f;  fac += lerpFacStep ) { 
+            Geometry test = lerp( src, dest, fac );
+            if ( test(obj, test, blockers) )
+                src = test;
+        }
+    }
+
     // evaluates whether two hitboxes are intersecting or not
-    [[nodiscard]]        bool intersect(    Box const *a,    Box const *b ) noexcept;
-    [[nodiscard]]        bool intersect( Sphere const *a,    Box const *b ) noexcept;
-    [[nodiscard]] inline bool intersect(    Box const *a, Sphere const *b ) noexcept;
-    [[nodiscard]]        bool intersect( Sphere const *a, Sphere const *b ) noexcept;
+    [[nodiscard]]        bool intersects(    Box const * const a,    Box const * const b ) const noexcept;
+    [[nodiscard]]        bool intersects( Sphere const * const a,    Box const * const b ) const noexcept;
+    [[nodiscard]] inline bool intersects(    Box const * const a, Sphere const * const b ) const noexcept;
+    [[nodiscard]]        bool intersects( Sphere const * const a, Sphere const * const b ) const noexcept;
 
     // checks if any of the mobiles have collided,
     // and if so, notifies them with the relevant information
