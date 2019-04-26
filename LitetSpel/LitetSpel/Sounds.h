@@ -57,6 +57,14 @@ private:
 	IDirectSoundBuffer8* secondBuffer;
 	IDirectSoundBuffer8* jump;
 	//Sounds to add
+	/*
+	More jump sounds
+	Landing
+	Shooting blobs, recalling
+	Enemy jump
+	Music?
+	Ambient sound?
+	*/
 };
 
 #endif // !SOUNDS_H
