@@ -439,29 +439,31 @@ Enemy::~Enemy(){}
 
 void Enemy::collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject & other)
 {
-	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_bottom)
-	{
-		this->enemyStanding = true;
-		this->isJumping = false;
-		this->canJump = true;
-		if(EmoveSpeed == 0.0f)
+	if (CollisionId::platform) {
+		if (ownHitbox == CollisionId::enemy_bottom)
 		{
-			EmoveSpeed = 20.0f;
+			this->enemyStanding = true;
+			this->isJumping = false;
+			this->canJump = true;
+			if (EmoveSpeed == 0.0f)
+			{
+				EmoveSpeed = 20.0f;
+			}
 		}
-	}
-	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_top)
-	{
-		this->EjumpSpeed = 0;
-	}
-	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_left)
-	{
-		//this->posCurr.x += EmoveSpeed * dt;
-		EmoveSpeed = EmoveSpeed * -1;
-	}
-	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_right)
-	{
-		//this->posCurr.x -= EmoveSpeed * dt;
-		EmoveSpeed = EmoveSpeed * -1;
+		else if (ownHitbox == CollisionId::enemy_top)
+		{
+			this->EjumpSpeed = 0;
+		}
+		else if (ownHitbox == CollisionId::enemy_left)
+		{
+			//this->posCurr.x += EmoveSpeed * dt;
+			EmoveSpeed = EmoveSpeed * -1;
+		}
+		else if (ownHitbox == CollisionId::enemy_right)
+		{
+			//this->posCurr.x -= EmoveSpeed * dt;
+			EmoveSpeed = EmoveSpeed * -1;
+		}
 	}
 }
 
