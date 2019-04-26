@@ -645,7 +645,7 @@ HRESULT Graphics::createBoxData()
 	return hr;
 }
 
-void Graphics::setBoxes(vector<Box> boxes)
+void Graphics::setBoxes(const vector<Box>& boxes)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
@@ -671,7 +671,7 @@ void Graphics::setBoxes(vector<Box> boxes)
 	boxInstances = boxes.size();
 }
 
-void Graphics::setMetaballs(vector<Sphere> metaballs)
+void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));

@@ -1,6 +1,6 @@
 #include "game.h"
 #define GRAVITY_CONSTANT -200.0f
-#define JUMP_CONSTANT 1.5f
+#define JUMP_CONSTANT 0.012f
 #define COOLDOWN_CONSTANT 0.3f
 
 void Game::init() {
@@ -42,6 +42,7 @@ void Game::init() {
 	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_left, currentLevel.enemy.HitboxLeft, false);
 	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_right, currentLevel.enemy.HitboxRight, false);
 
+	EnemyBox.color = glm::vec4(1,0,0,0);
 }
 
 
@@ -158,7 +159,6 @@ void Game::update(double dt) {
 	{
 		currentLevel.player.shoot(mousePos);
 	}
-	time += dt;
 	currentLevel.player.moveSpeed = 0.0f;
 	if (keys[0]) {
 		currentLevel.player.moveSpeed = 100.0f;
@@ -225,13 +225,8 @@ void Game::update(double dt) {
 		keys[i] = false;
 	}
 	// gravity
-	currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (currentLevel.player.gravity * float(dt)) / 100;
-	currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
-
-	currentLevel.enemy.EjumpSpeed = currentLevel.enemy.EjumpSpeed + (currentLevel.enemy.Egravity * float(dt)) / 100;
-	currentLevel.enemy.pos.y += currentLevel.enemy.EjumpSpeed;
-
-
+	updatePhysics(dt);
+	time += dt;
 
 	currentLevel.spheres = vector<Sphere>();
 	currentLevel.boxes = vector<Box>();
@@ -264,8 +259,6 @@ void Game::update(double dt) {
 	addSphereAnimation(playerSphere, glm::vec2(currentLevel.player.moveSpeed, currentLevel.player.jumpSpeed));
 	
 	currentLevel.player.isStanding = false;
-	currentLevel.colManager.update();
-	currentLevel.player.update();
 	for (int i = 0; i < currentLevel.player.blobs.size(); i++)
 	{
 		currentLevel.spheres.push_back(currentLevel.player.blobs[i].blobSphere);
@@ -279,6 +272,19 @@ void Game::update(double dt) {
 	//currentLevel.player.moveSpeed = 0;
 	currentLevel.player.jumpCooldown -= dt;
 }
+
+void Game::updatePhysics(double dt) {
+	float timestep = 0.0001f;
+	float invTimestep = 1.0 / timestep;
+	for (float i = (float)floor(time * invTimestep) * timestep; i < time + dt; i += timestep) {
+		currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (currentLevel.player.gravity * timestep) * 0.0001;
+		currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
+
+		currentLevel.enemy.EjumpSpeed = currentLevel.enemy.EjumpSpeed + (currentLevel.enemy.Egravity * timestep) * 0.0001;
+		currentLevel.enemy.pos.y += currentLevel.enemy.EjumpSpeed;
+	}
+}
+
 void Player::shoot(glm::vec3 mousePos)
 {
 	mousePos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
@@ -479,11 +485,10 @@ void Enemy::update()
 void Enemy::move()
 {
 	pos.x += EmoveSpeed * dt;
-	pos.y += EjumpSpeed * dt;
 	if (enemyStanding == false && isJumping == false && canJump == true) 
 	{
 		EmoveSpeed = EmoveSpeed * -1;
-		EjumpSpeed = 0.5f;
+		EjumpSpeed = JUMP_CONSTANT / 2;
 		enemyStanding = false;
 		isJumping = true;
 		canJump = false;
@@ -500,8 +505,6 @@ void Game::addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 ampl
 		glm::clamp(abs(moveSpeed.x), 1.0f, 5.0f),
 		glm::clamp(abs(moveSpeed.y), 1.0f, 2.0f)
 	);
-
-	
 
 	Sphere sphere1(glm::vec4(
 		sphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,
