@@ -212,7 +212,6 @@ void Player::recallBlobs()
 
 void Game::update(double dt) {
 
-	time += dt;
 	playerMovement();
 	updateGrapics();
 	updatePhysics(dt);
@@ -223,7 +222,7 @@ void Game::update(double dt) {
 	currentLevel.player.update();
 
 	updatePlayerCollision();
-	updateEnemyCollision();
+	
 
 	if (currentLevel.player.status != PlayerStatus::Sticky && currentLevel.player.isStuck == true)
 	{
@@ -232,6 +231,7 @@ void Game::update(double dt) {
 
 	if (currentLevel.enemy.isDead == false)
 	{
+		updateEnemyCollision();
 		currentLevel.enemy.update();
 	}
 
@@ -241,19 +241,17 @@ void Game::update(double dt) {
 		currentLevel.enemy.isDeregistered = true;
 	}
 
-
-	
-
-	//currentLevel.player.moveSpeed = 0;
 	currentLevel.player.jumpCooldown -= dt;
 	currentLevel.player.shootCooldown -= dt;
+	//currentLevel.player.moveSpeed = 0;
 }
 
 void Game::updatePhysics(double dt) {
 	float timestep = 0.0001f;
 	float invTimestep = 1.0 / timestep;
 	for (float i = (float)floor(time * invTimestep) * timestep; i < time + dt; i += timestep) {
-		currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (currentLevel.player.gravity * timestep) * 0.0001;
+		// gravity
+		currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (currentLevel.player.gravity * timestep) * 0.0001f;
 		currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
 		if (currentLevel.enemy.isDead == false) 
 		{
@@ -327,7 +325,10 @@ void Game::updateEnemyCollision()
 		3.0,
 		0.0
 	);
-	currentLevel.boxes.push_back(EnemyBox);
+	if (currentLevel.enemy.isDead == false) 
+	{
+		currentLevel.boxes.push_back(EnemyBox);
+	}
 	//####################################################################Bottom
 	currentLevel.enemy.HitboxBottom.center = glm::vec4(
 		currentLevel.enemy.pos.x,
@@ -429,7 +430,7 @@ void Game::playerMovement()
 
 	}
 	if (keys[2]) {
-		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != PlayerStatus::Heavy) {
+		if (currentLevel.player.isStanding == true && currentLevel.player.status != PlayerStatus::Heavy) {
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.isStanding = false;
 			currentLevel.player.gravity = GRAVITY_CONSTANT;
@@ -438,6 +439,7 @@ void Game::playerMovement()
 		else if (currentLevel.player.status == PlayerStatus::Bouncy && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
 			currentLevel.player.hasExtraJump = false;
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
+			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 
@@ -448,13 +450,13 @@ void Game::playerMovement()
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 	}
-	if (keys[3]) {
+	if (keys[3]){
 		if (currentLevel.player.status == PlayerStatus::Sticky)
 		{
 			currentLevel.player.isStuck = false;
 			if (currentLevel.player.isStanding == false)
 			{
-				currentLevel.player.gravity = GRAVITY_CONSTANT * 2;
+				currentLevel.player.gravity = GRAVITY_CONSTANT;
 			}
 		}
 	}
@@ -462,16 +464,12 @@ void Game::playerMovement()
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}
-
-	// gravity
 }
 
 void Game::updateGrapics()
 {
 	currentLevel.spheres = vector<Sphere>();
 	currentLevel.boxes = vector<Box>();
-	currentLevel.player.jumpCooldown -= dt;
-	currentLevel.player.shootCooldown -= dt;
 
 	currentLevel.boxes.push_back(groundBox.hitbox);
 	currentLevel.boxes.push_back(testPlat.hitbox);
