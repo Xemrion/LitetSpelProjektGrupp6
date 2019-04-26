@@ -42,11 +42,25 @@ void Game::init() {
 	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_left, currentLevel.enemy.HitboxLeft, false);
 	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_right, currentLevel.enemy.HitboxRight, false);
 
-	EnemyBox.color = glm::vec4(1,0,0,0);
+	for (int i = 0; i < currentLevel.player.blobCharges; i++)
+	{
+		currentLevel.colManager.register_entry(currentLevel.player.blobs[i], CollisionId::blob_bottom, currentLevel.player.blobs[i].HitboxBottom, false);
+		currentLevel.colManager.register_entry(currentLevel.player.blobs[i], CollisionId::blob_top, currentLevel.player.blobs[i].HitboxTop, false);
+		currentLevel.colManager.register_entry(currentLevel.player.blobs[i], CollisionId::blob_left, currentLevel.player.blobs[i].HitboxLeft, false);
+		currentLevel.colManager.register_entry(currentLevel.player.blobs[i], CollisionId::blob_right, currentLevel.player.blobs[i].HitboxRight, false);
+	}
+
+	EnemyBox.color = glm::vec4(1, 0, 0, 0);
+	currentLevel.enemy.HitboxBottom.color = glm::vec4(0, 0, 1, 0);
+	currentLevel.enemy.HitboxLeft.color = glm::vec4(0, 0, 1, 0);
+	currentLevel.enemy.HitboxRight.color = glm::vec4(0, 0, 1, 0);
+	currentLevel.enemy.HitboxTop.color = glm::vec4(0, 0, 1, 0);
+
+	currentLevel.player.HitboxBottom.color = glm::vec4(0, 1, 1, 0);
+	currentLevel.player.HitboxLeft.color = glm::vec4(0, 1, 1, 0);
+	currentLevel.player.HitboxRight.color = glm::vec4(0, 1, 1, 0);
+	currentLevel.player.HitboxTop.color = glm::vec4(0, 1, 1, 0);
 }
-
-
-
 
 Player::Player(glm::vec3 position) :
 	IObject(),
@@ -66,7 +80,6 @@ Player::Player(glm::vec3 position) :
 
 Player::~Player() {}
 
-
 void Player::move(float dt, glm::vec3 dir) noexcept {
 	// TODO: movea alla player hitboxar
 	posPrev = pos;
@@ -76,7 +89,6 @@ void Player::move(float dt, glm::vec3 dir) noexcept {
 glm::vec3 const& Player::getPosition() const noexcept {
 	return pos;
 }
-
 
 void Player::update() {
 	if (isStanding) {
@@ -107,166 +119,135 @@ void Player::update() {
 			blobs[i].blobSphere.centerRadius = glm::vec4(pos, 2);
 		}
 		blobs[i].move(dt);
+		blobs[i].updateBlobCollisions();
 	}
 }
 
 void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) 
 {
-	if (CollisionId::player_bottom) {
-		if (otherHitbox == CollisionId::platform) {
-			this->isStanding = true;
-		}
+	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_bottom or otherHitbox == CollisionId::enemy_top && ownHitbox == CollisionId::player_bottom)
+	{
+		this->isStanding = true;
+		//this->move(dt, glm::vec3(-0.5f, 0.0f, 0.0f));
 	}
-	else if (CollisionId::player_top) {
-		if (this->status == PlayerStatus::Sticky) {
+	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_top or otherHitbox == CollisionId::enemy_bottom && ownHitbox == CollisionId::player_top)
+	{
+		if (this->status == PlayerStatus::Sticky && otherHitbox != CollisionId::enemy_bottom)
+		{
 			this->gravity = 0;
 			this->isStuck = true;
 			this->pos.y -= 1;
 		}
 		this->jumpSpeed = 0;
+
 	}
-	else if (CollisionId::player_left) {
-		if (otherHitbox == CollisionId::platform) {
-			if (this->status == PlayerStatus::Sticky) {
-				this->gravity = 0;
-				this->jumpSpeed = 0;
-				this->isStuck = true;
-			}
+	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_left or otherHitbox == CollisionId::enemy_right && ownHitbox == CollisionId::player_left)
+	{
+		if (this->status == PlayerStatus::Sticky && this->isStanding == false && otherHitbox != CollisionId::enemy_right)
+		{
+			this->gravity = 0;
+			this->jumpSpeed = 0;
+			this->isStuck = true;
 		}
-		this->pos.x += this->moveSpeed*dt;
-	}
-	else if (CollisionId::player_right) {
-		if (otherHitbox == CollisionId::platform) {
-			if (this->status == PlayerStatus::Sticky) {
-				this->gravity = 0;
-				this->jumpSpeed = 0;
-				this->isStuck = true;
-			}
+		if (this->moveSpeed > 0)
+		{
+			this->pos.x += this->moveSpeed*dt;
 		}
-		this->pos.x -= this->moveSpeed * dt;
+		else
+		{
+			pos.x += 20 * dt;
+		}
+
+
 	}
+	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_right or otherHitbox == CollisionId::enemy_left && ownHitbox == CollisionId::player_right)
+	{
+		if (this->status == PlayerStatus::Sticky && this->isStanding == false && otherHitbox != CollisionId::enemy_left)
+		{
+			this->gravity = 0;
+			this->jumpSpeed = 0;
+			this->isStuck = true;
+		}
+		if (this->moveSpeed > 0)
+		{
+			this->pos.x -= this->moveSpeed*dt;
+		}
+		else
+		{
+			pos.x -= 20 * dt;
+		}
+	}
+}
+
+void Player::shoot(glm::vec3 mousePos)
+{
+	mousePos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
+	glm::vec3 dir = glm::normalize(mousePos - pos);
+	for (int i = 0; i < blobs.size(); i++)
+	{
+		if (!blobs[nrOfActiveBlobs + i].isBeingRecalled)
+		{
+			blobs[nrOfActiveBlobs + i].setMoveSpeed(150.0f);
+			blobs[nrOfActiveBlobs + i].setFallSpeed(0.01f);
+			blobs[nrOfActiveBlobs + i].setDir(dir);
+			blobs[nrOfActiveBlobs + i].isActive = true;
+			shootCooldown = 0.5f;
+			nrOfActiveBlobs++;
+			break;
+		}
+	}
+
+}
+
+void Player::recallBlobs()
+{
+	for (int i = 0; i < nrOfActiveBlobs; i++)
+	{
+		blobs[i].isActive = false;
+		blobs[i].isBeingRecalled = true;
+	}
+	shootCooldown = 0.5f;
+	nrOfActiveBlobs = 0;
 }
 
 void Game::update(double dt) {
 
-	if (leftButtonDown
-		&& currentLevel.player.nrOfActiveBlobs < currentLevel.player.blobCharges
-		&&  currentLevel.player.shootCooldown <= 0)
-	{
-		currentLevel.player.shoot(mousePos);
-	}
-	currentLevel.player.moveSpeed = 0.0f;
-	if (keys[0]) {
-		currentLevel.player.moveSpeed = 100.0f;
-		if (currentLevel.player.isStuck == false)
-		{
-			if (currentLevel.player.status == PlayerStatus::Heavy) {
-				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
-				currentLevel.player.pos.x -= currentLevel.player.moveSpeed*dt / 3;
-			}
-			else {
-				//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
-				currentLevel.player.pos.x -= currentLevel.player.moveSpeed*dt;
-			}
-		}
-
-	}
-	if (keys[1]) {
-		currentLevel.player.moveSpeed = 100.0f;
-		if (currentLevel.player.isStuck == false)
-		{
-			if (currentLevel.player.status == PlayerStatus::Heavy) {
-				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
-				currentLevel.player.pos.x += currentLevel.player.moveSpeed*dt / 3;
-			}
-			else {
-				//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
-				currentLevel.player.pos.x += currentLevel.player.moveSpeed*dt;
-			}
-		}
-
-	}
-	if (keys[2]) {
-		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != PlayerStatus::Heavy) {
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
-			currentLevel.player.isStanding = false;
-			currentLevel.player.gravity = GRAVITY_CONSTANT;
-			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
-		}
-		else if (currentLevel.player.status == PlayerStatus::Bouncy && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
-			currentLevel.player.hasExtraJump = false;
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
-			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
-		}
-
-		else if (currentLevel.player.status == PlayerStatus::Heavy && currentLevel.player.isStanding == true) {
-			currentLevel.player.jumpSpeed = JUMP_CONSTANT / 2;
-			currentLevel.player.isStanding = false;
-			currentLevel.player.gravity = GRAVITY_CONSTANT;
-			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
-		}
-	}
-	if (keys[3]) {
-		if (currentLevel.player.status == PlayerStatus::Sticky)
-		{
-			currentLevel.player.isStuck = false;
-			if (currentLevel.player.isStanding == false)
-			{
-				currentLevel.player.gravity = GRAVITY_CONSTANT * 2;
-			}
-		}
-	}
-
-	for (int i = 0; i < 4; ++i) {
-		keys[i] = false;
-	}
-	// gravity
+	playerMovement();
+	updateGrapics();
 	updatePhysics(dt);
 	time += dt;
 
-	currentLevel.spheres = vector<Sphere>();
-	currentLevel.boxes = vector<Box>();
-	currentLevel.player.jumpCooldown -= dt;
-	currentLevel.player.shootCooldown -= dt;
-
-	currentLevel.boxes.push_back(groundBox.hitbox);
-	currentLevel.boxes.push_back(testPlat.hitbox);
-	currentLevel.boxes.push_back(testplat2.hitbox);
+	
 	updatePlayerCollision();
 	updateEnemyCollision();
-	//currentLevel.boxes.push_back(currentLevel.player.HitboxBottom);
-	//currentLevel.boxes.push_back(currentLevel.player.HitboxLeft);
-	//currentLevel.boxes.push_back(currentLevel.player.HitboxRight);
-	//currentLevel.boxes.push_back(currentLevel.player.HitboxTop);
 
-	//currentLevel.boxes.push_back(currentLevel.enemy.HitboxBottom);
-	//currentLevel.boxes.push_back(currentLevel.enemy.HitboxTop);
-	//currentLevel.boxes.push_back(currentLevel.enemy.HitboxLeft);
-	//currentLevel.boxes.push_back(currentLevel.enemy.HitboxRight);
-
-
-	currentLevel.spheres = vector<Sphere>();
-	playerSphere.centerRadius = glm::vec4(
-		currentLevel.player.pos.x,
-		currentLevel.player.pos.y,
-		currentLevel.player.pos.z,
-		currentLevel.player.radius);
-	currentLevel.spheres.push_back(playerSphere);
-	addSphereAnimation(playerSphere, glm::vec2(currentLevel.player.moveSpeed, currentLevel.player.jumpSpeed));
-	
 	currentLevel.player.isStanding = false;
-	for (int i = 0; i < currentLevel.player.blobs.size(); i++)
-	{
-		currentLevel.spheres.push_back(currentLevel.player.blobs[i].blobSphere);
-	}
-
-
 	currentLevel.enemy.enemyStanding = false;
 	currentLevel.colManager.update();
 	currentLevel.player.update();
 	currentLevel.enemy.update();
+
+	if (currentLevel.player.status != PlayerStatus::Sticky && currentLevel.player.isStuck == true)
+	{
+		currentLevel.player.isStuck = false;
+	}
+
+	if (currentLevel.enemy.isDead == false)
+	{
+		currentLevel.enemy.update();
+		currentLevel.enemy.EjumpSpeed = currentLevel.enemy.EjumpSpeed + (currentLevel.enemy.Egravity * float(dt)) / 100;
+		currentLevel.enemy.pos.y += currentLevel.enemy.EjumpSpeed;
+	}
+
+	else if (currentLevel.enemy.isDead == true && currentLevel.enemy.isDeregistered == false)
+	{
+		currentLevel.colManager.unregister_entry(currentLevel.enemy);
+		currentLevel.enemy.isDeregistered = true;
+	}
+
 	//currentLevel.player.moveSpeed = 0;
 	currentLevel.player.jumpCooldown -= dt;
+	currentLevel.player.shootCooldown -= dt;
 }
 
 void Game::updatePhysics(double dt) {
@@ -281,33 +262,6 @@ void Game::updatePhysics(double dt) {
 	}
 }
 
-void Player::shoot(glm::vec3 mousePos)
-{
-	mousePos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
-	glm::vec3 dir = glm::normalize(mousePos - pos);
-	for (int i = 0; i < blobs.size(); i++)
-	{
-		if (!blobs[nrOfActiveBlobs + i].isBeingRecalled)
-		{
-			blobs[nrOfActiveBlobs + i].setDir(dir);
-			blobs[nrOfActiveBlobs + i].isActive = true;
-			shootCooldown = 0.5f;
-			nrOfActiveBlobs++;
-			break;
-		}
-	}
-
-}
-void Player::recallBlobs()
-{
-	for (int i = 0; i < nrOfActiveBlobs; i++)
-	{
-		blobs[i].isActive = false;
-		blobs[i].isBeingRecalled = true;
-	}
-	shootCooldown = 0.5f;
-	nrOfActiveBlobs = 0;
-}
 void Game::updatePlayerCollision()
 {
 	//####################################################################Bottom
@@ -420,76 +374,120 @@ void Game::updateEnemyCollision()
 	//####################################################################
 }
 
-Enemy::Enemy(glm::vec3 position):
-IObject(),
-posPrev(position),
-pos(position),
-EmoveSpeed(0.0f),
-EjumpSpeed(0.0f),
-EjumpCooldown(.0f),
-Egravity(GRAVITY_CONSTANT),
-enemyStanding(false),
-isJumping(false),
-canJump(false)
+void Game::showHitboxes()
 {
+	currentLevel.boxes.push_back(currentLevel.player.HitboxBottom);
+	currentLevel.boxes.push_back(currentLevel.player.HitboxLeft);
+	currentLevel.boxes.push_back(currentLevel.player.HitboxRight);
+	currentLevel.boxes.push_back(currentLevel.player.HitboxTop);
 
+	currentLevel.boxes.push_back(currentLevel.enemy.HitboxBottom);
+	currentLevel.boxes.push_back(currentLevel.enemy.HitboxTop);
+	currentLevel.boxes.push_back(currentLevel.enemy.HitboxLeft);
+	currentLevel.boxes.push_back(currentLevel.enemy.HitboxRight);
 }
 
-Enemy::~Enemy(){}
-
-void Enemy::collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject & other)
+void Game::playerMovement()
 {
-	if (CollisionId::platform) {
-		if (ownHitbox == CollisionId::enemy_bottom)
+	if (leftButtonDown
+		&& currentLevel.player.nrOfActiveBlobs < currentLevel.player.blobCharges
+		&&  currentLevel.player.shootCooldown <= 0)
+	{
+		currentLevel.player.shoot(mousePos);
+	}
+	currentLevel.player.moveSpeed = 0.0f;
+	if (keys[0]) {
+		currentLevel.player.moveSpeed = 100.0f;
+		if (currentLevel.player.isStuck == false)
 		{
-			this->enemyStanding = true;
-			this->isJumping = false;
-			this->canJump = true;
-			if (EmoveSpeed == 0.0f)
-			{
-				EmoveSpeed = 20.0f;
+			if (currentLevel.player.status == PlayerStatus::Heavy) {
+				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
+				currentLevel.player.pos.x -= currentLevel.player.moveSpeed*dt / 3;
+			}
+			else {
+				//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
+				currentLevel.player.pos.x -= currentLevel.player.moveSpeed*dt;
 			}
 		}
-		else if (ownHitbox == CollisionId::enemy_top)
+
+	}
+	if (keys[1]) {
+		currentLevel.player.moveSpeed = 100.0f;
+		if (currentLevel.player.isStuck == false)
 		{
-			this->EjumpSpeed = 0;
+			if (currentLevel.player.status == PlayerStatus::Heavy) {
+				//currentLevel.player.move(dt, glm::vec3(0.2, 0, 0));
+				currentLevel.player.pos.x += currentLevel.player.moveSpeed*dt / 3;
+			}
+			else {
+				//currentLevel.player.move(dt, glm::vec3(1, 0, 0));
+				currentLevel.player.pos.x += currentLevel.player.moveSpeed*dt;
+			}
 		}
-		else if (ownHitbox == CollisionId::enemy_left)
-		{
-			//this->posCurr.x += EmoveSpeed * dt;
-			EmoveSpeed = EmoveSpeed * -1;
+
+	}
+	if (keys[2]) {
+		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != PlayerStatus::Heavy) {
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
+			currentLevel.player.isStanding = false;
+			currentLevel.player.gravity = GRAVITY_CONSTANT;
+			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
-		else if (ownHitbox == CollisionId::enemy_right)
-		{
-			//this->posCurr.x -= EmoveSpeed * dt;
-			EmoveSpeed = EmoveSpeed * -1;
+		else if (currentLevel.player.status == PlayerStatus::Bouncy && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
+			currentLevel.player.hasExtraJump = false;
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
+			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
+		}
+
+		else if (currentLevel.player.status == PlayerStatus::Heavy && currentLevel.player.isStanding == true) {
+			currentLevel.player.jumpSpeed = JUMP_CONSTANT / 2;
+			currentLevel.player.isStanding = false;
+			currentLevel.player.gravity = GRAVITY_CONSTANT;
+			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
 		}
 	}
+	if (keys[3]) {
+		if (currentLevel.player.status == PlayerStatus::Sticky)
+		{
+			currentLevel.player.isStuck = false;
+			if (currentLevel.player.isStanding == false)
+			{
+				currentLevel.player.gravity = GRAVITY_CONSTANT * 2;
+			}
+		}
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		keys[i] = false;
+	}
+
+	// gravity
 }
 
-void Enemy::update()
+void Game::updateGrapics()
 {
-	if (enemyStanding) {
-		this->Egravity = 0;
-		this->EjumpSpeed = 0;
-	}
-	else
-	{
-		this->Egravity = GRAVITY_CONSTANT;
-	}
-	move();
-}
+	currentLevel.spheres = vector<Sphere>();
+	currentLevel.boxes = vector<Box>();
+	currentLevel.player.jumpCooldown -= dt;
+	currentLevel.player.shootCooldown -= dt;
 
-void Enemy::move()
-{
-	pos.x += EmoveSpeed * dt;
-	if (enemyStanding == false && isJumping == false && canJump == true) 
+	currentLevel.boxes.push_back(groundBox.hitbox);
+	currentLevel.boxes.push_back(testPlat.hitbox);
+	currentLevel.boxes.push_back(testplat2.hitbox);
+
+	currentLevel.spheres = vector<Sphere>();
+	playerSphere.centerRadius = glm::vec4(
+		currentLevel.player.pos.x,
+		currentLevel.player.pos.y,
+		currentLevel.player.pos.z,
+		currentLevel.player.radius);
+	currentLevel.spheres.push_back(playerSphere);
+	addSphereAnimation(playerSphere, glm::vec2(currentLevel.player.moveSpeed, currentLevel.player.jumpSpeed));
+
+	currentLevel.player.isStanding = false;
+	for (int i = 0; i < currentLevel.player.blobs.size(); i++)
 	{
-		EmoveSpeed = EmoveSpeed * -1;
-		EjumpSpeed = JUMP_CONSTANT / 2;
-		enemyStanding = false;
-		isJumping = true;
-		canJump = false;
+		currentLevel.spheres.push_back(currentLevel.player.blobs[i].blobSphere);
 	}
 }
 
@@ -522,3 +520,81 @@ void Game::addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 ampl
 	));
 	currentLevel.spheres.push_back(sphere2);
 }
+
+
+
+Enemy::Enemy(glm::vec3 position):
+IObject(),
+posPrev(position),
+pos(position),
+EmoveSpeed(0.0f),
+EjumpSpeed(0.0f),
+EjumpCooldown(.0f),
+Egravity(GRAVITY_CONSTANT),
+enemyStanding(false),
+isJumping(false),
+canJump(false)
+{
+
+}
+
+Enemy::~Enemy(){}
+
+void Enemy::collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject & other)
+{
+	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_bottom)
+	{
+		this->enemyStanding = true;
+		this->isJumping = false;
+		this->canJump = true;
+		if (EmoveSpeed == 0.0f)
+		{
+			EmoveSpeed = 20.0f;
+		}
+	}
+	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_top)
+	{
+		this->EjumpSpeed = 0;
+	}
+	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_left)
+	{
+		//this->posCurr.x += EmoveSpeed * dt;
+		EmoveSpeed = EmoveSpeed * -1;
+	}
+	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::enemy_right)
+	{
+		//this->posCurr.x -= EmoveSpeed * dt;
+		EmoveSpeed = EmoveSpeed * -1;
+	}
+	if (otherHitbox == CollisionId::player_bottom && ownHitbox == CollisionId::enemy_top)
+	{
+		this->isDead = true;
+	}
+}
+
+void Enemy::update()
+{
+	if (enemyStanding) {
+		this->Egravity = 0;
+		this->EjumpSpeed = 0;
+	}
+	else
+	{
+		this->Egravity = GRAVITY_CONSTANT;
+	}
+	move();
+}
+
+void Enemy::move()
+{
+	pos.x += EmoveSpeed * dt;
+	if (enemyStanding == false && isJumping == false && canJump == true) 
+	{
+		EmoveSpeed = EmoveSpeed * -1;
+		EjumpSpeed = JUMP_CONSTANT / 2;
+		enemyStanding = false;
+		isJumping = true;
+		canJump = false;
+	}
+}
+

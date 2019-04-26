@@ -4,10 +4,11 @@
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include "Geometry.h"
+#include "Collisions.h"
 
-class Blob {
+class Blob : public IObject {
 private:
-	float speed = 50.0f;
+	float speed = 150.0f;
 	float recallSpeed = 200.0f;
 	float fallSpeed = 0.01f;
 	float radius = 2;
@@ -22,5 +23,10 @@ public:
 	glm::vec3 pos;
 	void move(float dt);
 	void setDir(glm::vec3 dir);
+	void setMoveSpeed(int speed);
+	void setFallSpeed(int speed);
+	virtual void collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject &other) override;
+	void updateBlobCollisions();
+	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 #endif // !BLOBS_H

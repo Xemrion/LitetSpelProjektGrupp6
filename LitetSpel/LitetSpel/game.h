@@ -50,7 +50,7 @@ class Enemy : public IObject
 public:
 	glm::vec3  posPrev, pos;
 	float      EmoveSpeed, EjumpSpeed, EjumpCooldown, Egravity;
-	bool enemyStanding, isJumping, canJump;
+	bool enemyStanding, isJumping, canJump, isDead, isDeregistered;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 
 	Enemy(glm::vec3 position = {-25.0f, 40.0f, 0.0f});
@@ -93,6 +93,9 @@ public:
 	void updatePhysics(double dt);
 	void updatePlayerCollision();
 	void updateEnemyCollision();
+	void showHitboxes();
+	void playerMovement();
+	void updateGrapics();
 
 	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8));
 

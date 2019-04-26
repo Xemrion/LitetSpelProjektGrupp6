@@ -33,7 +33,7 @@ void CollisionManager::register_entry( IObject &parent, CollisionId id, Sphere c
 
 // TODO: wrap with RAII
 void CollisionManager::unregister_entry( IObject const &parent ) noexcept {
-    auto unary_predicate = [&parent]( auto const &e ) { return *(e.object) != parent; };
+	auto unary_predicate = [&parent](auto const &e) { return !(*(e.object) != parent); };
     std::remove_if( _staticBoxes.begin(),   _staticBoxes.end(),   unary_predicate );
     std::remove_if( _mobileBoxes.begin(),   _mobileBoxes.end(),   unary_predicate );
     std::remove_if( _staticSpheres.begin(), _staticSpheres.end(), unary_predicate );
