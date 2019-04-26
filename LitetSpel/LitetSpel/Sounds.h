@@ -10,6 +10,7 @@
 #include<dsound.h>
 #include<stdio.h>
 #include<string>
+#include<vector>
 
 class Sounds
 {
@@ -21,8 +22,6 @@ public:
 	bool InitializeSound(HWND handle);
 	void Shutdown();
 
-	bool LoadWaveToBuffer(char* fileName, IDirectSoundBuffer8** soundBuffer);
-	bool PlayWaveSound(IDirectSoundBuffer8* sound);
 
 	bool PlayJumpSound();
 	bool PlayTestSound();
@@ -57,6 +56,7 @@ private:
 	
 	IDirectSoundBuffer8* secondBuffer;
 	IDirectSoundBuffer8* jump;
+	//Sounds to add
 };
 
 #endif // !SOUNDS_H

@@ -21,18 +21,18 @@ if (results == false) {
 	return false;
 }
 std::string name = "sound02.wav";
-char* fileName = new char[name.size()];
-fileName = name.data();
+char testFileName[12] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10], name[11]};
 
-results = LoadWaveFile(fileName, &secondBuffer);
+
+results = LoadWaveFile(testFileName, &secondBuffer);
 if(results == false){
 	return false;
 }
 
 name = "jump01.wav";
-fileName = name.data();
+char jumpFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10]};
 
-results = LoadWaveFile(fileName, &jump);
+results = LoadWaveFile(jumpFileName, &jump);
 if (results == false) {
 	return false;
 }
@@ -49,20 +49,6 @@ void Sounds::Shutdown() {
 	ShutdownWaveFile(&jump);
 	ShutdownDirectSound();
 
-}
-
-bool Sounds::LoadWaveToBuffer(char* fileName, IDirectSoundBuffer8** soundBuffer) {
-	if (!LoadWaveFile(fileName, soundBuffer)) {
-		return false;
-	}
-	return true;
-}
-bool Sounds::PlayWaveSound(IDirectSoundBuffer8* sound) {
-	if (!PlayWaveFile(sound)) {
-		return false;
-	}
-
-	return true;
 }
 
 bool Sounds::PlayJumpSound() {
@@ -257,9 +243,9 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 	return true;
 }
 void Sounds::ShutdownWaveFile(IDirectSoundBuffer8** soundBuffer) {
-	if (secondBuffer) {
-		secondBuffer->Release();
-		secondBuffer = nullptr;
+	if (*soundBuffer) {
+		(*soundBuffer)->Release();
+		*soundBuffer = nullptr;
 	}
 }
 bool Sounds::PlayWaveFile(IDirectSoundBuffer8* sound) {
