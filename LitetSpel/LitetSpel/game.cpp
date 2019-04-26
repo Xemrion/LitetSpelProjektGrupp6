@@ -212,20 +212,18 @@ void Player::recallBlobs()
 
 void Game::update(double dt) {
 
+	time += dt;
 	playerMovement();
 	updateGrapics();
 	updatePhysics(dt);
-	time += dt;
-
 	
-	updatePlayerCollision();
-	updateEnemyCollision();
-
 	currentLevel.player.isStanding = false;
 	currentLevel.enemy.enemyStanding = false;
 	currentLevel.colManager.update();
 	currentLevel.player.update();
-	currentLevel.enemy.update();
+
+	updatePlayerCollision();
+	updateEnemyCollision();
 
 	if (currentLevel.player.status != PlayerStatus::Sticky && currentLevel.player.isStuck == true)
 	{
@@ -235,8 +233,6 @@ void Game::update(double dt) {
 	if (currentLevel.enemy.isDead == false)
 	{
 		currentLevel.enemy.update();
-		currentLevel.enemy.EjumpSpeed = currentLevel.enemy.EjumpSpeed + (currentLevel.enemy.Egravity * float(dt)) / 100;
-		currentLevel.enemy.pos.y += currentLevel.enemy.EjumpSpeed;
 	}
 
 	else if (currentLevel.enemy.isDead == true && currentLevel.enemy.isDeregistered == false)
@@ -244,6 +240,9 @@ void Game::update(double dt) {
 		currentLevel.colManager.unregister_entry(currentLevel.enemy);
 		currentLevel.enemy.isDeregistered = true;
 	}
+
+
+	
 
 	//currentLevel.player.moveSpeed = 0;
 	currentLevel.player.jumpCooldown -= dt;
@@ -256,9 +255,12 @@ void Game::updatePhysics(double dt) {
 	for (float i = (float)floor(time * invTimestep) * timestep; i < time + dt; i += timestep) {
 		currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (currentLevel.player.gravity * timestep) * 0.0001;
 		currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
+		if (currentLevel.enemy.isDead == false) 
+		{
+			currentLevel.enemy.EjumpSpeed = currentLevel.enemy.EjumpSpeed + (currentLevel.enemy.Egravity * timestep) * 0.0001;
+			currentLevel.enemy.pos.y += currentLevel.enemy.EjumpSpeed;
+		}
 
-		currentLevel.enemy.EjumpSpeed = currentLevel.enemy.EjumpSpeed + (currentLevel.enemy.Egravity * timestep) * 0.0001;
-		currentLevel.enemy.pos.y += currentLevel.enemy.EjumpSpeed;
 	}
 }
 
@@ -521,8 +523,6 @@ void Game::addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 ampl
 	currentLevel.spheres.push_back(sphere2);
 }
 
-
-
 Enemy::Enemy(glm::vec3 position):
 IObject(),
 posPrev(position),
@@ -587,7 +587,7 @@ void Enemy::update()
 
 void Enemy::move()
 {
-	pos.x += EmoveSpeed * dt;
+	this->pos.x += EmoveSpeed * dt;
 	if (enemyStanding == false && isJumping == false && canJump == true) 
 	{
 		EmoveSpeed = EmoveSpeed * -1;
