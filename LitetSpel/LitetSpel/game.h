@@ -55,7 +55,7 @@ public:
 	bool enemyStanding, isJumping, canJump;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 
-	Enemy(glm::vec3 position = {-20.0f, 40.0f, 0.0f});
+	Enemy(glm::vec3 position = {-25.0f, 40.0f, 0.0f});
 	virtual ~Enemy();
 	virtual void collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject &other) override;
 	void update();
@@ -92,10 +92,11 @@ public:
 
 	void init();
 	void update(double dt);
+	void updatePhysics(double dt);
 	void updatePlayerCollision();
 	void updateEnemyCollision();
 
-	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed);
+	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8));
 
 	//float gravity = 50.0f;
 
