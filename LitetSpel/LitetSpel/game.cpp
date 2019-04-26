@@ -202,39 +202,7 @@ void Game::update(double dt) {
 
 	currentLevel.spheres = vector<Sphere>();
 	currentLevel.spheres.push_back(playerSphere);
-
-	/*** Animation of orbiting spheres ***/
-	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
-	// Offset the start rotation of the spheres to avoid them all starting at the same place
-	glm::vec3 offset = glm::vec3(0.2, 0.0, 0.0);
-	// Multiplier to animate faster when moving a certain direction. Not smooth.
-	glm::vec2 movementMultiplier = glm::vec2(
-		glm::clamp(abs(currentLevel.player.moveSpeed), 1.0f, 5.0f), 
-		glm::clamp(currentLevel.player.jumpSpeed, 1.0f, 2.0f)
-	);
-
-	// How far the spheres move away from the original sphere. Careful with the z axis, it can cause graphical glitches if it is too big
-	glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8);
-
-	Sphere playerSphere2;
-	playerSphere2.centerRadius = glm::vec4(
-		playerSphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,
-		playerSphere.centerRadius.y + sin(time * (rotationSpeed.y * movementMultiplier.y) + offset.y) * amplitude.y,
-		playerSphere.centerRadius.z + sin(time * rotationSpeed.z + offset.z) * amplitude.z,
-		2.5
-	);
-	currentLevel.spheres.push_back(playerSphere2);
-
-	offset = glm::vec3(0.45, 0.9, 1.1);
-	Sphere playerSphere3;
-	playerSphere3.centerRadius = glm::vec4(
-		playerSphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,
-		playerSphere.centerRadius.y + sin(time * (rotationSpeed.y * movementMultiplier.y) + offset.y) * amplitude.y,
-		playerSphere.centerRadius.z + sin(time * rotationSpeed.z + offset.z) * amplitude.z,
-		2.5
-	);
-	currentLevel.spheres.push_back(playerSphere3);
-	/*** ***/
+	addSphereAnimation(playerSphere, glm::vec2(currentLevel.player.moveSpeed, currentLevel.player.jumpSpeed));
 	
 	currentLevel.player.isStanding = false;
     currentLevel.colManager.update();
@@ -296,4 +264,39 @@ void Game::updatePlayerCollision()
 		playerSphere.centerRadius.w*0.1,
 		0);
 	//####################################################################
+}
+
+//Adds two orbiting spheres around a sphere for animation
+void Game::addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed) {
+	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
+	// Offset the start rotation of the spheres to avoid them all starting at the same place
+	glm::vec3 offset = glm::vec3(0.2, 0.0, 0.0);
+	// Multiplier to animate faster when moving a certain direction. Not smooth.
+	glm::vec2 movementMultiplier = glm::vec2(
+		glm::clamp(abs(moveSpeed.x), 1.0f, 5.0f),
+		glm::clamp(abs(moveSpeed.y), 1.0f, 2.0f)
+	);
+
+	// How far the spheres move away from the original sphere. Careful with the z axis, it can cause graphical glitches if it is too big
+	glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8);
+
+	Sphere sphere1;
+	sphere1.centerRadius = glm::vec4(
+		sphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,
+		sphere.centerRadius.y + sin(time * (rotationSpeed.y * movementMultiplier.y) + offset.y) * amplitude.y,
+		sphere.centerRadius.z + sin(time * rotationSpeed.z + offset.z) * amplitude.z,
+		sphere.centerRadius.w / 2
+	);
+	currentLevel.spheres.push_back(sphere1);
+
+	rotationSpeed = -rotationSpeed;
+	offset = glm::vec3(1.45, 0.9, 1.1);
+	Sphere sphere2;
+	sphere2.centerRadius = glm::vec4(
+		sphere.centerRadius.x + sin(time * (rotationSpeed.x * movementMultiplier.x) + offset.x) * amplitude.x,
+		sphere.centerRadius.y + sin(time * (rotationSpeed.y * movementMultiplier.y) + offset.y) * amplitude.y,
+		sphere.centerRadius.z + sin(time * rotationSpeed.z + offset.z) * amplitude.z,
+		sphere.centerRadius.w / 2
+	);
+	currentLevel.spheres.push_back(sphere2);
 }
