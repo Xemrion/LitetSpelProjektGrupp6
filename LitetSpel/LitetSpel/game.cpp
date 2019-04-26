@@ -41,7 +41,7 @@ void Game::init() {
 	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_top, currentLevel.enemy.HitboxTop, false);
 	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_left, currentLevel.enemy.HitboxLeft, false);
 	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_right, currentLevel.enemy.HitboxRight, false);
-
+	EnemyBox.color = grey;
 }
 
 
@@ -196,11 +196,13 @@ void Game::update(double dt) {
 			currentLevel.player.isStanding = false;
 			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
+			gameSounds->PlayJumpSound();
 		}
 		else if (currentLevel.player.status == PlayerStatus::Bouncy && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
 			currentLevel.player.hasExtraJump = false;
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
+			gameSounds->PlayJumpSound();
 		}
 
 		else if (currentLevel.player.status == PlayerStatus::Heavy && currentLevel.player.isStanding == true) {
@@ -208,6 +210,7 @@ void Game::update(double dt) {
 			currentLevel.player.isStanding = false;
 			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
+			gameSounds->PlayJumpSound();
 		}
 	}
 	if (keys[3]) {

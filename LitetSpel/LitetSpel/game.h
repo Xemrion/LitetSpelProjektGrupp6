@@ -9,6 +9,7 @@
 #include "Sounds.h"
 #include  "Platform.h"
 #include "Blob.h"
+#include "Library.h"
 
 using namespace std;
 
@@ -76,11 +77,6 @@ struct LevelData { // POD
     //    colManager.register_entry( player, CollisionId::player_bottom, pBoxBot,  true );
     //    colManager.register_entry( groundBox, CollisionId::platform, platBox,  false );
     //}
-};
-
-struct SFX {
-	char* fileName;
-	IDirectSoundBuffer8* soundBuffer;
 };
 
 class Game {

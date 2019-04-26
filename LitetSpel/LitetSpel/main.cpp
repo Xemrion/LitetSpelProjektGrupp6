@@ -233,6 +233,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			keyboardFunc();
 			mouseFunc();
 
+			if (keyboard.KeyIsPressed(VK_ADD)) {
+				gameSounds.PlayTestSound();
+			}
+			graphics.setMetaballColorAbsorb(glm::vec3(1.0f, 0.25f, 0.25f));
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
 			graphics.queueBoxes(game.currentLevel.boxes);

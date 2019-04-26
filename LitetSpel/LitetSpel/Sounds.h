@@ -23,6 +23,9 @@ public:
 
 	bool LoadWaveToBuffer(char* fileName, IDirectSoundBuffer8** soundBuffer);
 	bool PlayWaveSound(IDirectSoundBuffer8* sound);
+
+	bool PlayJumpSound();
+	bool PlayTestSound();
 private:
 	struct WaveHeaderType
 	{
@@ -51,9 +54,9 @@ private:
 	IDirectSound8* directSound;
 	IDirectSoundBuffer* firstBuffer;
 
-	std::string name;
-	char* fileName;
+	
 	IDirectSoundBuffer8* secondBuffer;
+	IDirectSoundBuffer8* jump;
 };
 
 #endif // !SOUNDS_H

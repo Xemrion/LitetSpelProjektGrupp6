@@ -20,8 +20,8 @@ results = InitializeDirectSound(handle);
 if (results == false) {
 	return false;
 }
-name = "sound02.wav";
-fileName = new char[name.size()];
+std::string name = "sound02.wav";
+char* fileName = new char[name.size()];
 fileName = name.data();
 
 results = LoadWaveFile(fileName, &secondBuffer);
@@ -29,20 +29,26 @@ if(results == false){
 	return false;
 }
 
-results = PlayWaveFile(secondBuffer);
+name = "jump01.wav";
+fileName = name.data();
+
+results = LoadWaveFile(fileName, &jump);
 if (results == false) {
 	return false;
 }
+
+//results = PlayWaveFile(secondBuffer);
+//if (results == false) {
+//	return false;
+//}
 
 return true;
 }
 void Sounds::Shutdown() {
 	ShutdownWaveFile(&secondBuffer);
+	ShutdownWaveFile(&jump);
 	ShutdownDirectSound();
 
-	if (fileName != nullptr) {
-		delete fileName;
-	}
 }
 
 bool Sounds::LoadWaveToBuffer(char* fileName, IDirectSoundBuffer8** soundBuffer) {
@@ -56,6 +62,19 @@ bool Sounds::PlayWaveSound(IDirectSoundBuffer8* sound) {
 		return false;
 	}
 
+	return true;
+}
+
+bool Sounds::PlayJumpSound() {
+	if (!PlayWaveFile(jump)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayTestSound() {
+	if (!PlayWaveFile(secondBuffer)) {
+		return false;
+	}
 	return true;
 }
 
@@ -194,7 +213,7 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 		return false;
 	}
 
-	hr = temp->QueryInterface(IID_IDirectSoundBuffer8, (void**)&secondBuffer);
+	hr = temp->QueryInterface(IID_IDirectSoundBuffer8, (void**)&*soundBuffer);
 	if (FAILED(hr)) {
 		return false;
 	}
@@ -209,7 +228,7 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 		return false;
 	}
 
-	count = fread(waveData, 1, waveFileHeader.dataSize, filePtr);
+	count = fread(waveData, 1u, waveFileHeader.dataSize, filePtr);
 	if (count != waveFileHeader.dataSize) {
 		delete[]waveData;
 		waveData = nullptr;
@@ -221,14 +240,14 @@ bool Sounds::LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer) {
 		return false;
 	}
 
-	hr = (secondBuffer)->Lock(0, waveFileHeader.dataSize, (void**)&bufferPtr, (DWORD*)&bufferSize, NULL, 0, 0);
+	hr = (*soundBuffer)->Lock(0, waveFileHeader.dataSize, (void**)&bufferPtr, (DWORD*)&bufferSize, NULL, 0, 0);
 	if (FAILED(hr)) {
 		return false;
 	}
 
 	memcpy(bufferPtr, waveData, waveFileHeader.dataSize);
 
-	hr = (secondBuffer)->Unlock((void*)bufferPtr, bufferSize, NULL, 0);
+	hr = (*soundBuffer)->Unlock((void*)bufferPtr, bufferSize, NULL, 0);
 	if (FAILED(hr)) {
 		return false;
 	}
