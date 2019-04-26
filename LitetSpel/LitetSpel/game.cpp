@@ -112,40 +112,36 @@ void Player::update() {
 
 void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) 
 {
-	if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_bottom or otherHitbox == CollisionId::enemy_top && ownHitbox == CollisionId::player_bottom)
-	{
-		this->isStanding = true;
-		//this->move(dt, glm::vec3(-0.5f, 0.0f, 0.0f));
+	if (CollisionId::player_bottom) {
+		if (otherHitbox == CollisionId::platform) {
+			this->isStanding = true;
+		}
 	}
-	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_top)
-	{
-		if (this->status == PlayerStatus::Sticky)
-		{
+	else if (CollisionId::player_top) {
+		if (this->status == PlayerStatus::Sticky) {
 			this->gravity = 0;
 			this->isStuck = true;
 			this->pos.y -= 1;
 		}
 		this->jumpSpeed = 0;
-		
 	}
-	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_left or otherHitbox == CollisionId::enemy_right && ownHitbox == CollisionId::player_left)
-	{
-		if (this->status == PlayerStatus::Sticky && this->isStanding == false && otherHitbox != CollisionId::enemy_right)
-		{
-			this->gravity = 0;
-			this->jumpSpeed = 0;
-			this->isStuck = true;
+	else if (CollisionId::player_left) {
+		if (otherHitbox == CollisionId::platform) {
+			if (this->status == PlayerStatus::Sticky) {
+				this->gravity = 0;
+				this->jumpSpeed = 0;
+				this->isStuck = true;
+			}
 		}
 		this->pos.x += this->moveSpeed*dt;
-
 	}
-	else if (otherHitbox == CollisionId::platform && ownHitbox == CollisionId::player_right or otherHitbox == CollisionId::enemy_left && ownHitbox == CollisionId::player_right)
-	{
-		if (this->status == PlayerStatus::Sticky && this->isStanding == false && otherHitbox != CollisionId::enemy_left)
-		{
-			this->gravity = 0;
-			this->jumpSpeed = 0;
-			this->isStuck = true;
+	else if (CollisionId::player_right) {
+		if (otherHitbox == CollisionId::platform) {
+			if (this->status == PlayerStatus::Sticky) {
+				this->gravity = 0;
+				this->jumpSpeed = 0;
+				this->isStuck = true;
+			}
 		}
 		this->pos.x -= this->moveSpeed * dt;
 	}
