@@ -122,10 +122,13 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 
 void mouseFunc() 
 {
-	if (mouse.ReadEvent().GetType() == MouseInput::Event::Type::Move)
+	if (mouse.LeftIsPressed())
 	{
-
+		game.leftButtonDown = true;
+		game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
 	}
+	else
+		game.leftButtonDown = false;
 }
 
 void keyboardFunc()
@@ -145,19 +148,19 @@ void keyboardFunc()
 	}
 	if (keyboard.KeyIsPressed('S'))
 	{
-		//game.keys[3] = true;
+		game.keys[3] = true;
 	}
 	if (keyboard.KeyIsPressed('B')) 
 	{
 		if (powerCoolDown <= 0) 
 		{
-			if (game.currentLevel.player.status == 0)
+			if (game.currentLevel.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = 1;
+				game.currentLevel.player.status = PlayerStatus::Bouncy;
 			}
 			else
 			{
-				game.currentLevel.player.status = 0;
+				game.currentLevel.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -166,17 +169,34 @@ void keyboardFunc()
 	{
 		if (powerCoolDown <= 0)
 		{
-			if (game.currentLevel.player.status == 0)
+			if (game.currentLevel.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = 2;
+				game.currentLevel.player.status = PlayerStatus::Heavy;
 			}
 			else
 			{
-				game.currentLevel.player.status = 0;
+				game.currentLevel.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}
 	}
+	if (keyboard.KeyIsPressed('Y'))
+	{
+		if (powerCoolDown <= 0)
+		{
+			if (game.currentLevel.player.status == PlayerStatus::None)
+			{
+				game.currentLevel.player.status = PlayerStatus::Sticky;
+			}
+			else
+			{
+				game.currentLevel.player.status = PlayerStatus::None;
+			}
+			powerCoolDown = 0.2f;
+		}
+	}
+	if (keyboard.KeyIsPressed('R'))
+		game.currentLevel.player.recallBlobs();
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
@@ -202,13 +222,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
-
+			
+			char title[64];
+			_itoa_s(1/dt, title, 64, 10);
+			SetWindowTextA(wndHandle, title);
+			
 			keyboardFunc();
 			mouseFunc();
 
 			game.update(dt);
-			graphics.queueBoxes(game.currentLevel.boxes);
-			graphics.queueMetaballs(game.currentLevel.spheres);
+			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
+			graphics.setBoxes(game.currentLevel.boxes);
+			graphics.setMetaballs(game.currentLevel.spheres);
 			graphics.swapBuffer();
 
 			powerCoolDown -= (float)dt;

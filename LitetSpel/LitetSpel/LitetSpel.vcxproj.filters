@@ -39,6 +39,9 @@
     <ClCompile Include="Platform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Blob.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -71,9 +74,14 @@
     <ClInclude Include="Platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Blob.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="vs.hlsl" />
     <FxCompile Include="ps.hlsl" />
+    <FxCompile Include="box_raster_ps.hlsl" />
+    <FxCompile Include="box_raster_vs.hlsl" />
   </ItemGroup>
 </Project>

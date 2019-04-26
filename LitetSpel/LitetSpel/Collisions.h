@@ -196,10 +196,15 @@ Sphere    lerp( Sphere const &src, Sphere const &dest, float fac ) noexcept;
 
 
 // TODO: contemplate placement;
-enum CollisionId { player_top,
-                   player_bottom,
-                   player_left,
-                   player_right,
+enum CollisionId {
+				   player_top,
+				   player_bottom,
+				   player_left,
+				   player_right,
+				   enemy_top,
+				   enemy_bottom,
+				   enemy_left,
+				   enemy_right,
                    platform,
                    wall,
                    powerup_bouncy,
