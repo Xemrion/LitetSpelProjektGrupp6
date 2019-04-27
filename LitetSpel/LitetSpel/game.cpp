@@ -37,6 +37,9 @@ void Game::init() {
 	level.colManager.registerEntry(level.enemy, ColliderType::enemy_left, level.enemy.HitboxLeft, false);
 	level.colManager.registerEntry(level.enemy, ColliderType::enemy_right, level.enemy.HitboxRight, false);
 
+	for (Blob& b : level.player.blobs) {
+		level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
+	}
 	EnemyBox.color = glm::vec4(1,0,0,0);
 }
 
@@ -159,10 +162,10 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other
 		}
 	}
 	else if (ownHitbox == ColliderType::player_right) {
-		this->pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
-		
-		if (this->status == PlayerStatus::Sticky) {
-			if (otherHitbox == ColliderType::platform) {
+		if (otherHitbox == ColliderType::platform) {
+			this->pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
+
+			if (this->status == PlayerStatus::Sticky) {
 				this->isStuck = true;
 			}
 		}
@@ -431,6 +434,8 @@ void Game::updateGraphics() {
 	{
 		level.spheres.push_back(level.player.blobs[i].blobSphere);
 	}
+
+	showHitboxes();
 }
 
 void Game::showHitboxes()
@@ -444,6 +449,11 @@ void Game::showHitboxes()
 	level.boxes.push_back(level.enemy.HitboxTop);
 	level.boxes.push_back(level.enemy.HitboxLeft);
 	level.boxes.push_back(level.enemy.HitboxRight);
+
+	for (int i = 0; i < level.player.blobCharges; i++)
+	{
+		level.boxes.push_back(level.player.blobs[i].hitbox);
+	}
 }
 
 Enemy::Enemy(glm::vec3 position):

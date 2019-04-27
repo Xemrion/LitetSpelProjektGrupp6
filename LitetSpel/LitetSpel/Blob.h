@@ -7,19 +7,18 @@
 #include "globals.h"
 #include "Collisions.h"
 
-class Blob {
+class Blob : public CollisionObject {
 private:
 	float recallSpeed = 200.0f;
 	float speed = 100.1f;
 	float radius = 2;
 	glm::vec3 velocity = glm::vec3(0, 0, 0);
-	Box hitbox;
 public:
+	Box hitbox;
 	bool isActive = false;
 	bool isBeingRecalled = false;
 	Sphere blobSphere;
 	Blob();
-	~Blob();
 	Blob(glm::vec3 pos);
 	glm::vec3 pos;
 	void update(float dt);
