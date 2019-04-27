@@ -154,13 +154,13 @@ void keyboardFunc()
 	{
 		if (powerCoolDown <= 0) 
 		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
+			if (game.level.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = PlayerStatus::Bouncy;
+				game.level.player.status = PlayerStatus::Bouncy;
 			}
 			else
 			{
-				game.currentLevel.player.status = PlayerStatus::None;
+				game.level.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -169,13 +169,13 @@ void keyboardFunc()
 	{
 		if (powerCoolDown <= 0)
 		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
+			if (game.level.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = PlayerStatus::Heavy;
+				game.level.player.status = PlayerStatus::Heavy;
 			}
 			else
 			{
-				game.currentLevel.player.status = PlayerStatus::None;
+				game.level.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -184,19 +184,19 @@ void keyboardFunc()
 	{
 		if (powerCoolDown <= 0)
 		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
+			if (game.level.player.status == PlayerStatus::None)
 			{
-				game.currentLevel.player.status = PlayerStatus::Sticky;
+				game.level.player.status = PlayerStatus::Sticky;
 			}
 			else
 			{
-				game.currentLevel.player.status = PlayerStatus::None;
+				game.level.player.status = PlayerStatus::None;
 			}
 			powerCoolDown = 0.2f;
 		}
 	}
 	if (keyboard.KeyIsPressed('R'))
-		game.currentLevel.player.recallBlobs();
+		game.level.player.recallBlobs();
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
@@ -232,10 +232,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
-			graphics.setBoxes(game.currentLevel.boxes);
-			graphics.setMetaballs(game.currentLevel.spheres);
+			graphics.setBoxes(game.level.boxes);
+			graphics.setMetaballs(game.level.spheres);
 			graphics.swapBuffer();
-
 			powerCoolDown -= (float)dt;
 		}
 		

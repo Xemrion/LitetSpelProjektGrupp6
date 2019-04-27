@@ -1,7 +1,7 @@
 #include"Platform.h"
 
 Platform::Platform():
-    IObject()
+    CollisionObject()
 {
 	this->hitbox.center;
 	this->hitbox.halfLengths;

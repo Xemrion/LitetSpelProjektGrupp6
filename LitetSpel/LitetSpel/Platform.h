@@ -3,7 +3,7 @@
 #include"Geometry.h"
 #include "Collisions.h"
 
-class Platform : public IObject  {
+class Platform : public CollisionObject  {
 public:
 	Platform();
 	Platform(glm::vec4 center, glm::vec4 halfLengths);
@@ -11,7 +11,7 @@ public:
 
 	//Box& getPlatformBox() const { return this->hitbox; };
 
-    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {}
+    void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) {}
     Box hitbox;
 
 private:
