@@ -1,6 +1,4 @@
 #include "game.h"
-#define GRAVITY_CONSTANT 200.0f
-#define COOLDOWN_CONSTANT 0.3f
 
 void Game::init() {
     groundBox.hitbox.center = glm::vec4(0, -30, 0, 0);
@@ -93,7 +91,7 @@ void Player::update(double dt) {
 	{
 		if (blobs[i].isBeingRecalled)
 		{
-			blobs[i].setDir(glm::normalize(pos - blobs[i].pos));
+			blobs[i].setVelocity(glm::normalize(pos - blobs[i].pos));
 			if (glm::length((pos - blobs[i].pos)) < this->radius)
 			{
 				blobs[i].isBeingRecalled = false;
@@ -104,7 +102,7 @@ void Player::update(double dt) {
 			blobs[i].pos = pos + glm::vec3(0.0, 2.0, 0.0);
 			blobs[i].blobSphere.centerRadius = glm::vec4(pos, 2);
 		}
-		blobs[i].move(dt);
+		//blobs[i].move(dt);
 	}
 }
 
@@ -150,17 +148,54 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other
 	}
 }
 
+void Player::shoot(glm::vec3 mousePos)
+{
+	mousePos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
+	glm::vec3 dir = glm::normalize(mousePos - pos);
+	for (int i = 0; i < blobs.size(); i++)
+	{
+		if (!blobs[nrOfActiveBlobs + i].isBeingRecalled)
+		{
+			blobs[nrOfActiveBlobs + i].setVelocity(dir);
+			blobs[nrOfActiveBlobs + i].isActive = true;
+			shootCooldown = 0.5f;
+			nrOfActiveBlobs++;
+			break;
+		}
+	}
+
+}
+void Player::recallBlobs()
+{
+	for (int i = 0; i < nrOfActiveBlobs; i++)
+	{
+		blobs[i].isActive = false;
+		blobs[i].isBeingRecalled = true;
+	}
+	shootCooldown = 0.5f;
+	nrOfActiveBlobs = 0;
+}
+
 void Game::update(double dt) {
 	time += dt;
+	level.player.velocity.x = 0;
+
+	handleInput();
+	level.player.update(dt);
+	level.enemy.update(dt);
+	updatePhysics();
+	updateGraphics();
+}
+
+void Game::handleInput() {
 
 	if (leftButtonDown
 		&& level.player.nrOfActiveBlobs < level.player.blobCharges
-		&&  level.player.shootCooldown <= 0)
+		&& level.player.shootCooldown <= 0)
 	{
 		level.player.shoot(mousePos);
 	}
 
-	level.player.velocity.x = 0;
 	if (keys[Keys::left]) {
 		if (level.player.isStuck == false)
 		{
@@ -199,38 +234,6 @@ void Game::update(double dt) {
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}
-
-	level.player.update(dt);
-	level.enemy.update(dt);
-	updatePhysics();
-
-	level.spheres = vector<Sphere>();
-	level.boxes = vector<Box>();
-
-
-	level.boxes.push_back(groundBox.hitbox);
-	level.boxes.push_back(testPlat.hitbox);
-	level.boxes.push_back(testplat2.hitbox);
-	EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
-	level.boxes.push_back(EnemyBox);
-
-
-	level.spheres = vector<Sphere>();
-	playerSphere.centerRadius = glm::vec4(
-		level.player.pos.x,
-		level.player.pos.y,
-		level.player.pos.z,
-		level.player.radius);
-	level.spheres.push_back(playerSphere);
-	
-	glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
-
-	animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
-
-	for (int i = 0; i < level.player.blobs.size(); i++)
-	{
-		level.spheres.push_back(level.player.blobs[i].blobSphere);
-	}
 }
 
 // Catches up the physics simulation time to the actual game time
@@ -244,6 +247,11 @@ void Game::updatePhysics() {
 		if (level.enemy.alive) {
 			level.enemy.pos += level.enemy.velocity * timestep;
 		}
+
+		for (int i = 0; i < level.player.blobs.size(); i++) {
+			level.player.blobs[i].move(timestep);
+			//level.player.blobs[i].updateCollisions();
+		}
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();
@@ -252,33 +260,6 @@ void Game::updatePhysics() {
 	}
 }
 
-void Player::shoot(glm::vec3 mousePos)
-{
-	mousePos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
-	glm::vec3 dir = glm::normalize(mousePos - pos);
-	for (int i = 0; i < blobs.size(); i++)
-	{
-		if (!blobs[nrOfActiveBlobs + i].isBeingRecalled)
-		{
-			blobs[nrOfActiveBlobs + i].setDir(dir);
-			blobs[nrOfActiveBlobs + i].isActive = true;
-			shootCooldown = 0.5f;
-			nrOfActiveBlobs++;
-			break;
-		}
-	}
-
-}
-void Player::recallBlobs()
-{
-	for (int i = 0; i < nrOfActiveBlobs; i++)
-	{
-		blobs[i].isActive = false;
-		blobs[i].isBeingRecalled = true;
-	}
-	shootCooldown = 0.5f;
-	nrOfActiveBlobs = 0;
-}
 void Game::updatePlayerCollision()
 {
 	//####################################################################Bottom
@@ -389,6 +370,50 @@ void Game::updateEnemyCollision()
 		EnemyBox.halfLengths.z,
 		0);
 	//####################################################################
+}
+
+void Game::updateGraphics() {
+	level.spheres = vector<Sphere>();
+	level.boxes = vector<Box>();
+
+	level.boxes.push_back(groundBox.hitbox);
+	level.boxes.push_back(testPlat.hitbox);
+	level.boxes.push_back(testplat2.hitbox);
+	EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
+	
+	if (level.enemy.alive) {
+		level.boxes.push_back(EnemyBox);
+	}
+
+	level.spheres = vector<Sphere>();
+	playerSphere.centerRadius = glm::vec4(
+		level.player.pos.x,
+		level.player.pos.y,
+		level.player.pos.z,
+		level.player.radius);
+	level.spheres.push_back(playerSphere);
+
+	glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
+
+	animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
+
+	for (int i = 0; i < level.player.blobs.size(); i++)
+	{
+		level.spheres.push_back(level.player.blobs[i].blobSphere);
+	}
+}
+
+void Game::showHitboxes()
+{
+	level.boxes.push_back(level.player.HitboxBottom);
+	level.boxes.push_back(level.player.HitboxLeft);
+	level.boxes.push_back(level.player.HitboxRight);
+	level.boxes.push_back(level.player.HitboxTop);
+
+	level.boxes.push_back(level.enemy.HitboxBottom);
+	level.boxes.push_back(level.enemy.HitboxTop);
+	level.boxes.push_back(level.enemy.HitboxLeft);
+	level.boxes.push_back(level.enemy.HitboxRight);
 }
 
 Enemy::Enemy(glm::vec3 position):

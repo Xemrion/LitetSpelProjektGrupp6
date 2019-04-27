@@ -19,12 +19,12 @@ void Blob::move(float dt)
 {
 	if (this->isActive)
 	{
-		dir -= glm::vec3(1, 60, 0) * fallSpeed * dt;
-		pos += dir * speed * dt;
+		velocity -= -GRAVITY_CONSTANT * dt;
+		pos += velocity * speed * dt;
 	}
 	else if (this->isBeingRecalled)
 	{
-		pos += dir * recallSpeed * dt;
+		pos += velocity * recallSpeed * dt;
 	}
 	
 	this->blobSphere.centerRadius = glm::vec4(
@@ -32,7 +32,7 @@ void Blob::move(float dt)
 			radius);
 }
 
-void Blob::setDir(glm::vec3 dir)
+void Blob::setVelocity(glm::vec3 dir)
 {
-	this->dir = dir;
+	this->velocity = dir;
 }

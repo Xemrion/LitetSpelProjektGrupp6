@@ -1,18 +1,17 @@
 #pragma once
-#include <d3d11.h>
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include <vector>
 #include "Geometry.h"
 #include "Collisions.h"
-#include  "Platform.h"
+#include "Platform.h"
 #include "Blob.h"
 
 using namespace std;
 
-
-extern double dt;
+const float GRAVITY_CONSTANT = 200.0f;
+const float COOLDOWN_CONSTANT = 0.3f;
 
 enum PlayerStatus 
 {
@@ -103,7 +102,7 @@ public:
 	void updatePlayerCollision();
 	void updateEnemyCollision();
 	void showHitboxes();
-	void playerMovement();
+	void handleInput();
 	void updateGraphics();
 
 	void animateSphere(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8));
