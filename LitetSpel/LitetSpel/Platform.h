@@ -11,7 +11,10 @@ public:
 
 	//Box& getPlatformBox() const { return this->hitbox; };
 
-    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {}
+    void collide( CollisionId             ownHitbox,
+                  CollisionId             otherHitbox,
+                  IObject                &other,
+                  CollisionManager const &collisionManager ) {}
     Box hitbox;
 
 private:

@@ -32,12 +32,12 @@ void CollisionManager::register_entry( IObject &parent, CollisionId id, Sphere c
 }
 
 // TODO: wrap with RAII
-void CollisionManager::unregister_entry( IObject const &parent ) noexcept {
+bool CollisionManager::unregister_entry( IObject const &parent ) noexcept {
     auto unary_predicate = [&parent]( auto const &e ) { return !(*(e.object) != parent); };
-    std::remove_if(   _staticBoxes.begin(),   _staticBoxes.end(), unary_predicate );
-    std::remove_if(   _mobileBoxes.begin(),   _mobileBoxes.end(), unary_predicate );
-    std::remove_if( _staticSpheres.begin(), _staticSpheres.end(), unary_predicate );
-    std::remove_if( _mobileSpheres.begin(), _mobileSpheres.end(), unary_predicate );
+    return std::remove_if(   _mobileBoxes.begin(),   _mobileBoxes.end(), unary_predicate ) !=   _mobileBoxes.end()
+        or std::remove_if( _mobileSpheres.begin(), _mobileSpheres.end(), unary_predicate ) != _mobileSpheres.end()
+        or std::remove_if(   _staticBoxes.begin(),   _staticBoxes.end(), unary_predicate ) !=   _staticBoxes.end()
+        or std::remove_if( _staticSpheres.begin(), _staticSpheres.end(), unary_predicate ) != _staticSpheres.end();
 }
 
 [[nodiscard]]
@@ -81,23 +81,23 @@ bool CollisionManager::intersects( Sphere const *s1, Sphere const *s2 ) const no
     return sqr(a.x-b.x) + sqr(a.y-b.y)  <  sqr(a.w + b.w);
 }
  
-float lerp( float src, float dest, float fac ) {
+float lerp( float src, float dest, float fac ) noexcept {
     return (1.0f - fac) * src + fac * dest;
 }
 
-glm::vec4 lerp( glm::vec4 const &src, glm::vec4 const &dest, float fac ) {
+glm::vec4 lerp( glm::vec4 const &src, glm::vec4 const &dest, float fac ) noexcept {
     return glm::vec4( lerp( src.x, dest.x, fac ),
                       lerp( src.y, dest.y, fac ),
                       lerp( src.z, dest.z, fac ),
                       lerp( src.w, dest.w, fac ) );
 }
 
-Box lerp( Box const &src, Box const &dest, float fac ) {
+Box lerp( Box const &src, Box const &dest, float fac ) noexcept {
     return { lerp( src.center,      dest.center,      fac ),
         lerp( src.halfLengths, dest.halfLengths, fac ) };
 }
 
-Sphere lerp( Sphere const &src, Sphere const &dest, float fac ) {
+Sphere lerp( Sphere const &src, Sphere const &dest, float fac ) noexcept {
     return { lerp( src.centerRadius, dest.centerRadius, fac ) };
 }
 
@@ -111,32 +111,32 @@ void CollisionManager::update() { /// yay for combinatoric explosions /s
         for ( auto &other : _mobileBoxes ) {
             auto &otherObject = *(other.object);
             if ( mObject != otherObject  and  intersects( m.hitbox, other.hitbox ) ) {
-                m.object->collide( m.id, other.id, otherObject );
-                otherObject.collide( other.id, m.id, *(m.object) );
+                m.object->collide( m.id, other.id, otherObject, *this );
+                otherObject.collide( other.id, m.id, *(m.object), *this );
             }
         }
         // test against all mobile hitspheres (that belong to another object)
         for ( auto &other : _mobileSpheres ) {
             auto &otherObject = *(other.object);
             if ( mObject != otherObject  and  intersects( m.hitbox, other.hitsphere ) ) {
-                m.object->collide( m.id, other.id, otherObject );
-                otherObject.collide( other.id, m.id, *(m.object) );
+                m.object->collide( m.id, other.id, otherObject, *this );
+                otherObject.collide( other.id, m.id, *(m.object), *this );
             }
         }
         // test against all static environment hitboxes
         for ( auto &environment : _staticBoxes ) {
             auto &environmentObject = *(environment.object);
             if ( intersects( m.hitbox, environment.hitbox ) ) {
-                m.object->collide( m.id, environment.id, environmentObject );
-                environmentObject.collide( environment.id, m.id, *(m.object) );
+                m.object->collide( m.id, environment.id, environmentObject, *this );
+                environmentObject.collide( environment.id, m.id, *(m.object), *this );
             }
         }
         // test against all static environment hitspheres
         for ( auto &environment : _staticSpheres ) {
             auto &environmentObject = *(environment.object);
             if ( intersects( m.hitbox, environment.hitsphere ) ) {
-                m.object->collide( m.id, environment.id, environmentObject );
-                environmentObject.collide( environment.id, m.id, *(m.object) );
+                m.object->collide( m.id, environment.id, environmentObject, *this );
+                environmentObject.collide( environment.id, m.id, *(m.object), *this );
             }
         }
     }
@@ -147,32 +147,32 @@ void CollisionManager::update() { /// yay for combinatoric explosions /s
         for ( auto &other : _mobileSpheres ) {
             auto &otherObject = *(other.object);
             if ( mObject != otherObject  and  intersects( m.hitsphere, other.hitsphere ) ) {
-                mObject.collide( m.id, other.id, otherObject );
-                otherObject.collide( other.id, m.id, *(m.object) );
+                mObject.collide( m.id, other.id, otherObject, *this );
+                otherObject.collide( other.id, m.id, *(m.object), *this );
             }
         }
         // test against all mobile hitboxes (that belong to another object)
         for ( auto &other : _mobileBoxes ) {
             auto &otherObject = *(other.object);
             if ( *(m.object) != otherObject  and  intersects( m.hitsphere, other.hitbox ) ) {
-                mObject.collide( m.id, other.id, otherObject );
-                otherObject.collide( other.id, m.id, *(m.object) );
+                mObject.collide( m.id, other.id, otherObject, *this );
+                otherObject.collide( other.id, m.id, *(m.object), *this );
             }
         }
         // test against all static environment hitspheres
         for ( auto &environment : _staticSpheres ) {
             auto &environmentObject = *(environment.object);
             if ( intersects(m.hitsphere, environment.hitsphere ) ) {
-                mObject.collide( m.id, environment.id, *(environment.object) );
-                environmentObject.collide( environment.id, m.id, *(m.object) );
+                mObject.collide( m.id, environment.id, *(environment.object), *this );
+                environmentObject.collide( environment.id, m.id, *(m.object), *this );
             }
         }
         // test against all static environment hitboxes
         for ( auto &environment : _staticBoxes ) {
             auto &environmentObject = *(environment.object);
             if ( intersects( m.hitsphere, environment.hitbox ) ) {
-                mObject.collide( m.id, environment.id, *(environment.object) );
-                environmentObject.collide( environment.id, m.id, *(m.object) );
+                mObject.collide( m.id, environment.id, *(environment.object), *this );
+                environmentObject.collide( environment.id, m.id, *(m.object), *this );
             }
         }
     }

@@ -6,8 +6,6 @@
 #include <algorithm>
 
 constexpr bool debugCollisions = true;
-#include <cstdio>
-
 
 float     lerp( float src, float dest, float fac ) noexcept;
 glm::vec4 lerp( glm::vec4 const &src, glm::vec4 const &dest, float fac ) noexcept;
@@ -196,8 +194,7 @@ Sphere    lerp( Sphere const &src, Sphere const &dest, float fac ) noexcept;
 
 
 // TODO: contemplate placement;
-enum CollisionId {
-				   player_top,
+enum CollisionId { player_top,
 				   player_bottom,
 				   player_left,
 				   player_right,
@@ -213,6 +210,8 @@ enum CollisionId {
                    level_goal
                    /* TODO: populate */ };
 
+class CollisionManager; // forward decl
+
 // TODO: refactor into more suitable header/source?
 class IObject { // Interface / abstract base class
 public:
@@ -225,7 +224,10 @@ public:
 
     virtual ~IObject() noexcept {}
 
-    virtual void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) = 0;
+    virtual void collide( CollisionId             ownHitbox,
+                          CollisionId             otherHitbox,
+                          IObject                &other,
+                          CollisionManager const &collisionManager ) = 0;
 
     virtual void update(double dt) noexcept {}
 
@@ -235,7 +237,9 @@ public:
 
 private:
     size_t const _id;
-    [[nodiscard]] static size_t _generateId() noexcept {
+
+    [[nodiscard]]
+    static size_t _generateId() noexcept {
         static size_t next_id { 0 };
         return next_id++;
     }
@@ -243,23 +247,23 @@ private:
 
 class CollisionManager {
     // step amount of the linear interpolation factor                                          
-    static float constexpr lerpFacStep = .1f;
+    static float constexpr lerpFacStep = .01f;
 
 public:
     using Ruleset = std::vector<CollisionId>;
-
     CollisionManager();
 
     // registers a new hitbox
     void register_entry( IObject &parent, CollisionId id,    Box const &hitbox,    bool is_static ) noexcept; // call from object constructor
     void register_entry( IObject &parent, CollisionId id, Sphere const &hitsphere, bool is_static ) noexcept; // call from object constructor
-    void unregister_entry( IObject const &parent ) noexcept;
+    bool unregister_entry( IObject const &parent ) noexcept;
 
     // tests whether the bounding box 'bounds' would be valid for object 'obj'
     // in accordance to the bounds ruleset 'rules' (list of invalidating CollisionIds)
-    bool test( IObject const &obj,
-               Box     const &bounds,
-               Ruleset const &rules ) const noexcept
+    template <typename Geometry> // Box or Sphere
+    bool test( IObject  const &obj,
+               Geometry const &bounds,
+               Ruleset  const &rules ) const noexcept
     {
         for ( auto const &e : _mobileBoxes )
             if ( *(e.object) != obj && intersects(e.hitbox,    &bounds) )
@@ -294,7 +298,7 @@ public:
     {
         for ( float fac = .0f;  fac <= 1.0f;  fac += lerpFacStep ) { 
             Geometry test = lerp( src, dest, fac );
-            if ( test(obj, test, blockers) )
+            if ( this->test(obj, test, blockers) )
                 src = test;
         }
     }
@@ -311,7 +315,7 @@ public:
     void update();
 
 private:
-    static auto constexpr sqr = []( auto n ) { return n*n; }; // TODO: refactor?
+    static auto constexpr sqr = []( auto n ) { return n*n; };
 
     struct _HitboxEntry { // POD
         IObject            *object; // parent object   (multiple hitboxes can share the same parent)

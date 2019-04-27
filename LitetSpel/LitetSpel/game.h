@@ -1,49 +1,52 @@
 #pragma once
+
 #include <d3d11.h>
+
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
+
 #include <vector>
+#include <functional>
+
 #include "Geometry.h"
 #include "Collisions.h"
-#include  "Platform.h"
-#include "Blob.h"
 #include "Platform.h"
-#include <functional>
+#include "Blob.h"
 
 using namespace std; // usch
 
 extern double dt;
-
-
 
 class LevelGoal : public IObject {
 public:
     using TriggerCallback = std::function<void(void)>;
     LevelGoal( CollisionManager &colManager, Box bounds, TriggerCallback cb=[](){} );
     virtual ~LevelGoal() {}
-    virtual void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override;
+    virtual void collide( CollisionId             ownHitbox,
+                          CollisionId             otherHitbox,
+                          IObject                &other,
+                          CollisionManager const &collisionManager ) override;
 private:
 //  auto             _representation; // TODO
     Box              _bounds;
     TriggerCallback  _triggerCallback;
 };
 
-
-
-enum PlayerStatus 
-{
-	None,
-	Bouncy,
-	Sticky,
-	Heavy
-};
+enum PlayerStatus { None,
+                    Bouncy,
+                    Sticky,
+                    Heavy };
 
 class Player : public IObject {
+    std::vector<CollisionId> blockRules = { CollisionId::wall, CollisionId::platform };
 public:
     Player( glm::vec3 position = {.0f, .0f, .0f} );
     virtual ~Player();
-    virtual void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override;
+    virtual void collide( CollisionId             ownHitbox,
+                          CollisionId             otherHitbox,
+                          IObject                &other,
+                          CollisionManager const &collisionManager ) override;
     void move(float dt, glm::vec3 dir) noexcept;
 	vector<Blob> blobs;
 	int blobCharges = 5;
@@ -62,8 +65,8 @@ public:
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
-class Enemy : public IObject 
-{
+class Enemy : public IObject {
+    std::vector<CollisionId> blockRules = { CollisionId::wall, CollisionId::platform };
 public:
 	glm::vec3  posPrev, pos;
 	float      EmoveSpeed, EjumpSpeed, EjumpCooldown, Egravity;
@@ -72,7 +75,10 @@ public:
 
 	Enemy(glm::vec3 position = {-20.0f, 40.0f, 0.0f});
 	virtual ~Enemy();
-	virtual void collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject &other) override;
+	virtual void collide( CollisionId             ownHitbox,
+                          CollisionId             otherHitbox,
+                          IObject                &other,
+                          CollisionManager const &collisionManager ) override;
 	void update();
 	void move();
 };
@@ -85,10 +91,10 @@ public:
         player ( startPos )
     {}
 
-    Player         player;
-	Enemy          enemy;
-    vector<Box>    boxes;
-    vector<Sphere> spheres;
+    Player           player;
+	Enemy            enemy;
+    vector<Box>      boxes;
+    vector<Sphere>   spheres;
     CollisionManager colManager;
 
     //void fun() {
@@ -120,8 +126,8 @@ public:
 
 	//float gravity = 50.0f;
 
-	Box EnemyBox;
-    Sphere playerSphere;
+	Box      EnemyBox;
+    Sphere   playerSphere;
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
