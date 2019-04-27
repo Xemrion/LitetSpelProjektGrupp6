@@ -1,12 +1,7 @@
-#ifndef LIBRARY_H
-#define LIBRARY_H
+#pragma once
 
-enum class PowerType {
-	None,
-	Bouncy,
-	Heavy,
-	Sticky
-}; //Adding more requires change in PowerUp class
+const float GRAVITY_CONSTANT = 100.f;
+const float COOLDOWN_CONSTANT = 0.3f;
 
 //Colours
 static const glm::vec4 red		= glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -20,7 +15,3 @@ static const glm::vec4 black	= glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 static const glm::vec4 white	= glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 static const glm::vec4 grey		= glm::vec4(0.77f, 0.77f, 0.77f, 1.0f);
 static const glm::vec4 olive	= glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-
-
-
-#endif // !LIBRARY_H

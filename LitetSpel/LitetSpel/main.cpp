@@ -1,10 +1,11 @@
-#include <Windows.h>
-#include <chrono>
-#include <d3d11.h>
+#define NOMINMAX
 #include "Graphics.h"
 #include "game.h"
 #include "KeyboardInput.h"
 #include "MouseInput.h"
+#include <chrono>
+#include <d3d11.h>
+#include <Windows.h>
 
 KeyboardInput keyboard;
 MouseInput mouse;

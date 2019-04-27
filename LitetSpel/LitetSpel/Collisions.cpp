@@ -33,10 +33,10 @@ void CollisionManager::unregisterEntry(CollisionObject const &parent) noexcept {
 }
 
 bool CollisionManager::intersect(Box const &a, Box const &b) noexcept {
-    float const dx = abs(a.center.x - b.center.x) * 2; // midpoint delta x
-    float const dy = abs(a.center.y - b.center.y) * 2; // midpoint delta y
-    float const cWidth  = (a.halfLengths.x + b.halfLengths.x) * 2; // combined width
-    float const cHeight = (a.halfLengths.y + b.halfLengths.y) * 2; // combined height
+    float const dx = abs(a.center.x - b.center.x); // midpoint delta x
+    float const dy = abs(a.center.y - b.center.y); // midpoint delta y
+    float const cWidth  = (a.halfLengths.x + b.halfLengths.x); // combined width
+    float const cHeight = (a.halfLengths.y + b.halfLengths.y); // combined height
     return dx < cWidth and dy < cHeight;
 }
 

@@ -7,11 +7,9 @@
 #include "Collisions.h"
 #include "Platform.h"
 #include "Blob.h"
+#include "Globals.h"
 
 using namespace std;
-
-const float GRAVITY_CONSTANT = 200.0f;
-const float COOLDOWN_CONSTANT = 0.3f;
 
 enum PlayerStatus 
 {
@@ -26,7 +24,9 @@ public:
     Player( glm::vec3 position = {.0f, .0f, .0f} );
     virtual ~Player();
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) override;
-    void move(glm::vec3 dir);
+    void move(float dt);
+	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
+	void addVelocity(glm::vec3 velocity, bool useSpeed = false);
 	void putForce(glm::vec3 force);
 	vector<Blob> blobs;
 	int blobCharges = 5;
@@ -56,8 +56,10 @@ public:
 	virtual ~Enemy();
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) override;
 	void update(double dt);
-	void move(glm::vec3 dir);
+	void addVelocity(glm::vec3 velocity, bool useSpeed = false);
+	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
 	void putForce(glm::vec3 force);
+	void move(float dt);
 };
 
 

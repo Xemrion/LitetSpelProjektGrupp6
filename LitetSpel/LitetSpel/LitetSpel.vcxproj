@@ -139,7 +139,7 @@
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="KeyboardInput.h" />
-    <ClInclude Include="Library.h" />
+    <ClInclude Include="Globals.h" />
     <ClInclude Include="MouseInput.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="PowerUp.h" />

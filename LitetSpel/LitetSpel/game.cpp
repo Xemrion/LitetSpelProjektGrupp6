@@ -61,15 +61,37 @@ Player::Player(glm::vec3 position) :
 
 Player::~Player() {}
 
-
-void Player::move(glm::vec3 dir) {
-	this->velocity += dir;
+// Set useSpeed to true to multiply velocity by objects speed value
+void Player::setVelocity(glm::vec3 velocity, bool useSpeed) {
+	if (useSpeed) {
+		this->velocity = velocity * moveSpeed;
+	}
+	else {
+		this->velocity = velocity;
+	}
 }
 
+// Set useSpeed to true to multiply velocity by objects speed value
+void Player::addVelocity(glm::vec3 velocity, bool useSpeed) {
+	if (useSpeed) {
+		this->velocity += velocity * moveSpeed;
+	}
+	else {
+		this->velocity += velocity;
+	}
+}
+
+// velocity += force / mass;
 void Player::putForce(glm::vec3 force) {
 	this->velocity += force / mass;
 }
 
+// Call from updatePhysics
+void Player::move(float dt) {
+	this->pos += velocity * dt;
+}
+
+// Updates logic, call once per frame
 void Player::update(double dt) {
 	jumpCooldown -= dt;
 	shootCooldown -= dt;
@@ -85,24 +107,23 @@ void Player::update(double dt) {
 		mass = 10;
 	}
 
-	this->velocity.y -= GRAVITY_CONSTANT * dt;
-
 	for (int i = 0; i < blobs.size(); i++)
 	{
 		if (blobs[i].isBeingRecalled)
 		{
-			blobs[i].setVelocity(glm::normalize(pos - blobs[i].pos));
 			if (glm::length((pos - blobs[i].pos)) < this->radius)
 			{
 				blobs[i].isBeingRecalled = false;
+				blobs[i].isActive = false;
 			}
 		}
 		else if (!blobs[i].isActive)
 		{
 			blobs[i].pos = pos + glm::vec3(0.0, 2.0, 0.0);
+			blobs[i].setVelocity(glm::vec3(0.0));
 			blobs[i].blobSphere.centerRadius = glm::vec4(pos, 2);
 		}
-		//blobs[i].move(dt);
+		blobs[i].update(dt);
 	}
 }
 
@@ -156,7 +177,7 @@ void Player::shoot(glm::vec3 mousePos)
 	{
 		if (!blobs[nrOfActiveBlobs + i].isBeingRecalled)
 		{
-			blobs[nrOfActiveBlobs + i].setVelocity(dir);
+			blobs[nrOfActiveBlobs + i].setVelocity(dir, true);
 			blobs[nrOfActiveBlobs + i].isActive = true;
 			shootCooldown = 0.5f;
 			nrOfActiveBlobs++;
@@ -165,12 +186,14 @@ void Player::shoot(glm::vec3 mousePos)
 	}
 
 }
+
 void Player::recallBlobs()
 {
 	for (int i = 0; i < nrOfActiveBlobs; i++)
 	{
 		blobs[i].isActive = false;
 		blobs[i].isBeingRecalled = true;
+		blobs[i].setVelocity(glm::normalize(pos - blobs[i].pos), true);
 	}
 	shootCooldown = 0.5f;
 	nrOfActiveBlobs = 0;
@@ -187,6 +210,7 @@ void Game::update(double dt) {
 	updateGraphics();
 }
 
+// Call first of all per frame updates
 void Game::handleInput() {
 
 	if (leftButtonDown
@@ -199,13 +223,13 @@ void Game::handleInput() {
 	if (keys[Keys::left]) {
 		if (level.player.isStuck == false)
 		{
-			level.player.move(glm::vec3(-level.player.moveSpeed, 0, 0));
+			level.player.addVelocity(glm::vec3(-1, 0, 0), true);
 		}
 	}
 	if (keys[Keys::right]) {
 		if (level.player.isStuck == false)
 		{
-			level.player.move(glm::vec3(level.player.moveSpeed, 0, 0));
+			level.player.addVelocity(glm::vec3(1, 0, 0), true);
 		}
 
 	}
@@ -226,7 +250,7 @@ void Game::handleInput() {
 			level.player.isStuck = false;
 			if (level.player.isStanding == false)
 			{
-				level.player.move(glm::vec3(0.0, GRAVITY_CONSTANT, 0.0));
+				level.player.addVelocity(glm::vec3(0.0, GRAVITY_CONSTANT, 0.0));
 			}
 		}
 	}
@@ -237,18 +261,23 @@ void Game::handleInput() {
 }
 
 // Catches up the physics simulation time to the actual game time
-// Moves entities using their velocity value
+// Call last of all logic updates (but before graphics)
 void Game::updatePhysics() {
 	float timestep = 0.0001f;
 	
 	while (physicsSimTime + timestep < time) {
-		level.player.pos += level.player.velocity * timestep;
+		level.player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+		level.player.move(timestep);
 
 		if (level.enemy.alive) {
-			level.enemy.pos += level.enemy.velocity * timestep;
+			level.player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+			level.enemy.move(timestep);
 		}
 
 		for (int i = 0; i < level.player.blobs.size(); i++) {
+			if (level.player.blobs[i].isActive) {
+				level.player.blobs[i].addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+			}
 			level.player.blobs[i].move(timestep);
 			//level.player.blobs[i].updateCollisions();
 		}
@@ -372,6 +401,7 @@ void Game::updateEnemyCollision()
 	//####################################################################
 }
 
+// Call after all other per frame updates
 void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
 	level.boxes = vector<Box>();
@@ -460,6 +490,7 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other)
 	}
 }
 
+// Updates logic, call once per frame before updatePhysics
 void Enemy::update(double dt)
 {
 	velocity.x = 0.0;
@@ -475,18 +506,42 @@ void Enemy::update(double dt)
 		}
 	}
 
-	move(controlDir * moveSpeed);
+	addVelocity(controlDir, true);
 	this->isStanding = false;
 }
 
-void Enemy::move(glm::vec3 dir)
+// Set useSpeed to true to multiply velocity by objects speed value
+void Enemy::addVelocity(glm::vec3 velocity, bool useSpeed)
 {
-	this->velocity += dir;
+	if (useSpeed) {
+		this->velocity += velocity * moveSpeed;
+	}
+	else {
+		this->velocity += velocity;
+	}
 }
 
+// Set useSpeed to true to multiply velocity by objects speed value
+void Enemy::setVelocity(glm::vec3 velocity, bool useSpeed)
+{
+	if (useSpeed) {
+		this->velocity = velocity * moveSpeed;
+	}
+	else {
+		this->velocity = velocity;
+	}
+}
+
+// velocity += force / mass;
 void Enemy::putForce(glm::vec3 force)
 {
 	this->velocity += force / mass;
+}
+
+// Call from updatePhysics
+void Enemy::move(float dt)
+{
+	this->pos += this->velocity * dt;
 }
 
 //Adds two orbiting spheres around a sphere for animation
