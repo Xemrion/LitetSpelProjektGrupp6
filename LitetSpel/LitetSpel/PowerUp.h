@@ -1,7 +1,7 @@
 #ifndef POWERUP_H
 #define POWERUP_H
 #include"Geometry.h"
-#include"Library.h"
+#include "globals.h"
 
 class PowerUp
 {

@@ -1,5 +1,4 @@
 #include "Blob.h"
-#include <queue>
 
 Blob::Blob()
 {

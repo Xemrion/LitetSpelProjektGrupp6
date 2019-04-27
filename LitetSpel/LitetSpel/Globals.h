@@ -3,6 +3,13 @@
 const float GRAVITY_CONSTANT = 100.f;
 const float COOLDOWN_CONSTANT = 0.3f;
 
+enum class PowerType {
+	None,
+	Bouncy,
+	Heavy,
+	Sticky
+}; //Adding more requires change in PowerUp class
+
 //Colours
 static const glm::vec4 red		= glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 static const glm::vec4 green	= glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
