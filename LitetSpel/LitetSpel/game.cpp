@@ -110,6 +110,10 @@ void Player::update(double dt) {
 		mass = 10;
 	}
 
+	if (status != PlayerStatus::Sticky) {
+		isStuck = false;
+	}
+
 	for (int i = 0; i < blobs.size(); i++)
 	{
 		if (blobs[i].isBeingRecalled)
@@ -135,6 +139,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other
 	if (ownHitbox == ColliderType::player_bottom) {
 		if (otherHitbox == ColliderType::platform) {
 			this->isStanding = true;
+			this->hasExtraJump = true;
 			this->pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			this->velocity.y = 0;
 		}
@@ -148,7 +153,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other
 			this->velocity.y = 0;
 			if (this->status == PlayerStatus::Sticky) {
 				this->isStuck = true;
-				this->pos.y -= 1;
+				//this->pos.y -= 1.1;
 			}
 		}
 	}
@@ -242,9 +247,11 @@ void Game::handleInput() {
 			level.player.jumpCooldown = COOLDOWN_CONSTANT;
 			level.player.putForce(glm::vec3(0.0, level.player.jumpForce, 0.0));
 		}
-		else if (level.player.status == PlayerStatus::Bouncy && level.player.hasExtraJump == true) {
+		else if (level.player.status == PlayerStatus::Bouncy && level.player.hasExtraJump && level.player.jumpCooldown <= 0) {
 			level.player.hasExtraJump = false;
 			level.player.jumpCooldown = COOLDOWN_CONSTANT;
+			level.player.velocity.y = 0;
+			level.player.putForce(glm::vec3(0.0, level.player.jumpForce, 0.0));
 		}
 	}
 	if (keys[Keys::down]) {
@@ -253,7 +260,7 @@ void Game::handleInput() {
 			level.player.isStuck = false;
 			if (level.player.isStanding == false)
 			{
-				level.player.addVelocity(glm::vec3(0.0, GRAVITY_CONSTANT, 0.0));
+				//level.player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0));
 			}
 		}
 	}
@@ -269,7 +276,12 @@ void Game::updatePhysics() {
 	float timestep = 0.0001f;
 	
 	while (physicsSimTime + timestep < time) {
-		level.player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+		if (level.player.isStuck == false) {
+			level.player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+		}
+		else {
+			level.player.setVelocity(glm::vec3(0.0));
+		}
 		level.player.move(timestep);
 
 		if (level.enemy.alive) {
