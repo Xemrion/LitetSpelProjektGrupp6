@@ -25,14 +25,14 @@ auto gravDir = glm::vec3{ .0f, -1.0f, .0f }; // down
 
 // function wrapping gravity modifier changes
 void IObject::updateGravMod() noexcept {
-if ( isStuck ) gravMod = .0f;
-else gravMod = isHeavy? 2.0f : 1.0f;
+    if ( isStuck ) gravMod = .0f;
+        else gravMod = isHeavy? 2.0f : 1.0f;
 }
 
 // at the start of each frame:
-updateGravMod(); // ensure the gravity modifier is up-to-date
-move( float(dt) * gravMod * gravFac, gravDir ); // apply gravity
-// if on a platfomr, the collision system will keep the entity
+    updateGravMod(); // ensure the gravity modifier is up-to-date
+    move( float(dt) * gravMod * gravFac, gravDir ); // apply gravity
+// if on a platform, the collision system will keep the entity
 // from falling through the floor, and collide() will reset
 // the 'canJump' state whenever a player.bottomHitbox touches a platform
 
@@ -62,6 +62,8 @@ void IMobile::collide CollisionId             ownHitbox,
 
     if ( floorCollision )
         onGround = true; // reenabling walking
+
+    if (
 }
 
 void IMobile::jump() noexcept {
