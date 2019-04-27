@@ -4,6 +4,98 @@
 #define JUMP_CONSTANT 1.5f
 #define COOLDOWN_CONSTANT 0.3f
 
+/*
+
+
+
+// one gravity factor:    gravFac
+// one gravity modifier:  gravMod
+// one gravity direction: gravDir
+//
+// two boolean states:   isStuck, isHeavy
+// that affect the gravity modifier thusly:
+//     isStuck              =>  gravMod = 0.0f;
+//    !isStuck && !isHeavy  =>  gravMod = 1.0f;
+//    !isStuck &&  isHeavy  =>  gravMod = 2.0f;
+
+// potential start values:
+auto gravFac = 9.81f; // Earth gravity
+auto gravMod = 1.00f; // normal gravity
+auto gravDir = glm::vec3{ .0f, -1.0f, .0f }; // down
+
+// function wrapping gravity modifier changes
+void IObject::updateGravMod() noexcept {
+if ( isStuck ) gravMod = .0f;
+else gravMod = isHeavy? 2.0f : 1.0f;
+}
+
+// at the start of each frame:
+updateGravMod(); // ensure the gravity modifier is up-to-date
+move( float(dt) * gravMod * gravFac, gravDir ); // apply gravity
+// if on a platfomr, the collision system will keep the entity
+// from falling through the floor, and collide() will reset
+// the 'canJump' state whenever a player.bottomHitbox touches a platform
+
+
+class IMobile : public IObject
+
+
+// private:
+
+glm::vec3 gravVel; // <=>  gravFac * gravDir
+glm::vec3 velocity;
+int       jumpsLeft;
+int       jumpsMax;
+
+void IMobile::collide CollisionId             ownHitbox,
+                         CollisionId             otherHitbox,
+                         IObject                &other,
+                         CollisionManager const &collisionManager ) override
+{
+    // ...
+
+    if ( floorCollision or wallCollision && canWallJump)
+        jumpsLeft = jumpsMax; // resetting jumps counter
+
+    if ( floorCollision or wallCollision )
+        velocity = glm::vec3{ .0f }; // collided; clearing velocity
+
+    if ( floorCollision )
+        onGround = true; // reenabling walking
+}
+
+void IMobile::jump() noexcept {
+    if (--jumpsLeft > 0) {
+        velocity += jumpPower * -gravDir;
+        onGround  = false; // disabling walking
+    }
+}
+
+void IMobile::moveLeft() noexcept {
+    if ( onGround )
+        velocity += glm::vec3{ -moveSpeed * float(dt), .0f, .0f };
+}
+
+void IMobile::moveRight() noexcept {
+    if ( onGround )
+        velocity += glm::vec3{  moveSpeed * float(dt), .0f, .0f };
+}
+
+// public:
+void IObject::update() {
+    // on every frame:
+    velocity += float(dt) * gravMod * gravVel; // apply gravity impact
+    move( velocity );
+
+    // ...
+}
+
+
+
+*/
+
+
+
 LevelGoal::LevelGoal( CollisionManager &colManager, Box bounds, TriggerCallback cb ):
     _bounds(bounds),
     _triggerCallback(cb)
