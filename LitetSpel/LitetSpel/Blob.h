@@ -1,14 +1,13 @@
 #pragma once
 
-#ifndef BLOB_H
-#define BLOB_H
-
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include "Geometry.h"
 #include "globals.h"
 #include "Collisions.h"
+
+// TODO: improve encapsulation by reducing public exposure
 
 class Blob : public CollisionObject {
 public:
@@ -43,4 +42,3 @@ public:
     Box       hitbox;
     Sphere    blobSphere;
 };
-#endif // !BLOBS_H

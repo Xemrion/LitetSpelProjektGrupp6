@@ -1,9 +1,9 @@
 #pragma once
+
 #include <d3d11.h>
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
-
 
 class Sphere {
 public:

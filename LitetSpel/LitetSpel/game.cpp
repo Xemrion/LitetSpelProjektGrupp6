@@ -46,15 +46,15 @@ void Game::init() {
 	EnemyBox.color = glm::vec4(1,0,0,0);
 }
 
-
-
-
 Player::Player(glm::vec3 position) :
 	CollisionObject(),
 	pos(position),
+    radius(5.0f),
 	velocity(glm::vec3(0.0)),
 	moveSpeed(150.0f),
 	mass(10.0),
+    blobCharges(5),
+    shootCooldown(0),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
 	hasExtraJump(true),
@@ -162,7 +162,6 @@ void Player::shoot(glm::vec3 mousePos)
         if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
             blob.shoot( dir );
             shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
-            //++nrOfActiveBlobs;
             break;
         }
     }
@@ -173,7 +172,6 @@ void Player::recallBlobs()
     for ( auto &blob : blobs ) 
         blob.recall();
     shootCooldown   = .5f; // TODO: refactor into a constexpr constant in Globals.h 
-    //nrOfActiveBlobs = 0;
 }
 
 
@@ -191,7 +189,7 @@ void Game::update(double dt) {
 void Game::handleInput() {
     auto &player = level.player;
 
-	if (leftButtonDown) { //&& level.player.nrOfActiveBlobs < level.player.blobCharges
+	if (leftButtonDown) {
 		player.shoot(mousePos);
 	}
 
@@ -262,7 +260,7 @@ void Game::updatePhysics() {
 				blob.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
 			blob.move(timestep);
-			//player.blobs[i].updateCollisions();
+			// blob.updateCollisions();
 		}
 		updatePlayerCollision();
 		updateEnemyCollision();

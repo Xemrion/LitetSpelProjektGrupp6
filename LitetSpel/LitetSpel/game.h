@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
@@ -9,10 +10,11 @@
 #include "Blob.h"
 #include "Globals.h"
 
+// TODO: improve encapsulation by reducing public exposure
+
 using namespace std;
 
-enum PlayerStatus 
-{
+enum PlayerStatus {
 	None,
 	Bouncy,
 	Sticky,
@@ -28,10 +30,6 @@ public:
 	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
 	void addVelocity(glm::vec3 velocity, bool useSpeed = false);
 	void putForce(glm::vec3 force);
-	vector<Blob> blobs;
-	int blobCharges = 5;
-	//int nrOfActiveBlobs = 0;
-	float shootCooldown = 0;
 	void shoot(glm::vec3 mousePos);
 	void recallBlobs();
     void update(double dt);
@@ -40,18 +38,16 @@ public:
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool hasExtraJump, isStanding, isStuck;
     int status;
-	double radius = 5.0;
+	double radius;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+    vector<Blob> blobs;
+    int blobCharges;
+    float shootCooldown;
 };
 
 class Enemy : public CollisionObject 
 {
 public:
-	glm::vec3 pos, velocity, controlDir;
-	float moveSpeed, jumpForce, jumpCooldown, mass;
-	bool isStanding, alive, isDeregistered;
-	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
-
 	Enemy(glm::vec3 position = { -25.0f, 20.0f, 0.0f });
 	virtual ~Enemy();
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) override;
@@ -60,33 +56,32 @@ public:
 	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
 	void putForce(glm::vec3 force);
 	void move(float dt);
+
+    glm::vec3 pos, velocity, controlDir;
+    float moveSpeed, jumpForce, jumpCooldown, mass;
+    bool isStanding, alive, isDeregistered;
+    Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
-
 struct LevelData { // POD
-    Player         player;
-	Enemy          enemy;
-    vector<Box>    boxes;
-    vector<Sphere> spheres;
+    // TODO: switch from POD struct to class 
+    // and merge in level start / goal code from falk branch
+    Player           player;
+	Enemy            enemy;
+    vector<Box>      boxes;
+    vector<Sphere>   spheres;
     CollisionManager colManager;
-
-    //void fun() {
-    //    colManager.register_entry( player, ColliderType::player_top,    pBoxTop   true );
-    //    colManager.register_entry( player, ColliderType::player_side,   pBoxLeft, true );
-    //    colManager.register_entry( player, ColliderType::player_side,   pBoxRight true );
-    //    colManager.register_entry( player, ColliderType::player_bottom, pBoxBot,  true );
-    //    colManager.register_entry( groundBox, ColliderType::platform, platBox,  false );
-    //}
 };
 
 class Game {
 private:
 public:
+    // TODO: refactor into ctor initializer list
 	double physicsSimTime = 0.0;
 	double time = 0.0;
 
-	enum Keys {
-		left,
+	enum Keys { // TODO: refactor into Globals.h
+        left,
 		right,
 		up,
 		down,
@@ -109,10 +104,8 @@ public:
 
 	void animateSphere(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8));
 
-	//float gravity = 50.0f;
-
-	Box EnemyBox;
-    Sphere playerSphere;
+	Box      EnemyBox;
+    Sphere   playerSphere;
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
