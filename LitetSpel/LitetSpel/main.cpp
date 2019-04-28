@@ -10,6 +10,7 @@
 KeyboardInput keyboard;
 MouseInput mouse;
 Game game;
+Graphics graphics;
 
 double dt;
 
@@ -158,10 +159,12 @@ void keyboardFunc()
 			if (game.level.player.status == PlayerStatus::None)
 			{
 				game.level.player.status = PlayerStatus::Bouncy;
+				graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
 			}
 			else
 			{
 				game.level.player.status = PlayerStatus::None;
+				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -173,10 +176,12 @@ void keyboardFunc()
 			if (game.level.player.status == PlayerStatus::None)
 			{
 				game.level.player.status = PlayerStatus::Heavy;
+				graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
 			}
 			else
 			{
 				game.level.player.status = PlayerStatus::None;
+				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -188,23 +193,27 @@ void keyboardFunc()
 			if (game.level.player.status == PlayerStatus::None)
 			{
 				game.level.player.status = PlayerStatus::Sticky;
+				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
 			}
 			else
 			{
 				game.level.player.status = PlayerStatus::None;
+				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 			}
 			powerCoolDown = 0.2f;
 		}
 	}
 	if (keyboard.KeyIsPressed('R'))
 		game.level.player.recallBlobs();
+	if (keyboard.KeyIsPressed('P')) {
+		graphics.createShaders();
+	}
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
 	MSG msg = { 0 };
-	Graphics graphics;
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
 	game.init();
