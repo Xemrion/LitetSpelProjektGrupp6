@@ -7,34 +7,28 @@ bool CollisionObject::operator!=(CollisionObject const &other) const noexcept {
 }
 
 CollisionManager::CollisionManager() {
-    staticBoxes.reserve(  200 );
-    mobileBoxes.reserve(   25 );
+    staticBoxes.reserve( 200 );
+    mobileBoxes.reserve(  25 );
 }
 
 void CollisionManager::registerEntry(CollisionObject &parent, ColliderType id, Box const &hitbox, bool isStatic) noexcept {
-    HitboxEntry e = { 
-		&parent,
-		&hitbox,
-		id
-	};
+    HitboxEntry e = { &parent, &hitbox, id };
 
-	if (isStatic) {
-		staticBoxes.push_back(e);
-	}
-	else {
-		mobileBoxes.push_back(e);
-	}
+	if (isStatic)
+        staticBoxes.push_back(e);
+	else
+        mobileBoxes.push_back(e);
 }
 
-void CollisionManager::unregisterEntry(CollisionObject const &parent) noexcept {
+bool CollisionManager::unregisterEntry(CollisionObject const &parent) noexcept {
     auto unary_predicate = [&parent]( auto const &e ) { return (e.object) != &parent; };
-    std::remove_if(staticBoxes.begin(), staticBoxes.end(), unary_predicate );
-    std::remove_if(mobileBoxes.begin(), mobileBoxes.end(), unary_predicate );
+    return std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate ) != staticBoxes.end()
+        or std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate ) != staticBoxes.end();
 }
 
 bool CollisionManager::intersect(Box const &a, Box const &b) noexcept {
-    float const dx = abs(a.center.x - b.center.x); // midpoint delta x
-    float const dy = abs(a.center.y - b.center.y); // midpoint delta y
+    float const dx      = abs(a.center.x - b.center.x); // midpoint delta x
+    float const dy      = abs(a.center.y - b.center.y); // midpoint delta y
     float const cWidth  = (a.halfLengths.x + b.halfLengths.x); // combined width
     float const cHeight = (a.halfLengths.y + b.halfLengths.y); // combined height
     return dx < cWidth and dy < cHeight;

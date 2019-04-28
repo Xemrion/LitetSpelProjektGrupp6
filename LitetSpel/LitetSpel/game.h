@@ -24,13 +24,13 @@ public:
     Player( glm::vec3 position = {.0f, .0f, .0f} );
     virtual ~Player();
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) override;
-    void move(float dt);
+    void move(double dt);
 	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
 	void addVelocity(glm::vec3 velocity, bool useSpeed = false);
 	void putForce(glm::vec3 force);
 	vector<Blob> blobs;
 	int blobCharges = 5;
-	int nrOfActiveBlobs = 0;
+	//int nrOfActiveBlobs = 0;
 	float shootCooldown = 0;
 	void shoot(glm::vec3 mousePos);
 	void recallBlobs();
