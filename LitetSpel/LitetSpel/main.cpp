@@ -10,6 +10,7 @@
 KeyboardInput keyboard;
 MouseInput mouse;
 Game game;
+Graphics graphics;
 
 double dt;
 
@@ -198,13 +199,15 @@ void keyboardFunc()
 	}
 	if (keyboard.KeyIsPressed('R'))
 		game.level.player.recallBlobs();
+	if (keyboard.KeyIsPressed('P')) {
+		graphics.createShaders();
+	}
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
 	MSG msg = { 0 };
-	Graphics graphics;
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
 	game.init();
