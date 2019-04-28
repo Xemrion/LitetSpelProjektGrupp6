@@ -34,7 +34,7 @@ bool CollisionManager::intersect(Box const &a, Box const &b) noexcept {
     return dx < cWidth and dy < cHeight;
 }
 
-void CollisionManager::update() {
+void CollisionManager::update() noexcept {
     // test each mobile hitbox for intersections:
     for (auto &m : mobileBoxes) {
         // test against all other mobile hitboxes (that belong to another object)

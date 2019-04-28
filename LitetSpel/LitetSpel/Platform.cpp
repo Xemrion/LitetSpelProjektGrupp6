@@ -13,6 +13,4 @@ Platform::Platform(glm::vec4 center, glm::vec4 halfLengths)
 	this->hitbox.halfLengths = halfLengths;
 }
 
-Platform::~Platform()
-{
-}
+Platform::~Platform() {}

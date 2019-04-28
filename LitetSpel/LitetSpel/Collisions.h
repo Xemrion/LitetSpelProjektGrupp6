@@ -26,7 +26,7 @@ public:
     //auto& operator=( IObject const  & ) = delete;
     //auto& operator=( IObject       && ) = delete;
     virtual ~CollisionObject() noexcept {}
-    virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) = 0;
+    virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) = 0;
     size_t getID() const noexcept { return id; }
     bool operator!=(CollisionObject const &other) const noexcept;
 
@@ -49,7 +49,7 @@ public:
     bool intersect(Box const &a, Box const &b) noexcept;
     // checks if any of the mobiles have collided,
     // and if so calls their collide function
-    void update();
+    void update() noexcept;
 private:
     struct HitboxEntry {
         CollisionObject *object; // parent object   (multiple hitboxes can share the same parent)

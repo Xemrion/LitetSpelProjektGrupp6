@@ -1,6 +1,6 @@
 #include "game.h"
 
-void Game::init() {
+void Game::init() noexcept {
     groundBox.hitbox.center      = glm::vec4(0, -30, 0, 0);
     groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
 	groundBox.hitbox.color       = glm::vec4(1.0, 1.0, 1.0, 0.0);
@@ -66,7 +66,7 @@ Player::Player(glm::vec3 position) :
 Player::~Player() {}
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Player::setVelocity(glm::vec3 velocity, bool useSpeed) {
+void Player::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
 	if (useSpeed) {
 		this->velocity = velocity * moveSpeed;
 	}
@@ -74,7 +74,7 @@ void Player::setVelocity(glm::vec3 velocity, bool useSpeed) {
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Player::addVelocity(glm::vec3 velocity, bool useSpeed) {
+void Player::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
 	if (useSpeed) {
 		this->velocity += velocity * moveSpeed;
 	}
@@ -82,17 +82,17 @@ void Player::addVelocity(glm::vec3 velocity, bool useSpeed) {
 }
 
 // velocity += force / mass;
-void Player::putForce(glm::vec3 force) {
+void Player::putForce(glm::vec3 const &force) noexcept {
 	this->velocity += force / mass;
 }
 
 // Call from updatePhysics
-void Player::move(double dt) {
+void Player::move(double dt) noexcept {
 	pos += velocity * float(dt);
 }
 
 // Updates logic, call once per frame
-void Player::update(double dt) {
+void Player::update(double dt) noexcept {
 	jumpCooldown  -= float(dt);
 	shootCooldown -= float(dt);
 
@@ -109,7 +109,7 @@ void Player::update(double dt) {
         blob.update(dt);
 }
 
-void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) 
+void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
 {
 	if (ownHitbox == ColliderType::player_bottom) {
 		if (otherHitbox == ColliderType::platform) {
@@ -152,12 +152,12 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other
 	}
 }
 
-void Player::shoot(glm::vec3 mousePos)
+void Player::shoot(glm::vec3 mousePos) noexcept
 {
     if (shootCooldown > 0) return;
 
-    mousePos      = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
-    glm::vec3 dir = glm::normalize(mousePos - pos);
+    auto mouseScreenPos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
+    glm::vec3 dir = glm::normalize( mouseScreenPos - pos);
     for ( auto &blob : blobs ) {
         if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
             blob.shoot( dir );
@@ -167,7 +167,7 @@ void Player::shoot(glm::vec3 mousePos)
     }
 }
 
-void Player::recallBlobs()
+void Player::recallBlobs() noexcept
 {
     for ( auto &blob : blobs ) 
         blob.recall();
@@ -175,7 +175,7 @@ void Player::recallBlobs()
 }
 
 
-void Game::update(double dt) {
+void Game::update(double dt)  {
 	time += dt;
 	level.player.velocity.x = 0;
 	handleInput();
@@ -456,7 +456,7 @@ Enemy::Enemy(glm::vec3 position):
 
 Enemy::~Enemy(){}
 
-void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other)
+void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
 {
 	if (otherHitbox == ColliderType::platform) {
 		if (ownHitbox == ColliderType::enemy_bottom)
@@ -484,7 +484,7 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other)
 }
 
 // Updates logic, call once per frame before updatePhysics
-void Enemy::update(double dt)
+void Enemy::update(double dt) noexcept
 {
 	velocity.x    = 0.0;
 	velocity.y   -= float(GRAVITY_CONSTANT) * float(dt);
@@ -503,7 +503,7 @@ void Enemy::update(double dt)
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Enemy::addVelocity(glm::vec3 velocity, bool useSpeed)
+void Enemy::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 {
 	if (useSpeed) {
 		this->velocity += velocity * moveSpeed;
@@ -514,7 +514,7 @@ void Enemy::addVelocity(glm::vec3 velocity, bool useSpeed)
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Enemy::setVelocity(glm::vec3 velocity, bool useSpeed)
+void Enemy::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 {
 	if (useSpeed) {
 		this->velocity = velocity * moveSpeed;
@@ -525,19 +525,19 @@ void Enemy::setVelocity(glm::vec3 velocity, bool useSpeed)
 }
 
 // velocity += force / mass;
-void Enemy::putForce(glm::vec3 force)
+void Enemy::putForce(glm::vec3 const &force) noexcept
 {
 	this->velocity += force / mass;
 }
 
 // Call from updatePhysics
-void Enemy::move(float dt)
+void Enemy::move(float dt) noexcept
 {
 	this->pos += this->velocity * dt;
 }
 
 //Adds two orbiting spheres around a sphere for animation
-void Game::animateSphere(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude) {
+void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::vec3 const &amplitude) {
 	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
 	// Offset the start rotation of the spheres to avoid them all starting at the same place
 	glm::vec3 offset = glm::vec3(0.2, 0.0, 0.0);

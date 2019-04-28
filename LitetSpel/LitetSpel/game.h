@@ -24,15 +24,15 @@ enum PlayerStatus {
 class Player : public CollisionObject {
 public:
     Player( glm::vec3 position = {.0f, .0f, .0f} );
-    virtual ~Player();
-    virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) override;
-    void move(double dt);
-	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
-	void addVelocity(glm::vec3 velocity, bool useSpeed = false);
-	void putForce(glm::vec3 force);
-	void shoot(glm::vec3 mousePos);
-	void recallBlobs();
-    void update(double dt);
+    virtual ~Player() noexcept;
+    virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
+    void move(double dt) noexcept;
+	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
+	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
+	void putForce(glm::vec3 const &force) noexcept;
+	void shoot(glm::vec3 mousePos) noexcept;
+	void recallBlobs() noexcept;
+    void update(double dt) noexcept;
 
     glm::vec3 pos, velocity;
     float moveSpeed, jumpForce, jumpCooldown, mass;
@@ -49,13 +49,13 @@ class Enemy : public CollisionObject
 {
 public:
 	Enemy(glm::vec3 position = { -25.0f, 20.0f, 0.0f });
-	virtual ~Enemy();
-	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box other) override;
-	void update(double dt);
-	void addVelocity(glm::vec3 velocity, bool useSpeed = false);
-	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
-	void putForce(glm::vec3 force);
-	void move(float dt);
+	virtual ~Enemy() noexcept;
+	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
+	void update(double dt) noexcept;
+	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
+	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
+	void putForce(glm::vec3 const &force) noexcept;
+	void move(float dt) noexcept;
 
     glm::vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
@@ -93,7 +93,7 @@ public:
 	glm::vec3 mousePos;
 	bool leftButtonDown = false;
 
-	void init();
+	void init() noexcept;
 	void update(double dt);
 	void updatePhysics();
 	void updatePlayerCollision();
@@ -102,7 +102,9 @@ public:
 	void handleInput();
 	void updateGraphics();
 
-	void animateSphere(Sphere sphere, glm::vec2 moveSpeed, glm::vec3 amplitude = glm::vec3(2.4, 1.7, 0.8));
+	void animateSphere( Sphere    const &sphere,
+                        glm::vec2 const &moveSpeed,
+                        glm::vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 
 	Box      EnemyBox;
     Sphere   playerSphere;

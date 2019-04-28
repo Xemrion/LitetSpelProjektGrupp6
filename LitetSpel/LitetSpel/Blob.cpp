@@ -37,7 +37,7 @@ bool Blob::getIsActive()        const noexcept { return isActive; }
 bool Blob::getIsBeingRecalled() const noexcept { return isBeingRecalled; }
 
 // called once per frame from Player::update
-void Blob::update(double dt)
+void Blob::update(double dt) noexcept
 {
     #undef min
     if ( isBeingRecalled ) {
@@ -54,24 +54,24 @@ void Blob::update(double dt)
 }
 
 // Call from updatePhysics
-void Blob::move(double dt)
+void Blob::move(double dt) noexcept
 {
 	pos           += velocity * float(dt);
 	hitbox.center  = glm::vec4( pos, 0.0 );
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Blob::setVelocity(glm::vec3 velocity, bool useSpeed)
+void Blob::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 {
 	if (useSpeed) {
 		float speedMultiplier = isBeingRecalled ? recallSpeed : speed;
-		velocity              = velocity * speedMultiplier;
+		this->velocity        = velocity * speedMultiplier;
 	}
 	else this->velocity = velocity;
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Blob::addVelocity(glm::vec3 velocity, bool useSpeed)
+void Blob::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 {
 	if (useSpeed) {
 		float speedMultiplier  = isBeingRecalled ? recallSpeed : speed;
@@ -80,7 +80,7 @@ void Blob::addVelocity(glm::vec3 velocity, bool useSpeed)
 	else this->velocity += velocity;
 }
 
-void Blob::collide(ColliderType ownType, ColliderType otherType, Box other)
+void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &other) noexcept
 {
     if ( isBeingRecalled and (
          otherType == ColliderType::player_bottom ||

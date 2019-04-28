@@ -14,25 +14,25 @@ public:
     Blob() = delete;
 	explicit Blob( glm::vec3 const & );
 
-	void update(double dt);
+	void update(double dt) noexcept;
 
-	void move(double dt);
-	void setVelocity(glm::vec3 velocity, bool useSpeed = false);
-	void addVelocity(glm::vec3 velocity, bool useSpeed = false);
+	void move(double dt) noexcept;
+	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
+	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
 
-	void collide(ColliderType ownType, ColliderType otherType, Box otherBox);
+	void collide(ColliderType ownType, ColliderType otherType, Box const &otherBox) noexcept override;
 
     void absorb() noexcept;
     void shoot( glm::vec3 const &direction ) noexcept;
     void recall() noexcept;
 
-    bool getIsActive() const noexcept;
-    bool getIsBeingRecalled() const noexcept;
+    [[nodiscard]] bool getIsActive() const noexcept;
+    [[nodiscard]] bool getIsBeingRecalled() const noexcept;
 
 private:
     glm::vec3 const *parentPosition;
-    bool isActive;       
-    bool isBeingRecalled;
+    bool  isActive;       
+    bool  isBeingRecalled;
     float recallSpeed;
     float speed;
     float radius;
