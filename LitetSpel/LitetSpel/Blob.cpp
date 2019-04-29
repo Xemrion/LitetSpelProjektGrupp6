@@ -34,12 +34,9 @@ void Blob::reactivateHitbox() noexcept {
 void Blob::shoot( glm::vec3 const &direction ) noexcept
 {
     if ( !isActive && !isBeingRecalled && status != BlobStatus::Blob_Heavy) {
+        reactivateHitbox();
         isActive = true;
-        velocity = direction * speed;
-    }
-	else if (!isActive && !isBeingRecalled && status == BlobStatus::Blob_Heavy) {
-		isActive = true;
-		velocity = direction * (speed/3);
+        velocity = (status == BlobStatus::Blob_Heavy)?  direction * speed  :  direction * (speed/3);
 	}
 }
 
