@@ -2,6 +2,10 @@
 #include <cassert>
 #include <algorithm>
 
+bool CollisionObject::operator==(CollisionObject const &other) const noexcept {
+    return id == other.id;
+}
+
 bool CollisionObject::operator!=(CollisionObject const &other) const noexcept {
     return id != other.id;
 }
@@ -21,9 +25,14 @@ void CollisionManager::registerEntry(CollisionObject &parent, ColliderType id, B
 }
 
 bool CollisionManager::unregisterEntry(CollisionObject const &parent) noexcept {
-    auto unary_predicate = [&parent]( auto const &e ) { return !((e.object) != &parent); };
-    return std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate ) != staticBoxes.end()
-        or std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate ) != staticBoxes.end();
+    auto unary_predicate = [&parent]( HitboxEntry const &e ) { return *(e.object) == parent; };
+    bool elementWasRemoved = false;
+    while ( std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate ) != staticBoxes.end()
+         or std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate ) != staticBoxes.end() )
+    {
+        elementWasRemoved = true;
+    }
+    return elementWasRemoved;
 }
 
 bool CollisionManager::intersect(Box const &a, Box const &b) noexcept {

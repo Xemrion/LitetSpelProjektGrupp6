@@ -29,6 +29,7 @@ public:
     virtual ~CollisionObject() noexcept {}
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) = 0;
     size_t getID() const noexcept { return id; }
+    bool operator==(CollisionObject const &other) const noexcept;
     bool operator!=(CollisionObject const &other) const noexcept;
 
 private:

@@ -53,7 +53,7 @@ public:
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(glm::vec3 position = { -25.0f, 20.0f, 0.0f });
+	Enemy(glm::vec3 position);
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
 	void update(double dt) noexcept;
@@ -87,17 +87,23 @@ private:
 };
 
 
-struct LevelData { // POD
-    // TODO: switch from POD struct to class 
-    // and merge in level start / goal code from falk branch
-    Player           player;
-	Enemy            enemy;
-    std::unique_ptr<LevelGoal> goal;
-    vector<Box>      boxes;
-    vector<Sphere>   spheres;
-    CollisionManager colManager;
-};
 
+struct LevelData { // POD -- TODO: switch from POD struct to class 
+    // TODO: refactor game objects into a hierarchy
+    //       i.e. a vector<SceneEntry> instead of vector<Enemy> + vector<Platform> + ... etc
+    Player                player;
+	vector<Enemy>         enemies;
+    vector<Platform>      platforms;
+    unique_ptr<LevelGoal> goal;
+    vector<Box>           boxes;
+    vector<Sphere>        spheres;
+    CollisionManager      colManager;
+    // TODO:
+    // struct SceneEntry { unique_ptr<GObject> object; glm::vec3 position; };     
+    // vector<SceneEntry> scene;
+    // void LevelData::add( glm::vec3 const &location, unique_ptr<GObject> object ) noexcept;
+    // bool LevelData::remove( GObject const &target ) noexcept;
+};
 
 class Game {
 private:
@@ -132,7 +138,7 @@ public:
                         glm::vec2 const &moveSpeed,
                         glm::vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 
-	Box      EnemyBox;
+    Box      enemyBox {{0,0,0,0},{3,3,3,0},{0,1,0,0}};
     Sphere   playerSphere;
     Platform groundBox;
 	Platform testPlat;
