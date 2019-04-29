@@ -5,6 +5,8 @@
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include <vector>
 #include <functional>
+#include <memory>
+#include <utility>
 #include "Geometry.h"
 #include "Collisions.h"
 #include "Platform.h"
@@ -66,15 +68,36 @@ public:
     Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 
+// TODO: commented lines
+class LevelGoal : public CollisionObject {
+public:
+    using TriggerCallback = std::function<void(void)>;
+    LevelGoal( CollisionManager &_colMan, glm::vec3 const &position, float radius, TriggerCallback cb=[](){} );
+    virtual ~LevelGoal();
+    virtual void collide( ColliderType  ownHitbox,
+                          ColliderType  otherHitbox,
+                          Box const    &other ) noexcept override;
+
+    Box               representation;
+
+private:
+    Box               _bounds;
+    TriggerCallback   _triggerCallback;
+    CollisionManager *_colMan;
+};
+
+
 struct LevelData { // POD
     // TODO: switch from POD struct to class 
     // and merge in level start / goal code from falk branch
     Player           player;
 	Enemy            enemy;
+    std::unique_ptr<LevelGoal> goal;
     vector<Box>      boxes;
     vector<Sphere>   spheres;
     CollisionManager colManager;
 };
+
 
 class Game {
 private:
@@ -117,19 +140,3 @@ public:
 };
 
 
-
-// TODO: commented lines
-class LevelGoal : public CollisionObject {
-public:
-    using TriggerCallback = std::function<void(void)>;
-    LevelGoal( LevelData &level, glm::vec3 const &position, float radius, TriggerCallback cb=[](){} );
-    virtual ~LevelGoal();
-    virtual void collide( ColliderType  ownHitbox,
-                          ColliderType  otherHitbox,
-                          Box const    &other ) noexcept override;
-private:
-    Box               _representation;
-    Box               _bounds;
-    TriggerCallback   _triggerCallback;
-    LevelData        &_level;
-};

@@ -1,6 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
+    level.goal = std::make_unique<LevelGoal>( level.colManager, glm::vec3{70.0f,-15.0f,.0f}, 12.0f );
     groundBox.hitbox.center      = glm::vec4(0, -30, 0, 0);
     groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
 	groundBox.hitbox.color       = glm::vec4(1.0, 1.0, 1.0, 0.0);
@@ -449,6 +450,8 @@ void Game::updateGraphics() {
 		level.spheres.push_back(level.player.blobs[i].blobSphere);
 	}
 
+    level.boxes.push_back(level.goal->representation);
+
 	//showHitboxes();
 }
 
@@ -603,18 +606,17 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 
 
 // TODO: commented lines
-LevelGoal::LevelGoal( LevelData &level, glm::vec3 const &position, float radius, TriggerCallback cb ):
-    _bounds( position, {radius,radius,radius,0}, {0,0,0,0} ),
-    _representation( position, {2,5,2,0}, {1,0,1,0} ),
+LevelGoal::LevelGoal( CollisionManager &colMan, glm::vec3 const &position, float radius, TriggerCallback cb ):
+    _bounds({ glm::vec4(position,0), {radius,radius,radius,0}, {0,0,0,0} }),
+     representation({ glm::vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,0.0f} }),
     _triggerCallback(cb),
-    _level(level)
+    _colMan(&colMan)
 {
-    _level.colManager.registerEntry( *this, ColliderType::level_goal, _bounds, true );
-    _level.boxes.push_back(_representation);
+    _colMan->registerEntry( *this, ColliderType::level_goal, _bounds, true );
 }
 
 LevelGoal::~LevelGoal() {
-    _level.colManager.unregisterEntry( *this );
+    _colMan->unregisterEntry( *this );
 }
 
 void LevelGoal::collide( ColliderType  ownHitbox,

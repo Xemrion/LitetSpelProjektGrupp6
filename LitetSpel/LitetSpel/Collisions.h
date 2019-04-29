@@ -32,7 +32,7 @@ public:
     bool operator!=(CollisionObject const &other) const noexcept;
 
 private:
-    size_t const id;
+    size_t id;
     glm::vec3 position;
 
     static size_t generateID() noexcept {
