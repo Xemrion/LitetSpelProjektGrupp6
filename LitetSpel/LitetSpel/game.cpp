@@ -154,6 +154,10 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				isStuck = true;
 			}
 		}
+		else if (otherHitbox == enemy_right) 
+		{
+			pos.x = other.center.x + other.halfLengths.x + (pos.x - HitboxLeft.center.x + HitboxLeft.halfLengths.x);
+		}
 	}
 	else if (ownHitbox == ColliderType::player_right) {
 		if (otherHitbox == ColliderType::platform) {
@@ -162,6 +166,10 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			if (status == PlayerStatus::Sticky) {
 				isStuck = true;
 			}
+		}
+		else if(otherHitbox == ColliderType::enemy_left)
+		{
+			pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
 		}
 	}
 }
@@ -193,7 +201,14 @@ void Game::update(double dt)  {
 	level.player.velocity.x = 0;
 	handleInput();
 	level.player.update(dt);
-	level.enemy.update(dt);
+	if (level.enemy.alive) 
+	{
+		level.enemy.update(dt);
+	}
+	else if (!level.enemy.alive && level.enemy.isDeregistered) 
+	{
+		level.colManager.unregisterEntry(level.enemy);
+	}
 	level.player.isStanding = false;
 	updatePhysics();
 	updateGraphics();
@@ -494,6 +509,10 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 			controlDir.x = -controlDir.x;
 			velocity.x   = -velocity.x;
 		}
+	}
+	else if (otherHitbox == ColliderType::player_bottom && ownHitbox == enemy_top) 
+	{
+		alive = false;
 	}
 }
 
