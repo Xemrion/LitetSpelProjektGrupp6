@@ -603,19 +603,18 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 
 
 // TODO: commented lines
-LevelGoal::LevelGoal( CollisionManager &colManager, /*GraphicsManager &gfxManager,*/ Box bounds, TriggerCallback cb ):
-    _bounds(bounds),
+LevelGoal::LevelGoal( LevelData &level, glm::vec3 const &position, float radius, TriggerCallback cb ):
+    _bounds( position, {radius,radius,radius,0}, {0,0,0,0} ),
+    _representation( position, {2,5,2,0}, {1,0,1,0} ),
     _triggerCallback(cb),
-    _colManager(colManager)
-//  _gfxManager(gfxManager)
+    _level(level)
 {
-    _colManager.registerEntry( *this, ColliderType::level_goal, _bounds, true );
-//  _gfxManager.registerEntry/ *this, _representation );
+    _level.colManager.registerEntry( *this, ColliderType::level_goal, _bounds, true );
+    _level.boxes.push_back(_representation);
 }
 
 LevelGoal::~LevelGoal() {
-    _colManager.unregisterEntry( *this );
-//  _gfxManager.unregisterEntry( *this );
+    _level.colManager.unregisterEntry( *this );
 }
 
 void LevelGoal::collide( ColliderType  ownHitbox,

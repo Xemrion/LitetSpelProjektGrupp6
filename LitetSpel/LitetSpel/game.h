@@ -17,26 +17,6 @@ using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/ma
 
 
 
-
-// TODO: commented lines
-class LevelGoal : public CollisionObject {
-public:
-    using TriggerCallback = std::function<void(void)>;
-    LevelGoal( CollisionManager &colManager, /*GraphicsManager &gfxManager,*/ Box bounds, TriggerCallback cb=[](){} );
-    virtual ~LevelGoal();
-    virtual void collide( ColliderType  ownHitbox,
-                          ColliderType  otherHitbox,
-                          Box const    &other ) noexcept override;
-private:
-//  auto              _representation; // TODO
-    Box               _bounds;
-    TriggerCallback   _triggerCallback;
-    CollisionManager &_colManager;
-//  GraphicsManager  &_gfxManager
-};
-
-
-
 enum PlayerStatus {
 	None,
 	Bouncy,
@@ -134,4 +114,22 @@ public:
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
+};
+
+
+
+// TODO: commented lines
+class LevelGoal : public CollisionObject {
+public:
+    using TriggerCallback = std::function<void(void)>;
+    LevelGoal( LevelData &level, glm::vec3 const &position, float radius, TriggerCallback cb=[](){} );
+    virtual ~LevelGoal();
+    virtual void collide( ColliderType  ownHitbox,
+                          ColliderType  otherHitbox,
+                          Box const    &other ) noexcept override;
+private:
+    Box               _representation;
+    Box               _bounds;
+    TriggerCallback   _triggerCallback;
+    LevelData        &_level;
 };
