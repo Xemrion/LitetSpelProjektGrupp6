@@ -210,7 +210,6 @@ void Game::update(double dt)  {
 	{
 		level.colManager.unregisterEntry(level.enemy);
 	}
-	level.player.isStanding = false;
 	updatePhysics();
 	updateGraphics();
 }
