@@ -22,9 +22,23 @@ public:
 	bool InitializeSound(HWND handle);
 	void Shutdown();
 
+	bool PlayJumpSound01();
+	bool PlayJumpSound02();
+	bool PlayJumpSound03();
 
-	bool PlayJumpSound();
-	bool PlayTestSound();
+	bool PlayLandSound01();
+	bool PlayLandSound02();
+	bool PlayLandSound03();
+
+	bool PlayBlobSound01();
+	bool PlayBlobSound02();
+	bool PlayBlobSound03();
+
+	bool PlayEnemySound01();
+	bool PlayEnemySound02();
+	bool PlayEnemySound03();
+
+	bool PlayTestSound01();
 private:
 	struct WaveHeaderType
 	{
@@ -53,9 +67,22 @@ private:
 	IDirectSound8* directSound;
 	IDirectSoundBuffer* firstBuffer;
 
-	
-	IDirectSoundBuffer8* secondBuffer;
-	IDirectSoundBuffer8* jump;
+	IDirectSoundBuffer8* test01;
+	IDirectSoundBuffer8* jump01;
+	IDirectSoundBuffer8* jump02;
+	IDirectSoundBuffer8* jump03;
+
+	IDirectSoundBuffer8* land01;
+	IDirectSoundBuffer8* land02;
+	IDirectSoundBuffer8* land03;
+
+	IDirectSoundBuffer8* blob01;
+	IDirectSoundBuffer8* blob02;
+	IDirectSoundBuffer8* blob03;
+
+	IDirectSoundBuffer8* enmy01;
+	IDirectSoundBuffer8* enmy02;
+	IDirectSoundBuffer8* enmy03;
 	//Sounds to add
 	/*
 	More jump sounds

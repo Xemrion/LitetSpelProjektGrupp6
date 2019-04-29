@@ -234,7 +234,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			mouseFunc();
 
 			if (keyboard.KeyIsPressed(VK_ADD)) {
-				gameSounds.PlayTestSound();
+				gameSounds.PlayTestSound01();
 			}
 			graphics.setMetaballColorAbsorb(glm::vec3(1.0f, 0.25f, 0.25f));
 			game.update(dt);

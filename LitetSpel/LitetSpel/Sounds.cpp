@@ -4,7 +4,19 @@
 Sounds::Sounds() {
 	this->directSound = nullptr;
 	this->firstBuffer = nullptr;
-	this->secondBuffer = nullptr;
+	this->test01 = nullptr;
+	this->jump01 = nullptr;
+	this->jump02 = nullptr;
+	this->jump03 = nullptr;
+	this->land01 = nullptr;
+	this->land02 = nullptr;
+	this->land03 = nullptr;
+	this->blob01 = nullptr;
+	this->blob02 = nullptr;
+	this->blob03 = nullptr;
+	this->enmy01 = nullptr;
+	this->enmy02 = nullptr;
+	this->enmy03 = nullptr;
 }
 Sounds::Sounds(const Sounds &sound) {
 
@@ -20,11 +32,11 @@ results = InitializeDirectSound(handle);
 if (results == false) {
 	return false;
 }
-std::string name = "sound02.wav";
-char testFileName[12] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10], name[11]};
+std::string name = "test01.wav";
+char testFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10]};
 
 
-results = LoadWaveFile(testFileName, &secondBuffer);
+results = LoadWaveFile(testFileName, &test01);
 if(results == false){
 	return false;
 }
@@ -32,10 +44,99 @@ if(results == false){
 name = "jump01.wav";
 char jumpFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10]};
 
-results = LoadWaveFile(jumpFileName, &jump);
+results = LoadWaveFile(jumpFileName, &jump01);
 if (results == false) {
 	return false;
 }
+
+name = "jump02.wav";
+jumpFileName[5] = name[5];
+
+results = LoadWaveFile(jumpFileName, &jump02);
+if (results == false) {
+	return false;
+}
+
+name = "jump03.wav";
+jumpFileName[5] = name[5];
+
+results = LoadWaveFile(jumpFileName, &jump03);
+if (results == false) {
+	return false;
+}
+
+name = "land01.wav";
+char landFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10] };
+
+results = LoadWaveFile(landFileName, &land01);
+if (results == false) {
+	return false;
+}
+
+name = "land02.wav";
+landFileName[5] = name[5];
+
+results = LoadWaveFile(landFileName, &land02);
+if (results == false) {
+	return false;
+}
+
+name = "land03.wav";
+landFileName[5] = name[5];
+
+results = LoadWaveFile(landFileName, &land03);
+if (results == false) {
+	return false;
+}
+
+name = "blob01.wav";
+char blobFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10] };
+
+results = LoadWaveFile(blobFileName, &blob01);
+if (results == false) {
+	return false;
+}
+
+name = "blob02.wav";
+blobFileName[5] = name[5];
+
+results = LoadWaveFile(blobFileName, &blob02);
+if (results == false) {
+	return false;
+}
+
+name = "blob03.wav";
+blobFileName[5] = name[5];
+
+results = LoadWaveFile(blobFileName, &blob03);
+if (results == false) {
+	return false;
+}
+
+name = "enmy01.wav";
+char enemyJumpFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10] };
+
+results = LoadWaveFile(enemyJumpFileName, &enmy01);
+if (results == false) {
+	return false;
+}
+
+name = "enmy02.wav";
+enemyJumpFileName[5] = name[5];
+
+results = LoadWaveFile(enemyJumpFileName, &enmy02);
+if (results == false) {
+	return false;
+}
+
+name = "enmy03.wav";
+enemyJumpFileName[5] = name[5];
+
+results = LoadWaveFile(enemyJumpFileName, &enmy03);
+if (results == false) {
+	return false;
+}
+
 
 //results = PlayWaveFile(secondBuffer);
 //if (results == false) {
@@ -45,20 +146,97 @@ if (results == false) {
 return true;
 }
 void Sounds::Shutdown() {
-	ShutdownWaveFile(&secondBuffer);
-	ShutdownWaveFile(&jump);
+	ShutdownWaveFile(&test01);
+	ShutdownWaveFile(&jump01);
+	ShutdownWaveFile(&jump02);
+	ShutdownWaveFile(&jump03);
+	ShutdownWaveFile(&land01);
+	ShutdownWaveFile(&land02);
+	ShutdownWaveFile(&land03);
+	ShutdownWaveFile(&blob01);
+	ShutdownWaveFile(&blob02);
+	ShutdownWaveFile(&blob03);
+	ShutdownWaveFile(&enmy01);
+	ShutdownWaveFile(&enmy02);
+	ShutdownWaveFile(&enmy03);
 	ShutdownDirectSound();
 
 }
 
-bool Sounds::PlayJumpSound() {
-	if (!PlayWaveFile(jump)) {
+bool Sounds::PlayJumpSound01() {
+	if (!PlayWaveFile(jump01)) {
 		return false;
 	}
 	return true;
 }
-bool Sounds::PlayTestSound() {
-	if (!PlayWaveFile(secondBuffer)) {
+bool Sounds::PlayJumpSound02() {
+	if (!PlayWaveFile(jump02)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayJumpSound03() {
+	if (!PlayWaveFile(jump03)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayLandSound01() {
+	if (!PlayWaveFile(land01)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayLandSound02() {
+	if (!PlayWaveFile(land02)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayLandSound03() {
+	if (!PlayWaveFile(land03)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayBlobSound01() {
+	if (!PlayWaveFile(blob01)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayBlobSound02() {
+	if (!PlayWaveFile(blob02)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayBlobSound03() {
+	if (!PlayWaveFile(blob03)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayEnemySound01() {
+	if (!PlayWaveFile(enmy01)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayEnemySound02() {
+	if (!PlayWaveFile(enmy02)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayEnemySound03() {
+	if (!PlayWaveFile(enmy03)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayTestSound01() {
+	if (!PlayWaveFile(test01)) {
 		return false;
 	}
 	return true;

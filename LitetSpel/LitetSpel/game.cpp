@@ -191,13 +191,13 @@ void Game::update(double dt) {
 			currentLevel.player.isStanding = false;
 			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
-			gameSounds->PlayJumpSound();
+			gameSounds->PlayJumpSound01();
 		}
 		else if (currentLevel.player.status == PlayerStatus::Bouncy && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
 			currentLevel.player.hasExtraJump = false;
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
-			gameSounds->PlayJumpSound();
+			gameSounds->PlayJumpSound02();
 		}
 
 		else if (currentLevel.player.status == PlayerStatus::Heavy && currentLevel.player.isStanding == true) {
@@ -205,7 +205,7 @@ void Game::update(double dt) {
 			currentLevel.player.isStanding = false;
 			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
-			gameSounds->PlayJumpSound();
+			gameSounds->PlayJumpSound03();
 		}
 	}
 	if (keys[3]) {
@@ -273,7 +273,7 @@ void Game::update(double dt) {
 
 void Game::updatePhysics(double dt) {
 	float timestep = 0.0001f;
-	float invTimestep = 1.0 / timestep;
+	float invTimestep = 1.0f / timestep;
 	for (float i = (float)floor(time * invTimestep) * timestep; i < time + dt; i += timestep) {
 		currentLevel.player.jumpSpeed = currentLevel.player.jumpSpeed + (currentLevel.player.gravity * timestep) * 0.0001;
 		currentLevel.player.pos.y += currentLevel.player.jumpSpeed;
