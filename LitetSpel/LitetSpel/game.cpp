@@ -96,7 +96,7 @@ void Player::update(double dt) noexcept {
 	jumpCooldown  -= float(dt);
 	shootCooldown -= float(dt);
 
-	if (isStanding) 
+	if (isStanding)
 		hasExtraJump = true;
 	
     mass = (status == PlayerStatus::Heavy)? 20.0f : 10.0f;
@@ -117,6 +117,13 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			hasExtraJump = true;
 			pos.y        = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y   = 0;
+		}
+		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky)
+		{
+			isStanding = true;
+			hasExtraJump = true;
+			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
+			velocity.y = 0;
 		}
 		else {
 			isStanding   = false;
@@ -204,7 +211,7 @@ void Game::handleInput() {
 		}
 	}
 	if (keys[Keys::up]) {
-		if (player.isStanding && level.player.jumpCooldown <= 0) {
+		if (player.isStanding) {
 			player.isStanding = false;
 			player.jumpCooldown = COOLDOWN_CONSTANT;
 			player.putForce(glm::vec3(0.0, level.player.jumpForce, 0.0));
@@ -256,7 +263,7 @@ void Game::updatePhysics() {
 
 // blobs:
 		for ( auto &blob : player.blobs ) {
-			if (blob.getIsActive() ) {
+			if (blob.getIsActive() && blob.getIsStuck() == false) {
 				blob.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
 			blob.move(timestep);
@@ -420,7 +427,7 @@ void Game::updateGraphics() {
 		level.spheres.push_back(level.player.blobs[i].blobSphere);
 	}
 
-	showHitboxes();
+	//showHitboxes();
 }
 
 void Game::showHitboxes()

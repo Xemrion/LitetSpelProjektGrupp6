@@ -158,11 +158,19 @@ void keyboardFunc()
 		{
 			if (game.level.player.status == PlayerStatus::None)
 			{
+				for (int i = 0; i < game.level.player.blobCharges; i++) 
+				{
+					game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+				}
 				game.level.player.status = PlayerStatus::Bouncy;
 				graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
 			}
 			else
 			{
+				for (int i = 0; i < game.level.player.blobCharges; i++)
+				{
+					game.level.player.blobs[i].status = BlobStatus::Blob_None;
+				}
 				game.level.player.status = PlayerStatus::None;
 				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 			}
@@ -175,11 +183,19 @@ void keyboardFunc()
 		{
 			if (game.level.player.status == PlayerStatus::None)
 			{
+				for (int i = 0; i < game.level.player.blobCharges; i++)
+				{
+					game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
+				}
 				game.level.player.status = PlayerStatus::Heavy;
 				graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
 			}
 			else
 			{
+				for (int i = 0; i < game.level.player.blobCharges; i++)
+				{
+					game.level.player.blobs[i].status = BlobStatus::Blob_None;
+				}
 				game.level.player.status = PlayerStatus::None;
 				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 			}
@@ -192,11 +208,19 @@ void keyboardFunc()
 		{
 			if (game.level.player.status == PlayerStatus::None)
 			{
+				for (int i = 0; i < game.level.player.blobCharges; i++)
+				{
+					game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
+				}
 				game.level.player.status = PlayerStatus::Sticky;
 				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
 			}
 			else
 			{
+				for (int i = 0; i < game.level.player.blobCharges; i++)
+				{
+					game.level.player.blobs[i].status = BlobStatus::Blob_None;
+				}
 				game.level.player.status = PlayerStatus::None;
 				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 			}

@@ -9,6 +9,13 @@
 
 // TODO: improve encapsulation by reducing public exposure
 
+enum BlobStatus {
+	Blob_None,
+	Blob_Bouncy,
+	Blob_Sticky,
+	Blob_Heavy
+};
+
 class Blob : public CollisionObject {
 public:
     Blob() = delete;
@@ -31,10 +38,12 @@ public:
 
     [[nodiscard]] bool getIsActive() const noexcept;
     [[nodiscard]] bool getIsBeingRecalled() const noexcept;
+	[[nodiscard]] bool getIsStuck() const noexcept;
 
 private:
     glm::vec3 const *parentPosition;
-    bool  isActive;       
+    bool  isActive;
+	bool isStuck;
     bool  isBeingRecalled;
     float recallSpeed;
     float speed;
@@ -44,4 +53,5 @@ public:
     glm::vec3 pos;
     Box       hitbox;
     Sphere    blobSphere;
+	int status;
 };
