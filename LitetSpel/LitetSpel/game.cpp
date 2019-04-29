@@ -120,7 +120,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			pos.y        = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y   = 0;
 		}
-		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w == 1)
+		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w == 1 && !isStuck)
 		{
 			isStanding   = true;
 			hasExtraJump = true;
