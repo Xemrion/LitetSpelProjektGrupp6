@@ -14,7 +14,9 @@ Blob::Blob( glm::vec3 const &parentPosition ):
     radius          (  2.0f),
 	status          (BlobStatus::Blob_None),
     velocity        (   .0f)
-{}
+{
+	deactivateHitbox();
+}
 
 void Blob::absorb() noexcept
 {
@@ -23,17 +25,16 @@ void Blob::absorb() noexcept
 }
 
 void Blob::deactivateHitbox() noexcept {
-    hitbox.halfLengths = glm::vec4(0,0,0,0);
+	hitbox.color.w = 0;
 }
 
-
 void Blob::reactivateHitbox() noexcept {
-    hitbox.halfLengths = glm::vec4(radius,radius,radius,0);
+	hitbox.color.w = 1;
 }
 
 void Blob::shoot( glm::vec3 const &direction ) noexcept
 {
-    if ( !isActive && !isBeingRecalled && status != BlobStatus::Blob_Heavy) {
+    if ( !isActive && !isBeingRecalled) {
         reactivateHitbox();
         isActive = true;
         velocity = (status == BlobStatus::Blob_Heavy)?  direction * speed/3.0f  :  direction * speed;
@@ -70,6 +71,10 @@ void Blob::update(double dt) noexcept
 	if (isStuck == true && status != BlobStatus::Blob_Sticky) 
 	{
 		isStuck = false;
+	}
+	if (!isActive) 
+	{
+		deactivateHitbox();
 	}
 	blobSphere.centerRadius = glm::vec4( pos, radius );
 }

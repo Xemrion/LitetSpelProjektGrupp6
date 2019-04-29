@@ -118,16 +118,16 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			pos.y        = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y   = 0;
 		}
-		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky)
+		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w == 1)
 		{
 			isStanding = true;
 			hasExtraJump = true;
 			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y = 0;
 		}
-		else {
-			isStanding   = false;
-		}
+		//else {
+			//isStanding   = false;
+		//}
 	}
 	else if (ownHitbox == ColliderType::player_top) {
 		if (otherHitbox == ColliderType::platform) {
@@ -181,13 +181,13 @@ void Player::recallBlobs() noexcept
     shootCooldown   = .5f; // TODO: refactor into a constexpr constant in Globals.h 
 }
 
-
 void Game::update(double dt)  {
 	time += dt;
 	level.player.velocity.x = 0;
 	handleInput();
 	level.player.update(dt);
 	level.enemy.update(dt);
+	level.player.isStanding = false;
 	updatePhysics();
 	updateGraphics();
 }
@@ -211,7 +211,7 @@ void Game::handleInput() {
 		}
 	}
 	if (keys[Keys::up]) {
-		if (player.isStanding) {
+		if (player.isStanding){
 			player.isStanding = false;
 			player.jumpCooldown = COOLDOWN_CONSTANT;
 			player.putForce(glm::vec3(0.0, level.player.jumpForce, 0.0));
@@ -223,7 +223,7 @@ void Game::handleInput() {
 			player.putForce(glm::vec3(0.0, player.jumpForce, 0.0));
 		}
 	}
-	if (keys[Keys::down]) {
+	if (keys[Keys::down]){
 		if (player.status == PlayerStatus::Sticky) {
 			player.isStuck = false;
 			if (player.isStanding == false) {
