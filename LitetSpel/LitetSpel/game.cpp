@@ -125,6 +125,13 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y = 0;
 		}
+		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Bouncy && other.color.w == 1)
+		{
+			isStanding = true;
+			hasExtraJump = true;
+			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
+			velocity.y = 0;
+		}
 		//else {
 			//isStanding   = false;
 		//}

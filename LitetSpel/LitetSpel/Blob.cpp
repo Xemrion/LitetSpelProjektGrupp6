@@ -117,7 +117,7 @@ void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &othe
         absorb();
     }
 
-	if ( isActive and otherType == ColliderType::platform && status != BlobStatus::Blob_Sticky) {
+	if ( isActive and otherType == ColliderType::platform && status != BlobStatus::Blob_Sticky && status != BlobStatus::Blob_Bouncy) {
 		this->velocity      = glm::vec3(0.0);
 		glm::vec3 pushUp    = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown  = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
@@ -138,5 +138,17 @@ void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &othe
 		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 		pos += glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 		isStuck = true;
+	}
+	else if (isActive and otherType == ColliderType::platform && status == BlobStatus::Blob_Bouncy)
+	{
+		this->velocity.y = -this->velocity.y;
+		this->velocity.x = 0;
+		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		pos += glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 	}
 }
