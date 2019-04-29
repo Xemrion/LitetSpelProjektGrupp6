@@ -598,3 +598,40 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 	));
 	level.spheres.push_back(sphere2);
 }
+
+
+
+
+// TODO: commented lines
+LevelGoal::LevelGoal( CollisionManager &colManager, /*GraphicsManager &gfxManager,*/ Box bounds, TriggerCallback cb ):
+    _bounds(bounds),
+    _triggerCallback(cb),
+    _colManager(colManager)
+//  _gfxManager(gfxManager)
+{
+    _colManager.registerEntry( *this, ColliderType::level_goal, _bounds, true );
+//  _gfxManager.registerEntry/ *this, _representation );
+}
+
+LevelGoal::~LevelGoal() {
+    _colManager.unregisterEntry( *this );
+//  _gfxManager.unregisterEntry( *this );
+}
+
+void LevelGoal::collide( ColliderType  ownHitbox,
+                         ColliderType  otherHitbox,
+                         Box const    &other ) noexcept {
+    if (    otherHitbox == player_top
+         or otherHitbox == player_bottom
+         or otherHitbox == player_left
+         or otherHitbox == player_right)
+    {
+        _triggerCallback();
+        // TODO (in callback):
+        //    tone and blur screen?
+        //    display text?
+        //    wait for input?
+        //    load next level?
+    }
+}
+
