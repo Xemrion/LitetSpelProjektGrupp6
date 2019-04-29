@@ -461,24 +461,24 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 	if (otherHitbox == ColliderType::platform) {
 		if (ownHitbox == ColliderType::enemy_bottom)
 		{
-			this->pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
-			this->velocity.y = 0;
-			this->isStanding = true;
+			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
+			velocity.y = 0;
+			isStanding = true;
 		}
 		else if (ownHitbox == ColliderType::enemy_top)
 		{
-			this->pos.y = other.center.y - other.halfLengths.y + (pos.y - HitboxTop.center.y - HitboxTop.halfLengths.y);
-			this->velocity.y = 0;
+			pos.y = other.center.y - other.halfLengths.y + (pos.y - HitboxTop.center.y - HitboxTop.halfLengths.y);
+			velocity.y = 0;
 		}
 		else if (ownHitbox == ColliderType::enemy_left)
 		{
-			this->controlDir.x = -this->controlDir.x;
-			this->velocity.x = -velocity.x;
+			controlDir.x = -controlDir.x;
+			velocity.x   = -velocity.x;
 		}
 		else if (ownHitbox == ColliderType::enemy_right)
 		{
-			this->controlDir.x = -this->controlDir.x;
-			this->velocity.x = -velocity.x;
+			controlDir.x = -controlDir.x;
+			velocity.x   = -velocity.x;
 		}
 	}
 }
@@ -527,13 +527,13 @@ void Enemy::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 // velocity += force / mass;
 void Enemy::putForce(glm::vec3 const &force) noexcept
 {
-	this->velocity += force / mass;
+	velocity += force / mass;
 }
 
 // Call from updatePhysics
 void Enemy::move(float dt) noexcept
 {
-	this->pos += this->velocity * dt;
+	pos += velocity * dt;
 }
 
 //Adds two orbiting spheres around a sphere for animation
