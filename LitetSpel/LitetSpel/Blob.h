@@ -22,6 +22,9 @@ public:
 
 	void collide(ColliderType ownType, ColliderType otherType, Box const &otherBox) noexcept override;
 
+    void deactivateHitbox() noexcept;
+    void reactivateHitbox() noexcept;
+
     void absorb() noexcept;
     void shoot( glm::vec3 const &direction ) noexcept;
     void recall() noexcept;

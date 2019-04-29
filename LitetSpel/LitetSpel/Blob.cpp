@@ -20,8 +20,18 @@ void Blob::absorb() noexcept
     isActive        = false;
 }
 
+void Blob::deactivateHitbox() noexcept {
+    hitbox.halfLengths = glm::vec4(0,0,0,0);
+}
+
+
+void Blob::reactivateHitbox() noexcept {
+    hitbox.halfLengths = glm::vec4(radius,radius,radius,0);
+}
+
 void Blob::shoot( glm::vec3 const &direction ) noexcept
 {
+    reactivateHitbox();
     if ( !isActive && !isBeingRecalled ) {
         isActive = true;
         velocity = direction * speed;
@@ -30,6 +40,7 @@ void Blob::shoot( glm::vec3 const &direction ) noexcept
 
 void Blob::recall() noexcept
 {
+    deactivateHitbox();
     isBeingRecalled = true;
 }
 
