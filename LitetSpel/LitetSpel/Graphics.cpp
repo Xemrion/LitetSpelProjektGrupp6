@@ -17,6 +17,7 @@
 
 HRESULT Graphics::init(HWND wndHandle, bool windowed)
 {
+	
 	HRESULT hr = 0;
 	hr = createDeviceContext(wndHandle, windowed);
 	if (FAILED(hr)) 

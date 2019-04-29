@@ -8,7 +8,7 @@
 #include "Collisions.h"
 #include  "Platform.h"
 #include "Blob.h"
-
+#include"ReadGeometry.h"
 using namespace std;
 
 
@@ -67,7 +67,7 @@ struct LevelData { // POD
     vector<Box>    boxes;
     vector<Sphere> spheres;
     CollisionManager colManager;
-
+	ReadGeometry readGeometry;
     //void fun() {
     //    colManager.register_entry( player, CollisionId::player_top,    pBoxTop   true );
     //    colManager.register_entry( player, CollisionId::player_side,   pBoxLeft, true );
@@ -102,4 +102,6 @@ public:
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
+	Platform testplat3;
+	Platform TEST;
 };
