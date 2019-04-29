@@ -4,6 +4,7 @@
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include <vector>
+#include <functional>
 #include "Geometry.h"
 #include "Collisions.h"
 #include "Platform.h"
@@ -12,7 +13,29 @@
 
 // TODO: improve encapsulation by reducing public exposure
 
-using namespace std;
+using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
+
+
+
+
+// TODO: commented lines
+class LevelGoal : public CollisionObject {
+public:
+    using TriggerCallback = std::function<void(void)>;
+    LevelGoal( CollisionManager &colManager, /*GraphicsManager &gfxManager,*/ Box bounds, TriggerCallback cb=[](){} );
+    virtual ~LevelGoal();
+    virtual void collide( ColliderType  ownHitbox,
+                          ColliderType  otherHitbox,
+                          Box const    &other ) noexcept override;
+private:
+//  auto              _representation; // TODO
+    Box               _bounds;
+    TriggerCallback   _triggerCallback;
+    CollisionManager &_colManager;
+//  GraphicsManager  &_gfxManager
+};
+
+
 
 enum PlayerStatus {
 	None,
