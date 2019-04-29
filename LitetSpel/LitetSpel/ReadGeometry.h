@@ -20,7 +20,8 @@ private:
 	std::vector<char> corners;
 	std::vector<std::vector<char> > pixelColour;
 	int length = 1280 * 720;
-	std::vector<bool> isUsed;
+	std::vector<int> isUsed;
+	std::vector<int> boxWidth;
 	unsigned char* rgb;
 
 
@@ -31,6 +32,9 @@ public:
 	void initialize();
 	bool isWhite(glm::vec3 pixelColour);
 	glm::vec3 getPixelColour(int index);
+	bool isPixelUsed(int index);
+	int getBoxWidth(int index);
+	int findIndexByPixel(int index);
 
 };
 #endif

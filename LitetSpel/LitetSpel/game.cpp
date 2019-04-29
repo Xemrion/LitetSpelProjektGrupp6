@@ -4,24 +4,24 @@
 #define COOLDOWN_CONSTANT 0.3f
 
 void Game::init() {
-	groundBox.hitbox.center = glm::vec4(0, -30, 0, 0);
-	groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
-	groundBox.hitbox.color = glm::vec4(1.0, 1.0, 1.0, 0.0);
-	currentLevel.boxes.push_back(groundBox.hitbox);
+	//groundBox.hitbox.center = glm::vec4(0, -30, 0, 0);
+	//groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
+	//groundBox.hitbox.color = glm::vec4(1.0, 1.0, 1.0, 0.0);
+	//currentLevel.boxes.push_back(groundBox.hitbox);
 
-	currentLevel.colManager.register_entry(groundBox, CollisionId::platform, groundBox.hitbox, true);
+	//currentLevel.colManager.register_entry(groundBox, CollisionId::platform, groundBox.hitbox, true);
 
-	testPlat.hitbox.center = glm::vec4(30.0f, 0.0f, 0.0f, 0.0f);
-	testPlat.hitbox.halfLengths = glm::vec4(10.0f, 20.0f, 10.0f, 0.0f);
-	testPlat.hitbox.color = glm::vec4(0.0, 1.0, 0.0, 0.0);
-	currentLevel.boxes.push_back(testPlat.hitbox);
-	currentLevel.colManager.register_entry(testPlat, CollisionId::platform, testPlat.hitbox, true);
+	//testPlat.hitbox.center = glm::vec4(30.0f, 0.0f, 0.0f, 0.0f);
+	//testPlat.hitbox.halfLengths = glm::vec4(10.0f, 20.0f, 10.0f, 0.0f);
+	//testPlat.hitbox.color = glm::vec4(0.0, 1.0, 0.0, 0.0);
+	//currentLevel.boxes.push_back(testPlat.hitbox);
+	//currentLevel.colManager.register_entry(testPlat, CollisionId::platform, testPlat.hitbox, true);
 
-	testplat2.hitbox.center = glm::vec4(-72.5f, 7.0f, 0.0f, 0.0f);
-	testplat2.hitbox.halfLengths = glm::vec4(1.0f, 1.8f, 0.0f, 0.0f);
-	testplat2.hitbox.color = glm::vec4(0.0, 0.5, 0.5, 0.0);
-	currentLevel.boxes.push_back(testplat2.hitbox);
-	currentLevel.colManager.register_entry(testplat2, CollisionId::platform, testplat2.hitbox, true);
+	//testplat2.hitbox.center = glm::vec4(-72.5f, 7.0f, 0.0f, 0.0f);
+	//testplat2.hitbox.halfLengths = glm::vec4(1.0f, 1.8f, 0.0f, 0.0f);
+	//testplat2.hitbox.color = glm::vec4(0.0, 0.5, 0.5, 0.0);
+	//currentLevel.boxes.push_back(testplat2.hitbox);
+	//currentLevel.colManager.register_entry(testplat2, CollisionId::platform, testplat2.hitbox, true);
 
 	//testplat3.hitbox.center = glm::vec4(-0.0f, 7.0f, 0.0f, 0.0f);
 	//testplat3.hitbox.halfLengths = glm::vec4(10.5f, 1.8f, 0.0f, 0.0f);
@@ -42,7 +42,7 @@ void Game::init() {
 	currentLevel.readGeometry.initialize();
 	for (int i = 0; i < currentLevel.readGeometry.platforms.size(); i++)
 	{
-		currentLevel.readGeometry.platforms.at(i).hitbox.color = glm::vec4(0.0, 0.5, 0.5, 0.0);
+		currentLevel.readGeometry.platforms.at(i).hitbox.color = glm::vec4(0.0, 1, 1, 0.0);
 		currentLevel.boxes.push_back(currentLevel.readGeometry.platforms.at(i).hitbox);
 	}
 	//updateEnemyCollision();
