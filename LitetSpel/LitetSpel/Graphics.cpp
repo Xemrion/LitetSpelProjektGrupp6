@@ -724,6 +724,15 @@ void Graphics::setMetaballColorAbsorb(const glm::vec3& colorAbsorb)
 	metaballColor = glm::vec4(colorAbsorb, 0.0);
 }
 
+void Graphics::setMetaballColorAbsorb(glm::vec4 colorAbsorb)
+{
+	metaballColor = colorAbsorb;
+}
+void Graphics::setMetaballColorDefault()
+{
+	metaballColor = glm::vec4(0.05f, 0.15f, 0.15f, 0.0f);
+}
+
 void Graphics::setCameraPos(glm::vec3 pos)
 {
 	camera = pos;
