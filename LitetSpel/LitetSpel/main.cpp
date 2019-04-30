@@ -213,7 +213,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
 				}
 				game.level.player.status = PlayerStatus::Sticky;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5)*2.f);
 			}
 			else
 			{
@@ -231,6 +231,12 @@ void keyboardFunc()
 		game.level.player.recallBlobs();
 	if (keyboard.KeyIsPressed('P')) {
 		graphics.createShaders();
+	}
+	if (keyboard.KeyIsPressed('8')) {
+		graphics.setMetaballColorAbsorb(graphics.getMetaballColorAbsorb() + glm::vec3(0.01));
+	}
+	if (keyboard.KeyIsPressed('9')) {
+		graphics.setMetaballColorAbsorb(graphics.getMetaballColorAbsorb() - glm::vec3(0.01));
 	}
 }
 

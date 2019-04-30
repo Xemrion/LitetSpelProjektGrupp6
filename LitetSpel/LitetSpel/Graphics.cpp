@@ -3,9 +3,11 @@
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
+#include "../../INCLUDE/DDSTextureLoader/DDSTextureLoader.h"
 
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"d3d11.lib")
+
 #ifndef SAFE_RELEASE
 #define SAFE_RELEASE(x) \
    if(x != NULL)        \
@@ -29,7 +31,7 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 		return hr;
 	createQuadData();
 	createBoxData();
-
+	
 	float c = 1.0 / glm::tan(glm::radians(22.5f));
 	float a = 16.f / 9.f;
 	float f = 500.f;
@@ -295,6 +297,36 @@ HRESULT Graphics::createResources(HWND wndHandle)
 			return hr;
 		}
 
+		hr = DirectX::CreateDDSTextureFromFile(device, L"output_skybox.dds", nullptr, &skyboxResourceView);
+		if (FAILED(hr)) {
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			return hr;
+		}
+
+		hr = DirectX::CreateDDSTextureFromFile(device, L"radiance.dds", nullptr, &radianceResourceView);
+		if (FAILED(hr)) {
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			return hr;
+		}
+
+		hr = DirectX::CreateDDSTextureFromFile(device, L"irradiance.dds", nullptr, &irradianceResourceView);
+		if (FAILED(hr)) {
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			return hr;
+		}
+		
 		backBuffer->Release();
 		geometryBuffer->Release();
 	}
@@ -687,7 +719,7 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 	deviceContext->Unmap(metaballBuffer, 0);
 }
 
-void Graphics::setMetaballColorAbsorb(glm::vec3 colorAbsorb)
+void Graphics::setMetaballColorAbsorb(const glm::vec3& colorAbsorb)
 {
 	metaballColor = glm::vec4(colorAbsorb, 0.0);
 }
@@ -700,7 +732,7 @@ void Graphics::setCameraPos(glm::vec3 pos)
 
 void Graphics::swapBuffer()
 {
-	float clearColor[] = { 0.9, 0.9, 0.9, 1.0 };
+	float clearColor[] = { 0.0, 0.0, 0.0, 0.0 };
 	deviceContext->ClearRenderTargetView(backBufferView, clearColor);
 	deviceContext->ClearRenderTargetView(geometryBufferView, clearColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
@@ -768,6 +800,9 @@ void Graphics::swapBuffer()
 	deviceContext->IASetInputLayout(quadVertexLayout);
 	deviceContext->PSSetShaderResources(0, 1, &geometryResourceView);
 	deviceContext->PSSetShaderResources(1, 1, &depthResourceView);
+	deviceContext->PSSetShaderResources(2, 1, &skyboxResourceView);
+	deviceContext->PSSetShaderResources(3, 1, &radianceResourceView);
+	deviceContext->PSSetShaderResources(4, 1, &irradianceResourceView);
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
 	deviceContext->Draw(6, 0);

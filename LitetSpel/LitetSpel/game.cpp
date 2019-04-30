@@ -440,7 +440,7 @@ void Game::updateGraphics() {
 		level.player.radius);
 	level.spheres.push_back(playerSphere);
 
-	glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
+	glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y*0.1));
 
 	animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
 

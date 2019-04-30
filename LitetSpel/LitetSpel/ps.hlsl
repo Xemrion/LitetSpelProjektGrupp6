@@ -1,5 +1,8 @@
-Texture2D background : register(t0);
+Texture2D geometryTexture : register(t0);
 Texture2D depthbuffer : register(t1);
+TextureCube skybox : register(t2);
+TextureCube radianceMap : register(t3);
+TextureCube irradianceMap : register(t4);
 SamplerState samp;
 
 struct VS_OUT
@@ -99,6 +102,12 @@ float3 calcNormal(float3 p)
 		k.xxx * testScene(p + k.xxx * h));
 }
 
+
+float3 fresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
+{
+	return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 float4 main(VS_OUT input) : SV_Target
 {
 	float2 resolution = float2(1280, 720);
@@ -113,9 +122,26 @@ float4 main(VS_OUT input) : SV_Target
 	float back;
 	float dist = castRay(ro, rd, intersect, back);
 	float3 color = float3(0.0, 0.0, 0.0);
+	float3 parallax = (ro * 0.001);
 
 	if (!intersect) {
-		color = background.Sample(samp, uv);
+		color = geometryTexture.Sample(samp, uv);
+
+		if (length(color) <= 0.01) {
+			//float angle = 3.1416 * -0.3;
+			//float3x3 rotationMatrix = float3x3(
+			//	cos(angle), 0, sin(angle),
+			//	0, 1, 0,
+			//	-sin(angle),0, cos(angle)
+			//	);
+
+			//color = skybox.Sample(samp, parallax + mul(rd, rotationMatrix));
+			
+			//color = skybox.Sample(samp, parallax + rd);
+			color = radianceMap.Sample(samp, parallax + rd);
+			color *= radianceMap.Sample(samp, parallax + rd);
+			color += 0.5;
+		}
 	}
 	else {
 		/* depth test */
@@ -123,39 +149,56 @@ float4 main(VS_OUT input) : SV_Target
 		projected.xyz /= projected.w;
 
 		if (projected.z > depthbuffer.Sample(samp, uv).x) {
-			color = background.Sample(samp, uv);
+			color = geometryTexture.Sample(samp, uv);
 		}
 		else {
 			/* lighting */
 			float3 p = ro + rd * dist;
-			float3 objectColor = float3(1.0, 1.0, 1.0);
 			float3 normal = calcNormal(p);
-			float3 lightVector = normalize(float3(0.0, 400.0, 100.0));
+			float3 objectColor = float3(1.0, 1.0, 1.0);
+			objectColor = float3(1,1,1) - sphereColor.rgb;
+			float3 irradiance = irradianceMap.Sample(samp, parallax + normal);
+			float3 specularity;
 			float3 diffuseColor = float3(0, 0, 0);
 			float3 specularColor = float3(0, 0, 0);
-			
-			/* specular */
-			specularColor = pow(max(dot(normal, normalize(lightVector - rd)), 0.0), 32) * float3(1.0, 1.0, 1.0);
-			
+			back = max(back, dist + 0.25);
+
 			/* absorbtion diffuse */
-			float3 absorbed = exp(-sphereColor * (back - dist));
-			diffuseColor = objectColor * absorbed;
+			float3 absorbed = exp2(-clamp(sphereColor, 0, 1) * (back - dist));
+			//diffuseColor = irradiance * absorbed;
+			diffuseColor += irradiance * objectColor;
+
+			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(0.0,0.0,0.0), 0.99);
 
 			/* refraction diffuse */
-			float3 ref = refract(rd, normal, 0.75);
-			float3 samplePoint = p + ref * (-500.0 / ref.z);
-			float4 projectedSample = mul(float4(samplePoint, 1.0), viewProj);
-			samplePoint.xy = (samplePoint.xy / resolution) + 0.5;
-			if (projectedSample.z / projectedSample.w > depthbuffer.Sample(samp, samplePoint.xy).x)
-			{
-				diffuseColor += background.Sample(samp, samplePoint.xy) * absorbed;
+			float3 refractDir = refract(rd, normal, 0.9);
+			float3 refractSamplePoint = p + refractDir * (back - dist);
+			refractSamplePoint.xy = (refractSamplePoint.xy / resolution) + 0.5;
+			refractSamplePoint.y = 1 - refractSamplePoint.y;
+			float3 refractColor = geometryTexture.Sample(samp, refractSamplePoint.xy) * absorbed;
+
+			if (length(refractColor) <= 0.00001) {
+				refractColor += skybox.Sample(samp, parallax + refractDir * (back - dist) + rd) * absorbed;
+				refractColor *= irradianceMap.Sample(samp, parallax + refractDir * (back - dist) + rd) * absorbed;
+			}
+
+			/* specular */
+			float3 reflectDir = reflect(rd, normal);
+			if (reflectDir.z > 0.010) {
+				float3 reflectSamplePoint = p + reflectDir * 300.0;
+				reflectSamplePoint.xy = (reflectSamplePoint.xy / resolution) + 0.5;
+				reflectSamplePoint.y = 1 - reflectSamplePoint.y;
+				specularColor = geometryTexture.Sample(samp, reflectSamplePoint.xy);
+			}
+			if (length(specularColor) <= 0.00001) {
+				specularColor += radianceMap.Sample(samp, parallax + reflectDir);
 			}
 
 			/* final color */
-			float diffuseRatio = 0.99;
-			color = diffuseRatio * diffuseColor + (1 - diffuseRatio) * specularColor;
+			color = (1.0 - specularity) * diffuseColor + specularity * specularColor + refractColor;
 		}
 	}
-	
+
+	color = color / (color + float3(1.0, 1.0, 1.0));
 	return float4(pow(color, 1.0 / 2.2), 1.0);
 }
