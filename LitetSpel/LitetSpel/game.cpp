@@ -131,6 +131,11 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			hasExtraJump = true;
 			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y = 0;
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
 		}
 		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Bouncy && other.color.w != 0)
 		{
@@ -138,6 +143,19 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			hasExtraJump = true;
 			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y = 0;
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
+		}
+		else if (otherHitbox == ColliderType::enemy_bottom) 
+		{
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
 		}
 		//else {
 			//isStanding   = false;
@@ -209,6 +227,7 @@ void Player::recallBlobs() noexcept
 
 void Game::update(double dt)  {
 	time += dt;
+	glm::vec3 temp = glm::vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 	//level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 	handleInput();
 	level.player.update(dt);
@@ -221,10 +240,7 @@ void Game::update(double dt)  {
 		level.colManager.unregisterEntry(level.enemy);
 	}
 	updatePhysics();
-	level.player.addVelocity(glm::vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0), true);
-	for (int i = 0; i < 4; ++i) {
-		keys[i] = false;
-	}
+	level.player.addVelocity(temp, true);
 	updateGraphics();
 }
 
@@ -236,37 +252,41 @@ void Game::handleInput() {
 		player.shoot(mousePos);
 	}
 
-	if (keys[Keys::left]) {
-		if ( !player.isStuck ) {
-			player.addVelocity(glm::vec3(-1, 0, 0), true);
-		}
-	}
-	if (keys[Keys::right]) {
-		if ( !player.isStuck ) {
-			player.addVelocity(glm::vec3(1, 0, 0), true);
-		}
-	}
-	if (keys[Keys::up]) {
-		if (player.isStanding){
-			player.isStanding = false;
-			player.jumpCooldown = COOLDOWN_CONSTANT;
-			player.putForce(glm::vec3(0.0, level.player.jumpForce, 0.0));
-		}
-		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
-			player.hasExtraJump = false;
-			player.jumpCooldown = COOLDOWN_CONSTANT;
-			player.velocity.y = 0;
-			player.putForce(glm::vec3(0.0, player.jumpForce, 0.0));
-		}
-	}
-	if (keys[Keys::down]){
-		if (player.status == PlayerStatus::Sticky) {
-			player.isStuck = false;
-			if (player.isStanding == false) {
-				//player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0));
+		if (keys[Keys::left]) {
+			if (!player.isStuck) {
+				player.addVelocity(glm::vec3(-1, 0, 0), true);
 			}
 		}
+		if (keys[Keys::right]) {
+			if (!player.isStuck) {
+				player.addVelocity(glm::vec3(1, 0, 0), true);
+			}
+		}
+		if (keys[Keys::up]) {
+			if (player.isStanding) {
+				player.isStanding = false;
+				player.jumpCooldown = COOLDOWN_CONSTANT;
+				player.putForce(glm::vec3(0.0, level.player.jumpForce, 0.0));
+			}
+			else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
+				player.hasExtraJump = false;
+				player.jumpCooldown = COOLDOWN_CONSTANT;
+				player.velocity.y = 0;
+				player.putForce(glm::vec3(0.0, player.jumpForce, 0.0));
+			}
+		}
+		if (keys[Keys::down]) {
+			if (player.status == PlayerStatus::Sticky) {
+				player.isStuck = false;
+				if (player.isStanding == false) {
+					//player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0));
+				}
+			}
+		}
+	for (int i = 0; i < 4; ++i) {
+		keys[i] = false;
 	}
+	
 }
 
 // Catches up the physics simulation time to the actual game time

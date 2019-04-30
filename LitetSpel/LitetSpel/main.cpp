@@ -136,102 +136,106 @@ void mouseFunc()
 void keyboardFunc()
 {
 	//Movement
-	if (keyboard.KeyIsPressed('D'))
+	if (game.level.player.knockBack == false) 
 	{
-		game.keys[1] = true;
-	}
-	if (keyboard.KeyIsPressed('A'))
-	{
-		game.keys[0] = true;
-	}
-	if (keyboard.KeyIsPressed('W'))
-	{
-		game.keys[2] = true;
-	}
-	if (keyboard.KeyIsPressed('S'))
-	{
-		game.keys[3] = true;
-	}
-	if (keyboard.KeyIsPressed('B')) 
-	{
-		if (powerCoolDown <= 0) 
+		if (keyboard.KeyIsPressed('D'))
 		{
-			if (game.level.player.status == PlayerStatus::None)
+			game.keys[1] = true;
+		}
+		if (keyboard.KeyIsPressed('A'))
+		{
+			game.keys[0] = true;
+		}
+		if (keyboard.KeyIsPressed('W'))
+		{
+			game.keys[2] = true;
+		}
+		if (keyboard.KeyIsPressed('S'))
+		{
+			game.keys[3] = true;
+		}
+		if (keyboard.KeyIsPressed('B'))
+		{
+			if (powerCoolDown <= 0)
 			{
-				for (int i = 0; i < game.level.player.blobCharges; i++) 
+				if (game.level.player.status == PlayerStatus::None)
 				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+					}
+					game.level.player.status = PlayerStatus::Bouncy;
+					graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
 				}
-				game.level.player.status = PlayerStatus::Bouncy;
-				graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
+				else
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+					}
+					game.level.player.status = PlayerStatus::None;
+					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				}
+				powerCoolDown = 0.2f;
 			}
-			else
+		}
+		if (keyboard.KeyIsPressed('H'))
+		{
+			if (powerCoolDown <= 0)
 			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
+				if (game.level.player.status == PlayerStatus::None)
 				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_None;
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
+					}
+					game.level.player.status = PlayerStatus::Heavy;
+					graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
 				}
-				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				else
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+					}
+					game.level.player.status = PlayerStatus::None;
+					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				}
+				powerCoolDown = 0.2f;
 			}
-			powerCoolDown = 0.2f;
+		}
+		if (keyboard.KeyIsPressed('Y'))
+		{
+			if (powerCoolDown <= 0)
+			{
+				if (game.level.player.status == PlayerStatus::None)
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
+					}
+					game.level.player.status = PlayerStatus::Sticky;
+					graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+				}
+				else
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+					}
+					game.level.player.status = PlayerStatus::None;
+					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				}
+				powerCoolDown = 0.2f;
+			}
+		}
+		if (keyboard.KeyIsPressed('R'))
+			game.level.player.recallBlobs();
+		if (keyboard.KeyIsPressed('P')) {
+			graphics.createShaders();
 		}
 	}
-	if (keyboard.KeyIsPressed('H'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.level.player.status == PlayerStatus::None)
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
-				}
-				game.level.player.status = PlayerStatus::Heavy;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
-			}
-			else
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_None;
-				}
-				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('Y'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.level.player.status == PlayerStatus::None)
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
-				}
-				game.level.player.status = PlayerStatus::Sticky;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
-			}
-			else
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_None;
-				}
-				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('R'))
-		game.level.player.recallBlobs();
-	if (keyboard.KeyIsPressed('P')) {
-		graphics.createShaders();
-	}
+	
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
