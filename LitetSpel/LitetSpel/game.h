@@ -64,7 +64,7 @@ public:
 
     glm::vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-    bool isStanding, alive, isDeregistered;
+    bool isStanding, alive, isDeregistered, isStuck;
     Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };
 

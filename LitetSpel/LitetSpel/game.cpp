@@ -119,14 +119,14 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			pos.y        = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y   = 0;
 		}
-		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w == 1 && !isStuck)
+		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w != 0 && !isStuck)
 		{
 			isStanding = true;
 			hasExtraJump = true;
 			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y = 0;
 		}
-		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Bouncy && other.color.w == 1)
+		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Bouncy && other.color.w != 0)
 		{
 			isStanding = true;
 			hasExtraJump = true;
@@ -482,7 +482,9 @@ Enemy::Enemy(glm::vec3 position):
     jumpCooldown(0.3f),
     mass(10.0),
     isStanding(false),
-    alive(true)
+    alive(true),
+	isStuck(false),
+	isDeregistered(false)
 {}
 
 Enemy::~Enemy(){}
@@ -516,6 +518,32 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 	{
 		alive = false;
 	}
+	else if (otherHitbox == ColliderType::blob) 
+	{
+		if (other.color.w == 0.25) 
+		{
+			if (ownHitbox == ColliderType::enemy_bottom)
+			{
+				pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
+				velocity.y = 0;
+				isStanding = true;
+			}
+			else if (ownHitbox == ColliderType::enemy_left)
+			{
+				controlDir.x = -controlDir.x;
+				velocity.x = -velocity.x;
+			}
+			else if (ownHitbox == ColliderType::enemy_right)
+			{
+				controlDir.x = -controlDir.x;
+				velocity.x = -velocity.x;
+			}
+		}
+		if (other.color.w == 0.5) 
+		{
+			isStuck = true;
+		}
+	}
 }
 
 // Updates logic, call once per frame before updatePhysics
@@ -532,8 +560,11 @@ void Enemy::update(double dt) noexcept
 			putForce(glm::vec3(0.0, jumpForce, 0.0));
 		}
 	}
+	if (!isStuck) 
+	{
+		addVelocity(controlDir, true);
+	}
 
-	addVelocity(controlDir, true);
 	isStanding = false;
 }
 
