@@ -61,6 +61,7 @@ Player::Player(glm::vec3 position) :
 	hasExtraJump(true),
 	isStanding(false),
 	isStuck(false),
+	knockBack(false),
 	status(PlayerStatus::None)
 {} // TODO: create hitboxes in ctor body
 
@@ -118,6 +119,11 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			hasExtraJump = true;
 			pos.y        = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y   = 0;
+			if (knockBack) 
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
 		}
 		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w != 0 && !isStuck)
 		{
@@ -157,7 +163,9 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		}
 		else if (otherHitbox == enemy_right) 
 		{
-			pos.x = other.center.x + other.halfLengths.x + (pos.x - HitboxLeft.center.x + HitboxLeft.halfLengths.x);
+			putForce(glm::vec3(2,3,0));
+			knockBack = true;
+			//pos.x = other.center.x + other.halfLengths.x + (pos.x - HitboxLeft.center.x + HitboxLeft.halfLengths.x);
 		}
 	}
 	else if (ownHitbox == ColliderType::player_right) {
@@ -170,7 +178,9 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		}
 		else if(otherHitbox == ColliderType::enemy_left)
 		{
-			pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
+			putForce(glm::vec3(-2, 3, 0));
+			knockBack = true;
+			//pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
 		}
 	}
 }
@@ -199,7 +209,7 @@ void Player::recallBlobs() noexcept
 
 void Game::update(double dt)  {
 	time += dt;
-	level.player.velocity.x = 0;
+	//level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 	handleInput();
 	level.player.update(dt);
 	if (level.enemy.alive) 
@@ -211,6 +221,10 @@ void Game::update(double dt)  {
 		level.colManager.unregisterEntry(level.enemy);
 	}
 	updatePhysics();
+	level.player.addVelocity(glm::vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0), true);
+	for (int i = 0; i < 4; ++i) {
+		keys[i] = false;
+	}
 	updateGraphics();
 }
 
@@ -252,10 +266,6 @@ void Game::handleInput() {
 				//player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0));
 			}
 		}
-	}
-
-	for (int i = 0; i < 4; ++i) {
-		keys[i] = false;
 	}
 }
 

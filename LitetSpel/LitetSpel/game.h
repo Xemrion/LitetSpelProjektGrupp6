@@ -41,7 +41,7 @@ public:
 
     glm::vec3 pos, velocity;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-    bool hasExtraJump, isStanding, isStuck;
+    bool hasExtraJump, isStanding, isStuck, knockBack;
     int status;
 	double radius;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
@@ -53,7 +53,7 @@ public:
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(glm::vec3 position = { -25.0f, 20.0f, 0.0f });
+	Enemy(glm::vec3 position = { -65.0f, -20.0f, 0.0f });
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
 	void update(double dt) noexcept;
