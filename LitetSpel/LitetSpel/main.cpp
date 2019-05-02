@@ -188,7 +188,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
 				}
 				game.level.player.status = PlayerStatus::Heavy;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
+				graphics.setMetaballColorAbsorb(glm::vec3(1.75, 1.75, 1.75), 0.5);
 			}
 			else
 			{

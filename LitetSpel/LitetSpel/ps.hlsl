@@ -56,15 +56,15 @@ float testScene(float3 p)
 	return (2.5) - mbDist;
 }
 
-float castRay(float3 ro, float3 rd, out bool intersect, out float back)
+float castRay(float3 ro, float3 rd, out bool intersect)
 {
-	float dist = -ro.z - (30.0 / rd.z);
+	float dist = -ro.z - (10 * rd.z);
 	float i;
-	float maxDist = -ro.z + (60.0 / rd.z);
+	float maxDist = -ro.z + (20 / rd.z);
 	intersect = false;
 
 	/* calculate ray entry */
-	for (i = 0.0; i < 30; i += 1.0)
+	for (i = 0.0; i < 20; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
 		dist += currentDist + 0.1;
@@ -78,17 +78,17 @@ float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 	}
 
 	/* calculate ray exit */
-	if (intersect) {
-		back = maxDist;
-		for (i = 0.0; i < 30; i += 1.0)
-		{
-			float currentDist = testScene(ro + rd * back);
-			back -= currentDist + 0.1;
-			if (currentDist < 0.1) {
-				break;
-			}
-		}
-	}
+	//if (intersect) {
+	//	back = maxDist;
+	//	for (i = 0.0; i < 10; i += 1.0)
+	//	{
+	//		float currentDist = testScene(ro + rd * back);
+	//		back -= currentDist + 0.1;
+	//		if (currentDist < 0.1) {
+	//			break;
+	//		}
+	//	}
+	//}
 	return dist;
 }
 
@@ -119,8 +119,7 @@ float4 main(VS_OUT input) : SV_Target
 		uv.x));
 
 	bool intersect;
-	float back;
-	float dist = castRay(ro, rd, intersect, back);
+	float dist = castRay(ro, rd, intersect);
 	float3 color = float3(0.0, 0.0, 0.0);
 	float3 parallax = (ro * 0.001);
 
@@ -161,25 +160,27 @@ float4 main(VS_OUT input) : SV_Target
 			float3 specularity;
 			float3 diffuseColor = float3(0, 0, 0);
 			float3 specularColor = float3(0, 0, 0);
-			back = max(back, dist + 0.25);
-
+			float3 refractDir = refract(rd, normal, 1.00029 / 1.45);
+			float back = castRay(p + refractDir * 12, -refractDir, intersect);
+			float3 backp = (p + refractDir * 12) - (refractDir * back);
+			float3 backNormal = calcNormal(backp);
+			
 			/* absorbtion diffuse */
-			float3 absorbed = exp2(-clamp(sphereColor, 0, 1) * (back - dist));
+			float3 absorbed = exp2(-clamp(sphereColor, 0, 1) * back);
 			//diffuseColor = irradiance * absorbed;
 			diffuseColor += irradiance * objectColor;
 
-			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(0.0,0.0,0.0), 0.99);
+			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), sphereColor.rgb * (1 - sphereColor.a), sphereColor.a);
 
 			/* refraction diffuse */
-			float3 refractDir = refract(rd, normal, 0.9);
-			float3 refractSamplePoint = p + refractDir * (back - dist);
-			refractSamplePoint.xy = (refractSamplePoint.xy / resolution) + 0.5;
-			refractSamplePoint.y = 1 - refractSamplePoint.y;
-			float3 refractColor = geometryTexture.Sample(samp, refractSamplePoint.xy) * absorbed;
-
+			//float3 refractSamplePoint = p + refractDir * (back - dist);
+			//refractSamplePoint.xy = (refractSamplePoint.xy / resolution) + 0.5;
+			//refractSamplePoint.y = 1 - refractSamplePoint.y;
+			//float3 refractColor = geometryTexture.Sample(samp, refractSamplePoint.xy) * absorbed;
+			float3 refractColor = float3(0.0, 0.0, 0.0);
 			if (length(refractColor) <= 0.00001) {
-				refractColor += skybox.Sample(samp, parallax + refractDir * (back - dist) + rd) * absorbed;
-				refractColor *= irradianceMap.Sample(samp, parallax + refractDir * (back - dist) + rd) * absorbed;
+				refractColor += skybox.Sample(samp, parallax + backp * 0.01 + refract(refractDir, backNormal, 1.45 / 1.00029)) * absorbed;
+				refractColor *= irradianceMap.Sample(samp, parallax + backp * 0.01 + refract(refractDir, backNormal, 1.45 / 1.00029)) * absorbed;
 			}
 
 			/* specular */

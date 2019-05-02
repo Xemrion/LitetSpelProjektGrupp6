@@ -719,9 +719,14 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 	deviceContext->Unmap(metaballBuffer, 0);
 }
 
-void Graphics::setMetaballColorAbsorb(const glm::vec3& colorAbsorb)
+void Graphics::setMetaballColorAbsorb(const glm::vec3& colorAbsorb, float reflectivity)
 {
-	metaballColor = glm::vec4(colorAbsorb, 0.0);
+	metaballColor = glm::vec4(colorAbsorb, 1 - reflectivity);
+}
+
+void Graphics::setMetaballReflectivity(float reflectivity)
+{
+	metaballColor.a = glm::clamp(0.f, 1.f, 1 - reflectivity);
 }
 
 void Graphics::setCameraPos(glm::vec3 pos)
@@ -736,8 +741,6 @@ void Graphics::swapBuffer()
 	deviceContext->ClearRenderTargetView(backBufferView, clearColor);
 	deviceContext->ClearRenderTargetView(geometryBufferView, clearColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
-
-
 
 	deviceContext->VSSetShader(boxRasterVertexShader, nullptr, 0);
 	deviceContext->PSSetShader(boxRasterPixelShader, nullptr, 0);

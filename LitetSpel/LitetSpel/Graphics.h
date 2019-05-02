@@ -53,8 +53,9 @@ public:
 	HRESULT init(HWND wndHandle, bool windowed);
 	HRESULT createShaders();
 	void setMetaballs(const vector<Sphere>& metaballs);
-	void setMetaballColorAbsorb(const glm::vec3& colorAbsorb);
+	void setMetaballColorAbsorb(const glm::vec3& colorAbsorb, float reflectivity = 0.0);
 	glm::vec3 getMetaballColorAbsorb() { return metaballColor; };
+	void setMetaballReflectivity(float reflectivity);
 	void setBoxes(const vector<Box>& boxes);
 	void setCameraPos(glm::vec3 pos); // Set camera position before setting boxes / metaballs
 	void swapBuffer();
