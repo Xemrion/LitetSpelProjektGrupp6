@@ -15,16 +15,13 @@ class ReadGeometry
 {
 
 private:
-	glm::vec2 resolution = glm::vec2(1280, 720);
-	ID3D11Texture2D* texture;
-	std::vector<char> corners;
-	std::vector<std::vector<char> > pixelColour;
-	int length = 1280 * 720;
-	std::vector<int> isUsed;
+	std::vector<int> usedPixels;
 	std::vector<int> boxWidth;
+	std::vector<int> boxHeight;
 	unsigned char* rgb;
-
-
+	int minimumBoxSize = 10;
+	int width = 0;
+	int height = 0;
 public:
 	ReadGeometry();
 	~ReadGeometry();
@@ -32,7 +29,7 @@ public:
 	void initialize();
 	bool isWhite(glm::vec3 pixelColour);
 	glm::vec3 getPixelColour(int index);
-	bool isPixelUsed(int index);
+	int isPixelUsed(int index);
 	int getBoxWidth(int index);
 	int findIndexByPixel(int index);
 
