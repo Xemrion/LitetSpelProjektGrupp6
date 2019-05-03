@@ -709,24 +709,12 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	struct MetaballStruct {
 		Sphere spheres[15];
-		glm::vec4 color;
 	} metaballStruct;
 	ZeroMemory(metaballStruct.spheres, sizeof(Sphere) * 15);
 	memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(15, (int)metaballs.size()));
-	metaballStruct.color = metaballColor;
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * 15 + sizeof(glm::vec4));
+	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * 15);
 	deviceContext->Unmap(metaballBuffer, 0);
-}
-
-void Graphics::setMetaballColorAbsorb(const glm::vec3& colorAbsorb, float reflectivity)
-{
-	metaballColor = glm::vec4(colorAbsorb, 1 - reflectivity);
-}
-
-void Graphics::setMetaballReflectivity(float reflectivity)
-{
-	metaballColor.a = glm::clamp(0.f, 1.f, 1 - reflectivity);
 }
 
 void Graphics::setCameraPos(glm::vec3 pos)

@@ -105,6 +105,7 @@ public:
     // TODO: refactor into ctor initializer list
 	double physicsSimTime = 0.0;
 	double time = 0.0;
+	double animationTime = 0.0;
 
 	enum Keys { // TODO: refactor into Globals.h
         left,

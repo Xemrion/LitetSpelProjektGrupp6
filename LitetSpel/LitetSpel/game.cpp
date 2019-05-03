@@ -199,6 +199,7 @@ void Player::recallBlobs() noexcept
 
 void Game::update(double dt)  {
 	time += dt;
+	animationTime = glm::mod(animationTime + dt, 3.1416 * 2);
 	level.player.velocity.x = 0;
 	handleInput();
 	level.player.update(dt);
@@ -438,14 +439,16 @@ void Game::updateGraphics() {
 		level.player.pos.y,
 		level.player.pos.z,
 		level.player.radius);
+	
 	level.spheres.push_back(playerSphere);
-
+	
 	glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y*0.1));
 
 	animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
 
 	for (int i = 0; i < level.player.blobs.size(); i++)
 	{
+		level.player.blobs[i].blobSphere.color = playerSphere.color;
 		level.spheres.push_back(level.player.blobs[i].blobSphere);
 	}
 
@@ -576,28 +579,25 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
 	// Offset the start rotation of the spheres to avoid them all starting at the same place
 	glm::vec3 offset = glm::vec3(0.2, 0.0, 0.0);
-	// Multiplier to animate faster when moving a certain direction. Not smooth.
-	glm::vec2 movementMultiplier = glm::vec2(
-		glm::clamp(abs(moveSpeed.x) + 0.0f, 0.0f, 2.0f),
-		glm::clamp(abs(moveSpeed.y) + 0.0f, 0.0f, 2.0f)
-	);
 
 	Sphere sphere1(glm::vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
-		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
+		sphere.centerRadius.x + sin(float(animationTime) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
+		sphere.centerRadius.y + sin(float(animationTime) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
+		sphere.centerRadius.z + sin(float(animationTime) * rotationSpeed.z + offset.z) * amplitude.z,
 		sphere.centerRadius.w / 2
 	));
+	sphere1.color = sphere.color;
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
 	offset = glm::vec3(1.45, 0.9, 1.1);
 	Sphere sphere2(glm::vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
-		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
+		sphere.centerRadius.x + sin(float(animationTime) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
+		sphere.centerRadius.y + sin(float(animationTime) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
+		sphere.centerRadius.z + sin(float(animationTime) * rotationSpeed.z + offset.z) * amplitude.z,
 		sphere.centerRadius.w / 2
 	));
+	sphere2.color = sphere.color;
 	level.spheres.push_back(sphere2);
 }
 

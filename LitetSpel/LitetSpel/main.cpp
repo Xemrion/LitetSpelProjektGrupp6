@@ -163,7 +163,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
 				}
 				game.level.player.status = PlayerStatus::Bouncy;
-				graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
+				game.playerSphere.color = glm::vec4(1.0, 0.5, 0.25, 0.0);
 			}
 			else
 			{
@@ -172,7 +172,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_None;
 				}
 				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				game.playerSphere.color = glm::vec4(0.85, 0.25, 0.75, 0.0);
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -188,7 +188,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
 				}
 				game.level.player.status = PlayerStatus::Heavy;
-				graphics.setMetaballColorAbsorb(glm::vec3(1.75, 1.75, 1.75), 0.5);
+				game.playerSphere.color = glm::vec4(1.75, 1.75, 1.75, 0.1);
 			}
 			else
 			{
@@ -197,7 +197,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_None;
 				}
 				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				game.playerSphere.color = glm::vec4(0.85, 0.25, 0.75, 0.0);
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -213,7 +213,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
 				}
 				game.level.player.status = PlayerStatus::Sticky;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5)*2.f);
+				game.playerSphere.color = glm::vec4(0.4, 0.4, 1.0, 0.0);
 			}
 			else
 			{
@@ -222,7 +222,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_None;
 				}
 				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				game.playerSphere.color = glm::vec4(0.85, 0.25, 0.75, 0.0);
 			}
 			powerCoolDown = 0.2f;
 		}
@@ -231,12 +231,6 @@ void keyboardFunc()
 		game.level.player.recallBlobs();
 	if (keyboard.KeyIsPressed('P')) {
 		graphics.createShaders();
-	}
-	if (keyboard.KeyIsPressed('8')) {
-		graphics.setMetaballColorAbsorb(graphics.getMetaballColorAbsorb() + glm::vec3(0.01));
-	}
-	if (keyboard.KeyIsPressed('9')) {
-		graphics.setMetaballColorAbsorb(graphics.getMetaballColorAbsorb() - glm::vec3(0.01));
 	}
 }
 

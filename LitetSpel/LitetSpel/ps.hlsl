@@ -12,11 +12,12 @@ struct VS_OUT
 
 struct Sphere {
 	float4 centerRadius;
+	float4 color;
 };
+
 #define MAX_SPHERES 15
 cbuffer SphereBuffer {
 	Sphere spheres[MAX_SPHERES];
-	float4 sphereColor;
 };
 
 cbuffer Camera {
@@ -77,18 +78,6 @@ float castRay(float3 ro, float3 rd, out bool intersect)
 		}
 	}
 
-	/* calculate ray exit */
-	//if (intersect) {
-	//	back = maxDist;
-	//	for (i = 0.0; i < 10; i += 1.0)
-	//	{
-	//		float currentDist = testScene(ro + rd * back);
-	//		back -= currentDist + 0.1;
-	//		if (currentDist < 0.1) {
-	//			break;
-	//		}
-	//	}
-	//}
 	return dist;
 }
 
@@ -100,6 +89,24 @@ float3 calcNormal(float3 p)
 		k.yyx * testScene(p + k.yyx * h) +
 		k.yxy * testScene(p + k.yxy * h) +
 		k.xxx * testScene(p + k.xxx * h));
+}
+
+float4 calcColor(float3 p)
+{
+	float4 color = spheres[0].color;
+	float minDist = mb(p, spheres[0].centerRadius);
+	for (int i = 1; i < MAX_SPHERES; ++i) {
+		if (spheres[i].centerRadius.a > 0.0) {
+			float dist = mb(p, spheres[i].centerRadius);
+
+			if (dist > minDist) {
+				color = spheres[i].color;
+				minDist = dist;
+			}
+		}
+	}
+
+	return color;
 }
 
 
@@ -153,34 +160,34 @@ float4 main(VS_OUT input) : SV_Target
 		else {
 			/* lighting */
 			float3 p = ro + rd * dist;
+
 			float3 normal = calcNormal(p);
+			float4 sphereColor = calcColor(p);
 			float3 objectColor = float3(1.0, 1.0, 1.0);
-			objectColor = float3(1,1,1) - sphereColor.rgb;
-			float3 irradiance = irradianceMap.Sample(samp, parallax + normal);
+			objectColor = float3(1, 1, 1) - sphereColor.rgb;
 			float3 specularity;
 			float3 diffuseColor = float3(0, 0, 0);
 			float3 specularColor = float3(0, 0, 0);
-			float3 refractDir = refract(rd, normal, 1.00029 / 1.45);
-			float back = castRay(p + refractDir * 12, -refractDir, intersect);
+			float refractiveIndex = 1.5;
+			float3 refractDir = refract(rd, normal, 1.00029 / refractiveIndex);
+			float back = castRay(p + refractDir * 12, - refractDir, intersect);
 			float3 backp = (p + refractDir * 12) - (refractDir * back);
 			float3 backNormal = calcNormal(backp);
+			float3 backSample = parallax + backp * 0.01 + refract(refractDir, backNormal, refractiveIndex / 1.00029);
+			float3 irradiance = irradianceMap.Sample(samp, backSample);
 			
 			/* absorbtion diffuse */
-			float3 absorbed = exp2(-clamp(sphereColor, 0, 1) * back);
-			//diffuseColor = irradiance * absorbed;
-			diffuseColor += irradiance * objectColor;
+			float3 absorbed = exp(-sphereColor * back);
+			diffuseColor = irradiance * absorbed;
+			diffuseColor = objectColor * absorbed;
 
-			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), sphereColor.rgb * (1 - sphereColor.a), sphereColor.a);
+			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), sphereColor.rgb * sphereColor.a, 1 - sphereColor.a);
 
 			/* refraction diffuse */
-			//float3 refractSamplePoint = p + refractDir * (back - dist);
-			//refractSamplePoint.xy = (refractSamplePoint.xy / resolution) + 0.5;
-			//refractSamplePoint.y = 1 - refractSamplePoint.y;
-			//float3 refractColor = geometryTexture.Sample(samp, refractSamplePoint.xy) * absorbed;
 			float3 refractColor = float3(0.0, 0.0, 0.0);
 			if (length(refractColor) <= 0.00001) {
-				refractColor += skybox.Sample(samp, parallax + backp * 0.01 + refract(refractDir, backNormal, 1.45 / 1.00029)) * absorbed;
-				refractColor *= irradianceMap.Sample(samp, parallax + backp * 0.01 + refract(refractDir, backNormal, 1.45 / 1.00029)) * absorbed;
+				refractColor += radianceMap.Sample(samp, backSample) * absorbed;
+				refractColor *= irradianceMap.Sample(samp, backSample) * absorbed;
 			}
 
 			/* specular */
@@ -196,10 +203,10 @@ float4 main(VS_OUT input) : SV_Target
 			}
 
 			/* final color */
-			color = (1.0 - specularity) * diffuseColor + specularity * specularColor + refractColor;
+			color = (1.0 - specularity) * (diffuseColor + refractColor) + specularity * specularColor;
 		}
 	}
-
+	
 	color = color / (color + float3(1.0, 1.0, 1.0));
 	return float4(pow(color, 1.0 / 2.2), 1.0);
 }
