@@ -104,7 +104,7 @@ void Player::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
 // Set useSpeed to true to multiply velocity by objects speed value
 void Player::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
 	if (useSpeed) {
-		this->velocity += velocity * moveSpeed;
+		this->velocity += velocity * (moveSpeed/2);
 	}
 	else this->velocity += velocity;
 }
