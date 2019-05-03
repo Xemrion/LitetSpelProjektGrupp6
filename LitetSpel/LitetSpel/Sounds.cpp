@@ -17,6 +17,7 @@ Sounds::Sounds() {
 	this->enmy01 = nullptr;
 	this->enmy02 = nullptr;
 	this->enmy03 = nullptr;
+	this->enemies = nullptr;
 }
 Sounds::Sounds(const Sounds &sound) {
 
@@ -271,6 +272,7 @@ void Sounds::Shutdown() {
 	ShutdownWaveFile(&menuHighlightButton);
 	ShutdownWaveFile(&menuClickButton);
 	ShutdownWaveFile(&menuBack);
+	ShutdownEnemySounds();
 	ShutdownDirectSound();
 }
 
@@ -527,6 +529,20 @@ bool Sounds::ContinueAllSFX() {
 	return true;
 }
 
+void Sounds::setLimits(float inner, float outer) {
+	if (inner <= 0) {
+		this->innerLimit = 0;
+	}
+	else {
+		this->innerLimit = inner;
+	}
+	if (outer <= 0) {
+		this->outerLimit = 0;
+	}
+	else {
+		this->outerLimit = outer;
+	}
+}
 void Sounds::setMasterVolume(UINT master) {
 	if (master >= 10) {
 		this->masterVolume = 10;
@@ -882,4 +898,52 @@ bool Sounds::ContinueSFX(IDirectSoundBuffer8* sound) {
 	}
 
 	return true;
+}
+
+bool Sounds::InitializeEnemySounds(int nrOfEnemies) {
+	bool results;
+	if (this->enemies == nullptr) {
+		this->nrOfEnemies = nrOfEnemies;
+		this->enemies = new IDirectSoundBuffer8*[this->nrOfEnemies];
+		std::string fileName = "nmyjmp.wav";
+		char file[11] = { fileName[0], fileName[1], fileName[2], fileName[3], fileName[4], fileName[5], fileName[6], fileName[7], fileName[8], fileName[9], fileName[10] };
+		for (int i = 0; i < this->nrOfEnemies; i++) {
+			results = LoadWaveFile(file, &enemies[i]);
+			if (results == false) {
+				return false;
+			}
+		}
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+bool Sounds::PlayEnemyJumpSound(int enemy, float distance) {
+	if (enemy >= nrOfEnemies) {
+		return false;
+	}
+	if (distance < outerLimit && distance > innerLimit) {
+		float temp = (1.0f - ((distance - innerLimit) / (outerLimit - innerLimit)));
+		LONG volume = (masterVolume * sfxVolume * (90 * temp)) - 10000;
+		SetVolume(this->enemies[enemy], volume);
+		if(!PlayWaveFile(this->enemies[enemy])) {
+			return false;
+		}
+	}
+	else if (distance <= innerLimit) {
+		LONG volume = (masterVolume * sfxVolume * 90) - 10000;
+		SetVolume(this->enemies[enemy], volume);
+		if (!PlayWaveFile(this->enemies[enemy])) {
+			return false;
+		}
+	}
+	return true;
+}
+void Sounds::ShutdownEnemySounds() {
+	for (int i = 0; i < this->nrOfEnemies; i++) {
+		ShutdownWaveFile(&enemies[i]);
+	}
+	delete[]enemies;
+	this->nrOfEnemies;
 }

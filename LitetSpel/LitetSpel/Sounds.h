@@ -61,6 +61,10 @@ public:
 	bool StopAllSFX();
 	bool ContinueAllSFX();
 
+	bool PlayEnemyJumpSound(int enemy, float distance);
+	bool InitializeEnemySounds(int nrOfEnemies);
+
+	void setLimits(float inner, float outer);
 	void setMasterVolume(UINT master);
 	void setSFXVolume(UINT sfx);
 	void setMusicVolume(UINT music);
@@ -98,12 +102,15 @@ private:
 	bool SetVolume(IDirectSoundBuffer8* sound, LONG volume);
 	bool StopSFX(IDirectSoundBuffer8* sound);
 	bool ContinueSFX(IDirectSoundBuffer8* sound);
+	void ShutdownEnemySounds();
 
 private:
 	UINT masterVolume;
 	UINT sfxVolume;
 	UINT musicVolume;
 	bool defaultVolume = true;
+	float innerLimit;
+	float outerLimit;
 
 	IDirectSound8* directSound;
 	IDirectSoundBuffer* firstBuffer;
@@ -145,6 +152,9 @@ private:
 	IDirectSoundBuffer8* menuHighlightButton;
 	IDirectSoundBuffer8* menuClickButton;
 	IDirectSoundBuffer8* menuBack;
+
+	IDirectSoundBuffer8** enemies;
+	int nrOfEnemies;
 
 };
 
