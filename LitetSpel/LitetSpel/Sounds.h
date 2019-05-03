@@ -48,6 +48,10 @@ public:
 	bool PlayStartOfLevelSound();
 	bool PlayEndOfLevelSound();
 
+	bool PlayMenuHighlightSound();
+	bool PlayMenuClickSound();
+	bool PlayMenuBackSound();
+
 	bool PlayTestSound01();
 	bool StartMenuMusic();
 	bool StopMenuMusic();
@@ -107,35 +111,41 @@ private:
 	//Test
 	IDirectSoundBuffer8* test01;
 	//Music
-	IDirectSoundBuffer8* menu01;
-	IDirectSoundBuffer8* game01;
-	IDirectSoundBuffer8* pStart;
-	IDirectSoundBuffer8* pGoal;
+	IDirectSoundBuffer8* menu01; //Menu sound loop
+	IDirectSoundBuffer8* game01; //During game sound loop
+	IDirectSoundBuffer8* pStart; //Start of level sound
+	IDirectSoundBuffer8* pGoal; //End of level sound
 
 	//SFX
-	IDirectSoundBuffer8* jump01;
+	IDirectSoundBuffer8* jump01; //Jump for different power ups
 	IDirectSoundBuffer8* jump02;
 	IDirectSoundBuffer8* jump03;
 
-	IDirectSoundBuffer8* land01;
+	IDirectSoundBuffer8* land01; //Landing for different power ups
 	IDirectSoundBuffer8* land02;
 	IDirectSoundBuffer8* land03;
 
-	IDirectSoundBuffer8* blob01;
-	IDirectSoundBuffer8* blob02;
-	IDirectSoundBuffer8* blob03;
+	IDirectSoundBuffer8* blob01; //Shoot
+	IDirectSoundBuffer8* blob02; //Landing
+	IDirectSoundBuffer8* blob03; //Recall
 
 	IDirectSoundBuffer8* enmy01;
 	IDirectSoundBuffer8* enmy02;
 	IDirectSoundBuffer8* enmy03;
 
-	IDirectSoundBuffer8* sorb01;
-	IDirectSoundBuffer8* sorb02;
-	IDirectSoundBuffer8* sorb03;
+	IDirectSoundBuffer8* sorb01; //Absorb blob
+	IDirectSoundBuffer8* sorb02; //Absorb enemy
+	IDirectSoundBuffer8* sorb03; //Absorb power up
 
-	IDirectSoundBuffer8* pDeath;
+	IDirectSoundBuffer8* pDeath; //Player Death
 	IDirectSoundBuffer8* pDmg01; //High health
 	IDirectSoundBuffer8* pDmg02; //Lower Health
+
+	//GUI SFX
+	IDirectSoundBuffer8* menuHighlightButton;
+	IDirectSoundBuffer8* menuClickButton;
+	IDirectSoundBuffer8* menuBack;
+
 };
 
 #endif // !SOUNDS_H

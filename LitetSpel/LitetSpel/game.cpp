@@ -191,7 +191,7 @@ void Game::update(double dt) {
 			currentLevel.player.isStanding = false;
 			currentLevel.player.gravity = GRAVITY_CONSTANT;
 			currentLevel.player.jumpCooldown = COOLDOWN_CONSTANT;
-			gameSounds->PlayJumpSound01();
+			gameSounds->PlayJumpSound02();
 		}
 		else if (currentLevel.player.status == PlayerStatus::Bouncy && currentLevel.player.hasExtraJump == true && currentLevel.player.isStanding == false && currentLevel.player.jumpCooldown <= 0) {
 			currentLevel.player.hasExtraJump = false;

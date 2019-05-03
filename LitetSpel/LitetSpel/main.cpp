@@ -211,6 +211,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game.gameSounds = &gameSounds;
 	ShowWindow(wndHandle, nCmdShow);
+	gameSounds.StartGameMusic();
 	
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message)
@@ -233,8 +234,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			keyboardFunc();
 			mouseFunc();
 
-			if (keyboard.KeyIsPressed(VK_ADD)) {
-				gameSounds.PlayTestSound01();
+			if (keyboard.KeyIsPressed(VK_UP)) {
+				gameSounds.StopGameMusic();
+			}
+			if (keyboard.KeyIsPressed(VK_DOWN)) {
+				gameSounds.ContinueGameMusic();
 			}
 			graphics.setMetaballColorAbsorb(glm::vec3(1.0f, 0.25f, 0.25f));
 			game.update(dt);

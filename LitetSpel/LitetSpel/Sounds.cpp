@@ -218,6 +218,30 @@ if (results == false) {
 	return false;
 }
 
+name = "mhlbtn.wav";
+char menuHighlightButtonFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10] };
+
+results = LoadWaveFile(menuHighlightButtonFileName, &menuHighlightButton);
+if (results == false) {
+	return false;
+}
+
+name = "mclkbt.wav";
+char menuClickFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10] };
+
+results = LoadWaveFile(menuClickFileName, &menuClickButton);
+if (results == false) {
+	return false;
+}
+
+name = "m-back.wav";
+char menuBackFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10] };
+
+results = LoadWaveFile(menuBackFileName, &menuBack);
+if (results == false) {
+	return false;
+}
+
 return true;
 }
 void Sounds::Shutdown() {
@@ -244,6 +268,9 @@ void Sounds::Shutdown() {
 	ShutdownWaveFile(&pDmg02);
 	ShutdownWaveFile(&pStart);
 	ShutdownWaveFile(&pGoal);
+	ShutdownWaveFile(&menuHighlightButton);
+	ShutdownWaveFile(&menuClickButton);
+	ShutdownWaveFile(&menuBack);
 	ShutdownDirectSound();
 }
 
@@ -363,6 +390,24 @@ bool Sounds::PlayStartOfLevelSound() {
 }
 bool Sounds::PlayEndOfLevelSound() {
 	if (!PlayWaveFile(pGoal)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayMenuHighlightSound() {
+	if (!PlayWaveFile(menuHighlightButton)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayMenuClickSound() {
+	if (!PlayWaveFile(menuClickButton)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::PlayMenuBackSound() {
+	if (!PlayWaveFile(menuBack)) {
 		return false;
 	}
 	return true;

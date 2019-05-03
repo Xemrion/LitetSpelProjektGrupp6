@@ -47,6 +47,9 @@ pdmg01.wav
 pdmg02.wav
 pstart.wav
 p-goal.wav
+mhlbtn.wav
+mclkbt.wav
+m-back.wav
 |----------------------------------|
 */
 
