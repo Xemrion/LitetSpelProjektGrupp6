@@ -1,112 +1,209 @@
 #include "Blob.h"
+#include <algorithm>
 
-Blob::Blob()
+Blob::Blob( glm::vec3 const &parentPosition ):
+    parentPosition  ( &parentPosition ),
+    pos             (  parentPosition ),
+    blobSphere      ({ glm::vec4(pos,radius) }),
+    hitbox          ({ glm::vec4(pos,0), glm::vec4(radius,radius,radius,0), glm::vec4(.5, .5, 1.0, .0) }),
+    isActive        (false),
+    isBeingRecalled (true),
+	isStuck         (false),
+    recallSpeed     (200.0f),
+    speed           (100.1f),
+    radius          (  2.0f),
+	status          (BlobStatus::Blob_None),
+    velocity        (   .0f)
 {
+	deactivateHitbox();
 }
 
-Blob::~Blob()
+void Blob::absorb() noexcept
 {
+    isBeingRecalled = false;
+    isActive        = false;
 }
 
-Blob::Blob(glm::vec3 pos)
-{
-	this->blobSphere.centerRadius = glm::vec4(
-		pos,
-		radius);
-	this->pos = pos;
+void Blob::deactivateHitbox() noexcept {
+	hitbox.color.w = 0;
 }
-void Blob::move(float dt)
-{
-	if (this->isActive)
+
+void Blob::reactivateHitbox() noexcept {
+	if (status == BlobStatus::Blob_Heavy)
 	{
-		dir -= glm::vec3(1, 60, 0) * fallSpeed * dt;
-		pos += dir * speed * dt;
-		this->blobSphere.centerRadius = glm::vec4(
-			pos,
-			radius);
-		//AA
+		hitbox.color.w = 0.25;
 	}
-	else if (this->isBeingRecalled)
+	else if (status == BlobStatus::Blob_Sticky)
 	{
-		pos += dir * recallSpeed * dt;
-		this->blobSphere.centerRadius = glm::vec4(
-			pos,
-			radius);
+		hitbox.color.w = 0.5;
+	}
+	else
+	{
+		hitbox.color.w = 1;
 	}
 
 }
 
-void Blob::setDir(glm::vec3 dir)
+void Blob::shoot( glm::vec3 const &direction ) noexcept
 {
-	this->dir = dir;
-}
-
-void Blob::setMoveSpeed(int speed)
-{
-	this->speed = speed;
-}
-
-void Blob::setFallSpeed(int speed)
-{
-	this->fallSpeed = speed;
-}
-
-
-void Blob::collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject & other)
-{
-	if (otherHitbox == CollisionId::platform)
-	{
-		this->fallSpeed = 0;
-		this->speed = 0;
+    if ( !isActive && !isBeingRecalled ) {
+        reactivateHitbox();
+        isActive = true;
+        velocity = (status == BlobStatus::Blob_Heavy)?  direction * speed/3.0f  :  direction * speed;
 	}
 }
 
-void Blob::updateBlobCollisions()
+void Blob::recall() noexcept
 {
-	//####################################################################Bottom
-	HitboxBottom.center = glm::vec4(
-		pos.x,
-		pos.y - 0.4*blobSphere.centerRadius.w,
-		pos.z,
-		0);
-	HitboxBottom.halfLengths = glm::vec4(
-		blobSphere.centerRadius.w*0.5,
-		blobSphere.centerRadius.w*0.4,
-		blobSphere.centerRadius.w*0.1,
-		0);
-	//####################################################################Top
-	HitboxTop.center = glm::vec4(
-		pos.x,
-		pos.y + 0.4*blobSphere.centerRadius.w,
-		pos.z,
-		0);
-	HitboxTop.halfLengths = glm::vec4(
-		blobSphere.centerRadius.w*0.5,
-		blobSphere.centerRadius.w*0.4,
-		blobSphere.centerRadius.w*0.1,
-		0);
-	//####################################################################Left
-	HitboxLeft.center = glm::vec4(
-		pos.x - 0.5*blobSphere.centerRadius.w,
-		pos.y,
-		pos.z,
-		0);
-	HitboxLeft.halfLengths = glm::vec4(
-		blobSphere.centerRadius.w*0.2,
-		blobSphere.centerRadius.w*0.8,
-		blobSphere.centerRadius.w*0.1,
-		0);
+    deactivateHitbox();
+    isBeingRecalled = true;
+}
 
-	//####################################################################Right
-	HitboxRight.center = glm::vec4(
-		pos.x + 0.5*blobSphere.centerRadius.w,
-		pos.y,
-		pos.z,
-		0);
-	HitboxRight.halfLengths = glm::vec4(
-		blobSphere.centerRadius.w*0.2,
-		blobSphere.centerRadius.w*0.8,
-		blobSphere.centerRadius.w*0.1,
-		0);
-	//####################################################################
+bool Blob::getIsActive()        const noexcept { return isActive; }
+
+bool Blob::getIsBeingRecalled() const noexcept { return isBeingRecalled; }
+
+bool Blob::getIsStuck() const noexcept { return isStuck; }
+
+// called once per frame from Player::update
+void Blob::update(double dt) noexcept
+{
+    #undef min
+    if ( isBeingRecalled ) {
+        float speed          = std::min( recallSpeed * float(dt), glm::distance(pos, *parentPosition) );
+        glm::vec3 direction  = glm::normalize( *parentPosition - pos );
+		pos                 += speed * direction;
+		isStuck              = false;
+	}
+    if (!isActive) {
+        pos = *parentPosition + glm::vec3(0.0, 2.0, 0.0);
+        setVelocity(glm::vec3(0.0));
+        blobSphere.centerRadius = glm::vec4(*parentPosition, 2);
+    }
+	if (isStuck == true && status != BlobStatus::Blob_Sticky) 
+	{
+		isStuck = false;
+	}
+	if (!isActive) 
+	{
+		deactivateHitbox();
+	}
+	blobSphere.centerRadius = glm::vec4( pos, radius );
+}
+
+// Call from updatePhysics
+void Blob::move(double dt) noexcept
+{
+	pos           += velocity * float(dt);
+	hitbox.center  = glm::vec4( pos, 0.0 );
+}
+
+// Set useSpeed to true to multiply velocity by objects speed value
+void Blob::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
+{
+	if (useSpeed) {
+		float speedMultiplier = isBeingRecalled ? recallSpeed : speed;
+		this->velocity        = velocity * speedMultiplier;
+	}
+	else this->velocity = velocity;
+}
+
+// Set useSpeed to true to multiply velocity by objects speed value
+void Blob::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
+{
+	if (useSpeed) {
+		float speedMultiplier  = isBeingRecalled ? recallSpeed : speed;
+		this->velocity        += velocity * speedMultiplier;
+	}
+	else this->velocity += velocity;
+}
+
+void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &other) noexcept
+{
+    if ( isBeingRecalled and(
+         otherType == ColliderType::player_bottom ||
+         otherType == ColliderType::player_top    ||
+         otherType == ColliderType::player_left   ||
+         otherType == ColliderType::player_right  ))
+    {
+        absorb();
+    }
+
+	if ( isActive and otherType == ColliderType::platform) {
+		if (status == BlobStatus::Blob_Bouncy) 
+		{
+			this->velocity.y = -this->velocity.y;
+			this->velocity.x = 0;
+		}
+		else if (status == BlobStatus::Blob_Sticky) 
+		{
+			this->velocity = glm::vec3(0.0);
+			isStuck = true;
+		}
+		else 
+		{
+			this->velocity = glm::vec3(0.0);
+		}
+		glm::vec3 pushUp    = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown  = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft  = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
+		glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		pos                += glm::length(minDistY) < glm::length(minDistX)  ? minDistY : minDistX;
+	}
+	else if (isActive and otherType == ColliderType::enemy_top or isActive and otherType == ColliderType::enemy_bottom)
+	{
+		if (status == BlobStatus::Blob_Bouncy) 
+		{
+			this->velocity.y = -this->velocity.y;
+			this->velocity.x = 0;
+		}
+		else if (status == BlobStatus::Blob_Sticky) 
+		{
+			this->velocity = glm::vec3(0.0);
+			isStuck = true;
+		}
+		else 
+		{
+			this->velocity = glm::vec3(0.0);
+		}
+		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		pos += glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+	}
+	else if (isActive and otherType == ColliderType::enemy_left && status != BlobStatus::Blob_Heavy && status != BlobStatus::Blob_Sticky)
+	{
+		if (status == BlobStatus::Blob_Sticky)
+		{
+			this->velocity = glm::vec3(0.0);
+			isStuck = true;
+		}
+		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		pos += glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+	}
+	else if (isActive and otherType == ColliderType::enemy_right && status != BlobStatus::Blob_Heavy && status != BlobStatus::Blob_Sticky)
+	{
+		if (status == BlobStatus::Blob_Sticky)
+		{
+			this->velocity = glm::vec3(0.0);
+			isStuck = true;
+		}
+		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		pos += glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+	}
 }

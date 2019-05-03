@@ -700,7 +700,7 @@ void Graphics::setCameraPos(glm::vec3 pos)
 
 void Graphics::swapBuffer()
 {
-	float clearColor[] = { 0.0, 0.0, 0.0, 1.0 };
+	float clearColor[] = { 0.9, 0.9, 0.9, 1.0 };
 	deviceContext->ClearRenderTargetView(backBufferView, clearColor);
 	deviceContext->ClearRenderTargetView(geometryBufferView, clearColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
