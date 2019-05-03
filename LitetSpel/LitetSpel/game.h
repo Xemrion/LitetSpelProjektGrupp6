@@ -98,6 +98,11 @@ struct LevelData { // POD
     CollisionManager colManager;
 };
 
+enum GameState 
+{
+	LevelState,
+	MenuState
+};
 
 class Game {
 private:
@@ -105,6 +110,7 @@ public:
     // TODO: refactor into ctor initializer list
 	double physicsSimTime = 0.0;
 	double time = 0.0;
+	double state;
 
 	enum Keys { // TODO: refactor into Globals.h
         left,
@@ -137,6 +143,10 @@ public:
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
+
+	Box      MenuBG;
+	Box      MenuYes;
+	Box      MenuNo;
 };
 
 

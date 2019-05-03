@@ -16,6 +16,7 @@ double dt;
 
 int xMus = 0;
 float powerCoolDown = 0.0;
+bool gameEnd = false;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -124,19 +125,37 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 
 void mouseFunc() 
 {
-	if (mouse.LeftIsPressed())
+	if (game.state == GameState::LevelState) 
 	{
-		game.leftButtonDown = true;
-		game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
+		if (mouse.LeftIsPressed())
+		{
+			game.leftButtonDown = true;
+			game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
+		}
+		else
+			game.leftButtonDown = false;
 	}
-	else
-		game.leftButtonDown = false;
+	else 
+	{
+		if (mouse.LeftIsPressed())
+		{
+			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
+				game.state = GameState::LevelState;
+			}
+			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
+			{
+				gameEnd = true;
+			}
+		}
+
+	}
+
 }
 
 void keyboardFunc()
 {
 	//Movement
-	if (game.level.player.knockBack == false) 
+	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
 	{
 		if (keyboard.KeyIsPressed('D'))
 		{
@@ -240,9 +259,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (FAILED(hr)) return 2;
 	game.init();
 	ShowWindow(wndHandle, nCmdShow);
-	
+
+
 	auto prevFrameTime = std::chrono::steady_clock::now();
-	while (WM_QUIT != msg.message)
+	while (WM_QUIT != msg.message && gameEnd == false)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
@@ -282,8 +302,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				keyboardFunc();
 				mouseFunc();
 			}
-
-
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
 			graphics.setBoxes(game.level.boxes);

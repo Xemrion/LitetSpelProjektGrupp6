@@ -55,6 +55,21 @@ void Game::init() noexcept {
 	level.TestPowerUp.powerBox.color = glm::vec4(0.0, 0.5, 0.75, 0);
 	level.boxes.push_back(level.TestPowerUp.powerBox);
 	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
+
+// MENU
+	MenuBG.center = glm::vec4(0.0f, 0.0f, 5.0f, 0.0f);
+	MenuBG.halfLengths = glm::vec4(100.0f, 100.0f, 0.0f, 0.0f);
+	MenuBG.color = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+
+	MenuYes.center = glm::vec4(30.0f, 10.0f, 0.0f, 0.0f);
+	MenuYes.halfLengths = glm::vec4(20.0f, 20.0f, 0.0f, 0.0f);
+	MenuYes.color = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+
+	MenuNo.center = glm::vec4(-30.0f, 10.0f, 0.0f, 0.0f);
+	MenuNo.halfLengths = glm::vec4(20.0f, 20.0f, 0.0f, 0.0f);
+	MenuNo.color = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+
+	state = GameState::MenuState;
 }
 
 Player::Player(glm::vec3 position) :
@@ -265,22 +280,25 @@ void Player::recallBlobs() noexcept
 }
 
 void Game::update(double dt)  {
-	time += dt;
-	glm::vec3 temp = glm::vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
-	//level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
-	handleInput();
-	level.player.isStanding = false;
-	level.player.update(dt);
-	if (level.enemy.alive) 
+	if (state == GameState::LevelState) 
 	{
-		level.enemy.update(dt);
+		time += dt;
+		glm::vec3 temp = glm::vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
+		//level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
+		handleInput();
+		level.player.isStanding = false;
+		level.player.update(dt);
+		if (level.enemy.alive)
+		{
+			level.enemy.update(dt);
+		}
+		else if (!level.enemy.alive && level.enemy.isDeregistered)
+		{
+			level.colManager.unregisterEntry(level.enemy);
+		}
+		updatePhysics();
+		level.player.addVelocity(temp, true);
 	}
-	else if (!level.enemy.alive && level.enemy.isDeregistered) 
-	{
-		level.colManager.unregisterEntry(level.enemy);
-	}
-	updatePhysics();
-	level.player.addVelocity(temp, true);
 	updateGraphics();
 }
 
@@ -493,36 +511,45 @@ void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
 	level.boxes   = vector<Box>();
 
-	level.boxes.push_back(groundBox.hitbox);
-	level.boxes.push_back(testPlat.hitbox);
-	level.boxes.push_back(testplat2.hitbox);
-	level.boxes.push_back(level.TestPowerUp.powerBox);
-	EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
-	
-	if (level.enemy.alive) {
-		level.boxes.push_back(EnemyBox);
-	}
-
-	level.spheres = vector<Sphere>();
-	playerSphere.centerRadius = glm::vec4(
-		level.player.pos.x,
-		level.player.pos.y,
-		level.player.pos.z,
-		level.player.radius);
-	level.spheres.push_back(playerSphere);
-
-	glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
-
-	animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
-
-	for (int i = 0; i < level.player.blobs.size(); i++)
+	if (state == GameState::LevelState) 
 	{
-		level.spheres.push_back(level.player.blobs[i].blobSphere);
+		level.boxes.push_back(groundBox.hitbox);
+		level.boxes.push_back(testPlat.hitbox);
+		level.boxes.push_back(testplat2.hitbox);
+		level.boxes.push_back(level.TestPowerUp.powerBox);
+		EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
+
+		if (level.enemy.alive) {
+			level.boxes.push_back(EnemyBox);
+		}
+
+		level.spheres = vector<Sphere>();
+		playerSphere.centerRadius = glm::vec4(
+			level.player.pos.x,
+			level.player.pos.y,
+			level.player.pos.z,
+			level.player.radius);
+		level.spheres.push_back(playerSphere);
+
+		glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
+
+		animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
+
+		for (int i = 0; i < level.player.blobs.size(); i++)
+		{
+			level.spheres.push_back(level.player.blobs[i].blobSphere);
+		}
+
+		level.boxes.push_back(level.goal->representation);
+
+		//showHitboxes();
 	}
-
-    level.boxes.push_back(level.goal->representation);
-
-	//showHitboxes();
+	else 
+	{
+		level.boxes.push_back(MenuBG);
+		level.boxes.push_back(MenuYes);
+		level.boxes.push_back(MenuNo);
+	}
 }
 
 void Game::showHitboxes()
