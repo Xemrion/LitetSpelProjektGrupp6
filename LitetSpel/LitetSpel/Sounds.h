@@ -60,6 +60,8 @@ public:
 	bool ContinueGameMusic();
 	bool StopAllSFX();
 	bool ContinueAllSFX();
+	bool StartPlayerMoveLoop();
+	bool StopPlayerMoveLoop();
 
 	void setMasterVolume(UINT master);
 	void setSFXVolume(UINT sfx);
@@ -140,6 +142,7 @@ private:
 	IDirectSoundBuffer8* pDeath; //Player Death
 	IDirectSoundBuffer8* pDmg01; //High health
 	IDirectSoundBuffer8* pDmg02; //Lower Health
+	IDirectSoundBuffer8* playerMoveLoop;
 
 	//GUI SFX
 	IDirectSoundBuffer8* menuHighlightButton;

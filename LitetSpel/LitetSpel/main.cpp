@@ -13,6 +13,8 @@ Game game;
 
 double dt;
 
+bool playerMove;
+
 int xMus = 0;
 float powerCoolDown = 0.0;
 
@@ -138,10 +140,22 @@ void keyboardFunc()
 	if (keyboard.KeyIsPressed('D'))
 	{
 		game.keys[1] = true;
+		if (playerMove != true) {
+			gameSounds.StartPlayerMoveLoop();
+			playerMove = true;
+		}
 	}
 	if (keyboard.KeyIsPressed('A'))
 	{
 		game.keys[0] = true;
+		if (playerMove != true) {
+			gameSounds.StartPlayerMoveLoop();
+			playerMove = true;
+		}
+	}
+	if (!keyboard.KeyIsPressed('D') && !keyboard.KeyIsPressed('A') && playerMove != false) {
+		gameSounds.StopPlayerMoveLoop();
+		playerMove = false;
 	}
 	if (keyboard.KeyIsPressed('W'))
 	{

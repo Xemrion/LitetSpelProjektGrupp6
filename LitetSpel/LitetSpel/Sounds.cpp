@@ -242,6 +242,14 @@ if (results == false) {
 	return false;
 }
 
+name = "p-move.wav";
+char playerMoveFileName[11] = { name[0], name[1], name[2], name[3], name[4], name[5], name[6], name[7], name[8], name[9], name[10] };
+
+results = LoadWaveFile(playerMoveFileName, &playerMoveLoop);
+if (results == false) {
+	return false;
+}
+
 return true;
 }
 void Sounds::Shutdown() {
@@ -271,6 +279,7 @@ void Sounds::Shutdown() {
 	ShutdownWaveFile(&menuHighlightButton);
 	ShutdownWaveFile(&menuClickButton);
 	ShutdownWaveFile(&menuBack);
+	ShutdownWaveFile(&playerMoveLoop);
 	ShutdownDirectSound();
 }
 
@@ -522,6 +531,18 @@ bool Sounds::ContinueAllSFX() {
 		return false;
 	}
 	if (!ContinueSFX(enmy03)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::StartPlayerMoveLoop() {
+	if (!PlayLoopingWaveFile(playerMoveLoop)) {
+		return false;
+	}
+	return true;
+}
+bool Sounds::StopPlayerMoveLoop() {
+	if (!StopLoopingWaveFile(playerMoveLoop)) {
 		return false;
 	}
 	return true;
