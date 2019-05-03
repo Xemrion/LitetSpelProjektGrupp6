@@ -40,7 +40,7 @@ public:
 
     glm::vec3 pos, velocity;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-    bool hasExtraJump, isStanding, isStuck, knockBack;
+    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
     int status;
 	double radius;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;

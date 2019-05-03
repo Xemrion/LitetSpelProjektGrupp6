@@ -46,6 +46,8 @@ void Game::init() noexcept {
 
 	EnemyBox.color = glm::vec4(1,0,0,0);
 
+// LevelGoal
+
 // PowerUps
 	auto &powerup = level.TestPowerUp;
 	level.TestPowerUp.powerBox.center = glm::vec4(-30.0f, 15.0f, 0.0f, 0.0f);
@@ -70,6 +72,7 @@ Player::Player(glm::vec3 position) :
 	isStanding(false),
 	isStuck(false),
 	knockBack(false),
+	levelCompleted(false),
 	status(PlayerStatus::None)
 {} // TODO: create hitboxes in ctor body
 
@@ -232,6 +235,10 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			blobs[i].status = BlobStatus::Blob_Sticky;
 		}
 		status = PlayerStatus::Sticky;
+	}
+	if (otherHitbox == ColliderType::level_goal) 
+	{
+		levelCompleted = true;
 	}
 }
 
@@ -701,7 +708,7 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 
 // TODO: commented lines
 LevelGoal::LevelGoal( CollisionManager &colMan, glm::vec3 const &position, float radius, TriggerCallback cb ):
-    _bounds({ glm::vec4(position,0), {radius,radius,radius,0}, {0,0,0,0} }),
+    _bounds({ glm::vec4(position,0), {2.0f,5.0f,2.0f,0}, {0,0,0,0} }),
      representation({ glm::vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,0.0f} }),
     _triggerCallback(cb),
     _colMan(&colMan)
