@@ -165,7 +165,6 @@ void keyboardFunc()
 						game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
 					}
 					game.level.player.status = PlayerStatus::Bouncy;
-					graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
 				}
 				else
 				{
@@ -174,7 +173,6 @@ void keyboardFunc()
 						game.level.player.blobs[i].status = BlobStatus::Blob_None;
 					}
 					game.level.player.status = PlayerStatus::None;
-					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 				}
 				powerCoolDown = 0.2f;
 			}
@@ -190,7 +188,6 @@ void keyboardFunc()
 						game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
 					}
 					game.level.player.status = PlayerStatus::Heavy;
-					graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
 				}
 				else
 				{
@@ -199,7 +196,6 @@ void keyboardFunc()
 						game.level.player.blobs[i].status = BlobStatus::Blob_None;
 					}
 					game.level.player.status = PlayerStatus::None;
-					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 				}
 				powerCoolDown = 0.2f;
 			}
@@ -215,7 +211,6 @@ void keyboardFunc()
 						game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
 					}
 					game.level.player.status = PlayerStatus::Sticky;
-					graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
 				}
 				else
 				{
@@ -224,7 +219,6 @@ void keyboardFunc()
 						game.level.player.blobs[i].status = BlobStatus::Blob_None;
 					}
 					game.level.player.status = PlayerStatus::None;
-					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
 				}
 				powerCoolDown = 0.2f;
 			}
@@ -265,6 +259,25 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			_itoa_s(1/dt, title, 64, 10);
 			SetWindowTextA(wndHandle, title);
 			
+			if (game.level.player.status == PlayerStatus::Bouncy) 
+			{
+				graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
+			}
+			else if (game.level.player.status == PlayerStatus::Sticky)
+			{
+				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+			}
+			else if (game.level.player.status == PlayerStatus::Heavy)
+			{
+				graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
+			}
+			else 
+			{
+				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+			}
+
+
+
 			keyboardFunc();
 			mouseFunc();
 

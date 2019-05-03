@@ -45,6 +45,14 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false);
 
 	EnemyBox.color = glm::vec4(1,0,0,0);
+
+// PowerUps
+	auto &powerup = level.TestPowerUp;
+	level.TestPowerUp.powerBox.center = glm::vec4(-30.0f, 15.0f, 0.0f, 0.0f);
+	level.TestPowerUp.powerBox.halfLengths = glm::vec4(2.0f, 2.0f, 2.0f, 0.0f);
+	level.TestPowerUp.powerBox.color = glm::vec4(0.0, 0.5, 0.75, 0);
+	level.boxes.push_back(level.TestPowerUp.powerBox);
+	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
 }
 
 Player::Player(glm::vec3 position) :
@@ -201,6 +209,30 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			//pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
 		}
 	}
+	if (otherHitbox == ColliderType::powerup_bouncy) 
+	{
+		for (int i = 0; i < blobCharges; i++)
+		{
+			blobs[i].status = BlobStatus::Blob_Bouncy;
+		}
+		status = PlayerStatus::Bouncy;
+	}
+	if (otherHitbox == ColliderType::powerup_heavy)
+	{
+		for (int i = 0; i < blobCharges; i++)
+		{
+			blobs[i].status = BlobStatus::Blob_Heavy;
+		}
+		status = PlayerStatus::Heavy;
+	}
+	if (otherHitbox == ColliderType::powerup_sticky)
+	{
+		for (int i = 0; i < blobCharges; i++)
+		{
+			blobs[i].status = BlobStatus::Blob_Sticky;
+		}
+		status = PlayerStatus::Sticky;
+	}
 }
 
 void Player::shoot(glm::vec3 mousePos) noexcept
@@ -230,6 +262,7 @@ void Game::update(double dt)  {
 	glm::vec3 temp = glm::vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 	//level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 	handleInput();
+	level.player.isStanding = false;
 	level.player.update(dt);
 	if (level.enemy.alive) 
 	{
@@ -456,6 +489,7 @@ void Game::updateGraphics() {
 	level.boxes.push_back(groundBox.hitbox);
 	level.boxes.push_back(testPlat.hitbox);
 	level.boxes.push_back(testplat2.hitbox);
+	level.boxes.push_back(level.TestPowerUp.powerBox);
 	EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
 	
 	if (level.enemy.alive) {

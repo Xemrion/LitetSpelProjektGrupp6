@@ -12,12 +12,11 @@
 #include "Platform.h"
 #include "Blob.h"
 #include "Globals.h"
+#include "PowerUp.h"
 
 // TODO: improve encapsulation by reducing public exposure
 
 using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
-
-
 
 enum PlayerStatus {
 	None,
@@ -92,6 +91,7 @@ struct LevelData { // POD
     // and merge in level start / goal code from falk branch
     Player           player;
 	Enemy            enemy;
+	PowerUp          TestPowerUp;
     std::unique_ptr<LevelGoal> goal;
     vector<Box>      boxes;
     vector<Sphere>   spheres;

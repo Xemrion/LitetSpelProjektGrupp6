@@ -17,6 +17,7 @@ enum ColliderType { player_top,
                     wall,
                     powerup_bouncy,
                     powerup_sticky,
+					powerup_heavy,
 				    blob };
 
 class CollisionObject { // Interface / abstract base class
