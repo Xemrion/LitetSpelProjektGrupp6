@@ -37,6 +37,8 @@ void ReadGeometry::initialize()
 	for (int i = 0; i < width * height; i += minimumBoxSize)
 	{
 		counter++;
+		if (counter == 89496)
+			int aa = 0;
 		if (!isWhite(getPixelColour(i)))
 		{
 			for (int j = 0; j < minimumBoxSize; j++)
@@ -48,7 +50,7 @@ void ReadGeometry::initialize()
 					break;
 
 				}
-				if (isWhite(getPixelColour(i - j)))
+				if (isWhite(getPixelColour(i - j)) || isPixelUsed(i-j) != -1)
 				{
 					i -= j - 1;
 					break;
@@ -75,7 +77,7 @@ void ReadGeometry::initialize()
 					if (startPosY - minimumBoxSize * j <= (-height / 2)
 						|| isWhite(getPixelColour(startPos + (width * minimumBoxSize * j))))
 					{
-						endPosY = startPosY - minimumBoxSize * (j);
+						endPosY = startPosY - (minimumBoxSize) * (j);
 						foundEdge = true;
 					}
 				}
@@ -90,8 +92,7 @@ void ReadGeometry::initialize()
 						foundEdge = true;
 						//-1 because the for-loop will increase i with 1 for the next iteration
 						i += minimumBoxSize * j - minimumBoxSize;
-						if (i == 908780)
-							int sss = 0;
+
 						//Check width of boxes below(if all match it forms a square)
 						//height
 						for (int k = 1; k < glm::abs(endPosY - startPosY) / minimumBoxSize && continueLoop; k++)
@@ -105,24 +106,25 @@ void ReadGeometry::initialize()
 
 									if (!isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l + minimumBoxSize)))
 									{
-										endPosY = startPosY + minimumBoxSize * k;
+										endPosY = startPosY - minimumBoxSize * k;
 										continueLoop = false;
 									}
 
 								}
 								else if (isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l)))
 								{
-									//TODO:  MIINUS?
-									endPosY = startPosY + minimumBoxSize * k;
+									endPosY = startPosY - minimumBoxSize * k;
 									continueLoop = false;
 								}
 
 							}
 						}
 						continueLoop = true;
-						usedPixels.push_back(startPos);
+						usedPixelMinX.push_back(startPosX);
+						usedPixelMaxY.push_back(startPosY);
+						usedPixelMaxX.push_back(endPosX);
+						usedPixelMinY.push_back(endPosY);
 						boxWidth.push_back(minimumBoxSize * j);
-						boxHeight.push_back(glm::abs(endPosY - startPosY));
 					}
 				}
 
@@ -160,23 +162,16 @@ glm::vec3 ReadGeometry::getPixelColour(int index)
 
 int ReadGeometry::isPixelUsed(int index)
 {
-	if (usedPixels.size() == 0)
-		return -1;
-	int whileCtr = 1;
-	while (!isWhite(getPixelColour(index - width * whileCtr)))
-	{
-		for (int i = 0; i < this->usedPixels.size(); i++)
-		{
-			if (this->usedPixels.at(i) == index - width * whileCtr)
-			{
-				if (boxHeight.at(i) - 1 >= whileCtr)
-					return i;
-			}
+	int posY = (height / 2) - glm::floor(index / width) ;
+	int posX = index % width - (width / 2);
 
-		}
-		whileCtr++;
-		if (whileCtr > glm::ceil(index / width) || index - width * whileCtr < 0)
-			return -1;
+	for (int i = 0; i < usedPixelMaxX.size(); i++)
+	{
+		if (posY > usedPixelMinY.at(i)
+			&& posY < usedPixelMaxY.at(i)
+			&& posX >= usedPixelMinX.at(i)
+			&& posX <= usedPixelMaxX.at(i))
+			return i;
 	}
 	return -1;
 }
@@ -185,17 +180,6 @@ int ReadGeometry::getBoxWidth(int index)
 {
 	return boxWidth.at(index);
 }
-
-int ReadGeometry::findIndexByPixel(int index)
-{
-	for (int i = 0; i < this->usedPixels.size(); i++)
-	{
-		if (this->usedPixels.at(i) == index)
-			return i;
-	}
-	return -1;
-}
-
 bool ReadGeometry::isWhite(glm::vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 255 && pixelColour.z == 255;

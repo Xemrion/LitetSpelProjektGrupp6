@@ -15,7 +15,10 @@ class ReadGeometry
 {
 
 private:
-	std::vector<int> usedPixels;
+	std::vector<int> usedPixelMinX;
+	std::vector<int> usedPixelMaxX;
+	std::vector<int> usedPixelMinY;
+	std::vector<int> usedPixelMaxY;
 	std::vector<int> boxWidth;
 	std::vector<int> boxHeight;
 	unsigned char* rgb;
@@ -31,7 +34,6 @@ public:
 	glm::vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
 	int getBoxWidth(int index);
-	int findIndexByPixel(int index);
 
 };
 #endif

@@ -47,10 +47,10 @@ void Game::init() {
 	}
 	//updateEnemyCollision();
 
-	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_bottom, currentLevel.enemy.HitboxBottom, false);
-	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_top, currentLevel.enemy.HitboxTop, false);
-	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_left, currentLevel.enemy.HitboxLeft, false);
-	currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_right, currentLevel.enemy.HitboxRight, false);
+	//currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_bottom, currentLevel.enemy.HitboxBottom, false);
+	//currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_top, currentLevel.enemy.HitboxTop, false);
+	//currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_left, currentLevel.enemy.HitboxLeft, false);
+	//currentLevel.colManager.register_entry(currentLevel.enemy, CollisionId::enemy_right, currentLevel.enemy.HitboxRight, false);
 
 }
 
@@ -201,6 +201,8 @@ void Game::update(double dt) {
 
 	}
 	if (keys[2]) {
+		currentLevel.player.posCurr.y += 1;
+
 		if (currentLevel.player.isStanding == true && currentLevel.player.jumpCooldown <= 0 && currentLevel.player.status != PlayerStatus::Heavy) {
 			currentLevel.player.jumpSpeed = JUMP_CONSTANT;
 			currentLevel.player.isStanding = false;
@@ -221,6 +223,8 @@ void Game::update(double dt) {
 		}
 	}
 	if (keys[3]) {
+		currentLevel.player.posCurr.y -= 1;
+
 		if (currentLevel.player.status == PlayerStatus::Sticky)
 		{
 			currentLevel.player.isStuck = false;
