@@ -1,23 +1,23 @@
 #include "game.h"
 
 void Game::init() noexcept {
-    level.goal = std::make_unique<LevelGoal>( level.colManager, glm::vec3{70.0f,-15.0f,.0f}, 12.0f );
-    groundBox.hitbox.center      = glm::vec4(0, -30, 0, 0);
-    groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
-	groundBox.hitbox.color       = glm::vec4(1.0, 1.0, 1.0, 0.0);
+    level.goal = std::make_unique<LevelGoal>( level.colManager, vec3{70.0f,-15.0f,.0f}, 12.0f );
+    groundBox.hitbox.center      = vec4(0, -30, 0, 0);
+    groundBox.hitbox.halfLengths = vec4(100, 10, 10, 0);
+	groundBox.hitbox.color       = vec4(1.0, 1.0, 1.0, 0.0);
 	level.boxes.push_back(groundBox.hitbox);
 
 	level.colManager.registerEntry(groundBox, ColliderType::platform, groundBox.hitbox, true);
 
-	testPlat.hitbox.center      = glm::vec4(30.0f, 0.0f, 0.0f, 0.0f);
-	testPlat.hitbox.halfLengths = glm::vec4(10.0f, 20.0f, 10.0f, 0.0f);
-	testPlat.hitbox.color       = glm::vec4(0.0, 1.0, 0.0, 0.0);
+	testPlat.hitbox.center      = vec4(30.0f, 0.0f, 0.0f, 0.0f);
+	testPlat.hitbox.halfLengths = vec4(10.0f, 20.0f, 10.0f, 0.0f);
+	testPlat.hitbox.color       = vec4(0.0, 1.0, 0.0, 0.0);
 	level.boxes.push_back(testPlat.hitbox);
 	level.colManager.registerEntry(testPlat, ColliderType::platform, testPlat.hitbox, true);
 
-	testplat2.hitbox.center      = glm::vec4(-30.0f, 10.0f, 0.0f, 0.0f);
-	testplat2.hitbox.halfLengths = glm::vec4(10.0f, 2.0f, 10.0f, 0.0f);
-	testplat2.hitbox.color       = glm::vec4(0.0, 0.5, 0.5, 0.0);
+	testplat2.hitbox.center      = vec4(-30.0f, 10.0f, 0.0f, 0.0f);
+	testplat2.hitbox.halfLengths = vec4(10.0f, 2.0f, 10.0f, 0.0f);
+	testplat2.hitbox.color       = vec4(0.0, 0.5, 0.5, 0.0);
 	level.boxes.push_back(testplat2.hitbox);
 	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);
 
@@ -44,39 +44,39 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(enemy, ColliderType::enemy_left,   enemy.HitboxLeft,   false);
 	level.colManager.registerEntry(enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false);
 
-	EnemyBox.color = glm::vec4(1,0,0,0);
+	EnemyBox.color = vec4(1,0,0,0);
 
 // LevelGoal
 
 // PowerUps
 	auto &powerup = level.TestPowerUp;
-	level.TestPowerUp.powerBox.center = glm::vec4(-30.0f, 15.0f, 0.0f, 0.0f);
-	level.TestPowerUp.powerBox.halfLengths = glm::vec4(2.0f, 2.0f, 2.0f, 0.0f);
-	level.TestPowerUp.powerBox.color = glm::vec4(0.0, 0.5, 0.75, 0);
+	level.TestPowerUp.powerBox.center = vec4(-30.0f, 15.0f, 0.0f, 0.0f);
+	level.TestPowerUp.powerBox.halfLengths = vec4(2.0f, 2.0f, 2.0f, 0.0f);
+	level.TestPowerUp.powerBox.color = vec4(0.0, 0.5, 0.75, 0);
 	level.boxes.push_back(level.TestPowerUp.powerBox);
 	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
 
 // MENU
-	MenuBG.center = glm::vec4(0.0f, 0.0f, 5.0f, 0.0f);
-	MenuBG.halfLengths = glm::vec4(100.0f, 100.0f, 0.0f, 0.0f);
-	MenuBG.color = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
+	MenuBG.center = vec4(0.0f, 0.0f, 5.0f, 0.0f);
+	MenuBG.halfLengths = vec4(100.0f, 100.0f, 0.0f, 0.0f);
+	MenuBG.color = vec4(0.0f, 0.0f, 1.0f, 0.0f);
 
-	MenuYes.center = glm::vec4(30.0f, 10.0f, 0.0f, 0.0f);
-	MenuYes.halfLengths = glm::vec4(20.0f, 20.0f, 0.0f, 0.0f);
-	MenuYes.color = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	MenuYes.center = vec4(30.0f, 10.0f, 0.0f, 0.0f);
+	MenuYes.halfLengths = vec4(20.0f, 20.0f, 0.0f, 0.0f);
+	MenuYes.color = vec4(0.0f, 1.0f, 0.0f, 0.0f);
 
-	MenuNo.center = glm::vec4(-30.0f, 10.0f, 0.0f, 0.0f);
-	MenuNo.halfLengths = glm::vec4(20.0f, 20.0f, 0.0f, 0.0f);
-	MenuNo.color = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+	MenuNo.center = vec4(-30.0f, 10.0f, 0.0f, 0.0f);
+	MenuNo.halfLengths = vec4(20.0f, 20.0f, 0.0f, 0.0f);
+	MenuNo.color = vec4(1.0f, 0.0f, 0.0f, 0.0f);
 
 	state = GameState::MenuState;
 }
 
-Player::Player(glm::vec3 position) :
+Player::Player(vec3 position) :
 	CollisionObject(),
 	pos(position),
     radius(5.0f),
-	velocity(glm::vec3(0.0)),
+	velocity(vec3(0.0)),
 	moveSpeed(150.0f),
 	mass(10.0),
     blobCharges(5),
@@ -94,7 +94,7 @@ Player::Player(glm::vec3 position) :
 Player::~Player() {}
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Player::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
+void Player::setVelocity(vec3 const &velocity, bool useSpeed) noexcept {
 	if (useSpeed) {
 		this->velocity = velocity * moveSpeed;
 	}
@@ -102,7 +102,7 @@ void Player::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Player::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
+void Player::addVelocity(vec3 const &velocity, bool useSpeed) noexcept {
 	if (useSpeed) {
 		this->velocity += velocity * (moveSpeed/2);
 	}
@@ -110,7 +110,7 @@ void Player::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept {
 }
 
 // velocity += force / mass;
-void Player::putForce(glm::vec3 const &force) noexcept {
+void Player::putForce(vec3 const &force) noexcept {
 	this->velocity += force / mass;
 }
 
@@ -217,7 +217,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		}
 		else if (otherHitbox == enemy_right) 
 		{
-			putForce(glm::vec3(2,3,0));
+			putForce(vec3(2,3,0));
 			knockBack = true;
 			//pos.x = other.center.x + other.halfLengths.x + (pos.x - HitboxLeft.center.x + HitboxLeft.halfLengths.x);
 		}
@@ -237,7 +237,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		}
 		else if(otherHitbox == ColliderType::enemy_left)
 		{
-			putForce(glm::vec3(-2, 3, 0));
+			putForce(vec3(-2, 3, 0));
 			knockBack = true;
 			//pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
 		}
@@ -272,12 +272,12 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 	}
 }
 
-void Player::shoot(glm::vec3 mousePos) noexcept
+void Player::shoot(vec3 mousePos) noexcept
 {
     if (shootCooldown > 0) return;
 
-    auto mouseScreenPos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
-    glm::vec3 dir = glm::normalize( mouseScreenPos - pos);
+    auto mouseScreenPos = vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
+    vec3 dir = normalize( mouseScreenPos - pos);
     for ( auto &blob : blobs ) {
         if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
             blob.shoot( dir );
@@ -298,7 +298,7 @@ void Game::update(double dt)  {
 	if (state == GameState::LevelState) 
 	{
 		time += dt;
-		glm::vec3 temp = glm::vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
+		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 		//level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 		handleInput();
 		level.player.isStanding = false;
@@ -327,32 +327,32 @@ void Game::handleInput() {
 
 		if (keys[Keys::left]) {
 			if (!player.isStuck) {
-				player.addVelocity(glm::vec3(-1, 0, 0), true);
+				player.addVelocity(vec3(-1, 0, 0), true);
 			}
 		}
 		if (keys[Keys::right]) {
 			if (!player.isStuck) {
-				player.addVelocity(glm::vec3(1, 0, 0), true);
+				player.addVelocity(vec3(1, 0, 0), true);
 			}
 		}
 		if (keys[Keys::up]) {
 			if (player.isStanding) {
 				player.isStanding = false;
 				player.jumpCooldown = COOLDOWN_CONSTANT;
-				player.putForce(glm::vec3(0.0, level.player.jumpForce, 0.0));
+				player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
 			}
 			else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
 				player.hasExtraJump = false;
 				player.jumpCooldown = COOLDOWN_CONSTANT;
 				player.velocity.y = 0;
-				player.putForce(glm::vec3(0.0, player.jumpForce, 0.0));
+				player.putForce(vec3(0.0, player.jumpForce, 0.0));
 			}
 		}
 		if (keys[Keys::down]) {
 			if (player.status == PlayerStatus::Sticky) {
 				player.isStuck = false;
 				if (player.isStanding == false) {
-					//player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0));
+					//player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT, 0.0));
 				}
 			}
 		}
@@ -372,24 +372,24 @@ void Game::updatePhysics() {
 
 	while (physicsSimTime + timestep < time) {
 		if ( !player.isStuck ) {
-			player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 		}
 		else {
-            player.setVelocity(glm::vec3(0.0));
+            player.setVelocity(vec3(0.0));
         }
         player.move(timestep);
 
 // enemies:
         auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 		if (enemy.alive) {
-			player.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			enemy.move(timestep);
 		}
 
 // blobs:
 		for ( auto &blob : player.blobs ) {
 			if (blob.getIsActive() && blob.getIsStuck() == false) {
-				blob.addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+				blob.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
 			blob.move(timestep);
 			// blob.updateCollisions();
@@ -407,48 +407,48 @@ void Game::updatePlayerCollision()
     auto &player = level.player;
 
 	// Bottom:
-	player.HitboxBottom.center = glm::vec4(
+	player.HitboxBottom.center = vec4(
 		player.pos.x,
 		player.pos.y - 0.4*playerSphere.centerRadius.w,
 		player.pos.z,
 		0);
-	player.HitboxBottom.halfLengths = glm::vec4(
+	player.HitboxBottom.halfLengths = vec4(
 		player.radius*0.5,
 		player.radius*0.4,
 		player.radius*0.1,
 		0);
 
 	// Top:
-	player.HitboxTop.center = glm::vec4(
+	player.HitboxTop.center = vec4(
 		player.pos.x,
 		player.pos.y + 0.4*playerSphere.centerRadius.w,
 		player.pos.z,
 		0);
-	player.HitboxTop.halfLengths = glm::vec4(
+	player.HitboxTop.halfLengths = vec4(
 		player.radius*0.5,
 		player.radius*0.4,
 		player.radius*0.1,
 		0);
 	
     // Left:
-	player.HitboxLeft.center = glm::vec4(
+	player.HitboxLeft.center = vec4(
 		player.pos.x - 0.5*playerSphere.centerRadius.w,
 		player.pos.y,
 		player.pos.z,
 		0);
-	player.HitboxLeft.halfLengths = glm::vec4(
+	player.HitboxLeft.halfLengths = vec4(
 		player.radius*0.2,
 		player.radius*0.7,
 		player.radius*0.1,
 		0);
 
 	// Right:
-	player.HitboxRight.center = glm::vec4(
+	player.HitboxRight.center = vec4(
 		player.pos.x + 0.5*playerSphere.centerRadius.w,
 		player.pos.y,
 		player.pos.z,
 		0);
-	player.HitboxRight.halfLengths = glm::vec4(
+	player.HitboxRight.halfLengths = vec4(
 		player.radius* 0.2,
 		player.radius* 0.7,
 		player.radius* 0.1,
@@ -459,12 +459,12 @@ void Game::updateEnemyCollision()
 {
     auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 
-	EnemyBox.center = glm::vec4(
+	EnemyBox.center = vec4(
 		enemy.pos.x,
 		enemy.pos.y,
 		enemy.pos.z,
 		5.0);
-	EnemyBox.halfLengths = glm::vec4(
+	EnemyBox.halfLengths = vec4(
 		3.0,
 		3.0,
 		3.0,
@@ -473,48 +473,48 @@ void Game::updateEnemyCollision()
 	level.boxes.push_back(EnemyBox);
 
 	// Bottom:
-	enemy.HitboxBottom.center = glm::vec4(
+	enemy.HitboxBottom.center = vec4(
 		enemy.pos.x,
 		enemy.pos.y - 0.9*EnemyBox.halfLengths.y,
 		enemy.pos.z,
 		0);
-	enemy.HitboxBottom.halfLengths = glm::vec4(
+	enemy.HitboxBottom.halfLengths = vec4(
 		EnemyBox.halfLengths.x,
 		EnemyBox.halfLengths.y*0.2,
 		EnemyBox.halfLengths.z,
 		0);
 
 	// Top:
-	enemy.HitboxTop.center = glm::vec4(
+	enemy.HitboxTop.center = vec4(
 		enemy.pos.x,
 		enemy.pos.y + 0.9*EnemyBox.halfLengths.y,
 		enemy.pos.z,
 		0);
-	enemy.HitboxTop.halfLengths = glm::vec4(
+	enemy.HitboxTop.halfLengths = vec4(
 		EnemyBox.halfLengths.x,
 		EnemyBox.halfLengths.y*0.2,
 		EnemyBox.halfLengths.z,
 		0);
 
     // Left:
-	enemy.HitboxLeft.center = glm::vec4(
+	enemy.HitboxLeft.center = vec4(
 		enemy.pos.x - 0.9*EnemyBox.halfLengths.x,
 		enemy.pos.y,
 		enemy.pos.z,
 		0);
-	enemy.HitboxLeft.halfLengths = glm::vec4(
+	enemy.HitboxLeft.halfLengths = vec4(
 		EnemyBox.halfLengths.x*0.2,
 		EnemyBox.halfLengths.y*0.7,
 		EnemyBox.halfLengths.z,
 		0);
 
     // Right:
-	enemy.HitboxRight.center = glm::vec4(
+	enemy.HitboxRight.center = vec4(
 		enemy.pos.x + 0.9*EnemyBox.halfLengths.x,
 		enemy.pos.y,
 		enemy.pos.z,
 		0);
-	enemy.HitboxRight.halfLengths = glm::vec4(
+	enemy.HitboxRight.halfLengths = vec4(
 		EnemyBox.halfLengths.x*0.2,
 		EnemyBox.halfLengths.y*0.7,
 		EnemyBox.halfLengths.z,
@@ -532,14 +532,14 @@ void Game::updateGraphics() {
 		level.boxes.push_back(testPlat.hitbox);
 		level.boxes.push_back(testplat2.hitbox);
 		level.boxes.push_back(level.TestPowerUp.powerBox);
-		EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
+		EnemyBox.color = vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
 
 		if (level.enemy.alive) {
 			level.boxes.push_back(EnemyBox);
 		}
 
 		level.spheres = vector<Sphere>();
-		playerSphere.centerRadius = glm::vec4(
+		playerSphere.centerRadius = vec4(
 			level.player.pos.x,
 			level.player.pos.y,
 			level.player.pos.z,
@@ -548,9 +548,9 @@ void Game::updateGraphics() {
 
 		if (level.player.levelCompleted == false)
 		{
-			glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
+			vec2 animationSpeed = smoothstep(-150.0f, 150.0f, vec2(level.player.velocity.x, level.player.velocity.y));
 
-			animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
+			animateSphere(playerSphere, animationSpeed, vec3(3.0, 3.0, 0.5));
 		}
 		else
 			animateVictory(playerSphere);
@@ -590,11 +590,11 @@ void Game::showHitboxes()
 	}
 }
 
-Enemy::Enemy(glm::vec3 position):
+Enemy::Enemy(vec3 position):
     CollisionObject(),
     pos(position),
-    velocity(glm::vec3(0.0, 0.0, 0.0)),
-    controlDir(glm::vec3(1.0, 0.0, 0.0)),
+    velocity(vec3(0.0, 0.0, 0.0)),
+    controlDir(vec3(1.0, 0.0, 0.0)),
     moveSpeed(20.0f),
     jumpForce(450.0f),
     jumpCooldown(0.3f),
@@ -675,7 +675,7 @@ void Enemy::update(double dt) noexcept
 		if (jumpCooldown <= 0.0) {
 			controlDir.x = -controlDir.x;
 			jumpCooldown = 1.0;
-			putForce(glm::vec3(0.0, jumpForce, 0.0));
+			putForce(vec3(0.0, jumpForce, 0.0));
 		}
 	}
 	if (!isStuck) 
@@ -687,7 +687,7 @@ void Enemy::update(double dt) noexcept
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Enemy::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
+void Enemy::addVelocity(vec3 const &velocity, bool useSpeed) noexcept
 {
 	if (useSpeed) {
 		this->velocity += velocity * moveSpeed;
@@ -698,7 +698,7 @@ void Enemy::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 }
 
 // Set useSpeed to true to multiply velocity by objects speed value
-void Enemy::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
+void Enemy::setVelocity(vec3 const &velocity, bool useSpeed) noexcept
 {
 	if (useSpeed) {
 		this->velocity = velocity * moveSpeed;
@@ -709,7 +709,7 @@ void Enemy::setVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 }
 
 // velocity += force / mass;
-void Enemy::putForce(glm::vec3 const &force) noexcept
+void Enemy::putForce(vec3 const &force) noexcept
 {
 	velocity += force / mass;
 }
@@ -721,17 +721,17 @@ void Enemy::move(float dt) noexcept
 }
 
 //Adds two orbiting spheres around a sphere for animation
-void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::vec3 const &amplitude) {
-	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
+void Game::animateSphere(Sphere const &sphere, vec2 const &moveSpeed, vec3 const &amplitude) {
+	vec3 rotationSpeed = vec3(0.81, 0.53, 0.1);
 	// Offset the start rotation of the spheres to avoid them all starting at the same place
-	glm::vec3 offset = glm::vec3(0.2, 0.0, 0.0);
+	vec3 offset = vec3(0.2, 0.0, 0.0);
 	// Multiplier to animate faster when moving a certain direction. Not smooth.
-	glm::vec2 movementMultiplier = glm::vec2(
-		glm::clamp(abs(moveSpeed.x) + 0.0f, 0.0f, 2.0f),
-		glm::clamp(abs(moveSpeed.y) + 0.0f, 0.0f, 2.0f)
+	vec2 movementMultiplier = vec2(
+		clamp(abs(moveSpeed.x) + 0.0f, 0.0f, 2.0f),
+		clamp(abs(moveSpeed.y) + 0.0f, 0.0f, 2.0f)
 	);
 
-	Sphere sphere1(glm::vec4(
+	Sphere sphere1(vec4(
 		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
 		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
@@ -741,8 +741,8 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
-	offset = glm::vec3(1.45, 0.9, 1.1);
-	Sphere sphere2(glm::vec4(
+	offset = vec3(1.45, 0.9, 1.1);
+	Sphere sphere2(vec4(
 		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
 		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
@@ -753,18 +753,18 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 
 void Game::animateColor(Graphics& graphics)
 {
-	graphics.setMetaballColorAbsorb(glm::vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
+	graphics.setMetaballColorAbsorb(vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
 }
 
 void Game::animateVictory(Sphere const & sphere)
 {
 	float distance = 2;
 	float orbit = 8;
-	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
+	vec3 rotationSpeed = vec3(0.81, 0.53, 0.1);
 	// Offset the start rotation of the spheres to avoid them all starting at the same place
-	glm::vec3 offset = glm::vec3(distance, distance, 2.0);
+	vec3 offset = vec3(distance, distance, 2.0);
 
-	Sphere sphere1(glm::vec4(
+	Sphere sphere1(vec4(
 		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
 		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
@@ -773,8 +773,8 @@ void Game::animateVictory(Sphere const & sphere)
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
-	offset = glm::vec3(-distance, -distance, -2.0);
-	Sphere sphere2(glm::vec4(
+	offset = vec3(-distance, -distance, -2.0);
+	Sphere sphere2(vec4(
 		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
 		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
@@ -787,9 +787,9 @@ void Game::animateVictory(Sphere const & sphere)
 
 
 // TODO: commented lines
-LevelGoal::LevelGoal( CollisionManager &colMan, glm::vec3 const &position, float radius, TriggerCallback cb ):
-    _bounds({ glm::vec4(position,0), {2.0f,5.0f,2.0f,0}, {0,0,0,0} }),
-     representation({ glm::vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,0.0f} }),
+LevelGoal::LevelGoal( CollisionManager &colMan, vec3 const &position, float radius, TriggerCallback cb ):
+    _bounds({vec4(position,0), {2.0f,5.0f,2.0f,0}, {0,0,0,0} }),
+     representation({vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,0.0f} }),
     _triggerCallback(cb),
     _colMan(&colMan)
 {
