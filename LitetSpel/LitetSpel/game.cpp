@@ -519,6 +519,8 @@ void Game::updateEnemyCollision()
 		EnemyBox.halfLengths.y*0.7,
 		EnemyBox.halfLengths.z,
 		0);
+
+
 }
 
 // Call after all other per frame updates
