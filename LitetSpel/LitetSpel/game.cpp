@@ -756,6 +756,7 @@ void Game::animateVictory(Sphere const & sphere)
 		sphere.centerRadius.w / 2
 	));
 
+
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
