@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-    level.goal = std::make_unique<LevelGoal>( level.colManager, glm::vec3{70.0f,-15.0f,.0f}, 12.0f );
+ /*   level.goal = std::make_unique<LevelGoal>( level.colManager, glm::vec3{70.0f,-15.0f,.0f}, 12.0f );
     groundBox.hitbox.center      = glm::vec4(0, -30, 0, 0);
     groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
 	groundBox.hitbox.color       = glm::vec4(1.0, 1.0, 1.0, 0.0);
@@ -19,7 +19,7 @@ void Game::init() noexcept {
 	testplat2.hitbox.halfLengths = glm::vec4(10.0f, 2.0f, 10.0f, 0.0f);
 	testplat2.hitbox.color       = glm::vec4(0.0, 0.5, 0.5, 0.0);
 	level.boxes.push_back(testplat2.hitbox);
-	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);
+	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);*/
 
 // player & blobs:
     auto &player = level.player;
@@ -37,24 +37,31 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(player, ColliderType::player_left,   player.HitboxLeft,   false);
 	level.colManager.registerEntry(player, ColliderType::player_right,  player.HitboxRight,  false);
 
+	readGeometry.initialize();
+	for (int i = 0; i < readGeometry.platforms.size(); i++)
+	{
+		readGeometry.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
+		level.boxes.push_back(readGeometry.platforms.at(i).hitbox);
+		level.colManager.registerEntry(readGeometry.platforms.at(i), ColliderType::platform, readGeometry.platforms.at(i).hitbox, true);
+	}
 // enemies:
-    auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	level.colManager.registerEntry(enemy, ColliderType::enemy_bottom, enemy.HitboxBottom, false);
-	level.colManager.registerEntry(enemy, ColliderType::enemy_top,    enemy.HitboxTop,    false);
-	level.colManager.registerEntry(enemy, ColliderType::enemy_left,   enemy.HitboxLeft,   false);
-	level.colManager.registerEntry(enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false);
+ //   auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	//level.colManager.registerEntry(enemy, ColliderType::enemy_bottom, enemy.HitboxBottom, false);
+	//level.colManager.registerEntry(enemy, ColliderType::enemy_top,    enemy.HitboxTop,    false);
+	//level.colManager.registerEntry(enemy, ColliderType::enemy_left,   enemy.HitboxLeft,   false);
+	//level.colManager.registerEntry(enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false);
 
-	EnemyBox.color = glm::vec4(1,0,0,0);
+	//EnemyBox.color = glm::vec4(1,0,0,0);
 
 // LevelGoal
 
 // PowerUps
-	auto &powerup = level.TestPowerUp;
-	level.TestPowerUp.powerBox.center = glm::vec4(-30.0f, 15.0f, 0.0f, 0.0f);
-	level.TestPowerUp.powerBox.halfLengths = glm::vec4(2.0f, 2.0f, 2.0f, 0.0f);
-	level.TestPowerUp.powerBox.color = glm::vec4(0.0, 0.5, 0.75, 0);
-	level.boxes.push_back(level.TestPowerUp.powerBox);
-	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
+	//auto &powerup = level.TestPowerUp;
+	//level.TestPowerUp.powerBox.center = glm::vec4(-30.0f, 15.0f, 0.0f, 0.0f);
+	//level.TestPowerUp.powerBox.halfLengths = glm::vec4(2.0f, 2.0f, 2.0f, 0.0f);
+	//level.TestPowerUp.powerBox.color = glm::vec4(0.0, 0.5, 0.75, 0);
+	//level.boxes.push_back(level.TestPowerUp.powerBox);
+	//level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
 }
 
 Player::Player(glm::vec3 position) :
@@ -362,7 +369,7 @@ void Game::updatePhysics() {
 			// blob.updateCollisions();
 		}
 		updatePlayerCollision();
-		updateEnemyCollision();
+	//	updateEnemyCollision();
 		level.colManager.update();
 
 		physicsSimTime += timestep;
@@ -491,17 +498,17 @@ void Game::updateEnemyCollision()
 // Call after all other per frame updates
 void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
-	level.boxes   = vector<Box>();
+//	level.boxes   = vector<Box>();
 
-	level.boxes.push_back(groundBox.hitbox);
-	level.boxes.push_back(testPlat.hitbox);
-	level.boxes.push_back(testplat2.hitbox);
-	level.boxes.push_back(level.TestPowerUp.powerBox);
-	EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
+//	level.boxes.push_back(groundBox.hitbox);
+//	level.boxes.push_back(testPlat.hitbox);
+//	level.boxes.push_back(testplat2.hitbox);
+//	level.boxes.push_back(level.TestPowerUp.powerBox);
+//	EnemyBox.color = glm::vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
 	
-	if (level.enemy.alive) {
-		level.boxes.push_back(EnemyBox);
-	}
+	//if (level.enemy.alive) {
+	//	level.boxes.push_back(EnemyBox);
+//	}
 
 	level.spheres = vector<Sphere>();
 	playerSphere.centerRadius = glm::vec4(
@@ -520,7 +527,7 @@ void Game::updateGraphics() {
 		level.spheres.push_back(level.player.blobs[i].blobSphere);
 	}
 
-    level.boxes.push_back(level.goal->representation);
+   // level.boxes.push_back(level.goal->representation);
 
 	//showHitboxes();
 }
