@@ -42,8 +42,9 @@ void Game::init() {
 	currentLevel.readGeometry.initialize();
 	for (int i = 0; i < currentLevel.readGeometry.platforms.size(); i++)
 	{
-		currentLevel.readGeometry.platforms.at(i).hitbox.color = glm::vec4(0.0, 1, 1, 0.0);
 		currentLevel.boxes.push_back(currentLevel.readGeometry.platforms.at(i).hitbox);
+		currentLevel.colManager.register_entry(currentLevel.readGeometry.platforms.at(i), CollisionId::platform, currentLevel.readGeometry.platforms.at(i).hitbox, true);
+
 	}
 	//updateEnemyCollision();
 

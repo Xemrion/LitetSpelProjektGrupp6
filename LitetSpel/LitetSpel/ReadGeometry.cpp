@@ -27,18 +27,11 @@ void ReadGeometry::initialize()
 	float pixelToUnitRatio = 8.8275862069f;
 	int middleX = width / 2;
 	int middleY = height / 2;
-	std::vector<float> highestDur;
-	int index = 0;
-	int counter = 0;
-	int counters = 0;
 	int pixelUsedIndex = 0;
 
 	std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < width * height; i += minimumBoxSize)
 	{
-		counter++;
-		if (counter == 89496)
-			int aa = 0;
 		if (!isWhite(getPixelColour(i)))
 		{
 			for (int j = 0; j < minimumBoxSize; j++)
@@ -63,8 +56,6 @@ void ReadGeometry::initialize()
 			}
 			else
 			{
-				counters++;
-
 				startPos = i;
 
 				//Position baserat på mittpunkten av bilden
@@ -120,10 +111,10 @@ void ReadGeometry::initialize()
 							}
 						}
 						continueLoop = true;
-						usedPixelMinX.push_back(startPosX);
-						usedPixelMaxY.push_back(startPosY);
-						usedPixelMaxX.push_back(endPosX);
-						usedPixelMinY.push_back(endPosY);
+						LeftSide.push_back(startPosX);
+						rightSide.push_back(startPosY);
+						topSide.push_back(endPosX);
+						bottomSide.push_back(endPosY);
 						boxWidth.push_back(minimumBoxSize * j);
 					}
 				}
@@ -136,13 +127,12 @@ void ReadGeometry::initialize()
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
 
-				platforms.push_back(Platform(center, halfLength));
+				platforms.push_back(Platform(center, halfLength,glm::vec3(255,10,0)));
 			}
 
 		}
 
 	}
-	//TODO: en range istället? om Z är över startposX, under endposX osv..
 	std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	int aa = 0;
@@ -153,7 +143,7 @@ glm::vec3 ReadGeometry::getPixelColour(int index)
 {
 	//Convert to RGB
 	index *= 3;
-	if (index > 1280 * 720 * 3)
+	if (index > width * height * 3)
 	{
 		return glm::vec3(0, 0, 0);
 	}
@@ -165,12 +155,12 @@ int ReadGeometry::isPixelUsed(int index)
 	int posY = (height / 2) - glm::floor(index / width) ;
 	int posX = index % width - (width / 2);
 
-	for (int i = 0; i < usedPixelMaxX.size(); i++)
+	for (int i = 0; i < topSide.size(); i++)
 	{
-		if (posY > usedPixelMinY.at(i)
-			&& posY < usedPixelMaxY.at(i)
-			&& posX >= usedPixelMinX.at(i)
-			&& posX <= usedPixelMaxX.at(i))
+		if (posY > bottomSide.at(i)
+			&& posY < rightSide.at(i)
+			&& posX >= LeftSide.at(i)
+			&& posX <= topSide.at(i))
 			return i;
 	}
 	return -1;

@@ -6,7 +6,7 @@
 class Platform : public IObject  {
 public:
 	Platform();
-	Platform(glm::vec4 center, glm::vec4 halfLengths, glm::vec4 color = glm::vec4(0,0.5f,0.5f,0));
+	Platform(glm::vec4 center, glm::vec4 halfLengths, glm::vec3 color = glm::vec3(0,0.5f,0.5f));
 	~Platform();
 
 	//Box& getPlatformBox() const { return this->hitbox; };

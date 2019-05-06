@@ -15,12 +15,11 @@ class ReadGeometry
 {
 
 private:
-	std::vector<int> usedPixelMinX;
-	std::vector<int> usedPixelMaxX;
-	std::vector<int> usedPixelMinY;
-	std::vector<int> usedPixelMaxY;
+	std::vector<int> LeftSide;
+	std::vector<int> topSide;
+	std::vector<int> bottomSide;
+	std::vector<int> rightSide;
 	std::vector<int> boxWidth;
-	std::vector<int> boxHeight;
 	unsigned char* rgb;
 	int minimumBoxSize = 10;
 	int width = 0;
