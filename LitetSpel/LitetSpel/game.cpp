@@ -195,6 +195,11 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				isStuck = true;
 				//this->pos.y -= 1.1;
 			}
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
 		}
 	}
 	else if (ownHitbox == ColliderType::player_left) {
@@ -203,6 +208,11 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			
 			if (status == PlayerStatus::Sticky) {
 				isStuck = true;
+			}
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
 			}
 		}
 		else if (otherHitbox == enemy_right) 
@@ -218,6 +228,11 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 
 			if (status == PlayerStatus::Sticky) {
 				isStuck = true;
+			}
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
 			}
 		}
 		else if(otherHitbox == ColliderType::enemy_left)
@@ -755,7 +770,6 @@ void Game::animateVictory(Sphere const & sphere)
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
 		sphere.centerRadius.w / 2
 	));
-
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
