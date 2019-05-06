@@ -1,27 +1,17 @@
-#ifndef PLATFORM_H
-#define PLATFORM_H
+#pragma once
+
 #include"Geometry.h"
 #include "Collisions.h"
 
-class Platform : public IObject  {
+class Platform : public CollisionObject  {
 public:
 	Platform();
-	Platform(glm::vec4 center, glm::vec4 halfLengths, glm::vec3 color = glm::vec3(0,0.5f,0.5f));
-	~Platform();
-
+	Platform(glm::vec4 center, glm::vec4 halfLengths);
+    virtual ~Platform() noexcept;
 	//Box& getPlatformBox() const { return this->hitbox; };
-
-    void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) {}
+    void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override {}
     Box hitbox;
 
 private:
-
-
 	//Hitbox
-
-	
 };
-
-
-#endif // !PLATFORM_H
-

@@ -27,6 +27,10 @@ PowerUp::~PowerUp()
 {
 }
 
+void PowerUp::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const & other) noexcept
+{
+}
+
 void PowerUp::setType(PowerType type) {
 	if (type != PowerType::None) {
 		if (this->typeOfPowerUp != type) {
