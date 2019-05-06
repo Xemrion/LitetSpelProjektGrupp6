@@ -709,11 +709,13 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	struct MetaballStruct {
 		Sphere spheres[15];
+		int nSpheres;
 	} metaballStruct;
 	ZeroMemory(metaballStruct.spheres, sizeof(Sphere) * 15);
 	memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(15, (int)metaballs.size()));
+	metaballStruct.nSpheres = glm::min(15, (int)metaballs.size());
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * 15);
+	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * 15 + sizeof(int));
 	deviceContext->Unmap(metaballBuffer, 0);
 }
 

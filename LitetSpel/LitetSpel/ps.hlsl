@@ -18,6 +18,7 @@ struct Sphere {
 #define MAX_SPHERES 15
 cbuffer SphereBuffer {
 	Sphere spheres[MAX_SPHERES];
+	int nSpheres;
 };
 
 cbuffer Camera {
@@ -49,7 +50,7 @@ float mb(float3 p, float4 mb)
 float testScene(float3 p)
 {
 	float mbDist = 0;
-	for (int i = 0; i < MAX_SPHERES; ++i)
+	for (int i = 0; i < nSpheres; ++i)
 	{
 		mbDist += mb(p, spheres[i].centerRadius);
 	}
@@ -134,18 +135,8 @@ float4 main(VS_OUT input) : SV_Target
 		color = geometryTexture.Sample(samp, uv);
 
 		if (length(color) <= 0.01) {
-			//float angle = 3.1416 * -0.3;
-			//float3x3 rotationMatrix = float3x3(
-			//	cos(angle), 0, sin(angle),
-			//	0, 1, 0,
-			//	-sin(angle),0, cos(angle)
-			//	);
-
-			//color = skybox.Sample(samp, parallax + mul(rd, rotationMatrix));
-			
-			//color = skybox.Sample(samp, parallax + rd);
-			color = radianceMap.Sample(samp, parallax + rd);
-			color *= radianceMap.Sample(samp, parallax + rd);
+			float4 radiance = radianceMap.Sample(samp, parallax + rd);
+			color = radiance * radiance;
 			color += 0.5;
 		}
 	}
@@ -160,11 +151,10 @@ float4 main(VS_OUT input) : SV_Target
 		else {
 			/* lighting */
 			float3 p = ro + rd * dist;
-
 			float3 normal = calcNormal(p);
 			float4 sphereColor = calcColor(p);
 			float3 objectColor = float3(1.0, 1.0, 1.0);
-			objectColor = float3(1, 1, 1) - sphereColor.rgb;
+			//objectColor = float3(1, 1, 1) - sphereColor.rgb;
 			float3 specularity;
 			float3 diffuseColor = float3(0, 0, 0);
 			float3 specularColor = float3(0, 0, 0);
@@ -178,7 +168,6 @@ float4 main(VS_OUT input) : SV_Target
 			
 			/* absorbtion diffuse */
 			float3 absorbed = exp(-sphereColor * back);
-			diffuseColor = irradiance * absorbed;
 			diffuseColor = objectColor * absorbed;
 
 			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), sphereColor.rgb * sphereColor.a, 1 - sphereColor.a);
@@ -187,7 +176,7 @@ float4 main(VS_OUT input) : SV_Target
 			float3 refractColor = float3(0.0, 0.0, 0.0);
 			if (length(refractColor) <= 0.00001) {
 				refractColor += radianceMap.Sample(samp, backSample) * absorbed;
-				refractColor *= irradianceMap.Sample(samp, backSample) * absorbed;
+				refractColor *= irradiance * absorbed;
 			}
 
 			/* specular */

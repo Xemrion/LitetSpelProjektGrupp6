@@ -163,7 +163,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
 				}
 				game.level.player.status = PlayerStatus::Bouncy;
-				game.playerSphere.color = glm::vec4(1.0, 0.5, 0.25, 0.0);
+				game.playerSphere.color = glm::vec4(1.0, 0.75, 0.25, 0.0);
 			}
 			else
 			{
@@ -172,7 +172,7 @@ void keyboardFunc()
 					game.level.player.blobs[i].status = BlobStatus::Blob_None;
 				}
 				game.level.player.status = PlayerStatus::None;
-				game.playerSphere.color = glm::vec4(0.85, 0.25, 0.75, 0.0);
+				game.playerSphere.color = glm::vec4(0.85, 0.25, 1.75, 0.0);
 			}
 			powerCoolDown = 0.2f;
 		}
