@@ -717,6 +717,7 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
 		sphere.centerRadius.w / 2
 	));
+
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
