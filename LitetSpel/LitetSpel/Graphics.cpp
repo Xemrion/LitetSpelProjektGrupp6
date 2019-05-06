@@ -351,10 +351,20 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(Sphere) * 15 + sizeof(glm::vec4);
+	constBufferDesc.ByteWidth = sizeof(Sphere) * maxMetaballs + sizeof(glm::vec4);
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &metaballBuffer);
+
+
+
+	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
+	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufferDesc.ByteWidth = sizeof(Line) * maxLines + sizeof(glm::vec4);
+	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	device->CreateBuffer(&constBufferDesc, NULL, &lineBuffer);
 
 
 
@@ -708,15 +718,31 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	struct MetaballStruct {
-		Sphere spheres[15];
+		Sphere spheres[maxMetaballs];
 		int nSpheres;
 	} metaballStruct;
-	ZeroMemory(metaballStruct.spheres, sizeof(Sphere) * 15);
-	memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(15, (int)metaballs.size()));
-	metaballStruct.nSpheres = glm::min(15, (int)metaballs.size());
+	ZeroMemory(metaballStruct.spheres, sizeof(Sphere) * maxMetaballs);
+	memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(maxMetaballs, (int)metaballs.size()));
+	metaballStruct.nSpheres = glm::min(maxMetaballs, (int)metaballs.size());
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * 15 + sizeof(int));
+	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * maxMetaballs + sizeof(int));
 	deviceContext->Unmap(metaballBuffer, 0);
+}
+
+void Graphics::setLines(const vector<Line>& lines)
+{
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	struct LineStruct {
+		Line lines[maxLines];
+		int nLines;
+	} lineStruct;
+	ZeroMemory(lineStruct.lines, sizeof(Line) * maxLines);
+	memcpy(lineStruct.lines, lines.data(), sizeof(Line) * glm::min(maxLines, (int)lines.size()));
+	lineStruct.nLines = glm::min(maxLines, (int)lines.size());
+	deviceContext->Map(lineBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, &lineStruct, sizeof(Line) * maxLines + sizeof(int));
+	deviceContext->Unmap(lineBuffer, 0);
 }
 
 void Graphics::setCameraPos(glm::vec3 pos)
@@ -779,10 +805,11 @@ void Graphics::swapBuffer()
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 
-	deviceContext->PSSetConstantBuffers(0, 1, &metaballBuffer);
-	deviceContext->PSSetConstantBuffers(1, 1, &cameraBuffer);
-	deviceContext->PSSetConstantBuffers(2, 1, &cornerBuffer);
-	deviceContext->PSSetConstantBuffers(3, 1, &viewProjBuffer);
+	deviceContext->PSSetConstantBuffers(0, 1, &lineBuffer);
+	deviceContext->PSSetConstantBuffers(1, 1, &metaballBuffer);
+	deviceContext->PSSetConstantBuffers(2, 1, &cameraBuffer);
+	deviceContext->PSSetConstantBuffers(3, 1, &cornerBuffer);
+	deviceContext->PSSetConstantBuffers(4, 1, &viewProjBuffer);
 
 	vertexSize = sizeof(float) * 3;
 	offset = 0;

@@ -21,3 +21,10 @@ public:
 	glm::vec4 halfLengths;
 	glm::vec4 color;
 };
+
+class Line {
+public:
+	glm::vec4 start;
+	glm::vec4 end;
+	glm::vec4 color;
+};

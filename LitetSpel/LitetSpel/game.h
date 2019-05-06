@@ -95,6 +95,7 @@ struct LevelData { // POD
     std::unique_ptr<LevelGoal> goal;
     vector<Box>      boxes;
     vector<Sphere>   spheres;
+	vector<Line>     lines;
     CollisionManager colManager;
 };
 

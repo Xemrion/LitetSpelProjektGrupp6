@@ -423,6 +423,7 @@ void Game::updateEnemyCollision()
 void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
 	level.boxes   = vector<Box>();
+	level.lines   = vector<Line>();
 
 	level.boxes.push_back(groundBox.hitbox);
 	level.boxes.push_back(testPlat.hitbox);
@@ -453,6 +454,23 @@ void Game::updateGraphics() {
 	}
 
     level.boxes.push_back(level.goal->representation);
+
+	Line line0;
+	line0.start = glm::vec4(0, 0, 0, 0.1);
+	line0.end = glm::vec4(-100, -100, 0, 0.1);
+	line0.color = glm::vec4(0.1, 90.5, 90.5, 0.0);
+	level.lines.push_back(line0);
+
+	line0.start = glm::vec4(0, 2, 0, 0.1);
+	line0.end = glm::vec4(-100, -98, 0, 0.1);
+	line0.color = glm::vec4(99.9, 99.5, 99.5, 0.0);
+	level.lines.push_back(line0);
+
+	line0.start = glm::vec4(1, 0, 0, 0.1);
+	line0.end = glm::vec4(-99, -100, 0, 0.1);
+	line0.color = glm::vec4(90.1, 90.1, 0.9, 0.0);
+	level.lines.push_back(line0);
+
 
 	//showHitboxes();
 }

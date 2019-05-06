@@ -29,11 +29,15 @@ private:
 	ID3D11InputLayout* quadVertexLayout;
 	ID3D11Buffer* quadBuffer;
 
+	static const int maxMetaballs = 15;
+	static const int maxLines = 10;
+
 	ID3D11InputLayout* vertexLayout;
 	ID3D11Buffer* boxTransformBuffer;
 	ID3D11Buffer* boxVertexBuffer;
 	int boxInstances = 0;
 	ID3D11Buffer* metaballBuffer;
+	ID3D11Buffer* lineBuffer;
 	ID3D11Buffer* viewProjBuffer;
 	ID3D11Buffer* cameraBuffer;
 	ID3D11Buffer* cornerBuffer;
@@ -52,6 +56,7 @@ public:
 	HRESULT init(HWND wndHandle, bool windowed);
 	HRESULT createShaders();
 	void setMetaballs(const vector<Sphere>& metaballs);
+	void setLines(const vector<Line>& lines);
 	void setBoxes(const vector<Box>& boxes);
 	void setCameraPos(glm::vec3 pos); // Set camera position before setting boxes / metaballs
 	void swapBuffer();

@@ -10,29 +10,41 @@ struct VS_OUT
 	float4 pos : SV_POSITION;
 };
 
+struct Line {
+	float4 start;
+	float4 end;
+	float4 color;
+};
+
+#define MAX_LINES 10
+cbuffer LineBuffer : register(b0) {
+	Line lines[MAX_LINES];
+	int nLines;
+};
+
 struct Sphere {
 	float4 centerRadius;
 	float4 color;
 };
 
 #define MAX_SPHERES 15
-cbuffer SphereBuffer {
+cbuffer SphereBuffer : register(b1) {
 	Sphere spheres[MAX_SPHERES];
 	int nSpheres;
 };
 
-cbuffer Camera {
+cbuffer Camera : register(b2) {
 	float3 cameraPos;
 };
 
-cbuffer Corners {
+cbuffer Corners : register(b3) {
 	float4 upLeft;
 	float4 upRight;
 	float4 downLeft;
 	float4 downRight;
 };
 
-cbuffer Matrices {
+cbuffer Matrices : register(b4) {
 	float4x4 viewProj;
 };
 
@@ -47,6 +59,14 @@ float mb(float3 p, float4 mb)
 	return ((mb.w * mb.w) / dot(d, d));
 }
 
+float sdLine(float3 p, Line l) {
+	float lineDist = 100;
+	float3 u = normalize(l.end.xyz - l.start);
+	if (max(length(l.start.xyz - p), length(l.end.xyz - p)) < length(l.start.xyz - l.end.xyz))
+		lineDist = length(cross(l.start.xyz - p, u)) - l.start.w;
+	return lineDist;
+}
+
 float testScene(float3 p)
 {
 	float mbDist = 0;
@@ -55,26 +75,33 @@ float testScene(float3 p)
 		mbDist += mb(p, spheres[i].centerRadius);
 	}
 
-	return (2.5) - mbDist;
+	float lineDist = 10000;
+	for (int i = 0; i < nLines; ++i)
+	{
+		lineDist = min(lineDist, sdLine(p, lines[i]));
+	}
+
+	return min((2.5) - mbDist, lineDist);
 }
 
-float castRay(float3 ro, float3 rd, out bool intersect)
+float castRay(float3 ro, float3 rd, out float minDist)
 {
 	float dist = -ro.z - (10 * rd.z);
 	float i;
 	float maxDist = -ro.z + (20 / rd.z);
-	intersect = false;
+	minDist = 1000000.0;
 
 	/* calculate ray entry */
 	for (i = 0.0; i < 20; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
 		dist += currentDist + 0.1;
+		minDist = min(currentDist, minDist);
+
 		if (dist > maxDist) {
 			break;
 		}
 		else if (currentDist < 0.1) {
-			intersect = true;
 			break;
 		}
 	}
@@ -92,18 +119,27 @@ float3 calcNormal(float3 p)
 		k.xxx * testScene(p + k.xxx * h));
 }
 
+//type: 0 metaball, 1 line
 float4 calcColor(float3 p)
 {
 	float4 color = spheres[0].color;
 	float minDist = mb(p, spheres[0].centerRadius);
-	for (int i = 1; i < MAX_SPHERES; ++i) {
-		if (spheres[i].centerRadius.a > 0.0) {
-			float dist = mb(p, spheres[i].centerRadius);
+	for (int i = 1; i < nSpheres; ++i) {
+		float dist = mb(p, spheres[i].centerRadius);
 
-			if (dist > minDist) {
-				color = spheres[i].color;
-				minDist = dist;
-			}
+		if (dist > minDist) {
+			color = spheres[i].color;
+			minDist = dist;
+		}
+	}
+
+	for (int i = 0; i < nLines; ++i)
+	{
+		float dist = sdLine(p, lines[i]);
+
+		if (dist < minDist) {
+			color = lines[i].color;
+			minDist = dist;
 		}
 	}
 
@@ -126,12 +162,12 @@ float4 main(VS_OUT input) : SV_Target
 		float3(lerp(upRight.xyz, downRight.xyz, uv.y)),
 		uv.x));
 
-	bool intersect;
-	float dist = castRay(ro, rd, intersect);
+	float minDist;
+	float dist = castRay(ro, rd, minDist);
 	float3 color = float3(0.0, 0.0, 0.0);
 	float3 parallax = (ro * 0.001);
 
-	if (!intersect) {
+	if (minDist > 0.1) {
 		color = geometryTexture.Sample(samp, uv);
 
 		if (length(color) <= 0.01) {
@@ -160,7 +196,7 @@ float4 main(VS_OUT input) : SV_Target
 			float3 specularColor = float3(0, 0, 0);
 			float refractiveIndex = 1.5;
 			float3 refractDir = refract(rd, normal, 1.00029 / refractiveIndex);
-			float back = castRay(p + refractDir * 12, - refractDir, intersect);
+			float back = castRay(p + refractDir * 12, - refractDir, minDist);
 			float3 backp = (p + refractDir * 12) - (refractDir * back);
 			float3 backNormal = calcNormal(backp);
 			float3 backSample = parallax + backp * 0.01 + refract(refractDir, backNormal, refractiveIndex / 1.00029);
