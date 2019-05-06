@@ -279,28 +279,31 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			_itoa_s(1/dt, title, 64, 10);
 			SetWindowTextA(wndHandle, title);
 			
-			if (game.level.player.status == PlayerStatus::Bouncy) 
+			if (!game.level.player.levelCompleted) 
 			{
-				graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
-			}
-			else if (game.level.player.status == PlayerStatus::Sticky)
-			{
-				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
-			}
-			else if (game.level.player.status == PlayerStatus::Heavy)
-			{
-				graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
+				if (game.level.player.status == PlayerStatus::Bouncy)
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
+				}
+				else if (game.level.player.status == PlayerStatus::Sticky)
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+				}
+				else if (game.level.player.status == PlayerStatus::Heavy)
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
+				}
+				else
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				}
+				keyboardFunc();
+				mouseFunc();
 			}
 			else 
 			{
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-			}
-
-
-			if (!game.level.player.levelCompleted) 
-			{
-				keyboardFunc();
-				mouseFunc();
+				//game.animateColor(graphics);
+				//game.animateVictory(game.playerSphere);
 			}
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));

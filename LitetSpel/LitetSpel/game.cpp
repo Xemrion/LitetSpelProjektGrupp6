@@ -531,9 +531,14 @@ void Game::updateGraphics() {
 			level.player.radius);
 		level.spheres.push_back(playerSphere);
 
-		glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
+		if (level.player.levelCompleted == false)
+		{
+			glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
 
-		animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
+			animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
+		}
+		else
+			animateVictory(playerSphere);
 
 		for (int i = 0; i < level.player.blobs.size(); i++)
 		{
@@ -726,6 +731,39 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
 		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
+		sphere.centerRadius.w / 2
+	));
+	level.spheres.push_back(sphere2);
+}
+
+void Game::animateColor(Graphics& graphics)
+{
+	graphics.setMetaballColorAbsorb(glm::vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
+}
+
+void Game::animateVictory(Sphere const & sphere)
+{
+	float distance = 2;
+	float orbit = 8;
+	glm::vec3 rotationSpeed = glm::vec3(0.81, 0.53, 0.1);
+	// Offset the start rotation of the spheres to avoid them all starting at the same place
+	glm::vec3 offset = glm::vec3(distance, distance, 2.0);
+
+	Sphere sphere1(glm::vec4(
+		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
+		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
+		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
+		sphere.centerRadius.w / 2
+	));
+
+	level.spheres.push_back(sphere1);
+
+	rotationSpeed = -rotationSpeed;
+	offset = glm::vec3(-distance, -distance, -2.0);
+	Sphere sphere2(glm::vec4(
+		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
+		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
+		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
 		sphere.centerRadius.w / 2
 	));
 	level.spheres.push_back(sphere2);

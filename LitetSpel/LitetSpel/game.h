@@ -13,6 +13,7 @@
 #include "Blob.h"
 #include "Globals.h"
 #include "PowerUp.h"
+#include "Graphics.h"
 
 // TODO: improve encapsulation by reducing public exposure
 
@@ -137,6 +138,8 @@ public:
 	void animateSphere( Sphere    const &sphere,
                         glm::vec2 const &moveSpeed,
                         glm::vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
+	void animateColor(Graphics& graphics);
+	void animateVictory(Sphere    const &sphere);
 
 	Box      EnemyBox;
     Sphere   playerSphere;
