@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
@@ -18,7 +17,7 @@
 // TODO: improve encapsulation by reducing public exposure
 
 using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
-
+using namespace glm;
 enum PlayerStatus {
 	None,
 	Bouncy,
@@ -28,18 +27,18 @@ enum PlayerStatus {
 
 class Player : public CollisionObject {
 public:
-    Player( glm::vec3 position = {.0f, .0f, .0f} );
+    Player(vec3 position = {.0f, .0f, .0f} );
     virtual ~Player() noexcept;
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
     void move(double dt) noexcept;
-	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
-	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
-	void putForce(glm::vec3 const &force) noexcept;
-	void shoot(glm::vec3 mousePos) noexcept;
+	void setVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void addVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void putForce(vec3 const &force) noexcept;
+	void shoot(vec3 mousePos) noexcept;
 	void recallBlobs() noexcept;
     void update(double dt) noexcept;
 
-    glm::vec3 pos, velocity;
+    vec3 pos, velocity;
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
     int status;
@@ -53,16 +52,16 @@ public:
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(glm::vec3 position = { -65.0f, -20.0f, 0.0f });
+	Enemy(vec3 position = { -65.0f, -20.0f, 0.0f });
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
 	void update(double dt) noexcept;
-	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
-	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
-	void putForce(glm::vec3 const &force) noexcept;
+	void addVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void setVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void putForce(vec3 const &force) noexcept;
 	void move(float dt) noexcept;
 
-    glm::vec3 pos, velocity, controlDir;
+    vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool isStanding, alive, isDeregistered, isStuck;
     Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
@@ -72,7 +71,7 @@ public:
 class LevelGoal : public CollisionObject {
 public:
     using TriggerCallback = std::function<void(void)>;
-    LevelGoal( CollisionManager &_colMan, glm::vec3 const &position, float radius, TriggerCallback cb=[](){} );
+    LevelGoal( CollisionManager &_colMan, vec3 const &position, float radius, TriggerCallback cb=[](){} );
     virtual ~LevelGoal();
     virtual void collide( ColliderType  ownHitbox,
                           ColliderType  otherHitbox,
@@ -136,8 +135,8 @@ public:
 	void updateGraphics();
 
 	void animateSphere( Sphere    const &sphere,
-                        glm::vec2 const &moveSpeed,
-                        glm::vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
+                        vec2 const &moveSpeed,
+                        vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 	void animateColor(Graphics& graphics);
 	void animateVictory(Sphere    const &sphere);
 
