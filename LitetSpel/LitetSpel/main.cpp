@@ -1,19 +1,22 @@
-#include <Windows.h>
-#include <chrono>
-#include <d3d11.h>
+#define NOMINMAX
 #include "Graphics.h"
 #include "game.h"
 #include "KeyboardInput.h"
 #include "MouseInput.h"
+#include <chrono>
+#include <d3d11.h>
+#include <Windows.h>
 
 KeyboardInput keyboard;
 MouseInput mouse;
 Game game;
+Graphics graphics;
 
 double dt;
 
 int xMus = 0;
 float powerCoolDown = 0.0;
+bool gameEnd = false;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -122,95 +125,144 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 
 void mouseFunc() 
 {
-	if (mouse.LeftIsPressed())
+	if (game.state == GameState::LevelState) 
 	{
-		game.leftButtonDown = true;
-		game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
+		if (mouse.LeftIsPressed())
+		{
+			game.leftButtonDown = true;
+			game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
+		}
+		else
+			game.leftButtonDown = false;
 	}
-	else
-		game.leftButtonDown = false;
+	else 
+	{
+		if (mouse.LeftIsPressed())
+		{
+			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
+				game.state = GameState::LevelState;
+			}
+			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
+			{
+				gameEnd = true;
+			}
+		}
+
+	}
+
 }
 
 void keyboardFunc()
 {
 	//Movement
-	if (keyboard.KeyIsPressed('D'))
+	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
 	{
-		game.keys[1] = true;
-	}
-	if (keyboard.KeyIsPressed('A'))
-	{
-		game.keys[0] = true;
-	}
-	if (keyboard.KeyIsPressed('W'))
-	{
-		game.keys[2] = true;
-	}
-	if (keyboard.KeyIsPressed('S'))
-	{
-		game.keys[3] = true;
-	}
-	if (keyboard.KeyIsPressed('B')) 
-	{
-		if (powerCoolDown <= 0) 
+		if (keyboard.KeyIsPressed('D'))
 		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
+			game.keys[1] = true;
+		}
+		if (keyboard.KeyIsPressed('A'))
+		{
+			game.keys[0] = true;
+		}
+		if (keyboard.KeyIsPressed('W'))
+		{
+			game.keys[2] = true;
+		}
+		if (keyboard.KeyIsPressed('S'))
+		{
+			game.keys[3] = true;
+		}
+		if (keyboard.KeyIsPressed('B'))
+		{
+			if (powerCoolDown <= 0)
 			{
-				game.currentLevel.player.status = PlayerStatus::Bouncy;
+				if (game.level.player.status == PlayerStatus::None)
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+					}
+					game.level.player.status = PlayerStatus::Bouncy;
+				}
+				else
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+					}
+					game.level.player.status = PlayerStatus::None;
+				}
+				powerCoolDown = 0.2f;
 			}
-			else
+		}
+		if (keyboard.KeyIsPressed('H'))
+		{
+			if (powerCoolDown <= 0)
 			{
-				game.currentLevel.player.status = PlayerStatus::None;
+				if (game.level.player.status == PlayerStatus::None)
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
+					}
+					game.level.player.status = PlayerStatus::Heavy;
+				}
+				else
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+					}
+					game.level.player.status = PlayerStatus::None;
+				}
+				powerCoolDown = 0.2f;
 			}
-			powerCoolDown = 0.2f;
+		}
+		if (keyboard.KeyIsPressed('Y'))
+		{
+			if (powerCoolDown <= 0)
+			{
+				if (game.level.player.status == PlayerStatus::None)
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
+					}
+					game.level.player.status = PlayerStatus::Sticky;
+				}
+				else
+				{
+					for (int i = 0; i < game.level.player.blobCharges; i++)
+					{
+						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+					}
+					game.level.player.status = PlayerStatus::None;
+				}
+				powerCoolDown = 0.2f;
+			}
+		}
+		if (keyboard.KeyIsPressed('R'))
+			game.level.player.recallBlobs();
+		if (keyboard.KeyIsPressed('P')) {
+			graphics.createShaders();
 		}
 	}
-	if (keyboard.KeyIsPressed('H'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Heavy;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('Y'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Sticky;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('R'))
-		game.currentLevel.player.recallBlobs();
+	
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
 	MSG msg = { 0 };
-	Graphics graphics;
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
 	game.init();
 	ShowWindow(wndHandle, nCmdShow);
-	
+
+
 	auto prevFrameTime = std::chrono::steady_clock::now();
-	while (WM_QUIT != msg.message)
+	while (WM_QUIT != msg.message && gameEnd == false)
 	{
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 		{
@@ -227,15 +279,37 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			_itoa_s(1/dt, title, 64, 10);
 			SetWindowTextA(wndHandle, title);
 			
-			keyboardFunc();
-			mouseFunc();
-
+			if (!game.level.player.levelCompleted) 
+			{
+				if (game.level.player.status == PlayerStatus::Bouncy)
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
+				}
+				else if (game.level.player.status == PlayerStatus::Sticky)
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+				}
+				else if (game.level.player.status == PlayerStatus::Heavy)
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
+				}
+				else
+				{
+					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+				}
+				keyboardFunc();
+				mouseFunc();
+			}
+			else 
+			{
+				//game.animateColor(graphics);
+				//game.animateVictory(game.playerSphere);
+			}
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
-			graphics.queueBoxes(game.currentLevel.boxes);
-			graphics.queueMetaballs(game.currentLevel.spheres);
+			graphics.setBoxes(game.level.boxes);
+			graphics.setMetaballs(game.level.spheres);
 			graphics.swapBuffer();
-
 			powerCoolDown -= (float)dt;
 		}
 		

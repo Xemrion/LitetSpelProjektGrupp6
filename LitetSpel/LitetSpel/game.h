@@ -1,105 +1,154 @@
 #pragma once
-#include <d3d11.h>
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include <vector>
+#include <functional>
+#include <memory>
+#include <utility>
 #include "Geometry.h"
 #include "Collisions.h"
-#include  "Platform.h"
+#include "Platform.h"
 #include "Blob.h"
+#include "Globals.h"
+#include "PowerUp.h"
+#include "Graphics.h"
 
-using namespace std;
+// TODO: improve encapsulation by reducing public exposure
 
-
-extern double dt;
-
-enum PlayerStatus 
-{
+using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
+using namespace glm;
+enum PlayerStatus {
 	None,
 	Bouncy,
 	Sticky,
 	Heavy
 };
 
-class Player : public IObject {
+class Player : public CollisionObject {
 public:
-    Player( glm::vec3 position = {.0f, .0f, .0f} );
-    virtual ~Player();
-    virtual void collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override;
-    void move(float dt, glm::vec3 dir) noexcept;
-	vector<Blob> blobs;
-	int blobCharges = 5;
-	int nrOfActiveBlobs = 0;
-	float shootCooldown = 0;
-	void shoot(glm::vec3 mousePos);
-	void recallBlobs();
-    void update();
-    [[nodiscard]] glm::vec3 const& getPosition() const noexcept;
-    // TODO: accessors & mutations; refactor Player logic into >>Player<<; refactor member privacy
-    glm::vec3  posPrev, posCurr;
-    float      moveSpeed, jumpSpeed, jumpCooldown, gravity;
-    bool       hasExtraJump, isStanding, isStuck;
-    int        status; // TODO: enum!  powerup indicator: 0 = none |1 = bouncy |2 = heavy |3 = Sticky
+    Player(vec3 position = {.0f, .0f, .0f} );
+    virtual ~Player() noexcept;
+    virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
+    void move(double dt) noexcept;
+	void setVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void addVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void putForce(vec3 const &force) noexcept;
+	void shoot(vec3 mousePos) noexcept;
+	void recallBlobs() noexcept;
+    void update(double dt) noexcept;
 
+    vec3 pos, velocity;
+    float moveSpeed, jumpForce, jumpCooldown, mass;
+    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
+    int status;
+	double radius;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+    vector<Blob> blobs;
+    int blobCharges;
+    float shootCooldown;
 };
 
-class Enemy : public IObject 
+class Enemy : public CollisionObject 
 {
 public:
-	glm::vec3  posPrev, posCurr;
-	float      EmoveSpeed, EjumpSpeed, EjumpCooldown, Egravity;
-	bool enemyStanding, isJumping, canJump;
-	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+	Enemy(vec3 position = { -65.0f, -20.0f, 0.0f });
+	virtual ~Enemy() noexcept;
+	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
+	void update(double dt) noexcept;
+	void addVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void setVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
+	void putForce(vec3 const &force) noexcept;
+	void move(float dt) noexcept;
 
-	Enemy(glm::vec3 position = {-20.0f, 40.0f, 0.0f});
-	virtual ~Enemy();
-	virtual void collide(CollisionId ownHitbox, CollisionId otherHitbox, IObject &other) override;
-	void update();
-	void move();
+    vec3 pos, velocity, controlDir;
+    float moveSpeed, jumpForce, jumpCooldown, mass;
+    bool isStanding, alive, isDeregistered, isStuck;
+    Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+};
+
+// TODO: commented lines
+class LevelGoal : public CollisionObject {
+public:
+    using TriggerCallback = std::function<void(void)>;
+    LevelGoal( CollisionManager &_colMan, vec3 const &position, float radius, TriggerCallback cb=[](){} );
+    virtual ~LevelGoal();
+    virtual void collide( ColliderType  ownHitbox,
+                          ColliderType  otherHitbox,
+                          Box const    &other ) noexcept override;
+
+    Box               representation;
+
+private:
+    Box               _bounds;
+    TriggerCallback   _triggerCallback;
+    CollisionManager *_colMan;
 };
 
 
 struct LevelData { // POD
-    Player         player;
-	Enemy          enemy;
-    vector<Box>    boxes;
-    vector<Sphere> spheres;
+    // TODO: switch from POD struct to class 
+    // and merge in level start / goal code from falk branch
+    Player           player;
+	Enemy            enemy;
+	PowerUp          TestPowerUp;
+    std::unique_ptr<LevelGoal> goal;
+    vector<Box>      boxes;
+    vector<Sphere>   spheres;
     CollisionManager colManager;
+};
 
-    //void fun() {
-    //    colManager.register_entry( player, CollisionId::player_top,    pBoxTop   true );
-    //    colManager.register_entry( player, CollisionId::player_side,   pBoxLeft, true );
-    //    colManager.register_entry( player, CollisionId::player_side,   pBoxRight true );
-    //    colManager.register_entry( player, CollisionId::player_bottom, pBoxBot,  true );
-    //    colManager.register_entry( groundBox, CollisionId::platform, platBox,  false );
-    //}
+enum GameState 
+{
+	LevelState,
+	MenuState
 };
 
 class Game {
 private:
 public:
+    // TODO: refactor into ctor initializer list
+	double physicsSimTime = 0.0;
 	double time = 0.0;
-	//left/right/up/down
-	bool keys[4];
-	LevelData currentLevel;
+	double state;
+
+	enum Keys { // TODO: refactor into Globals.h
+        left,
+		right,
+		up,
+		down,
+		length
+	};
+	bool keys[Keys::length];
+	LevelData level;
 	
 	glm::vec3 mousePos;
 	bool leftButtonDown = false;
 
-	void init();
+	void init() noexcept;
 	void update(double dt);
+	void updatePhysics();
 	void updatePlayerCollision();
 	void updateEnemyCollision();
+	void showHitboxes();
+	void handleInput();
+	void updateGraphics();
 
-	void addSphereAnimation(Sphere sphere, glm::vec2 moveSpeed);
+	void animateSphere( Sphere    const &sphere,
+                        vec2 const &moveSpeed,
+                        vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
+	void animateColor(Graphics& graphics);
+	void animateVictory(Sphere    const &sphere);
 
-	//float gravity = 50.0f;
-
-	Box EnemyBox;
-    Sphere playerSphere;
+	Box      EnemyBox;
+    Sphere   playerSphere;
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
+
+	Box      MenuBG;
+	Box      MenuYes;
+	Box      MenuNo;
 };
+
+
