@@ -28,7 +28,7 @@ public:
 	ReadGeometry();
 	~ReadGeometry();
 	std::vector<Platform> platforms;
-	void initialize();
+	void initialize(std::string filename);
 	bool isWhite(glm::vec3 pixelColour);
 	glm::vec3 getPixelColour(int index);
 	int isPixelUsed(int index);

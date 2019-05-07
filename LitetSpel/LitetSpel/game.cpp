@@ -37,7 +37,7 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(player, ColliderType::player_left,   player.HitboxLeft,   false);
 	level.colManager.registerEntry(player, ColliderType::player_right,  player.HitboxRight,  false);
 
-	readGeometry.initialize();
+	readGeometry.initialize("test.png");
 	for (int i = 0; i < readGeometry.platforms.size(); i++)
 	{
 		readGeometry.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);

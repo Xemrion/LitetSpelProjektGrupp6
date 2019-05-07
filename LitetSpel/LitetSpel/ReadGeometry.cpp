@@ -10,11 +10,11 @@ ReadGeometry::~ReadGeometry()
 
 }
 
-void ReadGeometry::initialize()
+void ReadGeometry::initialize(std::string filename)
 {
 
 	int bpp = 0;
-	rgb = stbi_load("test.png", &width, &height, &bpp, 3);
+	rgb = stbi_load("filename", &width, &height, &bpp, 3);
 	int startPos = 0;
 	float startPosX = 0;
 	float startPosY = 0;
@@ -122,8 +122,8 @@ void ReadGeometry::initialize()
 				}
 
 				foundEdge = false;
-				halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio) + 0.1f;
 				//ful-lösning, fixar hål mellan boxes
+				halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio) + 0.1f;
 				halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio) + 0.1f;
 				startPosX /= pixelToUnitRatio;
 				startPosY /= pixelToUnitRatio;
