@@ -28,8 +28,9 @@ public:
 	ReadGeometry();
 	~ReadGeometry();
 	std::vector<Platform> platforms;
-	void initialize(std::string filename);
+	void initialize(const char* filename);
 	bool isWhite(glm::vec3 pixelColour);
+	bool isRed(glm::vec3 pixelColour);
 	glm::vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
 	int getBoxWidth(int index);

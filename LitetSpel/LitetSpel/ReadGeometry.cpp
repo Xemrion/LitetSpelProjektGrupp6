@@ -10,17 +10,17 @@ ReadGeometry::~ReadGeometry()
 
 }
 
-void ReadGeometry::initialize(std::string filename)
+void ReadGeometry::initialize(const char* filename)
 {
 
 	int bpp = 0;
-	rgb = stbi_load("filename", &width, &height, &bpp, 3);
+	rgb = stbi_load(filename, &width, &height, &bpp, 3);
 	int startPos = 0;
 	float startPosX = 0;
 	float startPosY = 0;
 	int endPosX = 0;
 	int endPosY = 0;
-	glm::vec4 halfLength(0, 0, 0, 0);
+	glm::vec4 halfLength(0, 0, 10, 0);
 	glm::vec4 center(0, 0, 0, 0);
 	bool foundEdge = false;
 	bool continueLoop = true;
@@ -34,103 +34,109 @@ void ReadGeometry::initialize(std::string filename)
 	{
 		if (!isWhite(getPixelColour(i)) && isPixelUsed(i) == -1)
 		{
-			if (i == 352520)
-				int aa = 0;
-			for (int j = 0; j < minimumBoxSize + 1; j++)
+			if (isRed(getPixelColour(i)))
 			{
 
-				if ((i - j) % width == 0)
-				{
-					i -= j;
-					break;
-
-				}
-				if (isWhite(getPixelColour(i - j)) || isPixelUsed(i - j) != -1)
-				{
-					i -= j - 1;
-					break;
-				}
-			}
-			pixelUsedIndex = isPixelUsed(i);
-			if (pixelUsedIndex != -1)
-			{
-				i += getBoxWidth(pixelUsedIndex) - minimumBoxSize;
 			}
 			else
 			{
-				startPos = i;
-
-				//Position baserat på mittpunkten av bilden
-				startPosX = (i % width) - middleX;
-				startPosY = middleY - glm::floor(i / width);
-
-				for (int j = 1; !foundEdge; j++)
+				for (int j = 0; j < minimumBoxSize + 1; j++)
 				{
 
-					if (startPosY - minimumBoxSize * j <= (-height / 2)
-						|| isWhite(getPixelColour(startPos + (width * minimumBoxSize * j))))
+					if ((i - j) % width == 0)
 					{
-						endPosY = startPosY - (minimumBoxSize) * (j)+1;
-						foundEdge = true;
+						i -= j;
+						break;
+
+					}
+					if (isWhite(getPixelColour(i - j)) || isPixelUsed(i - j) != -1)
+					{
+						i -= j - 1;
+						break;
 					}
 				}
-				foundEdge = false;
-				for (int j = 1; !foundEdge; j++)
+				pixelUsedIndex = isPixelUsed(i);
+				if (pixelUsedIndex != -1)
 				{
-					if ((startPosX + minimumBoxSize * j) >= width / 2
-						|| isWhite(getPixelColour(startPos + minimumBoxSize * j))
-						|| isPixelUsed(startPos + minimumBoxSize * j) != -1)
+					i += getBoxWidth(pixelUsedIndex) - minimumBoxSize;
+				}
+				else
+				{
+					startPos = i;
+
+					//Position baserat på mittpunkten av bilden
+					startPosX = (i % width) - middleX;
+					startPosY = middleY - glm::floor(i / width);
+
+					for (int j = 1; !foundEdge; j++)
 					{
-						endPosX = startPosX + minimumBoxSize * (j)-1;
-						foundEdge = true;
-						//-1 because the for-loop will increase i with 1 for the next iteration
-						i += minimumBoxSize * j - minimumBoxSize;
 
-						//Check width of boxes below(if all match it forms a square)
-						//height
-						for (int k = 1; k < glm::abs(endPosY - startPosY) / minimumBoxSize && continueLoop; k++)
+						if (startPosY - minimumBoxSize * j <= (-height / 2)
+							|| isWhite(getPixelColour(startPos + (width * minimumBoxSize * j))))
 						{
+							endPosY = startPosY - (minimumBoxSize) * (j)+1;
+							foundEdge = true;
+						}
+					}
+					foundEdge = false;
+					for (int j = 1; !foundEdge; j++)
+					{
+						if ((startPosX + minimumBoxSize * j) >= width / 2
+							|| isWhite(getPixelColour(startPos + minimumBoxSize * j))
+							|| isPixelUsed(startPos + minimumBoxSize * j) != -1)
+						{
+							endPosX = startPosX + minimumBoxSize * (j)-1;
+							foundEdge = true;
+							//-1 because the for-loop will increase i with 1 for the next iteration
+							i += minimumBoxSize * j - minimumBoxSize;
 
-							for (int l = minimumBoxSize * (j); l > 0 && continueLoop; l -= minimumBoxSize)
+							//Check width of boxes below(if all match it forms a square)
+							//height
+							for (int k = 1; k < glm::abs(endPosY - startPosY) / minimumBoxSize && continueLoop; k++)
 							{
-								//If its the first iteration and not at the edge of png
-								if (l == minimumBoxSize * j && startPosX + l + minimumBoxSize < width / 2)
-								{
 
-									if (!isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l + minimumBoxSize)))
+								for (int l = minimumBoxSize * (j); l > 0 && continueLoop; l -= minimumBoxSize)
+								{
+									//If its the first iteration and not at the edge of png
+									if (l == minimumBoxSize * j && startPosX + l + minimumBoxSize < width / 2)
+									{
+
+										if (!isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l + minimumBoxSize)))
+										{
+											endPosY = startPosY - minimumBoxSize * k + 1;
+											continueLoop = false;
+										}
+
+									}
+									else if (isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l)))
 									{
 										endPosY = startPosY - minimumBoxSize * k + 1;
 										continueLoop = false;
 									}
 
 								}
-								else if (isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l)))
-								{
-									endPosY = startPosY - minimumBoxSize * k + 1;
-									continueLoop = false;
-								}
-
 							}
+							continueLoop = true;
+							LeftSide.push_back(startPosX);
+							rightSide.push_back(endPosX);
+							topSide.push_back(startPosY);
+							bottomSide.push_back(endPosY);
+							boxWidth.push_back(minimumBoxSize * j);
 						}
-						continueLoop = true;
-						LeftSide.push_back(startPosX);
-						rightSide.push_back(endPosX);
-						topSide.push_back(startPosY);
-						bottomSide.push_back(endPosY);
-						boxWidth.push_back(minimumBoxSize * j);
 					}
+
+					foundEdge = false;
+					//ful-lösning, fixar hål mellan boxes
+					halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio) + 0.1f;
+					halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio) + 0.1f;
+					startPosX /= pixelToUnitRatio;
+					startPosY /= pixelToUnitRatio;
+					center.x = startPosX + halfLength.x;
+					center.y = startPosY - halfLength.y;
+
+					platforms.push_back(Platform(center, halfLength));
+
 				}
-
-				foundEdge = false;
-				//ful-lösning, fixar hål mellan boxes
-				halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio) + 0.1f;
-				halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio) + 0.1f;
-				startPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
-				center.y = startPosY - halfLength.y;
-
-				platforms.push_back(Platform(center, halfLength));
 			}
 
 		}
@@ -176,5 +182,10 @@ int ReadGeometry::getBoxWidth(int index)
 bool ReadGeometry::isWhite(glm::vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 255 && pixelColour.z == 255;
+}
+
+bool ReadGeometry::isRed(glm::vec3 pixelColour)
+{
+	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 0;
 }
 
