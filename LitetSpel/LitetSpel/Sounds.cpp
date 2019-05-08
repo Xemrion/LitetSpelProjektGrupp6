@@ -496,6 +496,35 @@ bool Sounds::StopAllSFX() {
 	if (!StopSFX(enmy03)) {
 		return false;
 	}
+	if (!StopSFX(sorb01)) {
+		return false;
+	}
+	if (!StopSFX(sorb02)) {
+		return false;
+	}
+	if (!StopSFX(sorb03)) {
+		return false;
+	}
+	if (!StopSFX(pDeath)) {
+		return false;
+	}
+	if (!StopSFX(pDmg01)) {
+		return false;
+	}
+	if (!StopSFX(pDmg02)) {
+		return false;
+	}
+	if (!StopSFX(pStart)) {
+		return false;
+	}
+	if (!StopSFX(pGoal)) {
+		return false;
+	}
+	for (int i = 0; i < nrOfEnemies; i++) {
+		if (!StopSFX(enemies[i])) {
+			return false;
+		}
+	}
 	return true;
 }
 bool Sounds::ContinueAllSFX() {
@@ -534,6 +563,35 @@ bool Sounds::ContinueAllSFX() {
 	}
 	if (!ContinueSFX(enmy03)) {
 		return false;
+	}
+	if (!ContinueSFX(sorb01)) {
+		return false;
+	}
+	if (!ContinueSFX(sorb02)) {
+		return false;
+	}
+	if (!ContinueSFX(sorb03)) {
+		return false;
+	}
+	if (!ContinueSFX(pDeath)) {
+		return false;
+	}
+	if (!ContinueSFX(pDmg01)) {
+		return false;
+	}
+	if (!ContinueSFX(pDmg02)) {
+		return false;
+	}
+	if (!ContinueSFX(pStart)) {
+		return false;
+	}
+	if (!ContinueSFX(pGoal)) {
+		return false;
+	}
+	for (int i = 0; i < nrOfEnemies; i++) {
+		if (!ContinueSFX(enemies[i])) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -905,6 +963,7 @@ bool Sounds::StopSFX(IDirectSoundBuffer8* sound) {
 }
 bool Sounds::ContinueSFX(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
+	LPDWORD position = NULL;
 
 	if (defaultVolume != false) {
 		hr = sound->SetVolume(DSBVOLUME_MAX);
@@ -912,10 +971,16 @@ bool Sounds::ContinueSFX(IDirectSoundBuffer8* sound) {
 			return false;
 		}
 	}
-
-	hr = sound->Play(0, 0, 0);
+	
+	hr = sound->GetCurrentPosition(position, NULL);
 	if (FAILED(hr)) {
 		return false;
+	}
+	if (position != 0) {
+		hr = sound->Play(0, 0, 0);
+		if (FAILED(hr)) {
+			return false;
+		}
 	}
 
 	return true;
