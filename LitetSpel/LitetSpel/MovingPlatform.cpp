@@ -14,19 +14,33 @@ MovingPlatform::~MovingPlatform()
 
 void MovingPlatform::move()
 {
-	//if (pos == endPos or pos == startPos) 
-	//{
-	//	Speed = -Speed;
-	//}
-	//pos -= (endPos-startPos)*(Speed/5);
-
-	if (pos.x <= endPos.x or pos.x >= startPos.x) 
+	if (endPos.x < startPos.x) 
 	{
-		Speed.x = -Speed.x;
+		if (pos.x <= endPos.x or pos.x >= startPos.x)
+		{
+			Speed.x = -Speed.x;
+		}
 	}
-	if (pos.y <= endPos.y or pos.y >= startPos.y) 
+	else 
 	{
-		Speed.y = -Speed.y;
+		if (pos.x >= endPos.x or pos.x<= startPos.x)
+		{
+			Speed.x = -Speed.x;
+		}
+	}
+	if (endPos.y < startPos.y)
+	{
+		if (pos.y <= endPos.y or pos.y >= startPos.y)
+		{
+			Speed.y = -Speed.y;
+		}
+	}
+	else
+	{
+		if (pos.y >= endPos.y or pos.y <= startPos.y)
+		{
+			Speed.y = -Speed.y;
+		}
 	}
 
 	pos.x -= (endPos.x - startPos.x)*(Speed.x / 5.0);
