@@ -1,6 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
+//Platorms
     level.goal = std::make_unique<LevelGoal>( level.colManager, vec3{70.0f,-15.0f,.0f}, 12.0f );
     groundBox.hitbox.center      = vec4(0, -30, 0, 0);
     groundBox.hitbox.halfLengths = vec4(100, 10, 10, 0);
@@ -21,7 +22,19 @@ void Game::init() noexcept {
 	level.boxes.push_back(testplat2.hitbox);
 	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);
 
-// player & blobs:
+// MovingPlatform
+	TestMove1.startPos = vec3(-80.0, 0.0, 0.0);
+	TestMove1.pos      = TestMove1.startPos;
+	TestMove1.endPos   = vec3(-120.0, 0.0, 0.0);
+
+	TestMove1.Hitbox.center = vec4(TestMove1.startPos, 0.0);
+	TestMove1.Hitbox.halfLengths = vec4(10.0f, 2.0f, 10.0f, 0.0f);
+	TestMove1.Hitbox.color = vec4(0.0, 1.0, 1.0, 0.0);
+	level.boxes.push_back(TestMove1.Hitbox);
+	level.colManager.registerEntry(TestMove1, ColliderType::movingPlatform, TestMove1.Hitbox, false);
+
+	
+// player & blobs
     auto &player = level.player;
 	for ( int i = 0;  i < player.blobCharges;  ++i ) {
         Blob b { player.pos };
@@ -45,8 +58,6 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false);
 
 	EnemyBox.color = vec4(1,0,0,0);
-
-// LevelGoal
 
 // PowerUps
 	auto &powerup = level.TestPowerUp;
@@ -151,6 +162,18 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				velocity.x = 0;
 			}
 		}
+		else if (otherHitbox == ColliderType::movingPlatform)
+		{
+			isStanding = true;
+			hasExtraJump = true;
+			pos.y = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
+			velocity.y = 0;
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
+		}
 		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w != 0 && !isStuck)
 		{
 			isStanding = true;
@@ -201,11 +224,36 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				velocity.x = 0;
 			}
 		}
+		else if (otherHitbox == ColliderType::movingPlatform) {
+			pos.y = other.center.y - other.halfLengths.y + (pos.y - HitboxTop.center.y - HitboxTop.halfLengths.y);
+			velocity.y = 0;
+			if (status == PlayerStatus::Sticky) {
+				isStuck = true;
+				//this->pos.y -= 1.1;
+			}
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
+		}
 	}
 	else if (ownHitbox == ColliderType::player_left) {
 		if (otherHitbox == ColliderType::platform) {
 			pos.x = other.center.x + other.halfLengths.x + (pos.x - HitboxLeft.center.x + HitboxLeft.halfLengths.x);
 			
+			if (status == PlayerStatus::Sticky) {
+				isStuck = true;
+			}
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
+		}
+		if (otherHitbox == ColliderType::movingPlatform) {
+			pos.x = other.center.x + other.halfLengths.x + (pos.x - HitboxLeft.center.x + HitboxLeft.halfLengths.x);
+
 			if (status == PlayerStatus::Sticky) {
 				isStuck = true;
 			}
@@ -224,6 +272,18 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 	}
 	else if (ownHitbox == ColliderType::player_right) {
 		if (otherHitbox == ColliderType::platform) {
+			pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
+
+			if (status == PlayerStatus::Sticky) {
+				isStuck = true;
+			}
+			if (knockBack)
+			{
+				knockBack = false;
+				velocity.x = 0;
+			}
+		}
+		if (otherHitbox == ColliderType::movingPlatform) {
 			pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
 
 			if (status == PlayerStatus::Sticky) {
@@ -303,6 +363,7 @@ void Game::update(double dt)  {
 		handleInput();
 		level.player.isStanding = false;
 		level.player.update(dt);
+		TestMove1.move();
 		if (level.enemy.alive)
 		{
 			level.enemy.update(dt);
@@ -396,6 +457,7 @@ void Game::updatePhysics() {
 		}
 		updatePlayerCollision();
 		updateEnemyCollision();
+		updatePlatformCollision();
 		level.colManager.update();
 
 		physicsSimTime += timestep;
@@ -523,6 +585,11 @@ void Game::updateEnemyCollision()
 
 }
 
+void Game::updatePlatformCollision()
+{
+	TestMove1.Hitbox.center = vec4(TestMove1.pos, 0.0);
+}
+
 // Call after all other per frame updates
 void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
@@ -534,6 +601,7 @@ void Game::updateGraphics() {
 		level.boxes.push_back(testPlat.hitbox);
 		level.boxes.push_back(testplat2.hitbox);
 		level.boxes.push_back(level.TestPowerUp.powerBox);
+		level.boxes.push_back(TestMove1.Hitbox);
 		EnemyBox.color = vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
 
 		if (level.enemy.alive) {

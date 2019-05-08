@@ -13,6 +13,7 @@
 #include "Globals.h"
 #include "PowerUp.h"
 #include "Graphics.h"
+#include "MovingPlatform.h"
 
 // TODO: improve encapsulation by reducing public exposure
 
@@ -130,6 +131,7 @@ public:
 	void updatePhysics();
 	void updatePlayerCollision();
 	void updateEnemyCollision();
+	void updatePlatformCollision();
 	void showHitboxes();
 	void handleInput();
 	void updateGraphics();
@@ -145,6 +147,7 @@ public:
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
+	MovingPlatform TestMove1;
 
 	Box      MenuBG;
 	Box      MenuYes;
