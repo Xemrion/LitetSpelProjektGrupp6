@@ -275,7 +275,6 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 void Player::shoot(vec3 mousePos) noexcept
 {
     if (shootCooldown > 0) return;
-
     auto mouseScreenPos = vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
     vec3 dir = normalize( mouseScreenPos - pos);
     for ( auto &blob : blobs ) {
@@ -325,37 +324,45 @@ void Game::handleInput() {
 		player.shoot(mousePos);
 	}
 
-		if (keys[Keys::left]) {
-			if (!player.isStuck) {
-				player.addVelocity(vec3(-1, 0, 0), true);
+	if (keys[Keys::left]) {
+		if (!player.isStuck) {
+			player.addVelocity(vec3(-1, 0, 0), true);
+		}
+	}
+	if (keys[Keys::right]) {
+		if (!player.isStuck) {
+			player.addVelocity(vec3(1, 0, 0), true);
+		}
+	}
+	if (keys[Keys::up]) {
+		if (player.isStanding) {
+			player.isStanding = false;
+			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
+			if (player.status != PlayerStatus::Heavy) {
+				gameSounds->PlayJumpSound01();
+			}
+			else if (player.status == PlayerStatus::Heavy) {
+				gameSounds->PlayJumpSound02();
+			}
+				
+		}
+		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
+			player.hasExtraJump = false;
+			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.velocity.y = 0;
+			player.putForce(vec3(0.0, player.jumpForce, 0.0));
+			gameSounds->PlayJumpSound03();
+		}
+	}
+	if (keys[Keys::down]) {
+		if (player.status == PlayerStatus::Sticky) {
+			player.isStuck = false;
+			if (player.isStanding == false) {
+				//player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT, 0.0));
 			}
 		}
-		if (keys[Keys::right]) {
-			if (!player.isStuck) {
-				player.addVelocity(vec3(1, 0, 0), true);
-			}
-		}
-		if (keys[Keys::up]) {
-			if (player.isStanding) {
-				player.isStanding = false;
-				player.jumpCooldown = COOLDOWN_CONSTANT;
-				player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
-			}
-			else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
-				player.hasExtraJump = false;
-				player.jumpCooldown = COOLDOWN_CONSTANT;
-				player.velocity.y = 0;
-				player.putForce(vec3(0.0, player.jumpForce, 0.0));
-			}
-		}
-		if (keys[Keys::down]) {
-			if (player.status == PlayerStatus::Sticky) {
-				player.isStuck = false;
-				if (player.isStanding == false) {
-					//player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT, 0.0));
-				}
-			}
-		}
+	}
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}

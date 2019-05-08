@@ -143,6 +143,8 @@ void mouseFunc()
 		if (mouse.LeftIsPressed())
 		{
 			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
+				gameSounds.StopMenuMusic();
+				gameSounds.StartGameMusic();
 				game.state = GameState::LevelState;
 			}
 			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
@@ -163,10 +165,22 @@ void keyboardFunc()
 		if (keyboard.KeyIsPressed('D'))
 		{
 			game.keys[1] = true;
+			if (playerMove != true) {
+				gameSounds.StartPlayerMoveLoop();
+				playerMove = true;
+			}
 		}
 		if (keyboard.KeyIsPressed('A'))
 		{
 			game.keys[0] = true;
+			if (playerMove != true) {
+				gameSounds.StartPlayerMoveLoop();
+				playerMove = true;
+			}
+		}
+		if (!keyboard.KeyIsPressed('D') && !keyboard.KeyIsPressed('A') && playerMove != false) {
+			gameSounds.StopPlayerMoveLoop();
+			playerMove = false;
 		}
 		if (keyboard.KeyIsPressed('W'))
 		{
@@ -251,82 +265,6 @@ void keyboardFunc()
 			graphics.createShaders();
 		}
 	}
-	
-	if (keyboard.KeyIsPressed('D'))
-	{
-		game.keys[1] = true;
-		if (playerMove != true) {
-			gameSounds.StartPlayerMoveLoop();
-			playerMove = true;
-		}
-	}
-	if (keyboard.KeyIsPressed('A'))
-	{
-		game.keys[0] = true;
-		if (playerMove != true) {
-			gameSounds.StartPlayerMoveLoop();
-			playerMove = true;
-		}
-	}
-	if (!keyboard.KeyIsPressed('D') && !keyboard.KeyIsPressed('A') && playerMove != false) {
-		gameSounds.StopPlayerMoveLoop();
-		playerMove = false;
-	}
-	if (keyboard.KeyIsPressed('W'))
-	{
-		game.keys[2] = true;
-	}
-	if (keyboard.KeyIsPressed('S'))
-	{
-		game.keys[3] = true;
-	}
-	if (keyboard.KeyIsPressed('B')) 
-	{
-		if (powerCoolDown <= 0) 
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Bouncy;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('H'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Heavy;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('Y'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Sticky;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('R'))
-		game.currentLevel.player.recallBlobs();
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
@@ -339,8 +277,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game.gameSounds = &gameSounds;
 	ShowWindow(wndHandle, nCmdShow);
-	gameSounds.StartGameMusic();
-	
+	gameSounds.StartMenuMusic();
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
 	{
@@ -358,7 +295,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			char title[64];
 			_itoa_s(1/dt, title, 64, 10);
 			SetWindowTextA(wndHandle, title);
-			
+
 			if (!game.level.player.levelCompleted) 
 			{
 				if (game.level.player.status == PlayerStatus::Bouncy)
@@ -379,22 +316,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				}
 				keyboardFunc();
 				mouseFunc();
+				if (keyboard.KeyIsPressed(VK_UP)) {
+					gameSounds.StopGameMusic();
+				}
+				if (keyboard.KeyIsPressed(VK_DOWN)) {
+					gameSounds.ContinueGameMusic();
+				}
 			}
 			else 
 			{
 				//game.animateColor(graphics);
 				//game.animateVictory(game.playerSphere);
 			}
-			keyboardFunc();
-			mouseFunc();
-
-			if (keyboard.KeyIsPressed(VK_UP)) {
-				gameSounds.StopGameMusic();
-			}
-			if (keyboard.KeyIsPressed(VK_DOWN)) {
-				gameSounds.ContinueGameMusic();
-			}
-			graphics.setMetaballColorAbsorb(glm::vec3(1.0f, 0.25f, 0.25f));
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
 			graphics.setBoxes(game.level.boxes);

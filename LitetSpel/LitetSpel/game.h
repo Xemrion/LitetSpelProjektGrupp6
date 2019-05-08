@@ -14,7 +14,6 @@
 #include "Globals.h"
 #include "PowerUp.h"
 #include "Graphics.h"
-#include "Library.h"
 
 // TODO: improve encapsulation by reducing public exposure
 

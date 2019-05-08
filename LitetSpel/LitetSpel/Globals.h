@@ -57,5 +57,3 @@ m-back.wav
 //Player sound. Wet/slimy
 //Enemy sound, robotic/metalic
 //Level sound, metalic/sci-fi or industrial?
-
-#endif // !LIBRARY_H
