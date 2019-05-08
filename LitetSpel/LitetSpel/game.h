@@ -13,8 +13,7 @@
 #include "Globals.h"
 #include "PowerUp.h"
 #include "Graphics.h"
-#include "MovingPlatform.h"
-
+#include "Editor.h"
 // TODO: improve encapsulation by reducing public exposure
 
 using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
@@ -122,7 +121,7 @@ public:
 	};
 	bool keys[Keys::length];
 	LevelData level;
-	
+	Editor editor;
 	glm::vec3 mousePos;
 	bool leftButtonDown = false;
 
@@ -131,7 +130,6 @@ public:
 	void updatePhysics();
 	void updatePlayerCollision();
 	void updateEnemyCollision();
-	void updatePlatformCollision();
 	void showHitboxes();
 	void handleInput();
 	void updateGraphics();
@@ -147,7 +145,6 @@ public:
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
-	MovingPlatform TestMove1;
 
 	Box      MenuBG;
 	Box      MenuYes;
