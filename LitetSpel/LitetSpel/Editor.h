@@ -27,7 +27,7 @@ private:
 	int isPixelUsed(int index);
 	void addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY);
 	unsigned char* rgb;
-	int minimumBoxSize = 40;
+	int minimumBoxSize = 30;
 	int width = 0;
 	int height = 0;
 

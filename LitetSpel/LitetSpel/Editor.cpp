@@ -36,24 +36,47 @@ void Editor::initialize(const char* filename)
 			//Position baserat på mittpunkten av bilden
 			startPosX = (i % width) - middleX;
 			startPosY = middleY - glm::floor(i / width);
+
+			halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio;
+			halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio;
+
 			if (isBlue(getPixelColour(i)))
 			{
-				this->goalPos = glm::vec3(startPosX, startPosY, 0);
 				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->goalPos = glm::vec3(center);
 			}
 			else if (isRed(getPixelColour(i)))
 			{
-				this->enemyPos.push_back(glm::vec3(startPosX, startPosY, 0));
 				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->enemyPos.push_back(glm::vec3(center));
 			}
 			else if (isGreen(getPixelColour(i)))
 			{
-				this->startPos = glm::vec3(startPosX, startPosY, 0);
 				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->startPos = glm::vec3(center);
 			}
 			else
 			{
+				startPosX = (i % width) - middleX;
+				startPosY = middleY - glm::floor(i / width);
 				startPos = i;
 				for (int j = 1; !foundEdge; j++)
 				{
@@ -61,7 +84,7 @@ void Editor::initialize(const char* filename)
 					if (startPosY - j <= (-height / 2)
 						|| isWhite(getPixelColour(startPos + (width * j))))
 					{
-						endPosY = startPosY - (j)*minimumBoxSize + 1;
+						endPosY = startPosY - j;
 						foundEdge = true;
 					}
 				}
@@ -72,7 +95,7 @@ void Editor::initialize(const char* filename)
 						|| isWhite(getPixelColour(startPos + j))
 						|| isPixelUsed(startPos + j) != -1)
 					{
-						endPosX = startPosX + (j)*minimumBoxSize - 1;
+						endPosX = startPosX + j;
 						foundEdge = true;
 						//-1 because the for-loop will increase i with 1 for the next iteration
 						i += j - 1;
@@ -91,14 +114,14 @@ void Editor::initialize(const char* filename)
 									if (!isWhite(getPixelColour((startPos + width * k) + l + 1)))
 									{
 										//+1??
-										endPosY = startPosY - k * minimumBoxSize + 1;
+										endPosY = startPosY - k;
 										continueLoop = false;
 									}
 
 								}
 								else if (isWhite(getPixelColour((startPos + width * k) + l)))
 								{
-									endPosY = startPosY - k * minimumBoxSize + 1;
+									endPosY = startPosY - k;
 									continueLoop = false;
 								}
 
@@ -111,9 +134,12 @@ void Editor::initialize(const char* filename)
 				}
 
 				foundEdge = false;
-				//ful-lösning, fixar hål mellan boxes
-				halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio) + 0.1f;
-				halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio) + 0.1f;
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				endPosX *= minimumBoxSize;
+				endPosY *= minimumBoxSize;
+				halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio);
+				halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio);
 				startPosX /= pixelToUnitRatio;
 				startPosY /= pixelToUnitRatio;
 				center.x = startPosX + halfLength.x;
@@ -148,10 +174,10 @@ int Editor::isPixelUsed(int index)
 
 	for (int i = 0; i < topSide.size(); i++)
 	{
-		if (posY >= bottomSide.at(i)
-			&& posY <= topSide.at(i)
-			&& posX >= LeftSide.at(i)
-			&& posX <= rightSide.at(i))
+		if (posY > bottomSide.at(i)
+			&& posY < topSide.at(i)
+			&& posX > LeftSide.at(i)
+			&& posX < rightSide.at(i))
 			return i;
 	}
 	return -1;
