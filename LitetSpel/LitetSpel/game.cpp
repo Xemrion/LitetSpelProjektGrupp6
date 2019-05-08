@@ -23,7 +23,7 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);
 
 // MovingPlatform
-	TestMove1.startPos = vec3(-800.0, 0.0, 0.0);
+	TestMove1.startPos = vec3(-80.0, 0.0, 0.0);
 	TestMove1.pos      = TestMove1.startPos;
 	TestMove1.endPos   = vec3(-120.0, 0.0, 0.0);
 
