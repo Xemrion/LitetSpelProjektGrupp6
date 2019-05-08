@@ -1,5 +1,7 @@
-#ifndef LIBRARY_H
-#define LIBRARY_H
+#pragma once
+
+const float GRAVITY_CONSTANT = 100.f;
+const float COOLDOWN_CONSTANT = 0.3f;
 
 enum class PowerType {
 	None,
