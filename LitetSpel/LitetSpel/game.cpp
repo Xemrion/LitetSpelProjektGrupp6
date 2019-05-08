@@ -1,8 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-    level.goal = std::make_unique<LevelGoal>( level.colManager, vec3{70.0f,-15.0f,.0f}, 12.0f );
-   groundBox.hitbox.center      = vec4(0, -30, 0, 0);
+   /* groundBox.hitbox.center      = vec4(0, -30, 0, 0);
     groundBox.hitbox.halfLengths = vec4(100, 10, 10, 0);
 	groundBox.hitbox.color       = vec4(1.0, 1.0, 1.0, 0.0);
 	level.boxes.push_back(groundBox.hitbox);
@@ -19,7 +18,7 @@ void Game::init() noexcept {
 	testplat2.hitbox.halfLengths = vec4(10.0f, 2.0f, 10.0f, 0.0f);
 	testplat2.hitbox.color       = vec4(0.0, 0.5, 0.5, 0.0);
 	level.boxes.push_back(testplat2.hitbox);
-	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);
+	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);*/
 	readGeometry.initialize("test.png");
 	for (int i = 0; i < readGeometry.platforms.size(); i++)
 	{
@@ -27,6 +26,7 @@ void Game::init() noexcept {
 		level.boxes.push_back(readGeometry.platforms.at(i).hitbox);
 		level.colManager.registerEntry(readGeometry.platforms.at(i), ColliderType::platform, readGeometry.platforms.at(i).hitbox, true);
 	}
+    level.goal = std::make_unique<LevelGoal>( level.colManager, readGeometry.goalPos, 12.0f );
 // player & blobs:
     auto &player = level.player;
 	for ( int i = 0;  i < player.blobCharges;  ++i ) {
@@ -536,10 +536,10 @@ void Game::updateGraphics() {
 
 	if (state == GameState::LevelState) 
 	{
-		level.boxes.push_back(groundBox.hitbox);
-		level.boxes.push_back(testPlat.hitbox);
-		level.boxes.push_back(testplat2.hitbox);
-		level.boxes.push_back(level.TestPowerUp.powerBox);
+		//level.boxes.push_back(groundBox.hitbox);
+		//level.boxes.push_back(testPlat.hitbox);
+		//level.boxes.push_back(testplat2.hitbox);
+		//level.boxes.push_back(level.TestPowerUp.powerBox);
 		for (int i = 0; i < readGeometry.platforms.size(); i++)
 		{
 			readGeometry.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);

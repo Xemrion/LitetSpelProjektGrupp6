@@ -34,8 +34,27 @@ void ReadGeometry::initialize(const char* filename)
 	{
 		if (!isWhite(getPixelColour(i)) && isPixelUsed(i) == -1)
 		{
-			if (isRed(getPixelColour(i)))
+			if (isBlue(getPixelColour(i)))
 			{
+				startPosX = (i % width) - middleX;
+				startPosY = middleY - glm::floor(i / width);
+				endPosY = startPosY - goalWidth;
+				endPosX = startPosX + goalWidth;
+				glm::vec2 center = glm::vec2((startPosX + goalWidth) / pixelToUnitRatio, (startPosY - goalWidth) / pixelToUnitRatio);
+				this->goalPos = glm::vec3(center, 0);
+				addBoxToUsed(startPosX, startPosY, endPosX, endPosY, goalWidth);
+			}
+			else if (isRed(getPixelColour(i)))
+			{
+				startPosX = (i % width) - middleX;
+				startPosY = middleY - glm::floor(i / width);
+				endPosY = startPosY - enemyWidth;
+				endPosX = startPosX + enemyWidth;
+
+				glm::vec2 center = glm::vec2((startPosX + enemyWidth) / pixelToUnitRatio, (startPosY - enemyWidth) / pixelToUnitRatio);
+				this->enemyPos.push_back(glm::vec3(center, 0));
+
+				addBoxToUsed(startPosX, startPosY, endPosX, endPosY, enemyWidth);
 
 			}
 			else
@@ -55,88 +74,78 @@ void ReadGeometry::initialize(const char* filename)
 						break;
 					}
 				}
-				pixelUsedIndex = isPixelUsed(i);
-				if (pixelUsedIndex != -1)
-				{
-					i += getBoxWidth(pixelUsedIndex) - minimumBoxSize;
-				}
-				else
-				{
-					startPos = i;
+				startPos = i;
 
-					//Position baserat på mittpunkten av bilden
-					startPosX = (i % width) - middleX;
-					startPosY = middleY - glm::floor(i / width);
+				//Position baserat på mittpunkten av bilden
+				startPosX = (i % width) - middleX;
+				startPosY = middleY - glm::floor(i / width);
 
-					for (int j = 1; !foundEdge; j++)
+				for (int j = 1; !foundEdge; j++)
+				{
+
+					if (startPosY - minimumBoxSize * j <= (-height / 2)
+						|| isWhite(getPixelColour(startPos + (width * minimumBoxSize * j))))
 					{
-
-						if (startPosY - minimumBoxSize * j <= (-height / 2)
-							|| isWhite(getPixelColour(startPos + (width * minimumBoxSize * j))))
-						{
-							endPosY = startPosY - (minimumBoxSize) * (j)+1;
-							foundEdge = true;
-						}
+						endPosY = startPosY - (minimumBoxSize) * (j)+1;
+						foundEdge = true;
 					}
-					foundEdge = false;
-					for (int j = 1; !foundEdge; j++)
+				}
+				foundEdge = false;
+				for (int j = 1; !foundEdge; j++)
+				{
+					if ((startPosX + minimumBoxSize * j) >= width / 2
+						|| isWhite(getPixelColour(startPos + minimumBoxSize * j))
+						|| isPixelUsed(startPos + minimumBoxSize * j) != -1)
 					{
-						if ((startPosX + minimumBoxSize * j) >= width / 2
-							|| isWhite(getPixelColour(startPos + minimumBoxSize * j))
-							|| isPixelUsed(startPos + minimumBoxSize * j) != -1)
+						endPosX = startPosX + minimumBoxSize * (j)-1;
+						foundEdge = true;
+						//-1 because the for-loop will increase i with 1 for the next iteration
+						i += minimumBoxSize * j - minimumBoxSize;
+
+						//Check width of boxes below(if all match it forms a square)
+						//height
+						for (int k = 1; k < glm::abs(endPosY - startPosY) / minimumBoxSize && continueLoop; k++)
 						{
-							endPosX = startPosX + minimumBoxSize * (j)-1;
-							foundEdge = true;
-							//-1 because the for-loop will increase i with 1 for the next iteration
-							i += minimumBoxSize * j - minimumBoxSize;
 
-							//Check width of boxes below(if all match it forms a square)
-							//height
-							for (int k = 1; k < glm::abs(endPosY - startPosY) / minimumBoxSize && continueLoop; k++)
+							for (int l = minimumBoxSize * (j); l > 0 && continueLoop; l -= minimumBoxSize)
 							{
-
-								for (int l = minimumBoxSize * (j); l > 0 && continueLoop; l -= minimumBoxSize)
+								//If its the first iteration and not at the edge of png
+								if (l == minimumBoxSize * j && startPosX + l + minimumBoxSize < width / 2)
 								{
-									//If its the first iteration and not at the edge of png
-									if (l == minimumBoxSize * j && startPosX + l + minimumBoxSize < width / 2)
-									{
 
-										if (!isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l + minimumBoxSize)))
-										{
-											endPosY = startPosY - minimumBoxSize * k + 1;
-											continueLoop = false;
-										}
-
-									}
-									else if (isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l)))
+									if (!isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l + minimumBoxSize)))
 									{
 										endPosY = startPosY - minimumBoxSize * k + 1;
 										continueLoop = false;
 									}
 
 								}
+								else if (isWhite(getPixelColour((startPos + width * minimumBoxSize * k) + l)))
+								{
+									endPosY = startPosY - minimumBoxSize * k + 1;
+									continueLoop = false;
+								}
+
 							}
-							continueLoop = true;
-							LeftSide.push_back(startPosX);
-							rightSide.push_back(endPosX);
-							topSide.push_back(startPosY);
-							bottomSide.push_back(endPosY);
-							boxWidth.push_back(minimumBoxSize * j);
 						}
+						continueLoop = true;
+						addBoxToUsed(startPosX, startPosY, endPosX, endPosY, minimumBoxSize * j);
+
 					}
-
-					foundEdge = false;
-					//ful-lösning, fixar hål mellan boxes
-					halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio) + 0.1f;
-					halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio) + 0.1f;
-					startPosX /= pixelToUnitRatio;
-					startPosY /= pixelToUnitRatio;
-					center.x = startPosX + halfLength.x;
-					center.y = startPosY - halfLength.y;
-
-					platforms.push_back(Platform(center, halfLength));
-
 				}
+
+				foundEdge = false;
+				//ful-lösning, fixar hål mellan boxes
+				halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio) + 0.1f;
+				halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio) + 0.1f;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+
+				platforms.push_back(Platform(center, halfLength));
+
+
 			}
 
 		}
@@ -179,9 +188,22 @@ int ReadGeometry::getBoxWidth(int index)
 {
 	return boxWidth.at(index);
 }
+void ReadGeometry::addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY, int width)
+{
+	LeftSide.push_back(startPosX);
+	rightSide.push_back(endPosX);
+	topSide.push_back(startPosY);
+	bottomSide.push_back(endPosY);
+	this->boxWidth.push_back(width);
+}
 bool ReadGeometry::isWhite(glm::vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 255 && pixelColour.z == 255;
+}
+
+bool ReadGeometry::isBlue(glm::vec3 pixelColour)
+{
+	return pixelColour.x == 0 && pixelColour.y == 0 && pixelColour.z == 255;
 }
 
 bool ReadGeometry::isRed(glm::vec3 pixelColour)

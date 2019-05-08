@@ -20,20 +20,27 @@ private:
 	std::vector<int> bottomSide;
 	std::vector<int> rightSide;
 	std::vector<int> boxWidth;
-	unsigned char* rgb;
-	int minimumBoxSize = 10;
-	int width = 0;
-	int height = 0;
-public:
-	ReadGeometry();
-	~ReadGeometry();
-	std::vector<Platform> platforms;
-	void initialize(const char* filename);
 	bool isWhite(glm::vec3 pixelColour);
+	bool isBlue(glm::vec3 pixelColour);
 	bool isRed(glm::vec3 pixelColour);
 	glm::vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
 	int getBoxWidth(int index);
+	void addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY, int width);
+	unsigned char* rgb;
+	int minimumBoxSize = 10;
+	int width = 0;
+	int height = 0;
+	//square
+	int goalWidth = 60;
+	int enemyWidth = 60;
+public:
+	ReadGeometry();
+	~ReadGeometry();
+	std::vector<Platform> platforms;
+	glm::vec3 goalPos;
+	std::vector<glm::vec3> enemyPos;
+	void initialize(const char* filename);
 
 };
 #endif
