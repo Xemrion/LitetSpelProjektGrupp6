@@ -89,5 +89,7 @@
     <FxCompile Include="ps.hlsl" />
     <FxCompile Include="box_raster_ps.hlsl" />
     <FxCompile Include="box_raster_vs.hlsl" />
+    <FxCompile Include="laser_raster_vs.hlsl" />
+    <FxCompile Include="laser_raster_ps.hlsl" />
   </ItemGroup>
 </Project>

@@ -60,7 +60,7 @@ HRESULT Graphics::createDeviceContext(HWND wndHandle, bool windowed)
 	scd.OutputWindow = wndHandle;
 	scd.SampleDesc.Count = 1;
 	scd.Windowed = windowed;
-
+	
 	HRESULT hr = D3D11CreateDeviceAndSwapChain(
 		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
@@ -333,6 +333,27 @@ HRESULT Graphics::createResources(HWND wndHandle)
 
 	createCBuffers();
 
+	D3D11_BLEND_DESC blendDesc;
+	blendDesc.AlphaToCoverageEnable = false;
+	blendDesc.IndependentBlendEnable = false;
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_MAX;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	hr = device->CreateBlendState(&blendDesc, &blendState);
+	if (FAILED(hr)) {
+		if (errorBlob)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+	}
+
 	return hr;
 }
 
@@ -341,7 +362,7 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(glm::mat4) * 200;
+	constBufferDesc.ByteWidth = sizeof(glm::mat4) * maxBoxes + sizeof(glm::vec4) * maxBoxes;
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &boxTransformBuffer);
@@ -361,10 +382,10 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(Line) * maxLines + sizeof(glm::vec4);
+	constBufferDesc.ByteWidth = sizeof(glm::mat4) * maxLasers + sizeof(glm::vec4) * maxLasers;
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	device->CreateBuffer(&constBufferDesc, NULL, &lineBuffer);
+	device->CreateBuffer(&constBufferDesc, NULL, &laserTransformBuffer);
 
 
 
@@ -399,188 +420,280 @@ void Graphics::createCBuffers() {
 
 HRESULT Graphics::createShaders()
 {
-	SAFE_RELEASE(vertexShader);
-	SAFE_RELEASE(pixelShader);
-
-	ID3DBlob* VS = nullptr;
+	HRESULT result;
 	ID3DBlob* errorBlob = nullptr;
 
-	HRESULT result = D3DCompileFromFile(
-		L"vs.hlsl",
-		nullptr,
-		nullptr,
-		"main",
-		"vs_5_0",
-		D3DCOMPILE_DEBUG,
-		0,
-		&VS,
-		&errorBlob
-	);
-
-	if (FAILED(result))
+	/*** RAY SHADER ***/
 	{
-		if (errorBlob)
-		{
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
-		}
-		if (VS)
-			VS->Release();
-		return result;
-	}
-	
-	device->CreateVertexShader(
-		VS->GetBufferPointer(),
-		VS->GetBufferSize(),
-		nullptr,
-		&vertexShader
-	);
+		SAFE_RELEASE(vertexShader);
+		SAFE_RELEASE(pixelShader);
 
-	D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
-		{
-			"POSITION",
+		ID3DBlob* VS = nullptr;
+
+		result = D3DCompileFromFile(
+			L"vs.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"vs_5_0",
+			D3DCOMPILE_DEBUG,
 			0,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			0,
-			0,
-			D3D11_INPUT_PER_VERTEX_DATA,
-			0
-		}
-	};
-	
-	device->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), VS->GetBufferPointer(), VS->GetBufferSize(), &quadVertexLayout);
+			&VS,
+			&errorBlob
+		);
 
-	VS->Release();
-
-	//create pixel shader
-	ID3DBlob* PS = nullptr;
-	if (errorBlob) errorBlob->Release();
-	errorBlob = nullptr;
-
-	result = D3DCompileFromFile(
-		L"ps.hlsl",
-		nullptr,
-		nullptr,
-		"main",
-		"ps_5_0",
-		D3DCOMPILE_DEBUG,
-		0,
-		&PS,
-		&errorBlob
-	);
-
-	if (FAILED(result))
-	{
-		if (errorBlob)
+		if (FAILED(result))
 		{
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (VS)
+				VS->Release();
+			return result;
 		}
-		if (PS)
-			PS->Release();
-		return result;
-	}
 
-	device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &pixelShader);
-	PS->Release();
+		device->CreateVertexShader(
+			VS->GetBufferPointer(),
+			VS->GetBufferSize(),
+			nullptr,
+			&vertexShader
+		);
 
+		D3D11_INPUT_ELEMENT_DESC inputDesc[] = {
+			{
+				"POSITION",
+				0,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				0,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			}
+		};
 
+		device->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), VS->GetBufferPointer(), VS->GetBufferSize(), &quadVertexLayout);
 
+		VS->Release();
 
-	/*** RASTERIZATION PASS SHADERS ***/
+		//create pixel shader
+		ID3DBlob* PS = nullptr;
+		if (errorBlob) errorBlob->Release();
+		errorBlob = nullptr;
 
-	SAFE_RELEASE(boxRasterVertexShader);
-	SAFE_RELEASE(boxRasterPixelShader);
+		result = D3DCompileFromFile(
+			L"ps.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"ps_5_0",
+			D3DCOMPILE_DEBUG,
+			0,
+			&PS,
+			&errorBlob
+		);
 
-	ID3DBlob* rVS = nullptr;
-
-	result = D3DCompileFromFile(
-		L"box_raster_vs.hlsl",
-		nullptr,
-		nullptr,
-		"main",
-		"vs_5_0",
-		D3DCOMPILE_DEBUG,
-		0,
-		&rVS,
-		&errorBlob
-	);
-	 
-	if (FAILED(result))
-	{
-		if (errorBlob)
+		if (FAILED(result))
 		{
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (PS)
+				PS->Release();
+			return result;
 		}
-		if (rVS)
-			rVS->Release();
-		return result;
+
+		device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &pixelShader);
+		PS->Release();
 	}
 
-	device->CreateVertexShader(
-		rVS->GetBufferPointer(),
-		rVS->GetBufferSize(),
-		nullptr,
-		&boxRasterVertexShader
-	);
 
-	D3D11_INPUT_ELEMENT_DESC rasterInputDesc[] = {
-		{
-			"POSITION",
-			0,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			0,
-			0,
-			D3D11_INPUT_PER_VERTEX_DATA,
-			0
-		},
-		{
-			"NORMAL",
-			0,
-			DXGI_FORMAT_R32G32B32_FLOAT,
-			0,
-			12,
-			D3D11_INPUT_PER_VERTEX_DATA,
-			0
-		}
-	};
 
-	device->CreateInputLayout(rasterInputDesc, ARRAYSIZE(rasterInputDesc), rVS->GetBufferPointer(), rVS->GetBufferSize(), &vertexLayout);
-
-	rVS->Release();
-
-	//create pixel shader
-	ID3DBlob* rPS = nullptr;
-	if (errorBlob) errorBlob->Release();
-	errorBlob = nullptr;
-
-	result = D3DCompileFromFile(
-		L"box_raster_ps.hlsl",
-		nullptr,
-		nullptr,
-		"main",
-		"ps_5_0",
-		D3DCOMPILE_DEBUG,
-		0,
-		&rPS,
-		&errorBlob
-	);
-
-	if (FAILED(result))
+	/*** BOX RASTERIZATION SHADERS ***/
 	{
-		if (errorBlob)
+		SAFE_RELEASE(boxRasterVertexShader);
+		SAFE_RELEASE(boxRasterPixelShader);
+
+		ID3DBlob* rVS = nullptr;
+
+		result = D3DCompileFromFile(
+			L"box_raster_vs.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"vs_5_0",
+			D3DCOMPILE_DEBUG,
+			0,
+			&rVS,
+			&errorBlob
+		);
+
+		if (FAILED(result))
 		{
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (rVS)
+				rVS->Release();
+			return result;
 		}
-		if (rPS)
-			rPS->Release();
-		return result;
+
+		device->CreateVertexShader(
+			rVS->GetBufferPointer(),
+			rVS->GetBufferSize(),
+			nullptr,
+			&boxRasterVertexShader
+		);
+
+		D3D11_INPUT_ELEMENT_DESC rasterInputDesc[] = {
+			{
+				"POSITION",
+				0,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				0,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			},
+			{
+				"NORMAL",
+				0,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				12,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			}
+		};
+
+		device->CreateInputLayout(rasterInputDesc, ARRAYSIZE(rasterInputDesc), rVS->GetBufferPointer(), rVS->GetBufferSize(), &boxVertexLayout);
+
+		rVS->Release();
+
+		//create pixel shader
+		ID3DBlob* rPS = nullptr;
+		if (errorBlob) errorBlob->Release();
+		errorBlob = nullptr;
+
+		result = D3DCompileFromFile(
+			L"box_raster_ps.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"ps_5_0",
+			D3DCOMPILE_DEBUG,
+			0,
+			&rPS,
+			&errorBlob
+		);
+
+		if (FAILED(result))
+		{
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (rPS)
+				rPS->Release();
+			return result;
+		}
+
+		device->CreatePixelShader(rPS->GetBufferPointer(), rPS->GetBufferSize(), nullptr, &boxRasterPixelShader);
+		rPS->Release();
 	}
 
-	device->CreatePixelShader(rPS->GetBufferPointer(), rPS->GetBufferSize(), nullptr, &boxRasterPixelShader);
-	rPS->Release();
+	/*** LASERS ***/
+	{
+		SAFE_RELEASE(laserRasterVertexShader);
+		SAFE_RELEASE(laserRasterPixelShader);
+
+		ID3DBlob* VS = nullptr;
+
+		result = D3DCompileFromFile(
+			L"laser_raster_vs.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"vs_5_0",
+			D3DCOMPILE_DEBUG,
+			0,
+			&VS,
+			&errorBlob
+		);
+
+		if (FAILED(result))
+		{
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (VS)
+				VS->Release();
+			return result;
+		}
+
+		device->CreateVertexShader(
+			VS->GetBufferPointer(),
+			VS->GetBufferSize(),
+			nullptr,
+			&laserRasterVertexShader
+		);
+
+		D3D11_INPUT_ELEMENT_DESC rasterInputDesc[] = {
+			{
+				"POSITION",
+				0,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				0,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			}
+		};
+
+		device->CreateInputLayout(rasterInputDesc, ARRAYSIZE(rasterInputDesc), VS->GetBufferPointer(), VS->GetBufferSize(), &laserVertexLayout);
+
+		VS->Release();
+
+		//create pixel shader
+		ID3DBlob* PS = nullptr;
+		if (errorBlob) errorBlob->Release();
+		errorBlob = nullptr;
+
+		result = D3DCompileFromFile(
+			L"laser_raster_ps.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"ps_5_0",
+			D3DCOMPILE_DEBUG,
+			0,
+			&PS,
+			&errorBlob
+		);
+
+		if (FAILED(result))
+		{
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (PS)
+				PS->Release();
+			return result;
+		}
+
+		device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &laserRasterPixelShader);
+		PS->Release();
+	}
 
 	return S_OK;
 }
@@ -713,6 +826,36 @@ void Graphics::setBoxes(const vector<Box>& boxes)
 	boxInstances = boxes.size();
 }
 
+void Graphics::setLasers(const vector<Line>& lines)
+{
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+
+	struct Transforms {
+		glm::mat4 WVP[maxLasers];
+		glm::vec4 color[maxLasers];
+	} transforms;
+	memset(&transforms, 0, sizeof(glm::mat4) * maxLasers + sizeof(glm::vec4) * maxLasers);
+
+	for (int i = 0; i < lines.size(); ++i)
+	{
+		glm::vec3 lengths = lines[i].start - lines[i].end;
+		glm::mat4 t = glm::mat4(1.0);
+		t = glm::translate(t, (lines[i].start + lengths) / 2.f);
+		t = glm::rotate(t, atan2f(lengths.y, lengths.x), glm::vec3(0.0, 0.0, 1.0));
+		t = glm::scale(t, glm::vec3(lengths.x, 10.0, 0.01));
+
+		transforms.WVP[i] = transpose(t) * viewProj;
+		transforms.color[i] = glm::vec4(lines[i].color, 0.0);
+	}
+
+	deviceContext->Map(laserTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, &transforms, sizeof(Transforms));
+	deviceContext->Unmap(laserTransformBuffer, 0);
+
+	laserInstances = lines.size();
+}
+
 void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
@@ -729,21 +872,6 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 	deviceContext->Unmap(metaballBuffer, 0);
 }
 
-void Graphics::setLines(const vector<Line>& lines)
-{
-	D3D11_MAPPED_SUBRESOURCE mr;
-	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	struct LineStruct {
-		Line lines[maxLines];
-		int nLines;
-	} lineStruct;
-	ZeroMemory(lineStruct.lines, sizeof(Line) * maxLines);
-	memcpy(lineStruct.lines, lines.data(), sizeof(Line) * glm::min(maxLines, (int)lines.size()));
-	lineStruct.nLines = glm::min(maxLines, (int)lines.size());
-	deviceContext->Map(lineBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, &lineStruct, sizeof(Line) * maxLines + sizeof(int));
-	deviceContext->Unmap(lineBuffer, 0);
-}
 
 void Graphics::setCameraPos(glm::vec3 pos)
 {
@@ -758,6 +886,7 @@ void Graphics::swapBuffer()
 	deviceContext->ClearRenderTargetView(geometryBufferView, clearColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
 
+	// draw boxes
 	deviceContext->VSSetShader(boxRasterVertexShader, nullptr, 0);
 	deviceContext->PSSetShader(boxRasterPixelShader, nullptr, 0);
 
@@ -765,12 +894,21 @@ void Graphics::swapBuffer()
 
 	UINT32 vertexSize = sizeof(glm::vec3) * 2;
 	UINT32 offset = 0;
-
+	
 	deviceContext->OMSetRenderTargets(1, &geometryBufferView, depthStencilView);
 	deviceContext->IASetVertexBuffers(0, 1, &boxVertexBuffer, &vertexSize, &offset);
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	deviceContext->IASetInputLayout(vertexLayout);
+	deviceContext->IASetInputLayout(boxVertexLayout);
 	deviceContext->DrawInstanced(36, boxInstances, 0, 0);
+
+	// draw lasers
+	deviceContext->VSSetShader(laserRasterVertexShader, nullptr, 0);
+	deviceContext->PSSetShader(laserRasterPixelShader, nullptr, 0);
+	
+	deviceContext->OMSetBlendState(blendState, 0, UINT_MAX);
+	deviceContext->VSSetConstantBuffers(0, 1, &laserTransformBuffer);
+	deviceContext->IASetInputLayout(laserVertexLayout);
+	deviceContext->DrawInstanced(36, laserInstances, 0, 0);
 
 	// update view projection matrix buffer
 	D3D11_MAPPED_SUBRESOURCE mr;
@@ -802,10 +940,11 @@ void Graphics::swapBuffer()
 	memcpy(mr.pData, corners, sizeof(glm::vec4) * 4);
 	deviceContext->Unmap(cornerBuffer, 0);
 
+	// lighting / metaball pass
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
 	deviceContext->PSSetShader(pixelShader, nullptr, 0);
 
-	deviceContext->PSSetConstantBuffers(0, 1, &lineBuffer);
+	deviceContext->PSSetConstantBuffers(0, 1, &laserTransformBuffer);
 	deviceContext->PSSetConstantBuffers(1, 1, &metaballBuffer);
 	deviceContext->PSSetConstantBuffers(2, 1, &cameraBuffer);
 	deviceContext->PSSetConstantBuffers(3, 1, &cornerBuffer);
@@ -853,7 +992,7 @@ Graphics::~Graphics()
 	
 	SAFE_RELEASE(quadVertexLayout);
 	SAFE_RELEASE(quadBuffer);
-	SAFE_RELEASE(vertexLayout);
+	SAFE_RELEASE(boxVertexLayout);
 	SAFE_RELEASE(boxVertexBuffer);
 	SAFE_RELEASE(boxTransformBuffer);
 	SAFE_RELEASE(metaballBuffer);

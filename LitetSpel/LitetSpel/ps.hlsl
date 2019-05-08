@@ -10,18 +10,6 @@ struct VS_OUT
 	float4 pos : SV_POSITION;
 };
 
-struct Line {
-	float4 start;
-	float4 end;
-	float4 color;
-};
-
-#define MAX_LINES 10
-cbuffer LineBuffer : register(b0) {
-	Line lines[MAX_LINES];
-	int nLines;
-};
-
 struct Sphere {
 	float4 centerRadius;
 	float4 color;
@@ -59,14 +47,6 @@ float mb(float3 p, float4 mb)
 	return ((mb.w * mb.w) / dot(d, d));
 }
 
-float sdLine(float3 p, Line l) {
-	float lineDist = 100;
-	float3 u = normalize(l.end.xyz - l.start);
-	if (max(length(l.start.xyz - p), length(l.end.xyz - p)) < length(l.start.xyz - l.end.xyz))
-		lineDist = length(cross(l.start.xyz - p, u)) - l.start.w;
-	return lineDist;
-}
-
 float testScene(float3 p)
 {
 	float mbDist = 0;
@@ -75,13 +55,7 @@ float testScene(float3 p)
 		mbDist += mb(p, spheres[i].centerRadius);
 	}
 
-	float lineDist = 10000;
-	for (int i = 0; i < nLines; ++i)
-	{
-		lineDist = min(lineDist, sdLine(p, lines[i]));
-	}
-
-	return min((2.5) - mbDist, lineDist);
+	return (2.5) - mbDist;
 }
 
 float castRay(float3 ro, float3 rd, out float minDist)
@@ -132,17 +106,6 @@ float4 calcColor(float3 p)
 			minDist = dist;
 		}
 	}
-
-	for (int i = 0; i < nLines; ++i)
-	{
-		float dist = sdLine(p, lines[i]);
-
-		if (dist < minDist) {
-			color = lines[i].color;
-			minDist = dist;
-		}
-	}
-
 	return color;
 }
 
@@ -164,16 +127,16 @@ float4 main(VS_OUT input) : SV_Target
 
 	float minDist;
 	float dist = castRay(ro, rd, minDist);
-	float3 color = float3(0.0, 0.0, 0.0);
+	float4 color = float4(0.0, 0.0, 0.0, 0.0);
 	float3 parallax = (ro * 0.001);
 
 	if (minDist > 0.1) {
 		color = geometryTexture.Sample(samp, uv);
 
-		if (length(color) <= 0.01) {
+		if (color.a < 1.0) {
 			float4 radiance = radianceMap.Sample(samp, parallax + rd);
-			color = radiance * radiance;
-			color += 0.5;
+			//color.rgb = color.a * color.rgb + float3(1.0,1.0,1.0)*(1.0 - color.a);
+			color.rgb += color.a * color.rgb + ((1.0 - color.a) * (radiance.rgb * radiance.rgb + 0.5));
 		}
 	}
 	else {
@@ -228,10 +191,10 @@ float4 main(VS_OUT input) : SV_Target
 			}
 
 			/* final color */
-			color = (1.0 - specularity) * (diffuseColor + refractColor) + specularity * specularColor;
+			color.rgb = (1.0 - specularity) * (diffuseColor + refractColor) + specularity * specularColor;
 		}
 	}
 	
-	color = color / (color + float3(1.0, 1.0, 1.0));
-	return float4(pow(color, 1.0 / 2.2), 1.0);
+	color.rgb = color.rgb / (color.rgb + float3(1.0, 1.0, 1.0));
+	return float4(pow(color.rgb, 1.0 / 2.2), 1.0);
 }

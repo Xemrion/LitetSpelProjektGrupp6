@@ -24,7 +24,7 @@ public:
 
 class Line {
 public:
-	glm::vec4 start;
-	glm::vec4 end;
-	glm::vec4 color;
+	glm::vec3 start;
+	glm::vec3 end;
+	glm::vec3 color;
 };
