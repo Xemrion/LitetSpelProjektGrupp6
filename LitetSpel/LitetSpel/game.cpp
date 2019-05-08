@@ -29,6 +29,7 @@ void Game::init() noexcept {
     level.goal = std::make_unique<LevelGoal>( level.colManager, editor.goalPos, 12.0f );
 // player & blobs:
     auto &player = level.player;
+	player.pos = editor.startPos;
 	for ( int i = 0;  i < player.blobCharges;  ++i ) {
         Blob b { player.pos };
 		player.blobs.push_back( Blob(player.pos) );
