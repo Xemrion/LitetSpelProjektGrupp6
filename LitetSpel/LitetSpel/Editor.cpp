@@ -1,16 +1,16 @@
-#include"ReadGeometry.h"
+#include"Editor.h"
 #include "stb_image.h"
 #include <chrono>
-ReadGeometry::ReadGeometry()
+Editor::Editor()
 {
 }
 
-ReadGeometry::~ReadGeometry()
+Editor::~Editor()
 {
 
 }
 
-void ReadGeometry::initialize(const char* filename)
+void Editor::initialize(const char* filename)
 {
 
 	int bpp = 0;
@@ -157,7 +157,7 @@ void ReadGeometry::initialize(const char* filename)
 
 }
 
-glm::vec3 ReadGeometry::getPixelColour(int index)
+glm::vec3 Editor::getPixelColour(int index)
 {
 	//Convert to RGB
 	index *= 3;
@@ -168,7 +168,7 @@ glm::vec3 ReadGeometry::getPixelColour(int index)
 	return glm::vec3(rgb[index], rgb[index + 1], rgb[index + 2]);
 }
 
-int ReadGeometry::isPixelUsed(int index)
+int Editor::isPixelUsed(int index)
 {
 	int posY = (height / 2) - glm::floor(index / width);
 	int posX = index % width - (width / 2);
@@ -184,11 +184,11 @@ int ReadGeometry::isPixelUsed(int index)
 	return -1;
 }
 
-int ReadGeometry::getBoxWidth(int index)
+int Editor::getBoxWidth(int index)
 {
 	return boxWidth.at(index);
 }
-void ReadGeometry::addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY, int width)
+void Editor::addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY, int width)
 {
 	LeftSide.push_back(startPosX);
 	rightSide.push_back(endPosX);
@@ -196,17 +196,17 @@ void ReadGeometry::addBoxToUsed(int startPosX, int startPosY, int endPosX, int e
 	bottomSide.push_back(endPosY);
 	this->boxWidth.push_back(width);
 }
-bool ReadGeometry::isWhite(glm::vec3 pixelColour)
+bool Editor::isWhite(glm::vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 255 && pixelColour.z == 255;
 }
 
-bool ReadGeometry::isBlue(glm::vec3 pixelColour)
+bool Editor::isBlue(glm::vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 0 && pixelColour.z == 255;
 }
 
-bool ReadGeometry::isRed(glm::vec3 pixelColour)
+bool Editor::isRed(glm::vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 0;
 }

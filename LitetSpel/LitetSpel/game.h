@@ -13,7 +13,7 @@
 #include "Globals.h"
 #include "PowerUp.h"
 #include "Graphics.h"
-#include "ReadGeometry.h"
+#include "Editor.h"
 // TODO: improve encapsulation by reducing public exposure
 
 using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
@@ -121,7 +121,7 @@ public:
 	};
 	bool keys[Keys::length];
 	LevelData level;
-	ReadGeometry readGeometry;
+	Editor editor;
 	glm::vec3 mousePos;
 	bool leftButtonDown = false;
 

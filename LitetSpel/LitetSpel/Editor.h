@@ -1,5 +1,5 @@
-#ifndef READGEOMETRY_H
-#define READGEOMETRY_H
+#ifndef EDITOR_H
+#define EDITOR_H
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include "stb_image.h"
@@ -11,7 +11,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include"Geometry.h"
 #include"Platform.h"
-class ReadGeometry
+class Editor
 {
 
 private:
@@ -35,8 +35,8 @@ private:
 	int goalWidth = 60;
 	int enemyWidth = 60;
 public:
-	ReadGeometry();
-	~ReadGeometry();
+	Editor();
+	~Editor();
 	std::vector<Platform> platforms;
 	glm::vec3 goalPos;
 	std::vector<glm::vec3> enemyPos;

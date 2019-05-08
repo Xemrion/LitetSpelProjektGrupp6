@@ -19,14 +19,14 @@ void Game::init() noexcept {
 	testplat2.hitbox.color       = vec4(0.0, 0.5, 0.5, 0.0);
 	level.boxes.push_back(testplat2.hitbox);
 	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);*/
-	readGeometry.initialize("test.png");
-	for (int i = 0; i < readGeometry.platforms.size(); i++)
+	editor.initialize("test.png");
+	for (int i = 0; i < editor.platforms.size(); i++)
 	{
-		readGeometry.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
-		level.boxes.push_back(readGeometry.platforms.at(i).hitbox);
-		level.colManager.registerEntry(readGeometry.platforms.at(i), ColliderType::platform, readGeometry.platforms.at(i).hitbox, true);
+		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
+		level.boxes.push_back(editor.platforms.at(i).hitbox);
+		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
-    level.goal = std::make_unique<LevelGoal>( level.colManager, readGeometry.goalPos, 12.0f );
+    level.goal = std::make_unique<LevelGoal>( level.colManager, editor.goalPos, 12.0f );
 // player & blobs:
     auto &player = level.player;
 	for ( int i = 0;  i < player.blobCharges;  ++i ) {
@@ -540,10 +540,10 @@ void Game::updateGraphics() {
 		//level.boxes.push_back(testPlat.hitbox);
 		//level.boxes.push_back(testplat2.hitbox);
 		//level.boxes.push_back(level.TestPowerUp.powerBox);
-		for (int i = 0; i < readGeometry.platforms.size(); i++)
+		for (int i = 0; i < editor.platforms.size(); i++)
 		{
-			readGeometry.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
-			level.boxes.push_back(readGeometry.platforms.at(i).hitbox);
+			editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
+			level.boxes.push_back(editor.platforms.at(i).hitbox);
 		}
 		EnemyBox.color = vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
 
