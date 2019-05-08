@@ -17,7 +17,6 @@ Sounds::Sounds() {
 	this->enmy01 = nullptr;
 	this->enmy02 = nullptr;
 	this->enmy03 = nullptr;
-	this->enemies = nullptr;
 }
 Sounds::Sounds(const Sounds &sound) {
 
@@ -988,9 +987,9 @@ bool Sounds::ContinueSFX(IDirectSoundBuffer8* sound) {
 
 bool Sounds::InitializeEnemySounds(int nrOfEnemies) {
 	bool results;
-	if (this->enemies == nullptr) {
+	if (this->enemies.size() > 0) {
 		this->nrOfEnemies = nrOfEnemies;
-		this->enemies = new IDirectSoundBuffer8*[this->nrOfEnemies];
+		this->enemies.resize(this->nrOfEnemies);
 		std::string fileName = "nmyjmp.wav";
 		char file[11] = { fileName[0], fileName[1], fileName[2], fileName[3], fileName[4], fileName[5], fileName[6], fileName[7], fileName[8], fileName[9], fileName[10] };
 		for (int i = 0; i < this->nrOfEnemies; i++) {
@@ -1028,8 +1027,10 @@ bool Sounds::PlayEnemyJumpSound(int enemy, float distance) {
 }
 void Sounds::ShutdownEnemySounds() {
 	for (int i = 0; i < this->nrOfEnemies; i++) {
-		ShutdownWaveFile(&enemies[i]);
+		if (enemies[i]) {
+			(enemies[i])->Release();
+			enemies[i] = nullptr;
+		}
 	}
-	delete[]enemies;
-	this->nrOfEnemies;
+	this->nrOfEnemies = 0;
 }

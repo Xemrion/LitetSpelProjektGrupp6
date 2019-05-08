@@ -20,6 +20,9 @@ Blob::Blob( glm::vec3 const &parentPosition ):
 
 void Blob::absorb() noexcept
 {
+	if (isActive != false && isBeingRecalled != false) {
+		gameSounds->PlayAbsorbSound01();
+	}
     isBeingRecalled = false;
     isActive        = false;
 }

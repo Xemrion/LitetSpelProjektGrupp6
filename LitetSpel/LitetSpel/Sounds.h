@@ -138,7 +138,7 @@ private:
 	IDirectSoundBuffer8* blob02; //Landing
 	IDirectSoundBuffer8* blob03; //Recall
 
-	IDirectSoundBuffer8* enmy01;
+	IDirectSoundBuffer8* enmy01; //Death
 	IDirectSoundBuffer8* enmy02;
 	IDirectSoundBuffer8* enmy03;
 
@@ -156,7 +156,7 @@ private:
 	IDirectSoundBuffer8* menuClickButton;
 	IDirectSoundBuffer8* menuBack;
 
-	IDirectSoundBuffer8** enemies;
+	std::vector<IDirectSoundBuffer8*> enemies;
 	int nrOfEnemies;
 
 };

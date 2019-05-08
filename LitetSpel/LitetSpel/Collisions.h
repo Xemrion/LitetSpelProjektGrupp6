@@ -3,6 +3,7 @@
 #include <vector>
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "geometry.h"
+#include "Sounds.h"
 
 enum ColliderType { player_top,
 				    player_bottom,
@@ -31,6 +32,7 @@ public:
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) = 0;
     size_t getID() const noexcept { return id; }
     bool operator!=(CollisionObject const &other) const noexcept;
+	Sounds* gameSounds;
 
 private:
     size_t id;

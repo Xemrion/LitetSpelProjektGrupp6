@@ -27,32 +27,34 @@ static const glm::vec4 olive	= glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 /*
 |----- Current Sound FileNames ----|
 test01.wav
-menu01.wav
-game01.wav
-jump01.wav
-jump02.wav
-jump03.wav
-land01.wav
-land02.wav
-land03.wav
-blob01.wav
-blob02.wav
-blob03.wav
-enmy01.wav
-enmy02.wav
-enmy03.wav
-sorb01.wav
-sorb02.wav
-sorb03.wav
-pdeath.wav
-pdmg01.wav
-pdmg02.wav
-pstart.wav
-p-goal.wav
-mhlbtn.wav
-mclkbt.wav
-m-back.wav
+menu01.wav O
+game01.wav O
+jump01.wav O
+jump02.wav O
+jump03.wav O
+land01.wav X
+land02.wav X
+land03.wav X
+blob01.wav O
+blob02.wav X
+blob03.wav O
+enmy01.wav O
+enmy02.wav X
+enmy03.wav X
+sorb01.wav O
+sorb02.wav O
+sorb03.wav O
+pdeath.wav X
+pdmg01.wav O
+pdmg02.wav O
+pstart.wav X
+p-goal.wav O
+mhlbtn.wav X
+mclkbt.wav X
+m-back.wav X
 |----------------------------------|
+O = implemented
+X = not
 */
 //Player sound. Wet/slimy
 //Enemy sound, robotic/metalic

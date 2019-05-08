@@ -8,8 +8,7 @@
 #include <utility>
 #include "Geometry.h"
 #include "Collisions.h"
-#include "Sounds.h"
-#include  "Platform.h"
+#include "Platform.h"
 #include "Blob.h"
 #include "Globals.h"
 #include "PowerUp.h"
@@ -48,6 +47,7 @@ public:
     vector<Blob> blobs;
     int blobCharges;
     float shootCooldown;
+	
 };
 
 class Enemy : public CollisionObject 
@@ -61,9 +61,11 @@ public:
 	void setVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
 	void putForce(vec3 const &force) noexcept;
 	void move(float dt) noexcept;
+	float getDistanceToPlayer() noexcept;
 
-    vec3 pos, velocity, controlDir;
+    vec3 pos, velocity, controlDir, playerPos;
     float moveSpeed, jumpForce, jumpCooldown, mass;
+	int enemyIndex;
     bool isStanding, alive, isDeregistered, isStuck;
     Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
 };

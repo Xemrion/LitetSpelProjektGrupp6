@@ -22,6 +22,7 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);
 
 // player & blobs:
+	level.player.gameSounds = gameSounds;
     auto &player = level.player;
 	for ( int i = 0;  i < player.blobCharges;  ++i ) {
         Blob b { player.pos };
@@ -29,6 +30,7 @@ void Game::init() noexcept {
 		level.spheres.push_back( player.blobs[i].blobSphere );
 	}
     for ( auto &b : player.blobs ) {
+		b.gameSounds = gameSounds;
         level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
     }
 	updatePlayerCollision();
@@ -38,12 +40,14 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(player, ColliderType::player_right,  player.HitboxRight,  false);
 
 // enemies:
+	level.enemy.gameSounds = gameSounds;
     auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 	level.colManager.registerEntry(enemy, ColliderType::enemy_bottom, enemy.HitboxBottom, false);
 	level.colManager.registerEntry(enemy, ColliderType::enemy_top,    enemy.HitboxTop,    false);
 	level.colManager.registerEntry(enemy, ColliderType::enemy_left,   enemy.HitboxLeft,   false);
 	level.colManager.registerEntry(enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false);
-
+	
+	gameSounds->InitializeEnemySounds(1);
 	EnemyBox.color = vec4(1,0,0,0);
 
 // LevelGoal
@@ -134,14 +138,15 @@ void Player::update(double dt) noexcept {
 	}
     
 	for ( auto &blob : blobs ) 
-        blob.update(dt);
+		blob.update(dt);
 }
 
 void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
 {
 	if (ownHitbox == ColliderType::player_bottom) {
 		if (otherHitbox == ColliderType::platform) {
-			isStanding   = true;
+			
+			isStanding = true;
 			hasExtraJump = true;
 			pos.y        = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
 			velocity.y   = 0;
@@ -218,6 +223,12 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		else if (otherHitbox == enemy_right) 
 		{
 			putForce(vec3(2,3,0));
+			if (blobCharges > 2) {
+				gameSounds->PlayDamagedSound01();
+			}
+			else {
+				gameSounds->PlayDamagedSound02();
+			}
 			knockBack = true;
 			//pos.x = other.center.x + other.halfLengths.x + (pos.x - HitboxLeft.center.x + HitboxLeft.halfLengths.x);
 		}
@@ -238,6 +249,12 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		else if(otherHitbox == ColliderType::enemy_left)
 		{
 			putForce(vec3(-2, 3, 0));
+			if (blobCharges > 2) {
+				gameSounds->PlayDamagedSound01();
+			}
+			else {
+				gameSounds->PlayDamagedSound02();
+			}
 			knockBack = true;
 			//pos.x = other.center.x - other.halfLengths.x + (pos.x - HitboxRight.center.x - HitboxRight.halfLengths.x);
 		}
@@ -248,6 +265,9 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		{
 			blobs[i].status = BlobStatus::Blob_Bouncy;
 		}
+		if (status != PlayerStatus::Bouncy) {
+			gameSounds->PlayAbsorbSound03();
+		}
 		status = PlayerStatus::Bouncy;
 	}
 	if (otherHitbox == ColliderType::powerup_heavy)
@@ -255,6 +275,9 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		for (int i = 0; i < blobCharges; i++)
 		{
 			blobs[i].status = BlobStatus::Blob_Heavy;
+		}
+		if (status != PlayerStatus::Heavy) {
+			gameSounds->PlayAbsorbSound03();
 		}
 		status = PlayerStatus::Heavy;
 	}
@@ -264,10 +287,16 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		{
 			blobs[i].status = BlobStatus::Blob_Sticky;
 		}
+		if (status != PlayerStatus::Sticky) {
+			gameSounds->PlayAbsorbSound03();
+		}
 		status = PlayerStatus::Sticky;
 	}
 	if (otherHitbox == ColliderType::level_goal) 
 	{
+		if (levelCompleted != true) {
+			gameSounds->PlayEndOfLevelSound();
+		}
 		levelCompleted = true;
 	}
 }
@@ -280,6 +309,7 @@ void Player::shoot(vec3 mousePos) noexcept
     for ( auto &blob : blobs ) {
         if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
             blob.shoot( dir );
+			gameSounds->PlayBlobSound01();
             shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
             break;
         }
@@ -290,7 +320,7 @@ void Player::recallBlobs() noexcept
 {
     for ( auto &blob : blobs ) 
         blob.recall();
-    shootCooldown   = .5f; // TODO: refactor into a constexpr constant in Globals.h 
+	shootCooldown   = .5f; // TODO: refactor into a constexpr constant in Globals.h 
 }
 
 void Game::update(double dt)  {
@@ -304,6 +334,8 @@ void Game::update(double dt)  {
 		level.player.update(dt);
 		if (level.enemy.alive)
 		{
+			level.enemy.enemyIndex = 1;
+			level.enemy.playerPos = level.player.pos;
 			level.enemy.update(dt);
 		}
 		else if (!level.enemy.alive && level.enemy.isDeregistered)
@@ -643,7 +675,10 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 	}
 	else if (otherHitbox == ColliderType::player_bottom && ownHitbox == enemy_top) 
 	{
-		alive = false;
+		if (alive != false) {
+			gameSounds->PlayEnemySound01();
+			alive = false;
+		}
 	}
 	else if (otherHitbox == ColliderType::blob) 
 	{
@@ -668,6 +703,7 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 		}
 		if (other.color.w == 0.5) 
 		{
+			gameSounds->PlayEnemySound03();
 			isStuck = true;
 		}
 	}
@@ -684,6 +720,7 @@ void Enemy::update(double dt) noexcept
 		if (jumpCooldown <= 0.0) {
 			controlDir.x = -controlDir.x;
 			jumpCooldown = 1.0;
+			gameSounds->PlayEnemyJumpSound(enemyIndex, getDistanceToPlayer());
 			putForce(vec3(0.0, jumpForce, 0.0));
 		}
 	}
@@ -727,6 +764,24 @@ void Enemy::putForce(vec3 const &force) noexcept
 void Enemy::move(float dt) noexcept
 {
 	pos += velocity * dt;
+}
+
+float Enemy::getDistanceToPlayer() noexcept {
+	vec2 values(pos.x - playerPos.x, pos.y - playerPos.y);
+	float sum = 0;
+	if (values.x < 0) {
+		sum += -1 * values.x;
+	}
+	else {
+		sum += values.x;
+	}
+	if (values.y < 0) {
+		sum += -1 * values.x;
+	}
+	else {
+		sum += values.x;
+	}
+	return sum;
 }
 
 //Adds two orbiting spheres around a sphere for animation

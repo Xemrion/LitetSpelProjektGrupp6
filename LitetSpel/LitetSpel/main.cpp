@@ -264,6 +264,19 @@ void keyboardFunc()
 		if (keyboard.KeyIsPressed('P')) {
 			graphics.createShaders();
 		}
+		if (keyboard.KeyIsPressed(VK_UP)) {
+			if (game.state == GameState::LevelState) {
+				gameSounds.StopGameMusic();
+			}
+			else {
+				gameSounds.StopMenuMusic();
+			}
+		}
+		if (keyboard.KeyIsPressed(VK_DOWN)) {
+			if (game.state == GameState::LevelState) {
+				gameSounds.ContinueGameMusic();
+			}
+		}
 	}
 }
 
@@ -273,11 +286,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
-	game.init();
 	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game.gameSounds = &gameSounds;
+	game.init();
+	gameSounds.setLimits((1280 + 720) / 8, (1280 + 720) / 2);
 	ShowWindow(wndHandle, nCmdShow);
 	gameSounds.StartMenuMusic();
+	
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
 	{
@@ -316,12 +331,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				}
 				keyboardFunc();
 				mouseFunc();
-				if (keyboard.KeyIsPressed(VK_UP)) {
-					gameSounds.StopGameMusic();
-				}
-				if (keyboard.KeyIsPressed(VK_DOWN)) {
-					gameSounds.ContinueGameMusic();
-				}
 			}
 			else 
 			{
