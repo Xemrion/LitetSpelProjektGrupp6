@@ -32,11 +32,11 @@ game01.wav O
 jump01.wav O
 jump02.wav O
 jump03.wav O
-land01.wav X
-land02.wav X
-land03.wav X
+land01.wav O
+land02.wav O
+land03.wav O
 blob01.wav O
-blob02.wav X
+blob02.wav O
 blob03.wav O
 enmy01.wav O
 enmy02.wav X
@@ -49,9 +49,9 @@ pdmg01.wav O
 pdmg02.wav O
 pstart.wav X
 p-goal.wav O
-mhlbtn.wav X
-mclkbt.wav X
-m-back.wav X
+mhlbtn.wav O
+mclkbt.wav O
+m-back.wav O
 |----------------------------------|
 O = implemented
 X = not

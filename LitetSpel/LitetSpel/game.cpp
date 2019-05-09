@@ -127,7 +127,8 @@ void Player::move(double dt) noexcept {
 void Player::update(double dt) noexcept {
 	jumpCooldown  -= float(dt);
 	shootCooldown -= float(dt);
-
+	if (velocity.y != 0)
+		landing = false;
 	if (isStanding)
 		hasExtraJump = true;
 	
@@ -145,7 +146,18 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 {
 	if (ownHitbox == ColliderType::player_bottom) {
 		if (otherHitbox == ColliderType::platform) {
-			
+			if (landing != true) {
+				if (status == PlayerStatus::Bouncy) {
+					gameSounds->PlayLandingSound03();
+				}
+				else if (status == PlayerStatus::Heavy) {
+					gameSounds->PlayLandingSound02();
+				}
+				else {
+					gameSounds->PlayLandingSound01();
+				}
+				landing = true;
+			}
 			isStanding = true;
 			hasExtraJump = true;
 			pos.y        = other.center.y + other.halfLengths.y + (pos.y - HitboxBottom.center.y + HitboxBottom.halfLengths.y);
@@ -188,9 +200,9 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				velocity.x = 0;
 			}
 		}
-		//else {
-			//isStanding   = false;
-		//}
+		/*else {
+			isStanding   = false;
+		}*/
 	}
 	else if (ownHitbox == ColliderType::player_top) {
 		if (otherHitbox == ColliderType::platform) {

@@ -45,6 +45,7 @@ private:
     bool  isActive;
 	bool isStuck;
     bool  isBeingRecalled;
+	bool isLanding;
     float recallSpeed;
     float speed;
     float radius;

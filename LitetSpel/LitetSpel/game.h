@@ -40,7 +40,7 @@ public:
 
     vec3 pos, velocity;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
+    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted, landing;
     int status;
 	double radius;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;

@@ -16,6 +16,7 @@ Graphics graphics;
 double dt;
 
 bool playerMove;
+bool highlight;
 
 int xMus = 0;
 float powerCoolDown = 0.0;
@@ -144,13 +145,25 @@ void mouseFunc()
 		{
 			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
 				gameSounds.StopMenuMusic();
+				gameSounds.PlayMenuClickSound();
 				gameSounds.StartGameMusic();
 				game.state = GameState::LevelState;
 			}
 			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
 			{
+				gameSounds.PlayMenuBackSound();
 				gameEnd = true;
 			}
+		}
+		if ((mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
+			|| (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
+			if (highlight != true) {
+				gameSounds.PlayMenuHighlightSound();
+				highlight = true;
+			}
+		}
+		else {
+			highlight = false;
 		}
 
 	}
@@ -165,7 +178,7 @@ void keyboardFunc()
 		if (keyboard.KeyIsPressed('D'))
 		{
 			game.keys[1] = true;
-			if (playerMove != true) {
+			if (playerMove != true && game.level.player.isStuck != true) {
 				gameSounds.StartPlayerMoveLoop();
 				playerMove = true;
 			}
@@ -173,7 +186,7 @@ void keyboardFunc()
 		if (keyboard.KeyIsPressed('A'))
 		{
 			game.keys[0] = true;
-			if (playerMove != true) {
+			if (playerMove != true && game.level.player.isStuck != true) {
 				gameSounds.StartPlayerMoveLoop();
 				playerMove = true;
 			}
@@ -264,19 +277,15 @@ void keyboardFunc()
 		if (keyboard.KeyIsPressed('P')) {
 			graphics.createShaders();
 		}
-		if (keyboard.KeyIsPressed(VK_UP)) {
-			if (game.state == GameState::LevelState) {
-				gameSounds.StopGameMusic();
-			}
-			else {
-				gameSounds.StopMenuMusic();
-			}
-		}
 		if (keyboard.KeyIsPressed(VK_DOWN)) {
 			if (game.state == GameState::LevelState) {
 				gameSounds.ContinueGameMusic();
 			}
 		}
+	}
+	if (game.level.player.knockBack == true && playerMove != false) {
+		gameSounds.StopPlayerMoveLoop();
+		playerMove = false;
 	}
 }
 

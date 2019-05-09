@@ -91,6 +91,9 @@ void Blob::update(double dt) noexcept
 	{
 		deactivateHitbox();
 	}
+	if (velocity.y != 0) {
+		isLanding = false;
+	}
 	blobSphere.centerRadius = glm::vec4( pos, radius );
 }
 
@@ -131,22 +134,34 @@ void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &othe
     {
         absorb();
     }
-
 	if ( isActive and otherType == ColliderType::platform) {
 		if (status == BlobStatus::Blob_Bouncy) 
 		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 			this->velocity.y = -this->velocity.y;
 			this->velocity.x = 0;
 		}
 		else if (status == BlobStatus::Blob_Sticky) 
 		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 			this->velocity = glm::vec3(0.0);
 			isStuck = true;
 		}
 		else 
 		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 			this->velocity = glm::vec3(0.0);
 		}
+		
 		glm::vec3 pushUp    = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown  = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
