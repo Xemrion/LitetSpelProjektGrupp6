@@ -43,7 +43,7 @@ public:
     bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
     PlayerStatus status;
 	double radius;
-	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+	Box Hitbox;
     vector<Blob> blobs;
     int blobCharges;
     float shootCooldown;
