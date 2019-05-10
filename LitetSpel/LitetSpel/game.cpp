@@ -19,7 +19,7 @@ void Game::init() noexcept {
 	testplat2.hitbox.color       = vec4(0.0, 0.5, 0.5, 0.0);
 	level.boxes.push_back(testplat2.hitbox);
 	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);*/
-	editor.initialize("test.png");
+	editor.initialize("test2.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
