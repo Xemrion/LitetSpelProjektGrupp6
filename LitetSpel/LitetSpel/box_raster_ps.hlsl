@@ -1,3 +1,6 @@
+TextureCube irradianceMap : register(t4);
+SamplerState samp;
+
 struct VS_OUT
 {
 	float4 pos : SV_POSITION;
