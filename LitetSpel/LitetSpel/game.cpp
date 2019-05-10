@@ -19,7 +19,7 @@ void Game::init() noexcept {
 	testplat2.hitbox.color       = vec4(0.0, 0.5, 0.5, 0.0);
 	level.boxes.push_back(testplat2.hitbox);
 	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);*/
-	editor.initialize("test2.png");
+	editor.initialize("test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
@@ -558,6 +558,7 @@ void Game::updateGraphics() {
 			level.player.pos.y,
 			level.player.pos.z,
 			level.player.radius);
+		playerSphere.color = playerStatusColors[level.player.status];
 		level.spheres.push_back(playerSphere);
 
 		if (level.player.levelCompleted == false)
@@ -571,6 +572,7 @@ void Game::updateGraphics() {
 
 		for (int i = 0; i < level.player.blobs.size(); i++)
 		{
+			level.player.blobs[i].blobSphere.color = playerSphere.color;
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
 		}
 
@@ -751,7 +753,7 @@ void Game::animateSphere(Sphere const &sphere, vec2 const &moveSpeed, vec3 const
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
 		sphere.centerRadius.w / 2
 	));
-
+	sphere1.color = sphere.color;
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
@@ -762,12 +764,13 @@ void Game::animateSphere(Sphere const &sphere, vec2 const &moveSpeed, vec3 const
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
 		sphere.centerRadius.w / 2
 	));
+	sphere2.color = sphere.color;
 	level.spheres.push_back(sphere2);
 }
 
 void Game::animateColor(Graphics& graphics)
 {
-	graphics.setMetaballColorAbsorb(vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
+	//graphics.setMetaballColorAbsorb(vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
 }
 
 void Game::animateVictory(Sphere const & sphere)

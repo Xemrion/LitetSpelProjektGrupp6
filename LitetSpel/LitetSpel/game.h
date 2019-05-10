@@ -41,7 +41,7 @@ public:
     vec3 pos, velocity;
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
-    int status;
+    PlayerStatus status;
 	double radius;
 	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
     vector<Blob> blobs;
