@@ -63,7 +63,7 @@ public:
 	bool StartPlayerMoveLoop();
 	bool StopPlayerMoveLoop();
 
-	bool PlayEnemyJumpSound(int enemy, float distance);
+	bool PlayEnemyJumpSound(int index, float distance);
 	bool InitializeEnemySounds(int nrOfEnemies);
 
 	void setLimits(float inner, float outer);
@@ -140,7 +140,7 @@ private:
 
 	IDirectSoundBuffer8* enmy01; //Death
 	IDirectSoundBuffer8* enmy02;
-	IDirectSoundBuffer8* enmy03;
+	IDirectSoundBuffer8* enmy03; //Enemy Stuck
 
 	IDirectSoundBuffer8* sorb01; //Absorb blob
 	IDirectSoundBuffer8* sorb02; //Absorb enemy

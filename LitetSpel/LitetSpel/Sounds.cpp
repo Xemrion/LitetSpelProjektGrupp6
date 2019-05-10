@@ -17,6 +17,7 @@ Sounds::Sounds() {
 	this->enmy01 = nullptr;
 	this->enmy02 = nullptr;
 	this->enmy03 = nullptr;
+	this->enemies.resize(0);
 }
 Sounds::Sounds(const Sounds &sound) {
 
@@ -675,6 +676,13 @@ void Sounds::applyVolumes() {
 	SetVolume(pDeath, sfx);
 	SetVolume(pDmg01, sfx);
 	SetVolume(pDmg02, sfx);
+	SetVolume(playerMoveLoop, sfx);
+	SetVolume(menuHighlightButton, sfx);
+	SetVolume(menuClickButton, sfx);
+	SetVolume(menuBack, sfx);
+	for (int i = 0; i < nrOfEnemies; i++) {
+		SetVolume(enemies[i], sfx);
+	}
 	//Music?
 	LONG music = (masterVolume * musicVolume * 100) - 10000;
 	SetVolume(test01, music);
@@ -987,7 +995,7 @@ bool Sounds::ContinueSFX(IDirectSoundBuffer8* sound) {
 
 bool Sounds::InitializeEnemySounds(int nrOfEnemies) {
 	bool results;
-	if (this->enemies.size() > 0) {
+	if (this->enemies.size() <= 0) {
 		this->nrOfEnemies = nrOfEnemies;
 		this->enemies.resize(this->nrOfEnemies);
 		std::string fileName = "nmyjmp.wav";
@@ -1004,22 +1012,22 @@ bool Sounds::InitializeEnemySounds(int nrOfEnemies) {
 		return false;
 	}
 }
-bool Sounds::PlayEnemyJumpSound(int enemy, float distance) {
-	if (enemy >= nrOfEnemies) {
+bool Sounds::PlayEnemyJumpSound(int index, float distance) {
+	if (index >= nrOfEnemies) {
 		return false;
 	}
 	if (distance < outerLimit && distance > innerLimit) {
-		float temp = (1.0f - ((distance - innerLimit) / (outerLimit - innerLimit)));
+		float temp = ((outerLimit - distance)/(outerLimit - innerLimit));
 		LONG volume = (masterVolume * sfxVolume * (90 * temp)) - 10000;
-		SetVolume(this->enemies[enemy], volume);
-		if(!PlayWaveFile(this->enemies[enemy])) {
+		SetVolume(this->enemies[index], volume);
+		if(!PlayWaveFile(this->enemies[index])) {
 			return false;
 		}
 	}
 	else if (distance <= innerLimit) {
 		LONG volume = (masterVolume * sfxVolume * 90) - 10000;
-		SetVolume(this->enemies[enemy], volume);
-		if (!PlayWaveFile(this->enemies[enemy])) {
+		SetVolume(this->enemies[index], volume);
+		if (!PlayWaveFile(this->enemies[index])) {
 			return false;
 		}
 	}

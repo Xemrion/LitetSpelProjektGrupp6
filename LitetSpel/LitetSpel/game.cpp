@@ -47,8 +47,10 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(enemy, ColliderType::enemy_left,   enemy.HitboxLeft,   false);
 	level.colManager.registerEntry(enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false);
 	
-	gameSounds->InitializeEnemySounds(1);
-	EnemyBox.color = vec4(1,0,0,0);
+	if (!gameSounds->InitializeEnemySounds(1)) {
+		testPlat.hitbox.color = vec4(0.0, 0.0, 1.0, 0.0);
+	}
+	EnemyBox.color = vec4(1, 0, 0, 0);
 
 // LevelGoal
 
@@ -307,6 +309,8 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 	if (otherHitbox == ColliderType::level_goal) 
 	{
 		if (levelCompleted != true) {
+			gameSounds->StopPlayerMoveLoop();
+			gameSounds->StopGameMusic();
 			gameSounds->PlayEndOfLevelSound();
 		}
 		levelCompleted = true;
@@ -346,7 +350,7 @@ void Game::update(double dt)  {
 		level.player.update(dt);
 		if (level.enemy.alive)
 		{
-			level.enemy.enemyIndex = 1;
+			level.enemy.enemyIndex = 0;
 			level.enemy.playerPos = level.player.pos;
 			level.enemy.update(dt);
 		}
@@ -715,7 +719,9 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 		}
 		if (other.color.w == 0.5) 
 		{
-			gameSounds->PlayEnemySound03();
+			if (isStuck != true) {
+				gameSounds->PlayEnemySound03();
+			}
 			isStuck = true;
 		}
 	}
@@ -732,7 +738,7 @@ void Enemy::update(double dt) noexcept
 		if (jumpCooldown <= 0.0) {
 			controlDir.x = -controlDir.x;
 			jumpCooldown = 1.0;
-			gameSounds->PlayEnemyJumpSound(enemyIndex, getDistanceToPlayer());
+			gameSounds->PlayEnemyJumpSound(enemyIndex, 0);
 			putForce(vec3(0.0, jumpForce, 0.0));
 		}
 	}
@@ -778,23 +784,7 @@ void Enemy::move(float dt) noexcept
 	pos += velocity * dt;
 }
 
-float Enemy::getDistanceToPlayer() noexcept {
-	vec2 values(pos.x - playerPos.x, pos.y - playerPos.y);
-	float sum = 0;
-	if (values.x < 0) {
-		sum += -1 * values.x;
-	}
-	else {
-		sum += values.x;
-	}
-	if (values.y < 0) {
-		sum += -1 * values.x;
-	}
-	else {
-		sum += values.x;
-	}
-	return sum;
-}
+
 
 //Adds two orbiting spheres around a sphere for animation
 void Game::animateSphere(Sphere const &sphere, vec2 const &moveSpeed, vec3 const &amplitude) {

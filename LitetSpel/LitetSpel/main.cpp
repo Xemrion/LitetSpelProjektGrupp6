@@ -278,9 +278,10 @@ void keyboardFunc()
 			graphics.createShaders();
 		}
 		if (keyboard.KeyIsPressed(VK_DOWN)) {
-			if (game.state == GameState::LevelState) {
-				gameSounds.ContinueGameMusic();
-			}
+			gameSounds.StopGameMusic();
+		}if (keyboard.KeyIsPressed(VK_NUMPAD5)) {
+			gameSounds.setMasterVolume(5);
+			gameSounds.applyVolumes();
 		}
 	}
 	if (game.level.player.knockBack == true && playerMove != false) {
@@ -298,7 +299,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game.gameSounds = &gameSounds;
 	game.init();
-	gameSounds.setLimits((1280 + 720) / 8, (1280 + 720) / 2);
+	gameSounds.setLimits(0, 1280 + 720);
 	ShowWindow(wndHandle, nCmdShow);
 	gameSounds.StartMenuMusic();
 	
