@@ -843,7 +843,7 @@ void Graphics::setLasers(const vector<Line>& lines)
 		glm::mat4 t = glm::mat4(1.0);
 		t = glm::translate(t, (lines[i].start + lengths) / 2.f);
 		t = glm::rotate(t, atan2f(lengths.y, lengths.x), glm::vec3(0.0, 0.0, 1.0));
-		t = glm::scale(t, glm::vec3(lengths.x, 10.0, 0.01));
+		t = glm::scale(t, glm::vec3(lengths.x, 0.5, 0.01));
 
 		transforms.WVP[i] = transpose(t) * viewProj;
 		transforms.color[i] = glm::vec4(lines[i].color, 0.0);
