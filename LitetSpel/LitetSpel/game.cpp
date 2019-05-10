@@ -294,6 +294,7 @@ void Player::shoot(vec3 mousePos) noexcept
     }
 }
 
+
 void Player::recallBlobs() noexcept
 {
     for ( auto &blob : blobs ) 
@@ -399,7 +400,6 @@ void Game::updatePhysics() {
 				blob.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
 			blob.move(timestep);
-			// blob.updateCollisions();
 		}
 		updatePlayerCollision();
 		updateEnemyCollision();
@@ -563,9 +563,7 @@ void Game::updateGraphics() {
 
 		if (level.player.levelCompleted == false)
 		{
-			vec2 animationSpeed = smoothstep(-150.0f, 150.0f, vec2(level.player.velocity.x, level.player.velocity.y));
-
-			animateSphere(playerSphere, animationSpeed, vec3(3.0, 3.0, 0.5));
+			animateSphere(playerSphere, vec3(3.0, 3.0, 0.5));
 		}
 		else
 			animateVictory(playerSphere);
@@ -737,20 +735,16 @@ void Enemy::move(float dt) noexcept
 }
 
 //Adds two orbiting spheres around a sphere for animation
-void Game::animateSphere(Sphere const &sphere, vec2 const &moveSpeed, vec3 const &amplitude) {
+void Game::animateSphere(Sphere const &sphere, vec3 const &amplitude) {
 	vec3 rotationSpeed = vec3(0.81, 0.53, 0.1);
 	// Offset the start rotation of the spheres to avoid them all starting at the same place
 	vec3 offset = vec3(0.2, 0.0, 0.0);
 	// Multiplier to animate faster when moving a certain direction. Not smooth.
-	vec2 movementMultiplier = vec2(
-		clamp(abs(moveSpeed.x) + 0.0f, 0.0f, 2.0f),
-		clamp(abs(moveSpeed.y) + 0.0f, 0.0f, 2.0f)
-	);
 
 	Sphere sphere1(vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
-		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
+		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x)) * amplitude.x,
+		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y)) * amplitude.y,
+		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z) * amplitude.z,
 		sphere.centerRadius.w / 2
 	));
 	sphere1.color = sphere.color;
@@ -759,8 +753,8 @@ void Game::animateSphere(Sphere const &sphere, vec2 const &moveSpeed, vec3 const
 	rotationSpeed = -rotationSpeed;
 	offset = vec3(1.45, 0.9, 1.1);
 	Sphere sphere2(vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
+		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x + offset.x)) * amplitude.x,
+		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y + offset.y)) * amplitude.y,
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
 		sphere.centerRadius.w / 2
 	));
@@ -787,6 +781,7 @@ void Game::animateVictory(Sphere const & sphere)
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
 		sphere.centerRadius.w / 2
 	));
+	sphere1.color = sphere.color;
 	level.spheres.push_back(sphere1);
 
 	rotationSpeed = -rotationSpeed;
@@ -797,6 +792,7 @@ void Game::animateVictory(Sphere const & sphere)
 		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
 		sphere.centerRadius.w / 2
 	));
+	sphere2.color = sphere.color;
 	level.spheres.push_back(sphere2);
 }
 

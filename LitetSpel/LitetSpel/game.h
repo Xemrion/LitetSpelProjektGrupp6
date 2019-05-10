@@ -135,7 +135,6 @@ public:
 	void updateGraphics();
 
 	void animateSphere( Sphere    const &sphere,
-                        vec2 const &moveSpeed,
                         vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 	void animateColor(Graphics& graphics);
 	void animateVictory(Sphere    const &sphere);

@@ -28,5 +28,5 @@ static const glm::vec4 playerStatusColors[4] = {
 	glm::vec4(0.85, 0.25, 0.75, 0.0),
 	glm::vec4(1.0, 0.75, 0.25, 0.0),
 	glm::vec4(0.4, 0.4, 1.0, 0.0),
-	glm::vec4(1.75, 1.75, 1.75, 0.2)
+	glm::vec4(1.75, 1.75, 1.75, 0.1)
 };
