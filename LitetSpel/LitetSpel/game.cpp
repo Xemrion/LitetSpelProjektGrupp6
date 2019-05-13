@@ -186,10 +186,11 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			{
 				isStuck = true;
 			}
-			if (knockBack) 
+			if (knockBack)
 			{
 				knockBack = false;
-				velocity.x = 0;
+				velocity = vec3(0, 0, 0);
+				pos.y += 1;
 			}
 		}
 		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w != 0 && !isStuck && !isStanding)
@@ -198,12 +199,12 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			{
 				isStanding = true;
 				hasExtraJump = true;
-				velocity.y = 0;
+				velocity = vec3(0, 0, 0);
 			}
 			if (knockBack)
 			{
 				knockBack = false;
-				velocity.x = 0;
+				velocity = vec3(0, 0, 0);
 			}
 			if (pos.y < (other.center.y - other.halfLengths.y))
 			{
@@ -236,7 +237,6 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			{
 				isStanding = true;
 				hasExtraJump = true;
-				//pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
 				velocity.y = 0;
 			}
 			if (knockBack)
@@ -257,17 +257,25 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			//Collision with enemy bottom
 			if (!knockBack && pos.y < (other.center.y - other.halfLengths.y)) 
 			{
-				
+
 			}
 			//Collision with enemy left
 			if (!knockBack && pos.x < (other.center.x - other.halfLengths.x)) 
 			{
+				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+				pos.x -= length(minDistX);
 				putForce(vec3(-2, 3, 0));
 				knockBack = true;
 			}
 			//Collision with enemy right
 			if (!knockBack && pos.x > (other.center.x + other.halfLengths.x))
 			{
+				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+				pos.x += length(minDistX);
 				putForce(vec3(2, 3, 0));
 				knockBack = true;
 			}
