@@ -107,24 +107,11 @@ void Editor::initialize(const char* filename)
 
 							for (int l = (j); l > 0 && continueLoop; l--)
 							{
-								//If its the first iteration and not at the edge of png
-								if (l == j && startPosX + l + 1 < width / 2)
+								if (isWhite(getPixelColour((startPos + width * k) + l)))
 								{
-
-									if (!isWhite(getPixelColour((startPos + width * k) + l + 1)))
-									{
-										//+1??
-										endPosY = startPosY - k;
-										continueLoop = false;
-									}
-
-								}
-								else if (isWhite(getPixelColour((startPos + width * k) + l)))
-								{
-									endPosY = startPosY - k;
+									endPosY = startPosY - k - 1;
 									continueLoop = false;
 								}
-
 							}
 						}
 						continueLoop = true;
@@ -175,8 +162,8 @@ int Editor::isPixelUsed(int index)
 	for (int i = 0; i < topSide.size(); i++)
 	{
 		if (posY > bottomSide.at(i)
-			&& posY < topSide.at(i)
-			&& posX > LeftSide.at(i)
+			&& posY <= topSide.at(i)
+			&& posX >= LeftSide.at(i)
 			&& posX < rightSide.at(i))
 			return i;
 	}
