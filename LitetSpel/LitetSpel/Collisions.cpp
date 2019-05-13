@@ -37,13 +37,14 @@ bool CollisionManager::intersect(Box const &a, Box const &b) noexcept {
 void CollisionManager::update() noexcept {
     // test each mobile hitbox for intersections:
     for (auto &m : mobileBoxes) {
+		// test against all static environment hitboxes
+		for (auto &environment : staticBoxes)
+			if (intersect((*m.hitbox), (*environment.hitbox)))
+				m.object->collide(m.colliderType, environment.colliderType, *environment.hitbox);
         // test against all other mobile hitboxes (that belong to another object)
         for (auto &other : mobileBoxes)
             if (*(m.object) != *(other.object) and intersect((*m.hitbox), (*other.hitbox)))
                    m.object->collide(m.colliderType, other.colliderType, *other.hitbox );
-        // test against all static environment hitboxes
-        for (auto &environment : staticBoxes)
-            if (intersect((*m.hitbox), (*environment.hitbox)))
-                m.object->collide(m.colliderType, environment.colliderType, *environment.hitbox);
+
     }
 }

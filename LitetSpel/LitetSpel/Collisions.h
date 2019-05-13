@@ -4,14 +4,8 @@
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "geometry.h"
 
-enum ColliderType { player_top,
-				    player_bottom,
-				    player_left,
-				    player_right,
-				    enemy_top,
-				    enemy_bottom,
-				    enemy_left,
-				    enemy_right,
+enum ColliderType { player,
+				    enemy,
                     level_goal,
                     platform,
 					movingPlatform,
