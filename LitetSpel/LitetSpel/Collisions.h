@@ -5,10 +5,7 @@
 #include "geometry.h"
 
 enum ColliderType { player,
-				    enemy_top,
-				    enemy_bottom,
-				    enemy_left,
-				    enemy_right,
+				    enemy,
                     level_goal,
                     platform,
 					movingPlatform,
