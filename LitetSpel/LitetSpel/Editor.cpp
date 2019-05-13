@@ -105,11 +105,11 @@ void Editor::initialize(const char* filename)
 						for (int k = 1; k < glm::abs(endPosY - startPosY) && continueLoop; k++)
 						{
 
-							for (int l = (j); l > 0 && continueLoop; l--)
+							for (int l = (j - 1); l > 0 && continueLoop; l--)
 							{
 								if (isWhite(getPixelColour((startPos + width * k) + l)))
 								{
-									endPosY = startPosY - k - 1;
+									endPosY = startPosY - k;
 									continueLoop = false;
 								}
 							}
@@ -119,7 +119,78 @@ void Editor::initialize(const char* filename)
 
 					}
 				}
-
+				if (isMovingPlatform(getPixelColour(i)))
+				{
+					//left side
+					int upperHalf = glm::ceil(startPos - ((endPosY - startPosY) / 2) * width);
+					int lowerHalf = glm::floor(startPos - ((endPosY - startPosY) / 2) * width);
+					int MPendPosX = INFINITE;
+					int MPendPosY = INFINITE;
+					int MPstartPosX = INFINITE;
+					int MPstartPosY = INFINITE;
+					for (int j = 0; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++)
+					{
+						if (getPixelColour(lowerHalf - j) == getPixelColour(i))
+						{
+							MPstartPosX = (lowerHalf - j % width) - middleX;;
+							MPstartPosY = middleY - glm::floor(lowerHalf - j / width);
+						}
+						else if (getPixelColour(upperHalf - j) == getPixelColour(i))
+						{
+							MPstartPosX = (upperHalf - j % width) - middleX;;
+							MPstartPosY = middleY - glm::floor(upperHalf - j / width);
+						}
+					}
+					//Right side
+					upperHalf = glm::ceil(startPos - ((MPendPosY - MPstartPosY) / 2) * width) + (MPendPosX - MPstartPosX);
+					lowerHalf = glm::floor(startPos - ((MPendPosY - MPstartPosY) / 2) * width) + (MPendPosX - MPstartPosX);
+					for (int j = 0; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++)
+					{
+						if (getPixelColour(lowerHalf + j) == getPixelColour(i))
+						{
+							MPendPosX = (lowerHalf + j % width) - middleX;;
+							MPendPosY = middleY - glm::floor(lowerHalf + j / width);
+						}
+						else if (getPixelColour(upperHalf + j) == getPixelColour(i))
+						{
+							MPendPosX = (upperHalf + j % width) - middleX;;
+							MPendPosY = middleY - glm::floor(upperHalf + j / width);
+						}
+					}
+					//top side
+					upperHalf = glm::ceil(startPos + ((MPendPosX - MPstartPosX) / 2));
+					lowerHalf = glm::floor(startPos + ((MPendPosX - MPstartPosX) / 2));
+					for (int j = 0; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++)
+					{
+						if (getPixelColour(lowerHalf + j) == getPixelColour(i))
+						{
+							MPstartPosX = (lowerHalf + j % width) - middleX;;
+							MPstartPosY = middleY - glm::floor(lowerHalf + j / width);
+						}
+						else if (getPixelColour(upperHalf + j) == getPixelColour(i))
+						{
+							MPstartPosX = (upperHalf + j % width) - middleX;;
+							MPstartPosY = middleY - glm::floor(upperHalf + j / width);
+						}
+					}
+					//bottom side
+					upperHalf = glm::ceil(startPos + ((MPendPosX - MPstartPosX) / 2)) + (MPendPosY - MPstartPosY) * width;
+					lowerHalf = glm::floor(startPos + ((MPendPosX - MPstartPosX) / 2)) + (MPendPosY - MPstartPosY) * width;
+					for (int j = 0; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++)
+					{
+						if (getPixelColour(lowerHalf - j) == getPixelColour(i))
+						{
+							MPendPosX = (lowerHalf - j % width) - middleX;;
+							MPendPosY = middleY - glm::floor(lowerHalf - j / width);
+						}
+						else if (getPixelColour(upperHalf - j) == getPixelColour(i))
+						{
+							MPendPosX = (upperHalf - j % width) - middleX;;
+							MPendPosY = middleY - glm::floor(upperHalf - j / width);
+						}
+					}
+					//	this->movingPlatforms.push_back(MovingPlatform(glm::vec3(startPosX, startPosY, 0), glm::vec3(startPosX, startPosY, 0)),);
+				}
 				foundEdge = false;
 				startPosX *= minimumBoxSize;
 				startPosY *= minimumBoxSize;
@@ -194,5 +265,10 @@ bool Editor::isRed(glm::vec3 pixelColour)
 bool Editor::isGreen(glm::vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z == 0;
+}
+
+bool Editor::isMovingPlatform(glm::vec3 pixelColour)
+{
+	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z >= 120 && pixelColour.z <= 130;
 }
 
