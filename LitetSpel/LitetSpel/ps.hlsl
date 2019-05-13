@@ -136,7 +136,7 @@ float4 main(VS_OUT input) : SV_Target
 		if (color.a < 1.0) {
 			float4 radiance = radianceMap.Sample(samp, parallax + rd);
 			//color.rgb = color.a * color.rgb + float3(1.0,1.0,1.0)*(1.0 - color.a);
-			color.rgb += color.a * color.rgb + ((1.0 - color.a) * (radiance.rgb * radiance.rgb + 0.5));
+			color.rgb += color.a * color.rgb + ((1.0 - color.a) * (radiance.rgb * radiance.rgb));
 		}
 	}
 	else {
