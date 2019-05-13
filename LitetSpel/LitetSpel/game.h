@@ -43,7 +43,7 @@ public:
     bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
     PlayerStatus status;
 	double radius;
-	Box Hitbox;
+	Box hitbox;
     vector<Blob> blobs;
     int blobCharges;
     float shootCooldown;
@@ -64,7 +64,7 @@ public:
     vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool isStanding, alive, isDeregistered, isStuck;
-    Box Hitbox;
+    Box hitbox;
 };
 
 // TODO: commented lines

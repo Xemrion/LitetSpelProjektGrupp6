@@ -22,6 +22,6 @@ public:
 	vec3 startPos;
 	vec3 endPos;
 
-	Box Hitbox;
+	Box hitbox;
 };
 

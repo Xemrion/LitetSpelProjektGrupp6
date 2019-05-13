@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("test.png");
+	editor.initialize("test2.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
@@ -22,11 +22,11 @@ void Game::init() noexcept {
         level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
     }
 	updatePlayerCollision();
-	level.colManager.registerEntry(player, ColliderType::player, player.Hitbox, false);
+	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
 // enemies:
     auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.Hitbox, false);
+	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1,0,0,0);
 
 // LevelGoal
@@ -125,63 +125,52 @@ void Player::update(double dt) noexcept {
 void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
 {
 		if (otherHitbox == ColliderType::platform) {
+			glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+			glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+			glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+			glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+			glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+			glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+			glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
-			// Collision with roof
-			if (pos.y < (other.center.y - other.halfLengths.y)) 
-			{
+			// if colliding in Y-axis
+			if (glm::length(minDistY) < glm::length(minDistX)) {
+				posDiff = minDistY;
 				velocity.y = 0;
-				vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
-				vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
-				vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
-				pos.y -= length(minDistY);
-				if (status == PlayerStatus::Sticky && !isStuck) 
-				{
-					isStuck = true;
+
+				// if colliding with floor
+				if (minDistY.y > 0.0) {
+					isStanding = true;
+					hasExtraJump = true;
+				}
+				//if colliding with ceiling
+				else {
+					if (status == PlayerStatus::Sticky)
+					{
+						isStuck = true;
+					}
 				}
 			}
-			// Collision with wall to the left
-			else if(pos.x > (other.center.x + other.halfLengths.x))
-			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-				pos.x += length(minDistX);
-				if (status == PlayerStatus::Sticky && !isStuck)
-				{
-					isStuck = true;
-					velocity.x = 0;
-				}
-			}
-			// Collision with wall to the right
-			else if (pos.x < (other.center.x - other.halfLengths.x))
-			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-				pos.x -= length(minDistX);
-				if (status == PlayerStatus::Sticky && !isStuck)
+			// if colliding in X-axis
+			else {
+				posDiff = minDistX;
+
+				if (status == PlayerStatus::Sticky && !isStanding)
 				{
 					isStuck = true;
 					velocity.x = 0;
 				}
 			}
 
-			//Collision with floor
-			else if (pos.y > (other.center.y + other.halfLengths.y))
+			if (knockBack)
 			{
-				isStanding = true;
-				hasExtraJump = true;
-				pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
-				velocity.y = 0;
+				knockBack = false;
 			}
-			/*vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
-			vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
-			vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
-			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-			pos += length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;*/
 
+			pos += posDiff;
+			
+
+			
 			if (status == PlayerStatus::Sticky && !isStanding)
 			{
 				isStuck = true;
@@ -207,24 +196,24 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			}
 			if (pos.y < (other.center.y - other.halfLengths.y))
 			{
-				vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
-				vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
+				vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+				vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 				vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
 				pos.y -= length(minDistY);
 			}
 			// Collision with blob to the left
 			if (pos.x > (other.center.x + other.halfLengths.x))
 			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 				pos.x += length(minDistX);
 			}
 			// Collision with blob to the right
 			if (pos.x < (other.center.x - other.halfLengths.x))
 			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 				pos.x -= length(minDistX);
 			}
@@ -244,10 +233,10 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				knockBack = false;
 				velocity.x = 0;
 			}
-			vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
-			vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
-			vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
+			vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+			vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+			vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+			vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 			vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
 			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 			pos += length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
@@ -431,12 +420,12 @@ void Game::updatePlayerCollision()
     auto &player = level.player;
 
 	// Bottom:
-	player.Hitbox.center = vec4(
+	player.hitbox.center = vec4(
 		player.pos.x,
 		player.pos.y,
 		player.pos.z,
 		0);
-	player.Hitbox.halfLengths = vec4(
+	player.hitbox.halfLengths = vec4(
 		player.radius,
 		player.radius,
 		player.radius,
@@ -461,12 +450,12 @@ void Game::updateEnemyCollision()
 	level.movingBoxes.push_back(EnemyBox);
 
 	// Bottom:
-	enemy.Hitbox.center = vec4(
+	enemy.hitbox.center = vec4(
 		enemy.pos.x,
 		enemy.pos.y,
 		enemy.pos.z,
 		0);
-	enemy.Hitbox.halfLengths = vec4(
+	enemy.hitbox.halfLengths = vec4(
 		EnemyBox.halfLengths.x,
 		EnemyBox.halfLengths.y,
 		EnemyBox.halfLengths.z,
@@ -520,9 +509,9 @@ void Game::updateGraphics() {
 
 void Game::showHitboxes()
 {
-	level.movingBoxes.push_back(level.player.Hitbox);
+	level.movingBoxes.push_back(level.player.hitbox);
 
-	level.movingBoxes.push_back(level.enemy.Hitbox);
+	level.movingBoxes.push_back(level.enemy.hitbox);
 
 
 	for (int i = 0; i < level.player.blobCharges; i++)
@@ -553,13 +542,13 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 	if (otherHitbox == ColliderType::platform) {
 		if (pos.y > (other.center.y + other.halfLengths.y))
 		{
-			pos.y = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
+			pos.y = other.center.y + other.halfLengths.y + (pos.y - hitbox.center.y + hitbox.halfLengths.y);
 			velocity.y = 0;
 			isStanding = true;
 		}
 		else if (pos.y < (other.center.y - other.halfLengths.y))
 		{
-			pos.y = other.center.y - other.halfLengths.y + (pos.y - Hitbox.center.y - Hitbox.halfLengths.y);
+			pos.y = other.center.y - other.halfLengths.y + (pos.y - hitbox.center.y - hitbox.halfLengths.y);
 			velocity.y = 0;
 		}
 		else if (pos.x > (other.center.x + other.halfLengths.x))
@@ -573,7 +562,7 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 			velocity.x   = -velocity.x;
 		}
 	}
-	else if (otherHitbox == ColliderType::player && (other.center.y+other.halfLengths.y) > (pos.y+Hitbox.halfLengths.y)) 
+	else if (otherHitbox == ColliderType::player && (other.center.y+other.halfLengths.y) > (pos.y+hitbox.halfLengths.y)) 
 	{
 		alive = false;
 	}
@@ -583,7 +572,7 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 		{
 			if (pos.y > (other.center.y + other.halfLengths.y))
 			{
-				pos.y = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
+				pos.y = other.center.y + other.halfLengths.y + (pos.y - hitbox.center.y + hitbox.halfLengths.y);
 				velocity.y = 0;
 				isStanding = true;
 			}
