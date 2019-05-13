@@ -93,7 +93,8 @@ struct LevelData { // POD
 	Enemy            enemy;
 	PowerUp          TestPowerUp;
     std::unique_ptr<LevelGoal> goal;
-    vector<Box>      boxes;
+    vector<Box>      staticBoxes;
+	vector<Box>      movingBoxes;
     vector<Sphere>   spheres;
     CollisionManager colManager;
 };

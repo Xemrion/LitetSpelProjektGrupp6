@@ -262,8 +262,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
 	game.init();
+	graphics.setStaticBoxes(game.level.staticBoxes);
 	ShowWindow(wndHandle, nCmdShow);
-
 
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
@@ -295,12 +295,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			}
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
-			graphics.setMovingBoxes(game.level.boxes);
+			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;
 		}
-		
 	}
 
 	return 0;
