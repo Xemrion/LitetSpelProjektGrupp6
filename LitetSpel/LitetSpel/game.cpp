@@ -171,7 +171,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			{
 				isStanding = true;
 				hasExtraJump = true;
-				//pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
+				pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
 				velocity.y = 0;
 			}
 			/*vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
