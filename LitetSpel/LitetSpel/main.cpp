@@ -261,8 +261,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
-	game.init();
-	graphics.setStaticBoxes(game.level.staticBoxes);
+
+	bool gameLoaded = false;
+	game.menuLoad();
 	ShowWindow(wndHandle, nCmdShow);
 
 	auto prevFrameTime = std::chrono::steady_clock::now();
@@ -275,6 +276,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 		else
 		{
+			if (game.state == GameState::LevelState && !gameLoaded) 
+			{
+				game.init();
+				graphics.setStaticBoxes(game.level.staticBoxes);
+				gameLoaded = true;
+			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
