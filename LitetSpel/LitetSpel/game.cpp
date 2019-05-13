@@ -40,6 +40,10 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
 
 // MENU
+	
+}
+void Game::menuLoad()
+{
 	MenuBG.center = vec4(0.0f, 0.0f, 5.0f, 0.0f);
 	MenuBG.halfLengths = vec4(100.0f, 100.0f, 0.0f, 0.0f);
 	MenuBG.color = vec4(0.0f, 0.0f, 1.0f, 0.0f);
