@@ -11,6 +11,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include"Geometry.h"
 #include"Platform.h"
+#include"MovingPlatform.h"
 class Editor
 {
 
@@ -23,6 +24,7 @@ private:
 	bool isBlue(glm::vec3 pixelColour);
 	bool isRed(glm::vec3 pixelColour);
 	bool isGreen(glm::vec3 pixelColour);
+	bool isMovingPlatform(glm::vec3 pixelColour);
 	glm::vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
 	void addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY);
@@ -30,11 +32,13 @@ private:
 	int minimumBoxSize = 30;
 	int width = 0;
 	int height = 0;
+	int maxMovingPlatformLength = 10;
 
 public:
 	Editor();
 	~Editor();
 	std::vector<Platform> platforms;
+	std::vector<MovingPlatform> movingPlatforms;
 	glm::vec3 goalPos;
 	glm::vec3 startPos;
 	std::vector<glm::vec3> enemyPos;
@@ -42,4 +46,3 @@ public:
 
 };
 #endif
- 
