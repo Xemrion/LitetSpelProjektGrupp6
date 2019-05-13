@@ -41,9 +41,9 @@ public:
     vec3 pos, velocity;
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
-    int status;
+    PlayerStatus status;
 	double radius;
-	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+	Box Hitbox;
     vector<Blob> blobs;
     int blobCharges;
     float shootCooldown;
@@ -135,7 +135,6 @@ public:
 	void updateGraphics();
 
 	void animateSphere( Sphere    const &sphere,
-                        vec2 const &moveSpeed,
                         vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 	void animateColor(Graphics& graphics);
 	void animateVictory(Sphere    const &sphere);

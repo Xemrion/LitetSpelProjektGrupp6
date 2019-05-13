@@ -121,10 +121,7 @@ void Blob::addVelocity(glm::vec3 const &velocity, bool useSpeed) noexcept
 void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &other) noexcept
 {
     if ( isBeingRecalled and(
-         otherType == ColliderType::player_bottom ||
-         otherType == ColliderType::player_top    ||
-         otherType == ColliderType::player_left   ||
-         otherType == ColliderType::player_right  ))
+         otherType == ColliderType::player ))
     {
         absorb();
     }

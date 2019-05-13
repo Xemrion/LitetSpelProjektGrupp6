@@ -281,22 +281,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			
 			if (!game.level.player.levelCompleted) 
 			{
-				if (game.level.player.status == PlayerStatus::Bouncy)
-				{
-					graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
-				}
-				else if (game.level.player.status == PlayerStatus::Sticky)
-				{
-					graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
-				}
-				else if (game.level.player.status == PlayerStatus::Heavy)
-				{
-					graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
-				}
-				else
-				{
-					graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-				}
 				keyboardFunc();
 				mouseFunc();
 			}

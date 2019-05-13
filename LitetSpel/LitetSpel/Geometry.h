@@ -12,6 +12,7 @@ public:
 	Sphere(glm::vec3 pos, float radius) { centerRadius = glm::vec4(pos.x, pos.y, pos.z, radius); };
 
 	glm::vec4 centerRadius;
+	glm::vec4 color; //w is reflectivity 0.0 is completely non-reflective and 1.0 is completely reflective
 };
 
 class Box {
@@ -21,4 +22,11 @@ public:
 	glm::vec4 color;
 
 	
+};
+
+class Line {
+public:
+	glm::vec3 start;
+	glm::vec3 end;
+	glm::vec3 color;
 };
