@@ -25,8 +25,8 @@ static const glm::vec4 olive	= glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 
 //Use player.status as index
 static const glm::vec4 playerStatusColors[4] = {
-	glm::vec4(0.85, 0.25, 0.75, 0.0),
-	glm::vec4(1.0, 0.75, 0.25, 0.0),
-	glm::vec4(0.4, 0.4, 1.0, 0.0),
-	glm::vec4(1.75, 1.75, 1.75, 0.1)
+	glm::vec4(0.85, 0.05, 0.75, 0.0),
+	glm::vec4(1.0, 0.75, 0.05, 0.0),
+	glm::vec4(0.05, 0.05, 1.0, 0.0),
+	glm::vec4(0.75, 0.75, 0.75, 0.1)
 };
