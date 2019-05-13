@@ -43,7 +43,7 @@ public:
     bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
     PlayerStatus status;
 	double radius;
-	Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+	Box Hitbox;
     vector<Blob> blobs;
     int blobCharges;
     float shootCooldown;
@@ -52,7 +52,7 @@ public:
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(vec3 position = { -65.0f, -20.0f, 0.0f });
+	Enemy(vec3 position = { -50.0f, 40.0f, 0.0f });
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
 	void update(double dt) noexcept;
@@ -64,7 +64,7 @@ public:
     vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool isStanding, alive, isDeregistered, isStuck;
-    Box HitboxBottom, HitboxTop, HitboxLeft, HitboxRight;
+    Box Hitbox;
 };
 
 // TODO: commented lines
