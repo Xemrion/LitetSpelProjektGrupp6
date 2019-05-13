@@ -291,7 +291,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			}
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
-			graphics.setBoxes(game.level.boxes);
+			graphics.setMovingBoxes(game.level.boxes);
 			graphics.setMetaballs(game.level.spheres);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;
