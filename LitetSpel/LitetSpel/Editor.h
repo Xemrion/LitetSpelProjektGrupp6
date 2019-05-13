@@ -24,6 +24,7 @@ private:
 	bool isBlue(glm::vec3 pixelColour);
 	bool isRed(glm::vec3 pixelColour);
 	bool isGreen(glm::vec3 pixelColour);
+	bool isPlatform(glm::vec3 pixelColour);
 	bool isMovingPlatform(glm::vec3 pixelColour);
 	glm::vec3 getPixelColour(int index);
 	int isPixelUsed(int index);

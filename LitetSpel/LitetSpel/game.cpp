@@ -8,6 +8,12 @@ void Game::init() noexcept {
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
 		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
+	for (int i = 0; i < editor.movingPlatforms.size(); i++)
+	{
+		editor.movingPlatforms.at(i).Hitbox.color = glm::vec4(1, 1, 1, 0);
+		level.movingBoxes.push_back(editor.platforms.at(i).hitbox);
+		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.movingPlatforms.at(i).Hitbox, true);
+	}
     level.goal = std::make_unique<LevelGoal>( level.colManager, editor.goalPos, 12.0f );
 	level.staticBoxes.push_back(level.goal->representation);
 // player & blobs:
@@ -485,7 +491,11 @@ void Game::updateGraphics() {
 		if (level.enemy.alive) {
 			level.movingBoxes.push_back(EnemyBox);
 		}
-
+		for (int i = 0; i < editor.movingPlatforms.size(); i++)
+		{
+			editor.movingPlatforms.at(i).Hitbox.color = glm::vec4(0, 1, 1, 0);
+			level.movingBoxes.push_back(editor.movingPlatforms.at(i).Hitbox);
+		}
 		level.spheres = vector<Sphere>();
 		playerSphere.centerRadius = vec4(
 			level.player.pos.x,
