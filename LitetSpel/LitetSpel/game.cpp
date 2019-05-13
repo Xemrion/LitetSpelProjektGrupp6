@@ -142,24 +142,17 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 	
 		if (otherHitbox == ColliderType::platform) {
 
-			//Collision with floor
-			if (pos.y > (other.center.y + other.halfLengths.y)) 
-			{
-				isStanding = true;
-				hasExtraJump = true;
-				//pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
-				velocity.y = 0;
-			}
 			// Collision with roof
-			if (pos.y < (other.center.y - other.halfLengths.y)) 
+			if (pos.y < (other.center.y - other.halfLengths.y) && !isStuck) 
 			{
+				velocity.y = 0;
 				vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
 				vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
 				vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
 				pos.y -= length(minDistY);
 			}
 			// Collision with wall to the left
-			if(pos.x > (other.center.x + other.halfLengths.x))
+			else if(pos.x > (other.center.x + other.halfLengths.x) && !isStuck)
 			{
 				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
@@ -167,12 +160,21 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				pos.x += length(minDistX);
 			}
 			// Collision with wall to the right
-			if (pos.x < (other.center.x - other.halfLengths.x))
+			else if (pos.x < (other.center.x - other.halfLengths.x) && !isStuck)
 			{
 				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 				pos.x -= length(minDistX);
+			}
+
+			//Collision with floor
+			else if (pos.y > (other.center.y + other.halfLengths.y) && !isStuck)
+			{
+				isStanding = true;
+				hasExtraJump = true;
+				//pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
+				velocity.y = 0;
 			}
 			/*vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
 			vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
@@ -355,16 +357,11 @@ void Game::handleInput() {
 	if (leftButtonDown) {
 		player.shoot(mousePos);
 	}
-
 		if (keys[Keys::left]) {
-			if (!player.isStuck) {
 				player.addVelocity(vec3(-1, 0, 0), true);
-			}
 		}
 		if (keys[Keys::right]) {
-			if (!player.isStuck) {
 				player.addVelocity(vec3(1, 0, 0), true);
-			}
 		}
 		if (keys[Keys::up]) {
 			if (player.isStanding) {
@@ -384,9 +381,6 @@ void Game::handleInput() {
 				player.isStuck = false;
 				if(!player.isStanding)
 					player.pos.y -= 0.01;
-				if (player.isStanding == false) {
-					//player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT, 0.0));
-				}
 			}
 		}
 	for (int i = 0; i < 4; ++i) {
