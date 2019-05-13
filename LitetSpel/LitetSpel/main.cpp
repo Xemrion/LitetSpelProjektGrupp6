@@ -155,15 +155,24 @@ void mouseFunc()
 				gameEnd = true;
 			}
 		}
-		if ((mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
-			|| (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
+		if ((mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
 			if (highlight != true) {
 				gameSounds.PlayMenuHighlightSound();
+				game.MenuYes.color = yellow;
+				highlight = true;
+			}
+		}
+		else if((mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
+			if (highlight != true) {
+				gameSounds.PlayMenuHighlightSound();
+				game.MenuNo.color = yellow;
 				highlight = true;
 			}
 		}
 		else {
 			highlight = false;
+			game.MenuNo.color = red;
+			game.MenuYes.color = green;
 		}
 
 	}
