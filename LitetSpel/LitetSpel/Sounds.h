@@ -73,7 +73,8 @@ public:
 	UINT getMasterVolume() const { return this->masterVolume; };
 	UINT getSFXVolume() const { return this->sfxVolume; };
 	UINT getMusicVolume() const { return this->musicVolume; };
-	void applyVolumes();
+
+	bool RestartSounds();
 
 private:
 	struct WaveHeaderType
@@ -97,8 +98,10 @@ private:
 	void ShutdownDirectSound();
 	bool LoadWaveFile(char* fileName, IDirectSoundBuffer8** soundBuffer);
 	void ShutdownWaveFile(IDirectSoundBuffer8** soundBuffer);
-	bool PlayWaveFile(IDirectSoundBuffer8* sound);
-	bool PlayLoopingWaveFile(IDirectSoundBuffer8* sound);
+	bool PlayMusicWaveFile(IDirectSoundBuffer8* sound);
+	bool PlaySFXWaveFile(IDirectSoundBuffer8* sound);
+	bool PlayLoopingMusicWaveFile(IDirectSoundBuffer8* sound);
+	bool PlayLoopingSFXWaveFile(IDirectSoundBuffer8* sound);
 	bool StopLoopingWaveFile(IDirectSoundBuffer8* sound);
 	bool ContinueLoopingWaveFile(IDirectSoundBuffer8* sound);
 	bool SetVolume(IDirectSoundBuffer8* sound, LONG volume);
@@ -110,9 +113,10 @@ private:
 	UINT masterVolume;
 	UINT sfxVolume;
 	UINT musicVolume;
-	bool defaultVolume = true;
 	float innerLimit;
 	float outerLimit;
+	bool gameMusicPlaying, menuMusicPlaying;
+	bool playerMoving;
 
 	IDirectSound8* directSound;
 	IDirectSoundBuffer* firstBuffer;

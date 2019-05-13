@@ -175,7 +175,7 @@ void keyboardFunc()
 	//Movement
 	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
 	{
-		if (keyboard.KeyIsPressed('D'))
+		if (keyboard.KeyIsPressed('D') || keyboard.KeyIsPressed(VK_RIGHT))
 		{
 			game.keys[1] = true;
 			if (playerMove != true && game.level.player.isStuck != true) {
@@ -183,7 +183,7 @@ void keyboardFunc()
 				playerMove = true;
 			}
 		}
-		if (keyboard.KeyIsPressed('A'))
+		if (keyboard.KeyIsPressed('A') || keyboard.KeyIsPressed(VK_LEFT))
 		{
 			game.keys[0] = true;
 			if (playerMove != true && game.level.player.isStuck != true) {
@@ -191,15 +191,15 @@ void keyboardFunc()
 				playerMove = true;
 			}
 		}
-		if (!keyboard.KeyIsPressed('D') && !keyboard.KeyIsPressed('A') && playerMove != false) {
+		if (!keyboard.KeyIsPressed('D') && !keyboard.KeyIsPressed('A') && !keyboard.KeyIsPressed(VK_LEFT) && !keyboard.KeyIsPressed(VK_RIGHT) && playerMove != false) {
 			gameSounds.StopPlayerMoveLoop();
 			playerMove = false;
 		}
-		if (keyboard.KeyIsPressed('W'))
+		if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
 		{
 			game.keys[2] = true;
 		}
-		if (keyboard.KeyIsPressed('S'))
+		if (keyboard.KeyIsPressed('S') || keyboard.KeyIsPressed(VK_DOWN))
 		{
 			game.keys[3] = true;
 		}
@@ -272,16 +272,15 @@ void keyboardFunc()
 				powerCoolDown = 0.2f;
 			}
 		}
-		if (keyboard.KeyIsPressed('R'))
+		if (keyboard.KeyIsPressed('R')) {
 			game.level.player.recallBlobs();
+		}
 		if (keyboard.KeyIsPressed('P')) {
 			graphics.createShaders();
 		}
-		if (keyboard.KeyIsPressed(VK_DOWN)) {
-			gameSounds.StopGameMusic();
-		}if (keyboard.KeyIsPressed(VK_NUMPAD5)) {
+		if (keyboard.KeyIsPressed(VK_NUMPAD5)) {
 			gameSounds.setMasterVolume(5);
-			gameSounds.applyVolumes();
+			gameSounds.RestartSounds();
 		}
 	}
 	if (game.level.player.knockBack == true && playerMove != false) {

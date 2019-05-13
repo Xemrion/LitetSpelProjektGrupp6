@@ -18,6 +18,9 @@ Sounds::Sounds() {
 	this->enmy02 = nullptr;
 	this->enmy03 = nullptr;
 	this->enemies.resize(0);
+	this->masterVolume = 10;
+	this->sfxVolume = 10;
+	this->musicVolume = 10;
 }
 Sounds::Sounds(const Sounds &sound) {
 
@@ -286,177 +289,182 @@ void Sounds::Shutdown() {
 }
 
 bool Sounds::PlayJumpSound01() {
-	if (!PlayWaveFile(jump01)) {
+	if (!PlaySFXWaveFile(jump01)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayJumpSound02() {
-	if (!PlayWaveFile(jump02)) {
+	if (!PlaySFXWaveFile(jump02)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayJumpSound03() {
-	if (!PlayWaveFile(jump03)) {
+	if (!PlaySFXWaveFile(jump03)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayLandingSound01() {
-	if (!PlayWaveFile(land01)) {
+	if (!PlaySFXWaveFile(land01)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayLandingSound02() {
-	if (!PlayWaveFile(land02)) {
+	if (!PlaySFXWaveFile(land02)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayLandingSound03() {
-	if (!PlayWaveFile(land03)) {
+	if (!PlaySFXWaveFile(land03)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayBlobSound01() {
-	if (!PlayWaveFile(blob01)) {
+	if (!PlaySFXWaveFile(blob01)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayBlobSound02() {
-	if (!PlayWaveFile(blob02)) {
+	if (!PlaySFXWaveFile(blob02)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayBlobSound03() {
-	if (!PlayWaveFile(blob03)) {
+	if (!PlaySFXWaveFile(blob03)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayEnemySound01() {
-	if (!PlayWaveFile(enmy01)) {
+	if (!PlaySFXWaveFile(enmy01)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayEnemySound02() {
-	if (!PlayWaveFile(enmy02)) {
+	if (!PlaySFXWaveFile(enmy02)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayEnemySound03() {
-	if (!PlayWaveFile(enmy03)) {
+	if (!PlaySFXWaveFile(enmy03)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayAbsorbSound01() {
-	if (!PlayWaveFile(sorb01)) {
+	if (!PlaySFXWaveFile(sorb01)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayAbsorbSound02() {
-	if (!PlayWaveFile(sorb02)) {
+	if (!PlaySFXWaveFile(sorb02)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayAbsorbSound03() {
-	if (!PlayWaveFile(sorb03)) {
+	if (!PlaySFXWaveFile(sorb03)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayPlayerDeathSound() {
-	if (!PlayWaveFile(pDeath)) {
+	if (!PlaySFXWaveFile(pDeath)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayDamagedSound01() {
-	if (!PlayWaveFile(pDmg01)) {
+	if (!PlaySFXWaveFile(pDmg01)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayDamagedSound02() {
-	if (!PlayWaveFile(pDmg02)) {
+	if (!PlaySFXWaveFile(pDmg02)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayStartOfLevelSound() {
-	if (!PlayWaveFile(pStart)) {
+	if (!PlaySFXWaveFile(pStart)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayEndOfLevelSound() {
-	if (!PlayWaveFile(pGoal)) {
+	if (!PlaySFXWaveFile(pGoal)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayMenuHighlightSound() {
-	if (!PlayWaveFile(menuHighlightButton)) {
+	if (!PlaySFXWaveFile(menuHighlightButton)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayMenuClickSound() {
-	if (!PlayWaveFile(menuClickButton)) {
+	if (!PlaySFXWaveFile(menuClickButton)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayMenuBackSound() {
-	if (!PlayWaveFile(menuBack)) {
+	if (!PlaySFXWaveFile(menuBack)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::PlayTestSound01() {
-	if (!PlayWaveFile(test01)) {
+	if (!PlaySFXWaveFile(test01)) {
 		return false;
 	}
 	return true;
 }
 bool Sounds::StartMenuMusic() {
-	if (!PlayLoopingWaveFile(menu01)) {
+	if (!PlayLoopingMusicWaveFile(menu01)) {
 		return false;
 	}
+	this->menuMusicPlaying = true;
 	return true;
 }
 bool Sounds::StopMenuMusic() {
 	if (!StopLoopingWaveFile(menu01)) {
 		return false;
 	}
+	this->menuMusicPlaying = false;
 	return true;
 }
 bool Sounds::StartGameMusic() {
-	if (!PlayLoopingWaveFile(game01)) {
+	if (!PlayLoopingMusicWaveFile(game01)) {
 		return false;
 	}
+	this->gameMusicPlaying = true;
 	return true;
 }
 bool Sounds::StopGameMusic() {
 	if (!StopLoopingWaveFile(game01)) {
 		return false;
 	}
+	this->gameMusicPlaying = false;
 	return true;
 }
 bool Sounds::ContinueGameMusic() {
 	if (ContinueLoopingWaveFile(game01)) {
 		return false;
 	}
+	this->gameMusicPlaying = true;
 	return true;
 }
 bool Sounds::StopAllSFX() {
@@ -583,7 +591,7 @@ bool Sounds::ContinueAllSFX() {
 		return false;
 	}
 	if (!ContinueSFX(pStart)) {
-		return false;
+return false;
 	}
 	if (!ContinueSFX(pGoal)) {
 		return false;
@@ -596,15 +604,17 @@ bool Sounds::ContinueAllSFX() {
 	return true;
 }
 bool Sounds::StartPlayerMoveLoop() {
-	if (!PlayLoopingWaveFile(playerMoveLoop)) {
+	if (!PlayLoopingSFXWaveFile(playerMoveLoop)) {
 		return false;
 	}
+	this->playerMoving = true;
 	return true;
 }
 bool Sounds::StopPlayerMoveLoop() {
 	if (!StopLoopingWaveFile(playerMoveLoop)) {
 		return false;
 	}
+	this->playerMoving = false;
 	return true;
 }
 
@@ -655,43 +665,39 @@ void Sounds::setMusicVolume(UINT music) {
 		this->musicVolume = music;
 	}
 }
-void Sounds::applyVolumes() {
-	//SFX
-	LONG sfx = (masterVolume * sfxVolume * 100) - 10000;
-	SetVolume(jump01, sfx);
-	SetVolume(jump02, sfx);
-	SetVolume(jump03, sfx);
-	SetVolume(land01, sfx);
-	SetVolume(land02, sfx);
-	SetVolume(land03, sfx);
-	SetVolume(blob01, sfx);
-	SetVolume(blob02, sfx);
-	SetVolume(blob03, sfx);
-	SetVolume(enmy01, sfx);
-	SetVolume(enmy02, sfx);
-	SetVolume(enmy03, sfx);
-	SetVolume(sorb01, sfx);
-	SetVolume(sorb02, sfx);
-	SetVolume(sorb03, sfx);
-	SetVolume(pDeath, sfx);
-	SetVolume(pDmg01, sfx);
-	SetVolume(pDmg02, sfx);
-	SetVolume(playerMoveLoop, sfx);
-	SetVolume(menuHighlightButton, sfx);
-	SetVolume(menuClickButton, sfx);
-	SetVolume(menuBack, sfx);
-	for (int i = 0; i < nrOfEnemies; i++) {
-		SetVolume(enemies[i], sfx);
-	}
-	//Music?
-	LONG music = (masterVolume * musicVolume * 100) - 10000;
-	SetVolume(test01, music);
-	SetVolume(menu01, music);
-	SetVolume(game01, music);
-	SetVolume(pStart, music);
-	SetVolume(pGoal, music);
 
-	defaultVolume = false;
+bool Sounds::RestartSounds() {
+	if (!StopAllSFX()) {
+		return false;
+	}
+	if (!ContinueAllSFX()) {
+		return false;
+	}
+	if (gameMusicPlaying == true) {
+		if (!StopGameMusic()) {
+			return false;
+		}
+		if (!ContinueGameMusic()) {
+			return false;
+		}
+	}
+	else if (menuMusicPlaying == true) {
+		if (!StopMenuMusic()) {
+			return false;
+		}
+		if (!ContinueLoopingWaveFile(menu01)) {
+			return false;
+		}
+	}
+	if (playerMoving == true) {
+		if (!StopPlayerMoveLoop()) {
+			return false;
+		}
+		if(!ContinueLoopingWaveFile(playerMoveLoop)){
+			return false;
+		}
+	}
+	return true;
 }
 
 bool Sounds::InitializeDirectSound(HWND handle) {
@@ -878,19 +884,24 @@ void Sounds::ShutdownWaveFile(IDirectSoundBuffer8** soundBuffer) {
 		*soundBuffer = nullptr;
 	}
 }
-bool Sounds::PlayWaveFile(IDirectSoundBuffer8* sound) {
+bool Sounds::PlayMusicWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 
 	hr = sound->SetCurrentPosition(0);
 	if (FAILED(hr)) {
 		return false;
 	}
-
-	if (defaultVolume != false) {
-		hr = sound->SetVolume(DSBVOLUME_MAX);
-		if (FAILED(hr)) {
-			return false;
-		}
+	UINT totalMusic = this->masterVolume + this->musicVolume;
+	LONG music;
+	if (masterVolume == 0 || musicVolume == 0) {
+		music = -10000;
+	}
+	else {
+		music = (totalMusic * 200) - 4000;
+	}
+	hr = sound->SetVolume(music);
+	if (FAILED(hr)) {
+		return false;
 	}
 	
 	hr = sound->Play(0, 0, 0);
@@ -900,19 +911,78 @@ bool Sounds::PlayWaveFile(IDirectSoundBuffer8* sound) {
 
 	return true;
 }
-bool Sounds::PlayLoopingWaveFile(IDirectSoundBuffer8* sound) {
+bool Sounds::PlaySFXWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 
 	hr = sound->SetCurrentPosition(0);
 	if (FAILED(hr)) {
 		return false;
 	}
+	UINT totalSfx = this->masterVolume + this->sfxVolume;
+	LONG sfx;
+	if (masterVolume == 0 || sfxVolume == 0) {
+		sfx = -10000;
+	}
+	else {
+		sfx = (totalSfx * 200) - 4000;
+	}
+	hr = sound->SetVolume(sfx);
+	if (FAILED(hr)) {
+		return false;
+	}
 
-	if (defaultVolume != false) {
-		hr = sound->SetVolume(DSBVOLUME_MAX);
-		if (FAILED(hr)) {
-			return false;
-		}
+	hr = sound->Play(0, 0, 0);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	return true;
+}
+bool Sounds::PlayLoopingMusicWaveFile(IDirectSoundBuffer8* sound) {
+	HRESULT hr;
+
+	hr = sound->SetCurrentPosition(0);
+	if (FAILED(hr)) {
+		return false;
+	}
+	UINT totalMusic = this->masterVolume + this->musicVolume;
+	LONG music;
+	if (masterVolume == 0 || musicVolume == 0) {
+		music = -10000;
+	}
+	else {
+		music = (totalMusic * 200) - 4000;
+	}
+	hr = sound->SetVolume(music);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	hr = sound->Play(0, 0, DSBPLAY_LOOPING);
+	if (FAILED(hr)) {
+		return false;
+	}
+
+	return true;
+}
+bool Sounds::PlayLoopingSFXWaveFile(IDirectSoundBuffer8* sound) {
+	HRESULT hr;
+
+	hr = sound->SetCurrentPosition(0);
+	if (FAILED(hr)) {
+		return false;
+	}
+	UINT totalSfx = this->masterVolume + this->sfxVolume;
+	LONG sfx;
+	if (masterVolume == 0 || sfxVolume == 0) {
+		sfx = -10000;
+	}
+	else {
+		sfx = (totalSfx * 200) - 4000;
+	}
+	hr = sound->SetVolume(sfx);
+	if (FAILED(hr)) {
+		return false;
 	}
 
 	hr = sound->Play(0, 0, DSBPLAY_LOOPING);
@@ -934,12 +1004,17 @@ bool Sounds::StopLoopingWaveFile(IDirectSoundBuffer8* sound) {
 }
 bool Sounds::ContinueLoopingWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
-
-	if (defaultVolume != false) {
-		hr = sound->SetVolume(DSBVOLUME_MAX);
-		if (FAILED(hr)) {
-			return false;
-		}
+	UINT totalMusic = this->masterVolume + this->musicVolume;
+	LONG music;
+	if (masterVolume == 0 || musicVolume == 0) {
+		music = -10000;
+	}
+	else {
+		music = (totalMusic * 200) - 4000;
+	}
+	hr = sound->SetVolume(music);
+	if (FAILED(hr)) {
+		return false;
 	}
 
 	hr = sound->Play(0, 0, DSBPLAY_LOOPING);
@@ -972,11 +1047,17 @@ bool Sounds::ContinueSFX(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 	LPDWORD position = NULL;
 
-	if (defaultVolume != false) {
-		hr = sound->SetVolume(DSBVOLUME_MAX);
-		if (FAILED(hr)) {
-			return false;
-		}
+	UINT totalSfx = this->masterVolume + this->sfxVolume;
+	LONG sfx;
+	if (masterVolume == 0 || sfxVolume == 0) {
+		sfx = -10000;
+	}
+	else {
+		sfx = (totalSfx * 200) - 4000;
+	}
+	hr = sound->SetVolume(sfx);
+	if (FAILED(hr)) {
+		return false;
 	}
 	
 	hr = sound->GetCurrentPosition(position, NULL);
@@ -1020,14 +1101,14 @@ bool Sounds::PlayEnemyJumpSound(int index, float distance) {
 		float temp = ((outerLimit - distance)/(outerLimit - innerLimit));
 		LONG volume = (masterVolume * sfxVolume * (90 * temp)) - 10000;
 		SetVolume(this->enemies[index], volume);
-		if(!PlayWaveFile(this->enemies[index])) {
+		if(!PlaySFXWaveFile(this->enemies[index])) {
 			return false;
 		}
 	}
 	else if (distance <= innerLimit) {
 		LONG volume = (masterVolume * sfxVolume * 90) - 10000;
 		SetVolume(this->enemies[index], volume);
-		if (!PlayWaveFile(this->enemies[index])) {
+		if (!PlaySFXWaveFile(this->enemies[index])) {
 			return false;
 		}
 	}
