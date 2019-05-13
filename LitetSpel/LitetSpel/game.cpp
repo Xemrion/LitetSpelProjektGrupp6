@@ -1,32 +1,21 @@
 #include "game.h"
 
 void Game::init() noexcept {
-   /* groundBox.hitbox.center      = vec4(0, -30, 0, 0);
-    groundBox.hitbox.halfLengths = vec4(100, 10, 10, 0);
-	groundBox.hitbox.color       = vec4(1.0, 1.0, 1.0, 0.0);
-	level.boxes.push_back(groundBox.hitbox);
-
-	level.colManager.registerEntry(groundBox, ColliderType::platform, groundBox.hitbox, true);
-
-	testPlat.hitbox.center      = vec4(30.0f, 0.0f, 0.0f, 0.0f);
-	testPlat.hitbox.halfLengths = vec4(10.0f, 20.0f, 10.0f, 0.0f);
-	testPlat.hitbox.color       = vec4(0.0, 1.0, 0.0, 0.0);
-	level.boxes.push_back(testPlat.hitbox);
-	level.colManager.registerEntry(testPlat, ColliderType::platform, testPlat.hitbox, true);
-
-	testplat2.hitbox.center      = vec4(-30.0f, 10.0f, 0.0f, 0.0f);
-	testplat2.hitbox.halfLengths = vec4(10.0f, 2.0f, 10.0f, 0.0f);
-	testplat2.hitbox.color       = vec4(0.0, 0.5, 0.5, 0.0);
-	level.boxes.push_back(testplat2.hitbox);
-	level.colManager.registerEntry(testplat2, ColliderType::platform, testplat2.hitbox, true);*/
 	editor.initialize("test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
-		level.boxes.push_back(editor.platforms.at(i).hitbox);
+		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
 		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
+	for (int i = 0; i < editor.movingPlatforms.size(); i++)
+	{
+		editor.movingPlatforms.at(i).Hitbox.color = glm::vec4(1, 1, 1, 0);
+		level.movingBoxes.push_back(editor.platforms.at(i).hitbox);
+		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.movingPlatforms.at(i).Hitbox, true);
+	}
     level.goal = std::make_unique<LevelGoal>( level.colManager, editor.goalPos, 12.0f );
+	level.staticBoxes.push_back(level.goal->representation);
 // player & blobs:
     auto &player = level.player;
 	player.pos = editor.startPos;
@@ -53,10 +42,12 @@ void Game::init() noexcept {
 	level.TestPowerUp.powerBox.center = vec4(-30.0f, 15.0f, 0.0f, 0.0f);
 	level.TestPowerUp.powerBox.halfLengths = vec4(2.0f, 2.0f, 2.0f, 0.0f);
 	level.TestPowerUp.powerBox.color = vec4(0.0, 0.5, 0.75, 0);
-	level.boxes.push_back(level.TestPowerUp.powerBox);
+	level.staticBoxes.push_back(level.TestPowerUp.powerBox);
 	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
-
-// MENU
+}
+void Game::menuLoad()
+{
+	// MENU
 	MenuBG.center = vec4(0.0f, 0.0f, 5.0f, 0.0f);
 	MenuBG.halfLengths = vec4(100.0f, 100.0f, 0.0f, 0.0f);
 	MenuBG.color = vec4(0.0f, 0.0f, 1.0f, 0.0f);
@@ -139,40 +130,55 @@ void Player::update(double dt) noexcept {
 
 void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
 {
-	
 		if (otherHitbox == ColliderType::platform) {
 
-			//Collision with floor
-			if (pos.y > (other.center.y + other.halfLengths.y)) 
-			{
-				isStanding = true;
-				hasExtraJump = true;
-				//pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
-				velocity.y = 0;
-			}
 			// Collision with roof
 			if (pos.y < (other.center.y - other.halfLengths.y)) 
 			{
+				velocity.y = 0;
 				vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
 				vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
 				vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
 				pos.y -= length(minDistY);
+				if (status == PlayerStatus::Sticky && !isStuck) 
+				{
+					isStuck = true;
+				}
 			}
 			// Collision with wall to the left
-			if(pos.x > (other.center.x + other.halfLengths.x))
+			else if(pos.x > (other.center.x + other.halfLengths.x))
 			{
 				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 				pos.x += length(minDistX);
+				if (status == PlayerStatus::Sticky && !isStuck)
+				{
+					isStuck = true;
+					velocity.x = 0;
+				}
 			}
 			// Collision with wall to the right
-			if (pos.x < (other.center.x - other.halfLengths.x))
+			else if (pos.x < (other.center.x - other.halfLengths.x))
 			{
 				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 				pos.x -= length(minDistX);
+				if (status == PlayerStatus::Sticky && !isStuck)
+				{
+					isStuck = true;
+					velocity.x = 0;
+				}
+			}
+
+			//Collision with floor
+			else if (pos.y > (other.center.y + other.halfLengths.y))
+			{
+				isStanding = true;
+				hasExtraJump = true;
+				//pos.y        = other.center.y + other.halfLengths.y + (pos.y - Hitbox.center.y + Hitbox.halfLengths.y);
+				velocity.y = 0;
 			}
 			/*vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-Hitbox.center.y + Hitbox.halfLengths.y), 0.0);
 			vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-Hitbox.center.y - Hitbox.halfLengths.y), 0.0);
@@ -355,17 +361,6 @@ void Game::handleInput() {
 	if (leftButtonDown) {
 		player.shoot(mousePos);
 	}
-
-		if (keys[Keys::left]) {
-			if (!player.isStuck) {
-				player.addVelocity(vec3(-1, 0, 0), true);
-			}
-		}
-		if (keys[Keys::right]) {
-			if (!player.isStuck) {
-				player.addVelocity(vec3(1, 0, 0), true);
-			}
-		}
 		if (keys[Keys::up]) {
 			if (player.isStanding) {
 				player.isStanding = false;
@@ -379,14 +374,17 @@ void Game::handleInput() {
 				player.putForce(vec3(0.0, player.jumpForce, 0.0));
 			}
 		}
+		if (keys[Keys::left]) {
+				player.addVelocity(vec3(-1, 0, 0), true);
+		}
+		if (keys[Keys::right]) {
+				player.addVelocity(vec3(1, 0, 0), true);
+		}
+
 		if (keys[Keys::down]) {
-			if (player.status == PlayerStatus::Sticky) {
+			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
 				player.isStuck = false;
-				if(!player.isStanding)
-					player.pos.y -= 0.01;
-				if (player.isStanding == false) {
-					//player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT, 0.0));
-				}
+				player.velocity = vec3(0,0,0);
 			}
 		}
 	for (int i = 0; i < 4; ++i) {
@@ -466,7 +464,7 @@ void Game::updateEnemyCollision()
 		3.0,
 		0.0
 	);
-	level.boxes.push_back(EnemyBox);
+	level.movingBoxes.push_back(EnemyBox);
 
 	// Bottom:
 	enemy.Hitbox.center = vec4(
@@ -484,25 +482,20 @@ void Game::updateEnemyCollision()
 // Call after all other per frame updates
 void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
-	level.boxes   = vector<Box>();
+	level.movingBoxes   = vector<Box>();
 
 	if (state == GameState::LevelState) 
 	{
-		//level.boxes.push_back(groundBox.hitbox);
-		//level.boxes.push_back(testPlat.hitbox);
-		//level.boxes.push_back(testplat2.hitbox);
-		//level.boxes.push_back(level.TestPowerUp.powerBox);
-		for (int i = 0; i < editor.platforms.size(); i++)
-		{
-			editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
-			level.boxes.push_back(editor.platforms.at(i).hitbox);
-		}
 		EnemyBox.color = vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
 
 		if (level.enemy.alive) {
-			level.boxes.push_back(EnemyBox);
+			level.movingBoxes.push_back(EnemyBox);
 		}
-
+		for (int i = 0; i < editor.movingPlatforms.size(); i++)
+		{
+			editor.movingPlatforms.at(i).Hitbox.color = glm::vec4(0, 1, 1, 0);
+			level.movingBoxes.push_back(editor.movingPlatforms.at(i).Hitbox);
+		}
 		level.spheres = vector<Sphere>();
 		playerSphere.centerRadius = vec4(
 			level.player.pos.x,
@@ -525,28 +518,26 @@ void Game::updateGraphics() {
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
 		}
 
-		level.boxes.push_back(level.goal->representation);
-
 		//showHitboxes();
 	}
 	else 
 	{
-		level.boxes.push_back(MenuBG);
-		level.boxes.push_back(MenuYes);
-		level.boxes.push_back(MenuNo);
+		level.movingBoxes.push_back(MenuBG);
+		level.movingBoxes.push_back(MenuYes);
+		level.movingBoxes.push_back(MenuNo);
 	}
 }
 
 void Game::showHitboxes()
 {
-	level.boxes.push_back(level.player.Hitbox);
+	level.movingBoxes.push_back(level.player.Hitbox);
 
-	level.boxes.push_back(level.enemy.Hitbox);
+	level.movingBoxes.push_back(level.enemy.Hitbox);
 
 
 	for (int i = 0; i < level.player.blobCharges; i++)
 	{
-		level.boxes.push_back(level.player.blobs[i].hitbox);
+		level.movingBoxes.push_back(level.player.blobs[i].hitbox);
 	}
 }
 

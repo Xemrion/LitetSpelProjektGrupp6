@@ -362,11 +362,19 @@ void Graphics::createCBuffers() {
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
 	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	constBufferDesc.ByteWidth = sizeof(glm::mat4) * maxBoxes + sizeof(glm::vec4) * maxBoxes;
+	constBufferDesc.ByteWidth = sizeof(glm::mat4) * maxMovingBoxes + sizeof(glm::vec4) * maxMovingBoxes;
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	device->CreateBuffer(&constBufferDesc, NULL, &boxTransformBuffer);
+	device->CreateBuffer(&constBufferDesc, NULL, &movingBoxTransformBuffer);
 
+
+	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
+	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufferDesc.ByteWidth = sizeof(glm::vec4) * maxStaticBoxes;
+	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	device->CreateBuffer(&constBufferDesc, NULL, &staticBoxColorBuffer);
 
 
 	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
@@ -514,8 +522,8 @@ HRESULT Graphics::createShaders()
 
 	/*** BOX RASTERIZATION SHADERS ***/
 	{
-		SAFE_RELEASE(boxRasterVertexShader);
-		SAFE_RELEASE(boxRasterPixelShader);
+		SAFE_RELEASE(movingBoxVertexShader);
+		SAFE_RELEASE(movingBoxPixelShader);
 
 		ID3DBlob* rVS = nullptr;
 
@@ -547,7 +555,7 @@ HRESULT Graphics::createShaders()
 			rVS->GetBufferPointer(),
 			rVS->GetBufferSize(),
 			nullptr,
-			&boxRasterVertexShader
+			&movingBoxVertexShader
 		);
 
 		D3D11_INPUT_ELEMENT_DESC rasterInputDesc[] = {
@@ -604,14 +612,110 @@ HRESULT Graphics::createShaders()
 			return result;
 		}
 
-		device->CreatePixelShader(rPS->GetBufferPointer(), rPS->GetBufferSize(), nullptr, &boxRasterPixelShader);
+		device->CreatePixelShader(rPS->GetBufferPointer(), rPS->GetBufferSize(), nullptr, &movingBoxPixelShader);
 		rPS->Release();
 	}
 
+	{
+		SAFE_RELEASE(staticBoxVertexShader);
+		SAFE_RELEASE(staticBoxPixelShader);
+
+		ID3DBlob* VS = nullptr;
+
+		result = D3DCompileFromFile(
+			L"static_box_raster_vs.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"vs_5_0",
+			D3DCOMPILE_DEBUG,
+			0,
+			&VS,
+			&errorBlob
+		);
+
+		if (FAILED(result))
+		{
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (VS)
+				VS->Release();
+			return result;
+		}
+
+		device->CreateVertexShader(
+			VS->GetBufferPointer(),
+			VS->GetBufferSize(),
+			nullptr,
+			&staticBoxVertexShader
+		);
+
+		D3D11_INPUT_ELEMENT_DESC rasterInputDesc[] = {
+			{
+				"POSITION",
+				0,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				0,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			},
+			{
+				"NORMAL",
+				0,
+				DXGI_FORMAT_R32G32B32_FLOAT,
+				0,
+				12,
+				D3D11_INPUT_PER_VERTEX_DATA,
+				0
+			}
+		};
+
+		device->CreateInputLayout(rasterInputDesc, ARRAYSIZE(rasterInputDesc), VS->GetBufferPointer(), VS->GetBufferSize(), &boxVertexLayout);
+
+		VS->Release();
+
+		//create pixel shader
+		ID3DBlob* PS = nullptr;
+		if (errorBlob) errorBlob->Release();
+		errorBlob = nullptr;
+
+		result = D3DCompileFromFile(
+			L"static_box_raster_ps.hlsl",
+			nullptr,
+			nullptr,
+			"main",
+			"ps_5_0",
+			D3DCOMPILE_DEBUG,
+			0,
+			&PS,
+			&errorBlob
+		);
+
+		if (FAILED(result))
+		{
+			if (errorBlob)
+			{
+				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+				errorBlob->Release();
+			}
+			if (PS)
+				PS->Release();
+			return result;
+		}
+
+		device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &staticBoxPixelShader);
+		PS->Release();
+	}
+
+
 	/*** LASERS ***/
 	{
-		SAFE_RELEASE(laserRasterVertexShader);
-		SAFE_RELEASE(laserRasterPixelShader);
+		SAFE_RELEASE(laserVertexShader);
+		SAFE_RELEASE(laserPixelShader);
 
 		ID3DBlob* VS = nullptr;
 
@@ -643,7 +747,7 @@ HRESULT Graphics::createShaders()
 			VS->GetBufferPointer(),
 			VS->GetBufferSize(),
 			nullptr,
-			&laserRasterVertexShader
+			&laserVertexShader
 		);
 
 		D3D11_INPUT_ELEMENT_DESC rasterInputDesc[] = {
@@ -691,7 +795,7 @@ HRESULT Graphics::createShaders()
 			return result;
 		}
 
-		device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &laserRasterPixelShader);
+		device->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), nullptr, &laserPixelShader);
 		PS->Release();
 	}
 
@@ -737,8 +841,6 @@ HRESULT Graphics::createBoxData()
 		glm::vec3( 1.0f,  1.0f, -1.0f),     glm::normalize(glm::vec3( 1.0f,  1.0f, -1.0f)),
 		glm::vec3( 1.0f, -1.0f, -1.0f),     glm::normalize(glm::vec3( 1.0f, -1.0f, -1.0f))
 	};
-
-	glm::vec3 boxVertices[36 * 2];
 
 	for (int i = 0; i < 4; ++i)
 	{
@@ -794,22 +896,19 @@ HRESULT Graphics::createBoxData()
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = boxVertices;
 	HRESULT hr = device->CreateBuffer(&bufferDesc, &data, &boxVertexBuffer);
-	if (FAILED(hr))
-		return hr;
-
 	return hr;
 }
 
-void Graphics::setBoxes(const vector<Box>& boxes)
+void Graphics::setMovingBoxes(const vector<Box>& boxes)
 {
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
 	struct Transforms {
-		glm::mat4 WVP[100];
-		glm::vec4 color[100];
+		glm::mat4 WVP[maxMovingBoxes];
+		glm::vec4 color[maxMovingBoxes];
 	} transforms;
-	memset(&transforms, 0, sizeof(glm::mat4) * 100 + sizeof(glm::vec4) * 100);
+	memset(&transforms, 0, sizeof(glm::mat4) * maxMovingBoxes + sizeof(glm::vec4) * maxMovingBoxes);
 
 	for (int i = 0; i < boxes.size(); ++i)
 	{
@@ -819,11 +918,55 @@ void Graphics::setBoxes(const vector<Box>& boxes)
 		transforms.color[i] = boxes[i].color;
 	}
 
-	deviceContext->Map(boxTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	deviceContext->Map(movingBoxTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, &transforms, sizeof(Transforms));
-	deviceContext->Unmap(boxTransformBuffer, 0);
+	deviceContext->Unmap(movingBoxTransformBuffer, 0);
 
-	boxInstances = boxes.size();
+	movingBoxInstances = boxes.size();
+}
+
+void Graphics::setStaticBoxes(const vector<Box>& boxes)
+{
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	vector<glm::vec3> worldVertices;
+	worldVertices.reserve(boxes.size() * 36 * 2);
+
+	struct Colors {
+		glm::vec4 color[maxStaticBoxes];
+	} colors;
+	memset(&colors, 0, sizeof(glm::vec4) * maxStaticBoxes);
+
+	for (int i = 0; i < boxes.size(); ++i)
+	{
+		glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
+		t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
+		
+		for (int j = 0; j < 36 * 2; j += 2) {
+			worldVertices.push_back(glm::vec3(t * glm::vec4(boxVertices[j], 1.0)));
+			worldVertices.push_back(boxVertices[j + 1]);
+		}
+
+		colors.color[i] = boxes[i].color;
+	}
+
+	deviceContext->Map(staticBoxColorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, &colors, sizeof(Colors));
+	deviceContext->Unmap(staticBoxColorBuffer, 0);
+
+	D3D11_BUFFER_DESC bufferDesc;
+	memset(&bufferDesc, 0, sizeof(bufferDesc));
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = worldVertices.size() * sizeof(glm::vec3);
+
+	SAFE_RELEASE(staticBoxVertexBuffer);
+	
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = worldVertices.data();
+	HRESULT hr = device->CreateBuffer(&bufferDesc, &data, &staticBoxVertexBuffer);
+
+	staticBoxInstances = boxes.size();
 }
 
 void Graphics::setLasers(const vector<Line>& lines)
@@ -881,34 +1024,11 @@ void Graphics::setCameraPos(glm::vec3 pos)
 
 void Graphics::swapBuffer()
 {
+	// clear buffers
 	float clearColor[] = { 0.0, 0.0, 0.0, 0.0 };
 	deviceContext->ClearRenderTargetView(backBufferView, clearColor);
 	deviceContext->ClearRenderTargetView(geometryBufferView, clearColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);
-
-	// draw boxes
-	deviceContext->VSSetShader(boxRasterVertexShader, nullptr, 0);
-	deviceContext->PSSetShader(boxRasterPixelShader, nullptr, 0);
-
-	deviceContext->VSSetConstantBuffers(0, 1, &boxTransformBuffer);
-
-	UINT32 vertexSize = sizeof(glm::vec3) * 2;
-	UINT32 offset = 0;
-	
-	deviceContext->OMSetRenderTargets(1, &geometryBufferView, depthStencilView);
-	deviceContext->IASetVertexBuffers(0, 1, &boxVertexBuffer, &vertexSize, &offset);
-	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	deviceContext->IASetInputLayout(boxVertexLayout);
-	deviceContext->DrawInstanced(36, boxInstances, 0, 0);
-
-	// draw lasers
-	deviceContext->VSSetShader(laserRasterVertexShader, nullptr, 0);
-	deviceContext->PSSetShader(laserRasterPixelShader, nullptr, 0);
-	
-	deviceContext->OMSetBlendState(blendState, 0, UINT_MAX);
-	deviceContext->VSSetConstantBuffers(0, 1, &laserTransformBuffer);
-	deviceContext->IASetInputLayout(laserVertexLayout);
-	deviceContext->DrawInstanced(36, laserInstances, 0, 0);
 
 	// update view projection matrix buffer
 	D3D11_MAPPED_SUBRESOURCE mr;
@@ -939,6 +1059,41 @@ void Graphics::swapBuffer()
 	deviceContext->Map(cornerBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, corners, sizeof(glm::vec4) * 4);
 	deviceContext->Unmap(cornerBuffer, 0);
+
+	// draw moving boxes
+	deviceContext->VSSetShader(movingBoxVertexShader, nullptr, 0);
+	deviceContext->PSSetShader(movingBoxPixelShader, nullptr, 0);
+
+	deviceContext->VSSetConstantBuffers(0, 1, &movingBoxTransformBuffer);
+
+	UINT32 vertexSize = sizeof(glm::vec3) * 2;
+	UINT32 offset = 0;
+	
+	deviceContext->OMSetRenderTargets(1, &geometryBufferView, depthStencilView);
+	deviceContext->IASetVertexBuffers(0, 1, &boxVertexBuffer, &vertexSize, &offset);
+	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	deviceContext->IASetInputLayout(boxVertexLayout);
+	deviceContext->DrawInstanced(36, movingBoxInstances, 0, 0);
+
+	// draw static boxes
+	deviceContext->VSSetShader(staticBoxVertexShader, nullptr, 0);
+	deviceContext->PSSetShader(staticBoxPixelShader, nullptr, 0);
+
+	deviceContext->VSSetConstantBuffers(0, 1, &staticBoxColorBuffer);
+	deviceContext->VSSetConstantBuffers(1, 1, &viewProjBuffer);
+
+	deviceContext->IASetVertexBuffers(0, 1, &staticBoxVertexBuffer, &vertexSize, &offset);
+	//deviceContext->DrawInstanced(36, staticBoxInstances, 0, 0);
+	deviceContext->Draw(36 * staticBoxInstances, 0);
+
+	// draw lasers
+	deviceContext->VSSetShader(laserVertexShader, nullptr, 0);
+	deviceContext->PSSetShader(laserPixelShader, nullptr, 0);
+	
+	deviceContext->OMSetBlendState(blendState, 0, UINT_MAX);
+	deviceContext->VSSetConstantBuffers(0, 1, &laserTransformBuffer);
+	deviceContext->IASetInputLayout(laserVertexLayout);
+	deviceContext->DrawInstanced(36, laserInstances, 0, 0);
 
 	// lighting / metaball pass
 	deviceContext->VSSetShader(vertexShader, nullptr, 0);
@@ -987,14 +1142,14 @@ Graphics::~Graphics()
 
 	SAFE_RELEASE(vertexShader);
 	SAFE_RELEASE(pixelShader);
-	SAFE_RELEASE(boxRasterVertexShader);
-	SAFE_RELEASE(boxRasterPixelShader);
+	SAFE_RELEASE(movingBoxVertexShader);
+	SAFE_RELEASE(movingBoxPixelShader);
 	
 	SAFE_RELEASE(quadVertexLayout);
 	SAFE_RELEASE(quadBuffer);
 	SAFE_RELEASE(boxVertexLayout);
 	SAFE_RELEASE(boxVertexBuffer);
-	SAFE_RELEASE(boxTransformBuffer);
+	SAFE_RELEASE(movingBoxTransformBuffer);
 	SAFE_RELEASE(metaballBuffer);
 	SAFE_RELEASE(viewProjBuffer);
 	SAFE_RELEASE(cameraBuffer);

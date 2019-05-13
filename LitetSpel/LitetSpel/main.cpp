@@ -157,18 +157,22 @@ void keyboardFunc()
 	//Movement
 	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
 	{
-		if (keyboard.KeyIsPressed('D'))
+		if (!game.level.player.isStuck) 
 		{
-			game.keys[1] = true;
+			if (keyboard.KeyIsPressed('D'))
+			{
+				game.keys[1] = true;
+			}
+			if (keyboard.KeyIsPressed('A'))
+			{
+				game.keys[0] = true;
+			}
+			if (keyboard.KeyIsPressed('W'))
+			{
+				game.keys[2] = true;
+			}
 		}
-		if (keyboard.KeyIsPressed('A'))
-		{
-			game.keys[0] = true;
-		}
-		if (keyboard.KeyIsPressed('W'))
-		{
-			game.keys[2] = true;
-		}
+		
 		if (keyboard.KeyIsPressed('S'))
 		{
 			game.keys[3] = true;
@@ -257,9 +261,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
-	game.init();
-	ShowWindow(wndHandle, nCmdShow);
 
+	bool gameLoaded = false;
+	game.menuLoad();
+	ShowWindow(wndHandle, nCmdShow);
 
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
@@ -271,6 +276,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 		else
 		{
+			if (game.state == GameState::LevelState && !gameLoaded) 
+			{
+				game.init();
+				graphics.setStaticBoxes(game.level.staticBoxes);
+				gameLoaded = true;
+			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
@@ -291,12 +302,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			}
 			game.update(dt);
 			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
-			graphics.setBoxes(game.level.boxes);
+			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;
 		}
-		
 	}
 
 	return 0;

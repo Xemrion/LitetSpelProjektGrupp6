@@ -12,7 +12,7 @@ using namespace glm;
 class MovingPlatform : public CollisionObject
 {
 public:
-	MovingPlatform(vec3 StartPos = vec3(0,0,0), vec3 endPos = vec3(0,0,0));
+	MovingPlatform(vec3 StartPos, vec3 endPos, vec4 center, vec4 halfLength);
 	virtual ~MovingPlatform();
 	void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override {};
 	void move();
