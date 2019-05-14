@@ -157,26 +157,23 @@ void keyboardFunc()
 	//Movement
 	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
 	{
-		if (!game.level.player.isStuck) 
+		if (keyboard.KeyIsPressed('D'))
 		{
-			if (keyboard.KeyIsPressed('D'))
-			{
-				game.keys[1] = true;
-			}
-			if (keyboard.KeyIsPressed('A'))
-			{
-				game.keys[0] = true;
-			}
-			if (keyboard.KeyIsPressed('W'))
-			{
-				game.keys[2] = true;
-			}
+			game.keys[Game::Keys::right] = true;
 		}
-		
+		if (keyboard.KeyIsPressed('A'))
+		{
+			game.keys[Game::Keys::left] = true;
+		}
+		if (keyboard.KeyIsPressed('W'))
+		{
+			game.keys[Game::Keys::up] = true;
+		}
 		if (keyboard.KeyIsPressed('S'))
 		{
-			game.keys[3] = true;
+			game.keys[Game::Keys::down] = true;
 		}
+
 		if (keyboard.KeyIsPressed('B'))
 		{
 			if (powerCoolDown <= 0)
