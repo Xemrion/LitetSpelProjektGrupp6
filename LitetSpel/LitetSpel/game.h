@@ -14,9 +14,7 @@
 #include "PowerUp.h"
 #include "Graphics.h"
 #include "Editor.h"
-// TODO: improve encapsulation by reducing public exposure
 
-using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
 using namespace glm;
 enum PlayerStatus {
 	None,

@@ -1,52 +1,22 @@
 #include "MovingPlatform.h"
 
-MovingPlatform::MovingPlatform(vec3 StartPos, vec3 endPos, vec4 center, vec4 halfLength)
+MovingPlatform::MovingPlatform(vec3 startPos, vec3 endPos, vec4 center, vec4 halfLength)
 {
-	this->startPos = StartPos;
-	this->pos = StartPos;
+	this->startPos = startPos;
+	this->pos = startPos;
 	this->endPos = endPos;
 	this->hitbox.center = center;
 	this->hitbox.halfLengths = halfLength;
 	this->hitbox.color = vec4(0, 1, 1, 0);
-	Speed = vec2(0.005, 0.005);
 }
 
 MovingPlatform::~MovingPlatform()
 {
 }
 
-void MovingPlatform::move()
+void MovingPlatform::move(double gameTime)
 {
-	if (endPos.x < startPos.x) 
-	{
-		if (pos.x <= endPos.x or pos.x >= startPos.x)
-		{
-			Speed.x = -Speed.x;
-		}
-	}
-	else 
-	{
-		if (pos.x >= endPos.x or pos.x<= startPos.x)
-		{
-			Speed.x = -Speed.x;
-		}
-	}
-	if (endPos.y < startPos.y)
-	{
-		if (pos.y <= endPos.y or pos.y >= startPos.y)
-		{
-			Speed.y = -Speed.y;
-		}
-	}
-	else
-	{
-		if (pos.y >= endPos.y or pos.y <= startPos.y)
-		{
-			Speed.y = -Speed.y;
-		}
-	}
-
-	pos.x -= (endPos.x - startPos.x)*(Speed.x / 100.0);
-	pos.y -= (endPos.y - startPos.y)*(Speed.y / 100.0);
+	pos = startPos + abs(glm::mod((float)gameTime, period) - period * 0.5f) * (endPos - startPos);
 	this->hitbox.center = vec4(pos, 0);
+	this->hitbox.color = vec4(1.0, 1.0, 0.0, 0.0);
 }
