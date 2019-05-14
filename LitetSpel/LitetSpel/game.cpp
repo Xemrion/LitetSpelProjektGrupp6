@@ -136,15 +136,16 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			// if colliding in Y-axis
 			if (glm::length(minDistY) < glm::length(minDistX)) {
 				posDiff = minDistY;
-				velocity.y = 0;
 
 				// if colliding with floor
 				if (minDistY.y > 0.0) {
+					velocity.y = max(0, velocity.y);
 					isStanding = true;
 					hasExtraJump = true;
 				}
 				//if colliding with ceiling
 				else {
+					velocity.y = min(0, velocity.y);
 					if (status == PlayerStatus::Sticky)
 					{
 						isStuck = true;
