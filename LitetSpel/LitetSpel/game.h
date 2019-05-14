@@ -38,7 +38,7 @@ public:
 	void recallBlobs() noexcept;
     void update(double dt) noexcept;
 
-    vec3 pos, velocity;
+    vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
     bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
     PlayerStatus status;
