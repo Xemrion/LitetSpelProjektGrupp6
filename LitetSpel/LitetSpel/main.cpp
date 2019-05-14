@@ -146,7 +146,7 @@ void mouseFunc()
 			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
 				gameSounds.StopMenuMusic();
 				gameSounds.PlayMenuClickSound();
-				gameSounds.StartGameMusic();
+				//gameSounds.StartGameMusic();
 				game.state = GameState::LevelState;
 			}
 			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)

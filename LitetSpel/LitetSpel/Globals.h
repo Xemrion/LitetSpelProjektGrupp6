@@ -26,6 +26,7 @@ static const glm::vec4 olive	= glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 
 /*
 |----- Current Sound FileNames ----|
+2 channels, 16 bit PCM, 44100Hz, wave file
 test01.wav
 menu01.wav O
 game01.wav O

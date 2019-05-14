@@ -387,11 +387,14 @@ void Game::handleInput() {
 			player.isStanding = false;
 			player.jumpCooldown = COOLDOWN_CONSTANT;
 			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
-			if (player.status != PlayerStatus::Heavy) {
+			if (player.status != PlayerStatus::Heavy && player.status != PlayerStatus::Bouncy) {
 				gameSounds->PlayJumpSound01();
 			}
 			else if (player.status == PlayerStatus::Heavy) {
 				gameSounds->PlayJumpSound02();
+			}
+			else if (player.status == PlayerStatus::Bouncy) {
+				gameSounds->PlayJumpSound03();
 			}
 				
 		}
