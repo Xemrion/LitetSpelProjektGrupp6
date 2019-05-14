@@ -83,7 +83,6 @@ void Editor::initialize(const char* filename)
 				{
 
 					if (startPosY - j <= (-height / 2)
-						|| isMovingPlatform(getPixelColour(startPos)) && !isMovingPlatform(getPixelColour(startPos + width *j))
 						|| !isPlatform(getPixelColour(startPos + (width * j))))
 					{
 						endPosY = startPosY - j;
@@ -110,26 +109,13 @@ void Editor::initialize(const char* filename)
 						//height
 						for (int k = 1; k < glm::abs(endPosY - startPosY) && continueLoop; k++)
 						{
-							if (isPlatform(getPixelColour(startPos + width)))
+
+							for (int l = (j - 1); l > 0 && continueLoop; l--)
 							{
-								for (int l = (j - 1); l > 0 && continueLoop; l--)
+								if (!isPlatform(getPixelColour((startPos + width * k) + l)))
 								{
-									if (!isPlatform(getPixelColour((startPos + width * k) + l)))
-									{
-										endPosY = startPosY - k;
-										continueLoop = false;
-									}
-								}
-							}
-							else
-							{
-								for (int l = (j - 1); l > 0 && continueLoop; l--)
-								{
-									if (!isMovingPlatform(getPixelColour((startPos + width * k) + l)))
-									{
-										endPosY = startPosY - k;
-										continueLoop = false;
-									}
+									endPosY = startPosY - k;
+									continueLoop = false;
 								}
 							}
 						}
@@ -139,7 +125,7 @@ void Editor::initialize(const char* filename)
 					}
 
 				}
-					foundEdge = false;
+				foundEdge = false;
 				if (drawThis)
 				{
 					foundEdge = false;
