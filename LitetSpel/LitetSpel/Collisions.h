@@ -29,7 +29,6 @@ public:
 
 private:
     size_t id;
-    glm::vec3 position;
 
     static size_t generateID() noexcept {
         static size_t idCounter { 0 };

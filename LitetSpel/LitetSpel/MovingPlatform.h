@@ -6,7 +6,6 @@
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 
-using namespace std; // läs: https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md#Rs-using-directive
 using namespace glm;
 
 class MovingPlatform : public CollisionObject
@@ -15,10 +14,10 @@ public:
 	MovingPlatform(vec3 StartPos, vec3 endPos, vec4 center, vec4 halfLength);
 	virtual ~MovingPlatform();
 	void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override {};
-	void move();
+	void move(double time);
 
-	vec2 Speed;
 	vec3 pos;
+	float period = 2.0; // time in seconds that the full path takes
 	vec3 startPos;
 	vec3 endPos;
 

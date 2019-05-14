@@ -13,7 +13,7 @@ void Game::init() noexcept {
 		editor.movingPlatforms.at(i).hitbox.color = glm::vec4(1, 0, 0, 0);
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
-		level.colManager.registerEntry(editor.movingPlatforms.at(i), ColliderType::platform, editor.movingPlatforms.at(i).hitbox, true);
+		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::platform, (level.movingPlatforms.end() - 1)->hitbox, false);
 	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
 	level.staticBoxes.push_back(level.goal->representation);
@@ -432,7 +432,7 @@ void Game::updatePhysics() {
 		//Moving platforms:
 		for (auto &movingPlatform : level.movingPlatforms)
 		{
-			movingPlatform.move();
+			movingPlatform.move(time);
 		}
 		updatePlayerCollision();
 		updateEnemyCollision();
