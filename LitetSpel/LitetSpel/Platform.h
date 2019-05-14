@@ -6,7 +6,7 @@
 class Platform : public CollisionObject  {
 public:
 	Platform();
-	Platform(glm::vec4 center, glm::vec4 halfLengths);
+	Platform(glm::vec4 center, glm::vec4 halfLengths,glm::vec4 color);
     virtual ~Platform() noexcept;
 	//Box& getPlatformBox() const { return this->hitbox; };
     void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override {}

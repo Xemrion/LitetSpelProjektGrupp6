@@ -20,8 +20,8 @@ void Editor::initialize(const char* filename)
 	float startPosY = 0;
 	int endPosX = 0;
 	int endPosY = 0;
-	glm::vec4 halfLength(0, 0, 10, 0);
-	glm::vec4 center(0, 0, 0, 0);
+	vec4 halfLength(0, 0, 10, 0);
+	vec4 center(0, 0, 0, 0);
 	bool foundEdge = false;
 	bool drawThis = true;
 	bool continueLoop = true;
@@ -36,7 +36,7 @@ void Editor::initialize(const char* filename)
 		{
 			//Position baserat på mittpunkten av bilden
 			startPosX = (i % width) - middleX;
-			startPosY = middleY - glm::floor(i / width);
+			startPosY = middleY - floor(i / width);
 
 			halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio;
 			halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio;
@@ -50,7 +50,7 @@ void Editor::initialize(const char* filename)
 				startPosY /= pixelToUnitRatio;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->goalPos = glm::vec3(center);
+				this->goalPos = vec3(center);
 			}
 			else if (isRed(getPixelColour(i)))
 			{
@@ -61,7 +61,7 @@ void Editor::initialize(const char* filename)
 				startPosY /= pixelToUnitRatio;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->enemyPos.push_back(glm::vec3(center));
+				this->enemyPos.push_back(vec3(center));
 			}
 			else if (isGreen(getPixelColour(i)))
 			{
@@ -72,12 +72,12 @@ void Editor::initialize(const char* filename)
 				startPosY /= pixelToUnitRatio;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->startPos = glm::vec3(center);
+				this->startPos = vec3(center);
 			}
 			else
 			{
 				startPosX = (i % width) - middleX;
-				startPosY = middleY - glm::floor(i / width);
+				startPosY = middleY - floor(i / width);
 				startPos = i;
 				for (int j = 1; !foundEdge; j++)
 				{
@@ -98,7 +98,7 @@ void Editor::initialize(const char* filename)
 					{
 						endPosX = startPosX + j;
 						//if its a moving platform and 1x1 size, its a startpoint/endpoint, don't draw
-						if (glm::abs(endPosX - startPosX) == 1 && glm::abs(endPosY - startPosY) == 1 && isMovingPlatform(getPixelColour(i)))
+						if (abs(endPosX - startPosX) == 1 && abs(endPosY - startPosY) == 1 && isMovingPlatform(getPixelColour(i)))
 							drawThis = false;
 
 						foundEdge = true;
@@ -107,7 +107,7 @@ void Editor::initialize(const char* filename)
 
 						//Check width of boxes below(if all match it forms a square)
 						//height
-						for (int k = 1; k < glm::abs(endPosY - startPosY) && continueLoop; k++)
+						for (int k = 1; k < abs(endPosY - startPosY) && continueLoop; k++)
 						{
 
 							for (int l = (j - 1); l > 0 && continueLoop; l--)
@@ -135,19 +135,21 @@ void Editor::initialize(const char* filename)
 						startPosY *= minimumBoxSize;
 						endPosX *= minimumBoxSize;
 						endPosY *= minimumBoxSize;
-						halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio);
-						halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio);
+						halfLength.x = ((abs(endPosX - startPosX)) / 2) / pixelToUnitRatio;
+						halfLength.y = ((abs(endPosY - startPosY)) / 2) / pixelToUnitRatio;
 						startPosX /= pixelToUnitRatio;
 						startPosY /= pixelToUnitRatio;
 						center.x = startPosX + halfLength.x;
 						center.y = startPosY - halfLength.y;
-						platforms.push_back(Platform(center, halfLength));
+						vec4 color = vec4(getPixelColour(startPos), 0);
+						color /= 255;
+						platforms.push_back(Platform(center, halfLength, color));
 					}
 					else
 					{
 						//left side
-						int upperHalf = startPos + (glm::floor((startPosY - endPosY) / 2) * width);
-						int lowerHalf = startPos + (glm::ceil((startPosY - endPosY) / 2 - 1) * width);
+						int upperHalf = startPos + (floor((startPosY - endPosY) / 2) * width);
+						int lowerHalf = startPos + (ceil((startPosY - endPosY) / 2 - 1) * width);
 						int MPendPosX = INFINITE;
 						int MPendPosY = INFINITE;
 						int MPstartPosX = INFINITE;
@@ -157,12 +159,12 @@ void Editor::initialize(const char* filename)
 							if (getPixelColour(lowerHalf - j) == getPixelColour(i))
 							{
 								MPstartPosX = ((lowerHalf - j) % width) - middleX;;
-								MPstartPosY = middleY - glm::floor((lowerHalf - j) / width);
+								MPstartPosY = middleY - floor((lowerHalf - j) / width);
 							}
 							else if (getPixelColour(upperHalf - j) == getPixelColour(i))
 							{
 								MPstartPosX = ((upperHalf - j) % width) - middleX;;
-								MPstartPosY = middleY - glm::floor((upperHalf - j) / width);
+								MPstartPosY = middleY - floor((upperHalf - j) / width);
 							}
 						}
 						//Right side
@@ -173,28 +175,28 @@ void Editor::initialize(const char* filename)
 							if (getPixelColour(lowerHalf + j) == getPixelColour(i))
 							{
 								MPendPosX = ((lowerHalf + j) % width) - middleX;;
-								MPendPosY = middleY - glm::floor((lowerHalf + j) / width);
+								MPendPosY = middleY - floor((lowerHalf + j) / width);
 							}
 							else if (getPixelColour(upperHalf + j) == getPixelColour(i))
 							{
 								MPendPosX = ((upperHalf + j) % width) - middleX;
-								MPendPosY = middleY - glm::floor((upperHalf + j) / width);
+								MPendPosY = middleY - floor((upperHalf + j) / width);
 							}
 						}
 						//top side
-						upperHalf = startPos + glm::floor((endPosX - startPosX) / 2);
-						lowerHalf = startPos + glm::ceil((endPosX - startPosX) / 2 - 1);
+						upperHalf = startPos + floor((endPosX - startPosX) / 2);
+						lowerHalf = startPos + ceil((endPosX - startPosX) / 2 - 1);
 						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++)
 						{
 							if (getPixelColour(lowerHalf - j * width) == getPixelColour(i))
 							{
 								MPstartPosX = (lowerHalf % width) - middleX;;
-								MPstartPosY = middleY - glm::floor((lowerHalf + j * width) / width);
+								MPstartPosY = middleY - floor((lowerHalf + j * width) / width);
 							}
 							else if (getPixelColour(upperHalf - j * width) == getPixelColour(i))
 							{
 								MPstartPosX = (upperHalf % width) - middleX;;
-								MPstartPosY = middleY - glm::floor((upperHalf + j * width) / width);
+								MPstartPosY = middleY - floor((upperHalf + j * width) / width);
 							}
 						}
 						//bottom side
@@ -206,12 +208,12 @@ void Editor::initialize(const char* filename)
 							if (getPixelColour(lowerHalf + j * width) == getPixelColour(i))
 							{
 								MPendPosX = (lowerHalf % width) - middleX;;
-								MPendPosY = middleY - glm::floor((lowerHalf - j * width) / width);
+								MPendPosY = middleY - floor((lowerHalf - j * width) / width);
 							}
 							else if (getPixelColour(upperHalf + j * width) == getPixelColour(i))
 							{
 								MPendPosX = (upperHalf % width) - middleX;;
-								MPendPosY = middleY - glm::floor((upperHalf - j * width) / width);
+								MPendPosY = middleY - floor((upperHalf - j * width) / width);
 							}
 						}
 
@@ -224,8 +226,8 @@ void Editor::initialize(const char* filename)
 						MPendPosY *= minimumBoxSize;
 						MPendPosX *= minimumBoxSize;
 
-						halfLength.x = (((glm::abs(endPosX - startPosX)) / 2) / pixelToUnitRatio);
-						halfLength.y = (((glm::abs(endPosY - startPosY)) / 2) / pixelToUnitRatio);
+						halfLength.x = (((abs(endPosX - startPosX)) / 2) / pixelToUnitRatio);
+						halfLength.y = (((abs(endPosY - startPosY)) / 2) / pixelToUnitRatio);
 
 						startPosX /= pixelToUnitRatio;
 						startPosY /= pixelToUnitRatio;
@@ -236,8 +238,13 @@ void Editor::initialize(const char* filename)
 
 						center.x = startPosX + halfLength.x;
 						center.y = startPosY - halfLength.y;
-
-						this->movingPlatforms.push_back(MovingPlatform(glm::vec3(MPstartPosX, MPstartPosY, 0), glm::vec3(MPendPosX, MPendPosY, 0), center, halfLength));
+						vec4 color = vec4(getPixelColour(startPos), 0);
+						color /= 255;
+						this->movingPlatforms.push_back(MovingPlatform(vec3(MPstartPosX, MPstartPosY, 0),
+							vec3(MPendPosX, MPendPosY, 0),
+							center,
+							halfLength,
+							color));
 
 					}
 				}
@@ -252,20 +259,20 @@ void Editor::initialize(const char* filename)
 
 }
 
-glm::vec3 Editor::getPixelColour(int index)
+vec3 Editor::getPixelColour(int index)
 {
 	//Convert to RGB
 	index *= 3;
 	if (index > width * height * 3)
 	{
-		return glm::vec3(0, 0, 0);
+		return vec3(0, 0, 0);
 	}
-	return glm::vec3(rgb[index], rgb[index + 1], rgb[index + 2]);
+	return vec3(rgb[index], rgb[index + 1], rgb[index + 2]);
 }
 
 int Editor::isPixelUsed(int index)
 {
-	int posY = (height / 2) - glm::floor(index / width);
+	int posY = (height / 2) - floor(index / width);
 	int posX = index % width - (width / 2);
 
 	for (int i = 0; i < topSide.size(); i++)
@@ -285,32 +292,32 @@ void Editor::addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY
 	topSide.push_back(startPosY);
 	bottomSide.push_back(endPosY);
 }
-bool Editor::isWhite(glm::vec3 pixelColour)
+bool Editor::isWhite(vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 255 && pixelColour.z == 255;
 }
 
-bool Editor::isBlue(glm::vec3 pixelColour)
+bool Editor::isBlue(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 0 && pixelColour.z == 255;
 }
 
-bool Editor::isRed(glm::vec3 pixelColour)
+bool Editor::isRed(vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 0;
 }
 
-bool Editor::isGreen(glm::vec3 pixelColour)
+bool Editor::isGreen(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z == 0;
 }
 
-bool Editor::isPlatform(glm::vec3 pixelColour)
+bool Editor::isPlatform(vec3 pixelColour)
 {
 	return !(isRed(pixelColour) || isGreen(pixelColour) || isBlue(pixelColour) || isWhite(pixelColour));
 }
 
-bool Editor::isMovingPlatform(glm::vec3 pixelColour)
+bool Editor::isMovingPlatform(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z >= 120 && pixelColour.z <= 130;
 }

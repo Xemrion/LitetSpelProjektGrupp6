@@ -4,13 +4,11 @@ void Game::init() noexcept {
 	editor.initialize("test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
-		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
 		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
-		editor.movingPlatforms.at(i).hitbox.color = glm::vec4(1, 0, 0, 0);
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
 		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::platform, (level.movingPlatforms.end() - 1)->hitbox, false);

@@ -12,6 +12,7 @@
 #include"Geometry.h"
 #include"Platform.h"
 #include"MovingPlatform.h"
+using namespace glm;
 class Editor
 {
 
@@ -20,13 +21,13 @@ private:
 	std::vector<int> topSide;
 	std::vector<int> bottomSide;
 	std::vector<int> rightSide;
-	bool isWhite(glm::vec3 pixelColour);
-	bool isBlue(glm::vec3 pixelColour);
-	bool isRed(glm::vec3 pixelColour);
-	bool isGreen(glm::vec3 pixelColour);
-	bool isPlatform(glm::vec3 pixelColour);
-	bool isMovingPlatform(glm::vec3 pixelColour);
-	glm::vec3 getPixelColour(int index);
+	bool isWhite(vec3 pixelColour);
+	bool isBlue(vec3 pixelColour);
+	bool isRed(vec3 pixelColour);
+	bool isGreen(vec3 pixelColour);
+	bool isPlatform(vec3 pixelColour);
+	bool isMovingPlatform(vec3 pixelColour);
+	vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
 	void addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY);
 	unsigned char* rgb;
@@ -40,9 +41,9 @@ public:
 	~Editor();
 	std::vector<Platform> platforms;
 	std::vector<MovingPlatform> movingPlatforms;
-	glm::vec3 goalPos;
-	glm::vec3 startPos;
-	std::vector<glm::vec3> enemyPos;
+	vec3 goalPos;
+	vec3 startPos;
+	std::vector<vec3> enemyPos;
 	void initialize(const char* filename);
 
 };
