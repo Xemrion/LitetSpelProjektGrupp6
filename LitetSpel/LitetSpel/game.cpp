@@ -8,30 +8,37 @@ void Game::init() noexcept {
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
 		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
-    level.goal = std::make_unique<LevelGoal>( level.colManager, editor.goalPos, 12.0f );
-	level.staticBoxes.push_back(level.goal->representation);
-// player & blobs:
-    auto &player = level.player;
-	player.pos = editor.startPos;
-	for ( int i = 0;  i < player.blobCharges;  ++i ) {
-        Blob b { player.pos };
-		player.blobs.push_back( Blob(player.pos) );
-		level.spheres.push_back( player.blobs[i].blobSphere );
+	for (int i = 0; i < editor.movingPlatforms.size(); i++)
+	{
+		editor.movingPlatforms.at(i).Hitbox.color = glm::vec4(1, 0, 0, 0);
+		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
+		level.movingBoxes.push_back(editor.movingPlatforms.at(i).Hitbox);
+		level.colManager.registerEntry(editor.movingPlatforms.at(i), ColliderType::platform, editor.movingPlatforms.at(i).Hitbox, true);
 	}
-    for ( auto &b : player.blobs ) {
-        level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
-    }
+	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
+	level.staticBoxes.push_back(level.goal->representation);
+	// player & blobs:
+	auto &player = level.player;
+	player.pos = editor.startPos;
+	for (int i = 0; i < player.blobCharges; ++i) {
+		Blob b{ player.pos };
+		player.blobs.push_back(Blob(player.pos));
+		level.spheres.push_back(player.blobs[i].blobSphere);
+	}
+	for (auto &b : player.blobs) {
+		level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
+	}
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
-// enemies:
-    auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
-	EnemyBox.color = vec4(1,0,0,0);
+	// enemies:
+	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.Hitbox, false);
+	EnemyBox.color = vec4(1, 0, 0, 0);
 
-// LevelGoal
+	// LevelGoal
 
-// PowerUps
+	// PowerUps
 	auto &powerup = level.TestPowerUp;
 	level.TestPowerUp.powerBox.center = vec4(-30.0f, 15.0f, 0.0f, 0.0f);
 	level.TestPowerUp.powerBox.halfLengths = vec4(2.0f, 2.0f, 2.0f, 0.0f);
@@ -61,12 +68,12 @@ void Game::menuLoad()
 Player::Player(vec3 position) :
 	CollisionObject(),
 	pos(position),
-    radius(5.0f),
+	radius(5.0f),
 	velocity(vec3(0.0)),
 	moveSpeed(150.0f),
 	mass(10.0),
-    blobCharges(5),
-    shootCooldown(0),
+	blobCharges(5),
+	shootCooldown(0),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
 	hasExtraJump(true),
@@ -90,7 +97,7 @@ void Player::setVelocity(vec3 const &velocity, bool useSpeed) noexcept {
 // Set useSpeed to true to multiply velocity by objects speed value
 void Player::addVelocity(vec3 const &velocity, bool useSpeed) noexcept {
 	if (useSpeed) {
-		this->velocity += velocity * (moveSpeed/2);
+		this->velocity += velocity * (moveSpeed / 2);
 	}
 	else this->velocity += velocity;
 }
@@ -107,20 +114,20 @@ void Player::move(double dt) noexcept {
 
 // Updates logic, call once per frame
 void Player::update(double dt) noexcept {
-	jumpCooldown  -= float(dt);
+	jumpCooldown -= float(dt);
 	shootCooldown -= float(dt);
 
 	if (isStanding)
 		hasExtraJump = true;
-	
-    mass = (status == PlayerStatus::Heavy)? 20.0f : 10.0f;
+
+	mass = (status == PlayerStatus::Heavy) ? 20.0f : 10.0f;
 
 	if (status != PlayerStatus::Sticky) {
 		isStuck = false;
 	}
-    
-	for ( auto &blob : blobs ) 
-        blob.update(dt);
+
+	for (auto &blob : blobs)
+		blob.update(dt);
 }
 
 void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
@@ -284,7 +291,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		}
 		status = PlayerStatus::Sticky;
 	}
-	if (otherHitbox == ColliderType::level_goal) 
+	if (otherHitbox == ColliderType::level_goal)
 	{
 		levelCompleted = true;
 	}
@@ -292,28 +299,28 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 
 void Player::shoot(vec3 mousePos) noexcept
 {
-    if (shootCooldown > 0) return;
+	if (shootCooldown > 0) return;
 
-    auto mouseScreenPos = vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
-    vec3 dir = normalize( mouseScreenPos - pos);
-    for ( auto &blob : blobs ) {
-        if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
-            blob.shoot( dir );
-            shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
-            break;
-        }
-    }
+	auto mouseScreenPos = vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
+	vec3 dir = normalize(mouseScreenPos - pos);
+	for (auto &blob : blobs) {
+		if (!blob.getIsActive() and !blob.getIsBeingRecalled()) {
+			blob.shoot(dir);
+			shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
+			break;
+		}
+	}
 }
 
 void Player::recallBlobs() noexcept
 {
-    for ( auto &blob : blobs ) 
-        blob.recall();
-    shootCooldown   = .5f; // TODO: refactor into a constexpr constant in Globals.h 
+	for (auto &blob : blobs)
+		blob.recall();
+	shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
 }
 
-void Game::update(double dt)  {
-	if (state == GameState::LevelState) 
+void Game::update(double dt) {
+	if (state == GameState::LevelState)
 	{
 		time += dt;
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
@@ -337,41 +344,41 @@ void Game::update(double dt)  {
 
 // Call first of all per frame updates
 void Game::handleInput() {
-    auto &player = level.player;
+	auto &player = level.player;
 
 	if (leftButtonDown) {
 		player.shoot(mousePos);
 	}
-		if (keys[Keys::up]) {
-			if (player.isStanding) {
-				player.isStanding = false;
-				player.jumpCooldown = COOLDOWN_CONSTANT;
-				player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
-			}
-			else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
-				player.hasExtraJump = false;
-				player.jumpCooldown = COOLDOWN_CONSTANT;
-				player.velocity.y = 0;
-				player.putForce(vec3(0.0, player.jumpForce, 0.0));
-			}
+	if (keys[Keys::up]) {
+		if (player.isStanding) {
+			player.isStanding = false;
+			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
 		}
-		if (keys[Keys::left]) {
-				player.addVelocity(vec3(-1, 0, 0), true);
+		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
+			player.hasExtraJump = false;
+			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.velocity.y = 0;
+			player.putForce(vec3(0.0, player.jumpForce, 0.0));
 		}
-		if (keys[Keys::right]) {
-				player.addVelocity(vec3(1, 0, 0), true);
-		}
+	}
+	if (keys[Keys::left]) {
+		player.addVelocity(vec3(-1, 0, 0), true);
+	}
+	if (keys[Keys::right]) {
+		player.addVelocity(vec3(1, 0, 0), true);
+	}
 
-		if (keys[Keys::down]) {
-			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
-				player.isStuck = false;
-				player.velocity = vec3(0,0,0);
-			}
+	if (keys[Keys::down]) {
+		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
+			player.isStuck = false;
+			player.velocity = vec3(0, 0, 0);
 		}
+	}
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}
-	
+
 }
 
 // Catches up the physics simulation time to the actual game time
@@ -379,31 +386,36 @@ void Game::handleInput() {
 void Game::updatePhysics() {
 	float timestep = 0.0001f;
 
- // player:
+	// player:
 	auto &player = level.player;
 
 	while (physicsSimTime + timestep < time) {
-		if ( !player.isStuck ) {
+		if (!player.isStuck) {
 			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 		}
 		else {
-            player.setVelocity(vec3(0.0));
-        }
-        player.move(timestep);
+			player.setVelocity(vec3(0.0));
+		}
+		player.move(timestep);
 
-// enemies:
-        auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+		// enemies:
+		auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 		if (enemy.alive) {
 			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			enemy.move(timestep);
 		}
 
-// blobs:
-		for ( auto &blob : player.blobs ) {
+		// blobs:
+		for (auto &blob : player.blobs) {
 			if (blob.getIsActive() && blob.getIsStuck() == false) {
 				blob.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
 			blob.move(timestep);
+		}
+		//Moving platforms:
+		for (auto &movingPlatform : level.movingPlatforms)
+		{
+			movingPlatform.move();
 		}
 		updatePlayerCollision();
 		updateEnemyCollision();
@@ -415,7 +427,7 @@ void Game::updatePhysics() {
 
 void Game::updatePlayerCollision()
 {
-    auto &player = level.player;
+	auto &player = level.player;
 
 	// Bottom:
 	player.hitbox.center = vec4(
@@ -432,7 +444,7 @@ void Game::updatePlayerCollision()
 
 void Game::updateEnemyCollision()
 {
-    auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 
 	EnemyBox.center = vec4(
 		enemy.pos.x,
@@ -463,14 +475,18 @@ void Game::updateEnemyCollision()
 // Call after all other per frame updates
 void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
-	level.movingBoxes   = vector<Box>();
+	level.movingBoxes = vector<Box>();
 
-	if (state == GameState::LevelState) 
+	if (state == GameState::LevelState)
 	{
 		EnemyBox.color = vec4((float)level.enemy.isStanding, 1.0 - (float)level.enemy.isStanding, 0.0, 0.0);
 
 		if (level.enemy.alive) {
 			level.movingBoxes.push_back(EnemyBox);
+		}
+		for (int i = 0; i < editor.movingPlatforms.size(); i++)
+		{
+			level.movingBoxes.push_back(level.movingPlatforms.at(i).Hitbox);
 		}
 
 		level.spheres = vector<Sphere>();
@@ -497,7 +513,7 @@ void Game::updateGraphics() {
 
 		//showHitboxes();
 	}
-	else 
+	else
 	{
 		level.movingBoxes.push_back(MenuBG);
 		level.movingBoxes.push_back(MenuYes);
@@ -518,22 +534,22 @@ void Game::showHitboxes()
 	}
 }
 
-Enemy::Enemy(vec3 position):
-    CollisionObject(),
-    pos(position),
-    velocity(vec3(0.0, 0.0, 0.0)),
-    controlDir(vec3(1.0, 0.0, 0.0)),
-    moveSpeed(20.0f),
-    jumpForce(450.0f),
-    jumpCooldown(0.3f),
-    mass(10.0),
-    isStanding(false),
-    alive(true),
+Enemy::Enemy(vec3 position) :
+	CollisionObject(),
+	pos(position),
+	velocity(vec3(0.0, 0.0, 0.0)),
+	controlDir(vec3(1.0, 0.0, 0.0)),
+	moveSpeed(20.0f),
+	jumpForce(450.0f),
+	jumpCooldown(0.3f),
+	mass(10.0),
+	isStanding(false),
+	alive(true),
 	isStuck(false),
 	isDeregistered(false)
 {}
 
-Enemy::~Enemy(){}
+Enemy::~Enemy() {}
 
 void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
 {
@@ -552,21 +568,21 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 		else if (pos.x > (other.center.x + other.halfLengths.x))
 		{
 			controlDir.x = -controlDir.x;
-			velocity.x   = -velocity.x;
+			velocity.x = -velocity.x;
 		}
 		else if (pos.x < (other.center.x - other.halfLengths.x))
 		{
 			controlDir.x = -controlDir.x;
-			velocity.x   = -velocity.x;
+			velocity.x = -velocity.x;
 		}
 	}
 	else if (otherHitbox == ColliderType::player && (other.center.y+other.halfLengths.y) > (pos.y+hitbox.halfLengths.y)) 
 	{
 		alive = false;
 	}
-	else if (otherHitbox == ColliderType::blob) 
+	else if (otherHitbox == ColliderType::blob)
 	{
-		if (other.color.w == 0.25) 
+		if (other.color.w == 0.25)
 		{
 			if (pos.y > (other.center.y + other.halfLengths.y))
 			{
@@ -585,7 +601,7 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 				velocity.x = -velocity.x;
 			}
 		}
-		if (other.color.w == 0.5) 
+		if (other.color.w == 0.5)
 		{
 			isStuck = true;
 		}
@@ -595,8 +611,8 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 // Updates logic, call once per frame before updatePhysics
 void Enemy::update(double dt) noexcept
 {
-	velocity.x    = 0.0;
-	velocity.y   -= float(GRAVITY_CONSTANT) * float(dt);
+	velocity.x = 0.0;
+	velocity.y -= float(GRAVITY_CONSTANT) * float(dt);
 	jumpCooldown -= float(dt);
 
 	if (isStanding == false) {
@@ -606,7 +622,7 @@ void Enemy::update(double dt) noexcept
 			putForce(vec3(0.0, jumpForce, 0.0));
 		}
 	}
-	if (!isStuck) 
+	if (!isStuck)
 	{
 		addVelocity(controlDir, true);
 	}
@@ -714,30 +730,30 @@ void Game::animateVictory(Sphere const & sphere)
 
 
 // TODO: commented lines
-LevelGoal::LevelGoal( CollisionManager &colMan, vec3 const &position, float radius, TriggerCallback cb ):
-    _bounds({vec4(position,0), {2.0f,5.0f,2.0f,0}, {0,0,0,0} }),
-     representation({vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,0.0f} }),
-    _triggerCallback(cb),
-    _colMan(&colMan)
+LevelGoal::LevelGoal(CollisionManager &colMan, vec3 const &position, float radius, TriggerCallback cb) :
+	_bounds({ vec4(position,0), {2.0f,5.0f,2.0f,0}, {0,0,0,0} }),
+	representation({ vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,0.0f} }),
+	_triggerCallback(cb),
+	_colMan(&colMan)
 {
-    _colMan->registerEntry( *this, ColliderType::level_goal, _bounds, true );
+	_colMan->registerEntry(*this, ColliderType::level_goal, _bounds, true);
 }
 
 LevelGoal::~LevelGoal() {
-    _colMan->unregisterEntry( *this );
+	_colMan->unregisterEntry(*this);
 }
 
-void LevelGoal::collide( ColliderType  ownHitbox,
-                         ColliderType  otherHitbox,
-                         Box const    &other ) noexcept {
-    if (    otherHitbox == player)
-    {
-        _triggerCallback();
-        // TODO (in callback):
-        //    tone and blur screen?
-        //    display text?
-        //    wait for input?
-        //    load next level?
-    }
+void LevelGoal::collide(ColliderType  ownHitbox,
+	ColliderType  otherHitbox,
+	Box const    &other) noexcept {
+	if (otherHitbox == player)
+	{
+		_triggerCallback();
+		// TODO (in callback):
+		//    tone and blur screen?
+		//    display text?
+		//    wait for input?
+		//    load next level?
+	}
 }
 
