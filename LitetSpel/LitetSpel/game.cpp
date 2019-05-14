@@ -39,6 +39,7 @@ void Game::init() noexcept {
 	level.staticBoxes.push_back(level.TestPowerUp.powerBox);
 	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
 }
+
 void Game::menuLoad()
 {
 	// MENU
