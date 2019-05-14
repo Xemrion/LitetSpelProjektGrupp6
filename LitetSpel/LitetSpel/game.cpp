@@ -528,7 +528,7 @@ void Game::updateGraphics() {
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
 		}
 
-		showHitboxes();
+		//showHitboxes();
 	}
 	else
 	{

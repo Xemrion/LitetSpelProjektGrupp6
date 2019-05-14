@@ -33,7 +33,7 @@ private:
 	int minimumBoxSize = 30;
 	int width = 0;
 	int height = 0;
-	int maxMovingPlatformLength = 10;
+	int maxMovingPlatformLength = 30;
 
 public:
 	Editor();

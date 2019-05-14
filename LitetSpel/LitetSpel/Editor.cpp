@@ -83,6 +83,7 @@ void Editor::initialize(const char* filename)
 				{
 
 					if (startPosY - j <= (-height / 2)
+						|| isMovingPlatform(getPixelColour(startPos)) && !isMovingPlatform(getPixelColour(startPos + width *j))
 						|| !isPlatform(getPixelColour(startPos + (width * j))))
 					{
 						endPosY = startPosY - j;
@@ -109,13 +110,26 @@ void Editor::initialize(const char* filename)
 						//height
 						for (int k = 1; k < glm::abs(endPosY - startPosY) && continueLoop; k++)
 						{
-
-							for (int l = (j - 1); l > 0 && continueLoop; l--)
+							if (isPlatform(getPixelColour(startPos + width)))
 							{
-								if (!isPlatform(getPixelColour((startPos + width * k) + l)))
+								for (int l = (j - 1); l > 0 && continueLoop; l--)
 								{
-									endPosY = startPosY - k;
-									continueLoop = false;
+									if (!isPlatform(getPixelColour((startPos + width * k) + l)))
+									{
+										endPosY = startPosY - k;
+										continueLoop = false;
+									}
+								}
+							}
+							else
+							{
+								for (int l = (j - 1); l > 0 && continueLoop; l--)
+								{
+									if (!isMovingPlatform(getPixelColour((startPos + width * k) + l)))
+									{
+										endPosY = startPosY - k;
+										continueLoop = false;
+									}
 								}
 							}
 						}
@@ -123,7 +137,9 @@ void Editor::initialize(const char* filename)
 						addBoxToUsed(startPosX, startPosY, endPosX, endPosY);
 
 					}
+
 				}
+					foundEdge = false;
 				if (drawThis)
 				{
 					foundEdge = false;
@@ -144,8 +160,8 @@ void Editor::initialize(const char* filename)
 					else
 					{
 						//left side
-						int upperHalf = glm::ceil(startPos - ((glm::floor((startPosY - endPosY) / 2)) * width));
-						int lowerHalf = glm::floor(startPos - ((glm::floor((startPosY - endPosY) / 2)) * width));
+						int upperHalf = startPos + (glm::floor((startPosY - endPosY) / 2) * width);
+						int lowerHalf = startPos + (glm::ceil((startPosY - endPosY) / 2 - 1) * width);
 						int MPendPosX = INFINITE;
 						int MPendPosY = INFINITE;
 						int MPstartPosX = INFINITE;
@@ -180,8 +196,8 @@ void Editor::initialize(const char* filename)
 							}
 						}
 						//top side
-						upperHalf = glm::ceil(startPos + glm::floor(((endPosX - startPosX) / 2)));
-						lowerHalf = glm::floor(startPos + glm::floor(((endPosX - startPosX) / 2)));
+						upperHalf = startPos + glm::floor((endPosX - startPosX) / 2);
+						lowerHalf = startPos + glm::ceil((endPosX - startPosX) / 2 - 1);
 						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++)
 						{
 							if (getPixelColour(lowerHalf - j * width) == getPixelColour(i))
@@ -196,8 +212,8 @@ void Editor::initialize(const char* filename)
 							}
 						}
 						//bottom side
-						upperHalf += (startPosY - (endPosY+1)) * width;
-						lowerHalf += (startPosY - (endPosY+1)) * width;
+						upperHalf += (startPosY - (endPosY + 1)) * width;
+						lowerHalf += (startPosY - (endPosY + 1)) * width;
 						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++)
 						{
 							//TODO: add check for edge of png
@@ -206,7 +222,7 @@ void Editor::initialize(const char* filename)
 								MPendPosX = (lowerHalf % width) - middleX;;
 								MPendPosY = middleY - glm::floor((lowerHalf - j * width) / width);
 							}
-							else if (getPixelColour(upperHalf + j * width) == getPixelColour(i) )
+							else if (getPixelColour(upperHalf + j * width) == getPixelColour(i))
 							{
 								MPendPosX = (upperHalf % width) - middleX;;
 								MPendPosY = middleY - glm::floor((upperHalf - j * width) / width);
