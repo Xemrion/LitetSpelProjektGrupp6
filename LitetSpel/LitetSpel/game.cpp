@@ -10,10 +10,10 @@ void Game::init() noexcept {
 	}
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
-		editor.movingPlatforms.at(i).Hitbox.color = glm::vec4(1, 0, 0, 0);
+		editor.movingPlatforms.at(i).hitbox.color = glm::vec4(1, 0, 0, 0);
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
-		level.movingBoxes.push_back(editor.movingPlatforms.at(i).Hitbox);
-		level.colManager.registerEntry(editor.movingPlatforms.at(i), ColliderType::platform, editor.movingPlatforms.at(i).Hitbox, true);
+		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
+		level.colManager.registerEntry(editor.movingPlatforms.at(i), ColliderType::platform, editor.movingPlatforms.at(i).hitbox, true);
 	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
 	level.staticBoxes.push_back(level.goal->representation);
@@ -33,7 +33,7 @@ void Game::init() noexcept {
 
 	// enemies:
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.Hitbox, false);
+	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
 
 	// LevelGoal
@@ -486,7 +486,7 @@ void Game::updateGraphics() {
 		}
 		for (int i = 0; i < editor.movingPlatforms.size(); i++)
 		{
-			level.movingBoxes.push_back(level.movingPlatforms.at(i).Hitbox);
+			level.movingBoxes.push_back(level.movingPlatforms.at(i).hitbox);
 		}
 
 		level.spheres = vector<Sphere>();
