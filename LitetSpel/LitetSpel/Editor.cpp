@@ -180,39 +180,36 @@ void Editor::initialize(const char* filename)
 							}
 						}
 						//top side
-						upperHalf = glm::ceil(startPos + ((endPosX - startPosX) / 2));
-						lowerHalf = glm::floor(startPos + ((endPosX - startPosX) / 2));
+						upperHalf = glm::ceil(startPos + glm::floor(((endPosX - startPosX) / 2)));
+						lowerHalf = glm::floor(startPos + glm::floor(((endPosX - startPosX) / 2)));
 						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++)
 						{
-							if (lowerHalf + j <= 360)
+							if (getPixelColour(lowerHalf - j * width) == getPixelColour(i))
 							{
-								if (getPixelColour(lowerHalf + j) == getPixelColour(i))
-								{
-									MPstartPosX = (lowerHalf + j % width) - middleX;;
-									MPstartPosY = middleY - glm::floor(lowerHalf + j / width);
-								}
-								else if (getPixelColour(upperHalf + j) == getPixelColour(i))
-								{
-									MPstartPosX = (upperHalf + j % width) - middleX;;
-									MPstartPosY = middleY - glm::floor(upperHalf + j / width);
-								}
+								MPstartPosX = (lowerHalf % width) - middleX;;
+								MPstartPosY = middleY - glm::floor((lowerHalf + j * width) / width);
+							}
+							else if (getPixelColour(upperHalf - j * width) == getPixelColour(i))
+							{
+								MPstartPosX = (upperHalf % width) - middleX;;
+								MPstartPosY = middleY - glm::floor((upperHalf + j * width) / width);
 							}
 						}
 						//bottom side
-						upperHalf = glm::ceil(startPos + ((endPosX - startPosX) / 2)) + (endPosY - startPosY) * width;
-						lowerHalf = glm::floor(startPos + ((endPosX - startPosX) / 2)) + (endPosY - startPosY) * width;
+						upperHalf += (startPosY - (endPosY+1)) * width;
+						lowerHalf += (startPosY - (endPosY+1)) * width;
 						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++)
 						{
 							//TODO: add check for edge of png
-							if (getPixelColour(lowerHalf - j) == getPixelColour(i))
+							if (getPixelColour(lowerHalf + j * width) == getPixelColour(i))
 							{
-								MPendPosX = (lowerHalf - j % width) - middleX;;
-								MPendPosY = middleY - glm::floor(lowerHalf - j / width);
+								MPendPosX = (lowerHalf % width) - middleX;;
+								MPendPosY = middleY - glm::floor((lowerHalf - j * width) / width);
 							}
-							else if (getPixelColour(upperHalf - j) == getPixelColour(i))
+							else if (getPixelColour(upperHalf + j * width) == getPixelColour(i) )
 							{
-								MPendPosX = (upperHalf - j % width) - middleX;;
-								MPendPosY = middleY - glm::floor(upperHalf - j / width);
+								MPendPosX = (upperHalf % width) - middleX;;
+								MPendPosY = middleY - glm::floor((upperHalf - j * width) / width);
 							}
 						}
 
