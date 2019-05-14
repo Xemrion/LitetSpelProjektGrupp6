@@ -52,7 +52,7 @@ public:
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(vec3 position = { -50.0f, 40.0f, 0.0f });
+	Enemy(vec3 position = { 0.0f, 0.0f, 0.0f });
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
 	void update(double dt) noexcept;
@@ -93,6 +93,7 @@ struct LevelData { // POD
 	Enemy            enemy;
 	PowerUp          TestPowerUp;
     std::unique_ptr<LevelGoal> goal;
+	vector<MovingPlatform> movingPlatforms;
     vector<Box>      staticBoxes;
 	vector<Box>      movingBoxes;
     vector<Sphere>   spheres;

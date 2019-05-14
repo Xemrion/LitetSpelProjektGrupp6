@@ -47,7 +47,6 @@ void Blob::reactivateHitbox() noexcept {
 void Blob::shoot( glm::vec3 const &direction ) noexcept
 {
     if ( !isActive && !isBeingRecalled ) {
-        reactivateHitbox();
         isActive = true;
         velocity = (status == BlobStatus::Blob_Heavy)?  direction * speed/3.0f  :  direction * speed;
 	}
@@ -126,7 +125,7 @@ void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &othe
         absorb();
     }
 
-	if ( hitbox.color.w != 0 and otherType == ColliderType::platform) {
+	if (otherType == ColliderType::platform) {
 		if (status == BlobStatus::Blob_Bouncy) 
 		{
 			this->velocity.y = -this->velocity.y;
@@ -140,6 +139,10 @@ void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &othe
 		else 
 		{
 			this->velocity = glm::vec3(0.0);
+		}
+		if(hitbox.color.w == 0)
+		{
+			reactivateHitbox();
 		}
 		glm::vec3 pushUp    = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown  = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);

@@ -1,14 +1,14 @@
 #include "MovingPlatform.h"
 
-MovingPlatform::MovingPlatform(vec3 StartPos, vec3 endPos, vec3 center, vec3 halfLength)
+MovingPlatform::MovingPlatform(vec3 StartPos, vec3 endPos, vec4 center, vec4 halfLength)
 {
 	this->startPos = StartPos;
 	this->pos = StartPos;
 	this->endPos = endPos;
-	this->hitbox.center = vec4(center,0);
-	this->hitbox.halfLengths = vec4(halfLength, 0);
+	this->hitbox.center = center;
+	this->hitbox.halfLengths = halfLength;
 	this->hitbox.color = vec4(0, 1, 1, 0);
-	Speed = vec2(0.05, 0.05);
+	Speed = vec2(0.005, 0.005);
 }
 
 MovingPlatform::~MovingPlatform()
@@ -46,6 +46,7 @@ void MovingPlatform::move()
 		}
 	}
 
-	pos.x -= (endPos.x - startPos.x)*(Speed.x / 5.0);
-	pos.y -= (endPos.y - startPos.y)*(Speed.y / 5.0);
+	pos.x -= (endPos.x - startPos.x)*(Speed.x / 100.0);
+	pos.y -= (endPos.y - startPos.y)*(Speed.y / 100.0);
+	this->hitbox.center = vec4(pos, 0);
 }
