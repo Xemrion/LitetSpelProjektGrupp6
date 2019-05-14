@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("test2.png");
+	editor.initialize("test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
@@ -125,7 +125,7 @@ void Player::update(double dt) noexcept {
 
 void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept
 {
-		if (otherHitbox == ColliderType::platform) {
+	if (otherHitbox == ColliderType::platform) {
 			glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 			glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 			glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
@@ -172,7 +172,8 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				pos.y += 1;
 			}
 		}
-		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w != 0 && !isStuck && !isStanding)
+	
+	else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Sticky && other.color.w != 0 && !isStuck && !isStanding)
 		{
 			if (pos.y > (other.center.y + other.halfLengths.y))
 			{
@@ -210,7 +211,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			}
 		}
 
-		else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Bouncy && other.color.w != 0)
+	else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Bouncy && other.color.w != 0)
 		{
 			if (pos.y > (other.center.y + other.halfLengths.y))
 			{
@@ -231,33 +232,32 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 			pos += length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 		}
-		else if (otherHitbox == ColliderType::enemy) 
+	
+	else if (otherHitbox == ColliderType::enemy) 
 		{
-			//Collision with enemy bottom
-			if (!knockBack && pos.y < (other.center.y - other.halfLengths.y)) 
-			{
+		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
-			}
-			//Collision with enemy left
-			if (!knockBack && pos.x < (other.center.x - other.halfLengths.x)) 
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+		}
+		// if colliding in X-axis
+		else {
+			posDiff = minDistX;
+
+			if(status != PlayerStatus::Heavy)
 			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-				pos.x -= length(minDistX);
-				putForce(vec3(-2, 3, 0));
+				putForce(vec3((hitbox.center.x - other.center.x), 3, 0));
 				knockBack = true;
 			}
-			//Collision with enemy right
-			if (!knockBack && pos.x > (other.center.x + other.halfLengths.x))
-			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-				pos.x += length(minDistX);
-				putForce(vec3(2, 3, 0));
-				knockBack = true;
-			}
+		}
+
+		pos += posDiff;
 		}
 	
 	if (otherHitbox == ColliderType::powerup_bouncy) 
