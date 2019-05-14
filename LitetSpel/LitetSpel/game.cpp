@@ -162,19 +162,8 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 				}
 			}
 
-			if (knockBack)
-			{
-				knockBack = false;
-			}
-
 			pos += posDiff;
 			
-
-			
-			if (status == PlayerStatus::Sticky && !isStanding)
-			{
-				isStuck = true;
-			}
 			if (knockBack)
 			{
 				knockBack = false;
@@ -251,8 +240,8 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			//Collision with enemy left
 			if (!knockBack && pos.x < (other.center.x - other.halfLengths.x)) 
 			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 				pos.x -= length(minDistX);
 				putForce(vec3(-2, 3, 0));
@@ -261,8 +250,8 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 			//Collision with enemy right
 			if (!knockBack && pos.x > (other.center.x + other.halfLengths.x))
 			{
-				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-Hitbox.center.x + Hitbox.halfLengths.x), 0.0, 0.0);
-				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-Hitbox.center.x - Hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+				vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 				vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 				pos.x += length(minDistX);
 				putForce(vec3(2, 3, 0));
