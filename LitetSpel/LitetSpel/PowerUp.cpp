@@ -27,7 +27,7 @@ PowerUp::~PowerUp()
 {
 }
 
-void PowerUp::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const & other) noexcept
+void PowerUp::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
 }
 

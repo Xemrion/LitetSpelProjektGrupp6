@@ -27,7 +27,7 @@ class Player : public CollisionObject {
 public:
     Player(vec3 position = {.0f, .0f, .0f} );
     virtual ~Player() noexcept;
-    virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
+    virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
     void move(double dt) noexcept;
 	void setVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
 	void addVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
@@ -52,7 +52,7 @@ class Enemy : public CollisionObject
 public:
 	Enemy(vec3 position = { 0.0f, 0.0f, 0.0f });
 	virtual ~Enemy() noexcept;
-	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override;
+	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
 	void update(double dt) noexcept;
 	void addVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
 	void setVelocity(vec3 const &velocity, bool useSpeed = false) noexcept;
@@ -72,8 +72,7 @@ public:
     LevelGoal( CollisionManager &_colMan, vec3 const &position, float radius, TriggerCallback cb=[](){} );
     virtual ~LevelGoal();
     virtual void collide( ColliderType  ownHitbox,
-                          ColliderType  otherHitbox,
-                          Box const    &other ) noexcept override;
+                          const HitboxEntry& other) noexcept override;
 
     Box               representation;
 

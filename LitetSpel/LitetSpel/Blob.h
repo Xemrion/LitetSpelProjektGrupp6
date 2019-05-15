@@ -27,7 +27,7 @@ public:
 	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
 	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
 
-	void collide(ColliderType ownType, ColliderType otherType, Box const &otherBox) noexcept override;
+	void collide(ColliderType ownType, const HitboxEntry& other) noexcept override;
 
     void deactivateHitbox() noexcept;
     void reactivateHitbox() noexcept;
