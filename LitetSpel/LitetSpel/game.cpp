@@ -185,10 +185,44 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	}
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Sticky && other.hitbox->color.w != 0 && !isStuck && !isStanding)
 	{
-		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
-		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
-		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-		glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		if (pos.y > (other.hitbox->center.y + other.hitbox->halfLengths.y))
+		{
+			isStanding = true;
+			hasExtraJump = true;
+			velocity = vec3(0, 0, 0);
+		}
+		if (knockBack)
+		{
+			knockBack = false;
+			velocity = vec3(0, 0, 0);
+		}
+		if (pos.y < (other.hitbox->center.y - other.hitbox->halfLengths.y))
+		{
+			vec3 pushUp = vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+			vec3 pushDown = vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+			vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+			pos.y -= length(minDistY);
+		}
+		// Collision with blob to the left
+		if (pos.x > (other.hitbox->center.x + other.hitbox->halfLengths.x))
+		{
+			vec3 pushRight = vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+			vec3 pushLeft = vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+			pos.x += length(minDistX);
+		}
+		// Collision with blob to the right
+		if (pos.x < (other.hitbox->center.x - other.hitbox->halfLengths.x))
+		{
+			vec3 pushRight = vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+			vec3 pushLeft = vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+			pos.x -= length(minDistX);
+		}
+		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
 		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
