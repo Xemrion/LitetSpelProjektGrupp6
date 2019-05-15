@@ -13,7 +13,7 @@ class MovingPlatform : public CollisionObject
 public:
 	MovingPlatform(vec3 StartPos, vec3 endPos, vec4 center, vec4 halfLength, vec4 color);
 	virtual ~MovingPlatform();
-	void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override {};
+	void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override {};
 	void move(double time);
 
 	vec3 pos;
