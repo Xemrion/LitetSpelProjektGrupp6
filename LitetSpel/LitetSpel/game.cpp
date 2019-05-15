@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeTwo.png");
+	editor.initialize("PrototypeOne.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
