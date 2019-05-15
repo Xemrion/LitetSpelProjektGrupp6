@@ -14,13 +14,13 @@ MovingPlatform::~MovingPlatform()
 {
 }
 
-void MovingPlatform::move(double gameTime)
+void MovingPlatform::move(double physicsTime)
 {
-	pos = moveFunction(gameTime);
+	pos = moveFunction(physicsTime);
 	this->hitbox.center = vec4(pos, 0);
 }
 
 vec3 MovingPlatform::moveFunction(double time) const
 {
-	return startPos + abs(glm::mod((float)time, period) - period * 0.5f) * (endPos - startPos);
+	return startPos + abs(glm::mod((float)time / period, 2.0f) - 1.0f) * (endPos - startPos);
 }

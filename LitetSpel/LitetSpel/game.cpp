@@ -11,7 +11,7 @@ void Game::init() noexcept {
 	{
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
-		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, false);
+		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, true);
 	}
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
@@ -407,6 +407,7 @@ void Game::update(double dt) {
 		level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 		handleInput();
 		level.player.isStanding = false;
+		level.player.collidingMovingPlatform = nullptr;
 		level.player.update(dt);
 		if (level.enemy.alive)
 		{
@@ -478,16 +479,12 @@ void Game::handleInput() {
 void Game::updatePhysics() {
 	float timestep = PHYSICS_TIME_STEP;
 
-	// player:
+
 	auto &player = level.player;
+	level.colManager.update();
 
 	while (physicsSimTime + timestep < time) {
-		//Moving platforms:
-		for (auto &movingPlatform : level.movingPlatforms)
-		{
-			movingPlatform.move(time);
-		}
-
+		// player:
 		if ( player.isStuck ) {
             player.setVelocity(vec3(0.0));
 		}
@@ -495,15 +492,14 @@ void Game::updatePhysics() {
 			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
         }
 		if (player.collidingMovingPlatform != nullptr) {
-			player.pos += player.collidingMovingPlatform->moveFunction(time + timestep) - player.collidingMovingPlatform->pos;
+			player.pos += player.collidingMovingPlatform->moveFunction(physicsSimTime) - player.collidingMovingPlatform->moveFunction(physicsSimTime - timestep);
 		}
         player.move(timestep);
 		player.isStuck = false;
-		player.collidingMovingPlatform = nullptr;
 // enemies:
         auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 		if (enemy.alive) {
-			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+			enemy.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			enemy.move(timestep);
 		}
 
@@ -515,10 +511,15 @@ void Game::updatePhysics() {
 			blob.move(timestep);
 		}
 
+		//Moving platforms:
+		for (auto& movingPlatform : level.movingPlatforms)
+		{
+			movingPlatform.move(physicsSimTime);
+		}
+
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();
-
 		physicsSimTime += timestep;
 	}
 }
