@@ -394,9 +394,13 @@ void Player::shoot(vec3 mousePos) noexcept
 
 void Player::recallBlobs() noexcept
 {
-	for (auto &blob : blobs)
-		blob.recall();
-	shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
+	if (isStanding) 
+	{
+		for (auto &blob : blobs)
+			blob.recall();
+		shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
+	}
+
 }
 
 void Game::update(double dt) {
