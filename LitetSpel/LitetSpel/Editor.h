@@ -12,6 +12,8 @@
 #include"Geometry.h"
 #include"Platform.h"
 #include"MovingPlatform.h"
+#include"PowerUp.h"
+
 using namespace glm;
 class Editor
 {
@@ -26,6 +28,10 @@ private:
 	bool isRed(vec3 pixelColour);
 	bool isGreen(vec3 pixelColour);
 	bool isPlatform(vec3 pixelColour);
+	bool isBouncy(vec3 pixelColour);
+	bool isHeavy(vec3 pixelColour);
+	bool isSticky(vec3 pixelColour);
+	bool isNone(vec3 pixelColour);
 	bool isMovingPlatform(vec3 pixelColour);
 	vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
@@ -43,6 +49,7 @@ public:
 	std::vector<MovingPlatform> movingPlatforms;
 	vec3 goalPos;
 	vec3 startPos;
+	std::vector<PowerUp> powerups;
 	std::vector<vec3> enemyPos;
 	void initialize(const char* filename);
 

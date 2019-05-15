@@ -128,7 +128,7 @@ float4 main(VS_OUT input) : SV_Target
 	float minDist;
 	float dist = castRay(ro, rd, minDist);
 	float4 color = float4(0.0, 0.0, 0.0, 0.0);
-	float3 parallax = (ro * 0.001);
+	float3 parallax = (ro * 0.0005);
 
 	if (minDist > 0.1) {
 		color = geometryTexture.Sample(samp, uv);

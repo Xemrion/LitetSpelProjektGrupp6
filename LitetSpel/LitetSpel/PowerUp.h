@@ -8,17 +8,17 @@ class PowerUp : public CollisionObject
 {
 public:
 	PowerUp();
-	PowerUp(glm::vec4 center, glm::vec4 halflengths, PowerType type);
-	PowerUp(glm::vec4 center, glm::vec4 halflengths, int type);
+	PowerUp(glm::vec4 center,PowerType type);
+	PowerUp(glm::vec4 center, int type);
 	~PowerUp();
 	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
-	Box getBox() const { return this->powerBox; }
+	Box getBox() const { return this->hitbox; }
 	PowerType getType() const { return this->typeOfPowerUp; }
 	int getTypeAsInt() const { return static_cast<int>(this->typeOfPowerUp); }
 
 	void setType(PowerType type);
 	void setTypeByInt(int type);
-	Box powerBox;
+	Box hitbox;
 private:
 	PowerType typeOfPowerUp;
 	//hitbox
