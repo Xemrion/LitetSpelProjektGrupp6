@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("test.png");
+	editor.initialize("PrototypeTwo.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -16,18 +16,18 @@ void Game::init() noexcept {
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
 		level.powerUps.push_back(editor.powerups.at(i));
-		level.staticBoxes.push_back(editor.powerups.at(i).powerBox);
+		level.staticBoxes.push_back(editor.powerups.at(i).hitbox);
 		if (editor.powerups.at(i).getType() == PowerType::Bouncy)
 		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->powerBox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, false);
 		}
 		else if (editor.powerups.at(i).getType() == PowerType::Sticky)
 		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->powerBox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, false);
 		}		
 		else if (editor.powerups.at(i).getType() == PowerType::Heavy)
 		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->powerBox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, false);
 		}
 		else
 		{
