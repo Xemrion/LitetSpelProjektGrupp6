@@ -74,6 +74,53 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				this->startPos = vec3(center);
 			}
+			else if (isBouncy(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::Bouncy));
+			}
+			else if (isHeavy(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::Heavy));
+
+			}
+			else if (isSticky(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::Sticky));
+
+			}
+			else if (isNone(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::None));
+
+			}
 			else
 			{
 				startPosX = (i % width) - middleX;
@@ -226,8 +273,8 @@ void Editor::initialize(const char* filename)
 						MPendPosY *= minimumBoxSize;
 						MPendPosX *= minimumBoxSize;
 
-						halfLength.x = (((abs(endPosX - startPosX)) / 2) / pixelToUnitRatio);
-						halfLength.y = (((abs(endPosY - startPosY)) / 2) / pixelToUnitRatio);
+						halfLength.x = ((abs(endPosX - startPosX)) / 2) / pixelToUnitRatio;
+						halfLength.y = ((abs(endPosY - startPosY)) / 2) / pixelToUnitRatio;
 
 						startPosX /= pixelToUnitRatio;
 						startPosY /= pixelToUnitRatio;
@@ -310,6 +357,27 @@ bool Editor::isRed(vec3 pixelColour)
 bool Editor::isGreen(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z == 0;
+}
+
+bool Editor::isBouncy(vec3 pixelColour)
+{
+	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 255;
+}
+
+bool Editor::isHeavy(vec3 pixelColour)
+{
+	return pixelColour.x == 192 && pixelColour.y == 192 && pixelColour.z == 192;
+}
+
+bool Editor::isSticky(vec3 pixelColour)
+{
+	return pixelColour.x == 0 && pixelColour.y == 64 && pixelColour.z == 0;
+}
+
+bool Editor::isNone(vec3 pixelColour)
+{
+	return pixelColour.x == 128 && pixelColour.y == 128 && pixelColour.z == 0;
+
 }
 
 bool Editor::isPlatform(vec3 pixelColour)

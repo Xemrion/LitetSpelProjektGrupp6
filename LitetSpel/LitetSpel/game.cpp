@@ -13,6 +13,27 @@ void Game::init() noexcept {
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
 		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::platform, (level.movingPlatforms.end() - 1)->hitbox, false);
 	}
+	for (int i = 0; i < editor.powerups.size(); i++)
+	{
+		level.powerUps.push_back(editor.powerups.at(i));
+		level.staticBoxes.push_back(editor.powerups.at(i).hitbox);
+		if (editor.powerups.at(i).getType() == PowerType::Bouncy)
+		{
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, false);
+		}
+		else if (editor.powerups.at(i).getType() == PowerType::Sticky)
+		{
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, false);
+		}		
+		else if (editor.powerups.at(i).getType() == PowerType::Heavy)
+		{
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, false);
+		}		
+		else
+		{
+			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.movingPlatforms.end() - 1)->hitbox, false);
+		}
+	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
 	level.staticBoxes.push_back(level.goal->representation);
 	// player & blobs:
@@ -33,16 +54,6 @@ void Game::init() noexcept {
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
-
-	// LevelGoal
-
-	// PowerUps
-	auto &powerup = level.TestPowerUp;
-	level.TestPowerUp.powerBox.center = vec4(-30.0f, 15.0f, 0.0f, 0.0f);
-	level.TestPowerUp.powerBox.halfLengths = vec4(2.0f, 2.0f, 2.0f, 0.0f);
-	level.TestPowerUp.powerBox.color = vec4(0.0, 0.5, 0.75, 0);
-	level.staticBoxes.push_back(level.TestPowerUp.powerBox);
-	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
 }
 
 void Game::menuLoad()
@@ -117,8 +128,8 @@ void Player::update(double dt) noexcept {
 
 	if (isStanding)
 		hasExtraJump = true;
-	
-    mass = (status == PlayerStatus::Heavy)? 20.0f : 10.0f;
+
+	mass = (status == PlayerStatus::Heavy) ? 20.0f : 10.0f;
 	isStuck = false;
 	if (status != PlayerStatus::Sticky) {
 		isStuck = false;
@@ -162,7 +173,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		}
 
 		pos += posDiff;
-		
+
 		if (status == PlayerStatus::Sticky && !isStanding)
 		{
 			isStuck = true;
@@ -222,29 +233,29 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 	}
 
 	else if (otherHitbox == ColliderType::blob && status == PlayerStatus::Bouncy && other.color.w != 0)
+	{
+		if (pos.y > (other.center.y + other.halfLengths.y))
 		{
-			if (pos.y > (other.center.y + other.halfLengths.y))
-			{
-				isStanding = true;
-				hasExtraJump = true;
-				velocity.y = 0;
-			}
-			if (knockBack)
-			{
-				knockBack = false;
-				velocity.x = 0;
-			}
-			vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
-			vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
-			vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
-			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-			pos += length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+			isStanding = true;
+			hasExtraJump = true;
+			velocity.y = 0;
 		}
-	
-	else if (otherHitbox == ColliderType::enemy) 
+		if (knockBack)
 		{
+			knockBack = false;
+			velocity.x = 0;
+		}
+		vec3 pushUp = vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		vec3 pushDown = vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		vec3 pushRight = vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		vec3 pushLeft = vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		pos += length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+	}
+
+	else if (otherHitbox == ColliderType::enemy)
+	{
 		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
@@ -260,7 +271,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		else {
 			posDiff = minDistX;
 
-			if(status != PlayerStatus::Heavy)
+			if (status != PlayerStatus::Heavy)
 			{
 				putForce(vec3((hitbox.center.x - other.center.x), 3, 0));
 				knockBack = true;
@@ -268,9 +279,9 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const
 		}
 
 		pos += posDiff;
-		}
-	
-	if (otherHitbox == ColliderType::powerup_bouncy) 
+	}
+
+	if (otherHitbox == ColliderType::powerup_bouncy)
 	{
 		for (int i = 0; i < blobCharges; i++)
 		{
@@ -347,7 +358,7 @@ void Game::update(double dt) {
 
 // Call first of all per frame updates
 void Game::handleInput() {
-    auto &player = level.player;
+	auto &player = level.player;
 	player.controlDir = glm::vec3(keys[Keys::right] - keys[Keys::left], keys[Keys::up] - keys[Keys::down], 0.0);
 	if (leftButtonDown) {
 		player.shoot(mousePos);
@@ -390,7 +401,7 @@ void Game::handleInput() {
 			//player.pos.y -= 0.001;
 		}
 	}
-	
+
 	for (int i = 0; i < 4; ++i) {
 		keys[i] = false;
 	}
@@ -405,16 +416,16 @@ void Game::updatePhysics() {
 	auto &player = level.player;
 
 	while (physicsSimTime + timestep < time) {
-		if ( player.isStuck ) {
-            player.setVelocity(vec3(0.0));
+		if (player.isStuck) {
+			player.setVelocity(vec3(0.0));
 		}
 		else {
 			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
-        }
-        player.move(timestep);
+		}
+		player.move(timestep);
 		player.isStuck = false;
-// enemies:
-        auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+		// enemies:
+		auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 		if (enemy.alive) {
 			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			enemy.move(timestep);
@@ -591,7 +602,7 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const 
 			velocity.x = -velocity.x;
 		}
 	}
-	else if (otherHitbox == ColliderType::player && (other.center.y+other.halfLengths.y) > (pos.y+hitbox.halfLengths.y)) 
+	else if (otherHitbox == ColliderType::player && (other.center.y + other.halfLengths.y) > (pos.y + hitbox.halfLengths.y))
 	{
 		alive = false;
 	}
