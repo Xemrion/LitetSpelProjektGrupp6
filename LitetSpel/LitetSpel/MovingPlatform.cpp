@@ -5,6 +5,7 @@ MovingPlatform::MovingPlatform(vec3 startPos, vec3 endPos, vec4 center, vec4 hal
 	this->startPos = startPos;
 	this->pos = startPos;
 	this->endPos = endPos;
+	this->period = glm::length(endPos - startPos) / 20; // move 20 units per second by default
 	this->hitbox.center = center;
 	this->hitbox.halfLengths = halfLength;
 	this->hitbox.color = color;

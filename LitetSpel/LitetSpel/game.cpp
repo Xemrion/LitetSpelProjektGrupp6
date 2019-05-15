@@ -209,7 +209,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			posDiff = minDistY;
 
 			// if colliding with floor
-			if (minDistY.y > 0.0) {
+			if (minDistY.y >= 0.0) {
 				velocity.y = 0;
 				isStanding = true;
 				collidingMovingPlatform = platformPtr;
@@ -481,7 +481,6 @@ void Game::updatePhysics() {
 
 
 	auto &player = level.player;
-	level.colManager.update();
 
 	while (physicsSimTime + timestep < time) {
 		// player:

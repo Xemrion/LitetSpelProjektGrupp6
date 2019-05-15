@@ -18,7 +18,7 @@ public:
 	vec3 moveFunction(double time) const;
 
 	vec3 pos;
-	float period = 2.0; // time in seconds that the full path takes
+	float period; // time in seconds that the full path takes
 	vec3 startPos;
 	vec3 endPos;
 
