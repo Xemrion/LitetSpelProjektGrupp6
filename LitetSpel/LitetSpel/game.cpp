@@ -17,6 +17,7 @@ void Game::init() noexcept {
 	level.staticBoxes.push_back(level.goal->representation);
 	// player & blobs:
 	auto &player = level.player;
+	player.gameSounds = gameSounds;
 	player.pos = editor.startPos;
 	for (int i = 0; i < player.blobCharges; ++i) {
 		Blob b{ player.pos };
@@ -24,17 +25,16 @@ void Game::init() noexcept {
 		level.spheres.push_back(player.blobs[i].blobSphere);
 	}
 	for (auto &b : player.blobs) {
+		b.gameSounds = gameSounds;
 		level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
 	}
-    for ( auto &b : player.blobs ) {
-		b.gameSounds = gameSounds;
-        level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
-    }
+
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
 	// enemies:
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	enemy.gameSounds = gameSounds;
 	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
 
@@ -136,6 +136,20 @@ void Player::update(double dt) noexcept {
 void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
 	if (other.colliderType == ColliderType::platform) {
+		if (landing != true) {
+			if (status == PlayerStatus::Heavy) {
+				gameSounds->PlayLandingSound02();
+				landing = true;
+			}
+			else if (status == PlayerStatus::Bouncy) {
+				gameSounds->PlayLandingSound03();
+				landing = true;
+			}
+			else {
+				gameSounds->PlayLandingSound01();
+				landing = true;
+			}
+		}
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
@@ -687,7 +701,7 @@ void Enemy::update(double dt) noexcept
 		if (jumpCooldown <= 0.0) {
 			controlDir.x = -controlDir.x;
 			jumpCooldown = 1.0;
-			gameSounds->PlayEnemyJumpSound(enemyIndex, 0);
+			gameSounds->PlayEnemyJumpSound(0, 0);
 			putForce(vec3(0.0, jumpForce, 0.0));
 		}
 	}

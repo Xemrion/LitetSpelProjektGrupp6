@@ -38,7 +38,7 @@ public:
 
     vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
+    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted, landing;
     PlayerStatus status;
 	double radius;
 	Box hitbox;

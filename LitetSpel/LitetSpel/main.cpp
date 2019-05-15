@@ -192,7 +192,7 @@ void keyboardFunc()
 		{
 			game.keys[Game::Keys::left] = true;
 		}
-		if (keyboard.KeyIsPressed('W'))
+		if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
 		{
 			game.keys[Game::Keys::up] = true;
 		}
@@ -295,7 +295,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (FAILED(hr)) return 2;
 	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game.gameSounds = &gameSounds;
-	game.init();
 
 	bool gameLoaded = false;
 	game.menuLoad();
