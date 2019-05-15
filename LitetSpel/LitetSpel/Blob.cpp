@@ -125,8 +125,8 @@ void Blob::collide(ColliderType ownType, ColliderType otherType, Box const &othe
         absorb();
     }
 
-	if (otherType == ColliderType::platform) {
-		if (status == BlobStatus::Blob_Bouncy) 
+	if (otherType == ColliderType::platform && !isBeingRecalled) {
+		if (status == BlobStatus::Blob_Bouncy)
 		{
 			this->velocity.y = -this->velocity.y;
 			this->velocity.x = 0;
