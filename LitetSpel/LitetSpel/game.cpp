@@ -118,7 +118,7 @@ void Player::move(double dt) noexcept {
 void Player::update(double dt) noexcept {
 	jumpCooldown -= float(dt);
 	shootCooldown -= float(dt);
-	if (velocity.y != 0)
+	if (isStanding != true)
 		landing = false;
 	if (isStanding)
 		hasExtraJump = true;
@@ -136,20 +136,7 @@ void Player::update(double dt) noexcept {
 void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
 	if (other.colliderType == ColliderType::platform) {
-		if (landing != true) {
-			if (status == PlayerStatus::Heavy) {
-				gameSounds->PlayLandingSound02();
-				landing = true;
-			}
-			else if (status == PlayerStatus::Bouncy) {
-				gameSounds->PlayLandingSound03();
-				landing = true;
-			}
-			else {
-				gameSounds->PlayLandingSound01();
-				landing = true;
-			}
-		}
+		
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
@@ -373,6 +360,7 @@ void Player::shoot(vec3 mousePos) noexcept
 	for (auto &blob : blobs) {
 		if (!blob.getIsActive() and !blob.getIsBeingRecalled()) {
 			blob.shoot(dir);
+			gameSounds->PlayBlobSound01();
 			shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
 			break;
 		}
@@ -421,12 +409,22 @@ void Game::handleInput() {
 			player.isStanding = false;
 			player.jumpCooldown = COOLDOWN_CONSTANT;
 			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
+			if (player.status != PlayerStatus::Heavy && player.status != PlayerStatus::Bouncy) {
+				gameSounds->PlayJumpSound01();
+			}
+			else if (player.status == PlayerStatus::Heavy) {
+				gameSounds->PlayJumpSound02();
+			}
+			else if (player.status == PlayerStatus::Bouncy) {
+				gameSounds->PlayJumpSound03();
+			}
 		}
 		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
 			player.hasExtraJump = false;
 			player.jumpCooldown = COOLDOWN_CONSTANT;
 			player.velocity.y = 0;
 			player.putForce(vec3(0.0, player.jumpForce, 0.0));
+			gameSounds->PlayJumpSound03();
 		}
 	}
 	if (keys[Keys::left]) {

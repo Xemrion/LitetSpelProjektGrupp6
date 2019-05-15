@@ -192,6 +192,14 @@ void keyboardFunc()
 		{
 			game.keys[Game::Keys::left] = true;
 		}
+		if ((game.keys[Game::Keys::left] || game.keys[Game::Keys::right]) && playerMove != true) {
+			gameSounds.StartPlayerMoveLoop();
+			playerMove = true;
+		}
+		if (!game.keys[Game::Keys::left] && !game.keys[Game::Keys::right] && playerMove != false) {
+			gameSounds.StopPlayerMoveLoop();
+			playerMove = false;
+		}
 		if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
 		{
 			game.keys[Game::Keys::up] = true;
