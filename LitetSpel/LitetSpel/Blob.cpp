@@ -25,6 +25,7 @@ void Blob::absorb() noexcept
 	}
     isBeingRecalled = false;
     isActive        = false;
+	isLanding		= false;
 }
 
 void Blob::deactivateHitbox() noexcept {
@@ -136,15 +137,28 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 		{
 			this->velocity.y = -this->velocity.y;
 			this->velocity.x = 0;
+			if (isLanding != true) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 		}
 		else if (status == BlobStatus::Blob_Sticky) 
 		{
 			this->velocity = glm::vec3(0.0);
+			if (isLanding != true && isStuck != true) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 			isStuck = true;
+			
 		}
 		else 
 		{
 			this->velocity = glm::vec3(0.0);
+			if (isLanding != true) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 		}
 		if(hitbox.color.w == 0)
 		{
