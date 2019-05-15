@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("test.png");
+	editor.initialize("PrototypeTwo.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -155,7 +155,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			posDiff = minDistY;
 
 			// if colliding with floor
-			if (minDistY.y > 0.0) {
+			if (minDistY.y >= 0.0) {
 				velocity.y = 0;
 				isStanding = true;
 				hasExtraJump = true;
