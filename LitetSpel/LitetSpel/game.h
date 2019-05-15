@@ -88,7 +88,7 @@ struct LevelData { // POD
     // and merge in level start / goal code from falk branch
     Player           player;
 	Enemy            enemy;
-	vector<PowerUp>  powerUps;
+	PowerUp          TestPowerUp;
     std::unique_ptr<LevelGoal> goal;
 	vector<MovingPlatform> movingPlatforms;
     vector<Box>      staticBoxes;
