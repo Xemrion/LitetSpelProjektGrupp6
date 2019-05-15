@@ -1,16 +1,18 @@
 #include"Platform.h"
 
-Platform::Platform():
-    CollisionObject()
+Platform::Platform() :
+	CollisionObject()
 {
 	this->hitbox.center;
 	this->hitbox.halfLengths;
+
 }
 
-Platform::Platform(glm::vec4 center, glm::vec4 halfLengths)
+Platform::Platform(glm::vec4 center, glm::vec4 halfLengths, glm::vec4 color)
 {
 	this->hitbox.center = center;
 	this->hitbox.halfLengths = halfLengths;
+	this->hitbox.color = color;
 }
 
 Platform::~Platform() {}

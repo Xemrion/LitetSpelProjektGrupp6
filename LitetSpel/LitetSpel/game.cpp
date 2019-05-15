@@ -1,16 +1,14 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("test.png");
+	editor.initialize("PrototypeTwo.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
-		editor.platforms.at(i).hitbox.color = glm::vec4(0, 1, 1, 0);
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
 		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
-		editor.movingPlatforms.at(i).hitbox.color = glm::vec4(1, 0, 0, 0);
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
 		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::platform, (level.movingPlatforms.end() - 1)->hitbox, false);
@@ -187,40 +185,37 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	}
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Sticky && other.hitbox->color.w != 0 && !isStuck && !isStanding)
 	{
-		if (pos.y > (other.hitbox->center.y + other.hitbox->halfLengths.y))
-		{
-			isStanding = true;
-			hasExtraJump = true;
-			velocity = vec3(0, 0, 0);
+		glm::vec3 pushUp = glm::vec3(0.0, other.center.y + other.halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.center.y - other.halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.center.x + other.halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.center.x - other.halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+			posDiff = minDistY;
+
+			// if colliding with floor
+			if (minDistY.y > 0.0) {
+				//velocity.y = 0;
+				isStanding = true;
+				hasExtraJump = true;
+				isStuck = false;
+			}
+			//if colliding with ceiling
+			else {
+				velocity.y = 0;
+				velocity.y = min(0, velocity.y);
+			}
 		}
-		if (knockBack)
-		{
-			knockBack = false;
-			velocity = vec3(0, 0, 0);
+		// if colliding in X-axis
+		else {
+			posDiff = minDistX;
 		}
-		if (pos.y < (other.hitbox->center.y - other.hitbox->halfLengths.y))
-		{
-			vec3 pushUp = vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
-			vec3 pushDown = vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
-			vec3 minDistY = length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
-			pos.y -= length(minDistY);
-		}
-		// Collision with blob to the left
-		if (pos.x > (other.hitbox->center.x + other.hitbox->halfLengths.x))
-		{
-			vec3 pushRight = vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 pushLeft = vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-			pos.x += length(minDistX);
-		}
-		// Collision with blob to the right
-		if (pos.x < (other.hitbox->center.x - other.hitbox->halfLengths.x))
-		{
-			vec3 pushRight = vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 pushLeft = vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-			vec3 minDistX = length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-			pos.x -= length(minDistX);
-		}
+
+		pos += posDiff;
 	}
 
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Bouncy && other.hitbox->color.w != 0)
@@ -528,7 +523,7 @@ void Game::updateGraphics() {
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
 		}
 
-		showHitboxes();
+		//showHitboxes();
 	}
 	else
 	{
