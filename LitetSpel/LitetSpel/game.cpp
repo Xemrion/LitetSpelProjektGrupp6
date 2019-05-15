@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeOne.png");
+	editor.initialize("test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -12,6 +12,27 @@ void Game::init() noexcept {
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
 		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::platform, (level.movingPlatforms.end() - 1)->hitbox, false);
+	}
+	for (int i = 0; i < editor.powerups.size(); i++)
+	{
+		level.powerUps.push_back(editor.powerups.at(i));
+		level.staticBoxes.push_back(editor.powerups.at(i).powerBox);
+		if (editor.powerups.at(i).getType() == PowerType::Bouncy)
+		{
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->powerBox, false);
+		}
+		else if (editor.powerups.at(i).getType() == PowerType::Sticky)
+		{
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->powerBox, false);
+		}		
+		else if (editor.powerups.at(i).getType() == PowerType::Heavy)
+		{
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->powerBox, false);
+		}
+		else
+		{
+			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->powerBox, false);
+		}
 	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
 	level.staticBoxes.push_back(level.goal->representation);
@@ -33,16 +54,6 @@ void Game::init() noexcept {
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
-
-	// LevelGoal
-
-	// PowerUps
-	auto &powerup = level.TestPowerUp;
-	level.TestPowerUp.powerBox.center = vec4(-30.0f, 15.0f, 0.0f, 0.0f);
-	level.TestPowerUp.powerBox.halfLengths = vec4(2.0f, 2.0f, 2.0f, 0.0f);
-	level.TestPowerUp.powerBox.color = vec4(0.0, 0.5, 0.75, 0);
-	level.staticBoxes.push_back(level.TestPowerUp.powerBox);
-	level.colManager.registerEntry(powerup, ColliderType::powerup_bouncy, level.TestPowerUp.powerBox, true);
 }
 
 void Game::menuLoad()

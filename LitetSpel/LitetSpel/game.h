@@ -89,7 +89,7 @@ struct LevelData { // POD
     Player           player;
 	Enemy            enemy;
 	vector<PowerUp>  powerUps;
-    std::unique_ptr<LevelGoal> goal;
+	std::unique_ptr<LevelGoal> goal;
 	vector<MovingPlatform> movingPlatforms;
     vector<Box>      staticBoxes;
 	vector<Box>      movingBoxes;

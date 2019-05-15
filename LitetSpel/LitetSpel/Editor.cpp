@@ -273,8 +273,8 @@ void Editor::initialize(const char* filename)
 						MPendPosY *= minimumBoxSize;
 						MPendPosX *= minimumBoxSize;
 
-						halfLength.x = ((abs(endPosX - startPosX)) / 2) / pixelToUnitRatio;
-						halfLength.y = ((abs(endPosY - startPosY)) / 2) / pixelToUnitRatio;
+						halfLength.x = (((abs(endPosX - startPosX)) / 2) / pixelToUnitRatio);
+						halfLength.y = (((abs(endPosY - startPosY)) / 2) / pixelToUnitRatio);
 
 						startPosX /= pixelToUnitRatio;
 						startPosY /= pixelToUnitRatio;
@@ -358,7 +358,6 @@ bool Editor::isGreen(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z == 0;
 }
-
 bool Editor::isBouncy(vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 255;

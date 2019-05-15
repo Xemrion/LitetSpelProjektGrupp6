@@ -2,18 +2,18 @@
 
 PowerUp::PowerUp()
 {
-	this->hitbox.center = glm::vec4();
-	this->hitbox.halfLengths = glm::vec4();
+	this->powerBox.center = glm::vec4();
+	this->powerBox.halfLengths = glm::vec4();
 	this->typeOfPowerUp = PowerType::Heavy;
 }
 PowerUp::PowerUp(glm::vec4 center, PowerType type) {
-	this->hitbox.center = center;
-	this->hitbox.halfLengths = glm::vec4(1,1,0,0);
+	this->powerBox.center = center;
+	this->powerBox.halfLengths = glm::vec4(1,1,0,0);
 	this->typeOfPowerUp = type;
 }
 PowerUp::PowerUp(glm::vec4 center, int type) {
-	this->hitbox.center = center;
-	this->hitbox.halfLengths = glm::vec4(1,1,0,0);
+	this->powerBox.center = center;
+	this->powerBox.halfLengths = glm::vec4(1,1,0,0);
 	if (static_cast<PowerType>(type) == PowerType::Bouncy ||
 		static_cast<PowerType>(type) == PowerType::Heavy ||
 		static_cast<PowerType>(type) == PowerType::Sticky) {
