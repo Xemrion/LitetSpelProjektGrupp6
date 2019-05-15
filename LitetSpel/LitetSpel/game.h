@@ -45,6 +45,7 @@ public:
     vector<Blob> blobs;
     int blobCharges;
     float shootCooldown;
+	const MovingPlatform* collidingMovingPlatform = nullptr;
 };
 
 class Enemy : public CollisionObject 
@@ -106,13 +107,12 @@ enum GameState
 class Game {
 private:
 public:
-    // TODO: refactor into ctor initializer list
 	double physicsSimTime = 0.0;
 	double time = 0.0;
 	double state;
 
-	enum Keys { // TODO: refactor into Globals.h
-        left,
+	enum Keys {
+		left,
 		right,
 		up,
 		down,

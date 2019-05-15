@@ -16,6 +16,11 @@ MovingPlatform::~MovingPlatform()
 
 void MovingPlatform::move(double gameTime)
 {
-	pos = startPos + abs(glm::mod((float)gameTime, period) - period * 0.5f) * (endPos - startPos);
+	pos = moveFunction(gameTime);
 	this->hitbox.center = vec4(pos, 0);
+}
+
+vec3 MovingPlatform::moveFunction(double time) const
+{
+	return startPos + abs(glm::mod((float)time, period) - period * 0.5f) * (endPos - startPos);
 }

@@ -15,6 +15,8 @@ public:
 	virtual ~MovingPlatform();
 	void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override {};
 	void move(double time);
+	vec3 moveFunction(double time) const;
+	float getSpeed() { return glm::length(endPos - startPos) / (period * 2.0); };
 
 	vec3 pos;
 	float period = 2.0; // time in seconds that the full path takes

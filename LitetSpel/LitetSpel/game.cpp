@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeTwo.png");
+	editor.initialize("test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -11,7 +11,7 @@ void Game::init() noexcept {
 	{
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
-		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::platform, (level.movingPlatforms.end() - 1)->hitbox, false);
+		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, false);
 	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
 	level.staticBoxes.push_back(level.goal->representation);
@@ -166,6 +166,62 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		if (status == PlayerStatus::Sticky && !isStanding)
 		{
 			isStuck = true;
+			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
+				pos.y += 0.001f;
+			}
+			else if (controlDir.x > 0.0) {
+				pos.x += 0.001f;
+			}
+			else if (controlDir.x < 0.0) {
+				pos.x -= 0.001f;
+			}
+		}
+		else if (knockBack)
+		{
+			knockBack = false;
+			velocity = vec3(0, 0, 0);
+			pos.y += 1;
+		}
+	}
+	else if (other.colliderType == ColliderType::movingPlatform) {
+		MovingPlatform* platformPtr = (MovingPlatform*)other.object;
+		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+			posDiff = minDistY;
+
+			// if colliding with floor
+			if (minDistY.y > 0.0) {
+				velocity.y = 0;
+				isStanding = true;
+				collidingMovingPlatform = platformPtr;
+				hasExtraJump = true;
+				isStuck = false;
+			}
+			//if colliding with ceiling
+			else {
+				velocity.y = 0;
+				velocity.y = min(0, velocity.y);
+			}
+		}
+		// if colliding in X-axis
+		else {
+			posDiff = minDistX;
+		}
+
+		pos += posDiff;
+
+		if (status == PlayerStatus::Sticky && !isStanding)
+		{
+			isStuck = true;
+			collidingMovingPlatform = platformPtr;
 			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
 				pos.y += 0.001f;
 			}
@@ -430,20 +486,30 @@ void Game::handleInput() {
 // Catches up the physics simulation time to the actual game time
 // Call last of all logic updates (but before graphics)
 void Game::updatePhysics() {
-	float timestep = 0.0001f;
+	float timestep = PHYSICS_TIME_STEP;
 
 	// player:
 	auto &player = level.player;
 
 	while (physicsSimTime + timestep < time) {
+		//Moving platforms:
+		for (auto &movingPlatform : level.movingPlatforms)
+		{
+			movingPlatform.move(time);
+		}
+
 		if ( player.isStuck ) {
             player.setVelocity(vec3(0.0));
 		}
 		else {
 			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
         }
+		if (player.collidingMovingPlatform != nullptr) {
+			player.pos += player.collidingMovingPlatform->moveFunction(time + timestep) - player.collidingMovingPlatform->pos;
+		}
         player.move(timestep);
 		player.isStuck = false;
+		player.collidingMovingPlatform = nullptr;
 // enemies:
         auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 		if (enemy.alive) {
@@ -458,11 +524,7 @@ void Game::updatePhysics() {
 			}
 			blob.move(timestep);
 		}
-		//Moving platforms:
-		for (auto &movingPlatform : level.movingPlatforms)
-		{
-			movingPlatform.move(time);
-		}
+
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();

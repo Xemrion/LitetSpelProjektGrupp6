@@ -2,6 +2,7 @@
 
 const float GRAVITY_CONSTANT = 100.f;
 const float COOLDOWN_CONSTANT = 0.3f;
+const float PHYSICS_TIME_STEP = 0.0001f;
 
 enum class PowerType {
 	None,
