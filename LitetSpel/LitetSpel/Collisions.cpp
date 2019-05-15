@@ -40,11 +40,10 @@ void CollisionManager::update() noexcept {
 		// test against all static environment hitboxes
 		for (auto &environment : staticBoxes)
 			if (intersect((*m.hitbox), (*environment.hitbox)))
-				m.object->collide(m.colliderType, environment.colliderType, *environment.hitbox);
+				m.object->collide(m.colliderType, environment);
         // test against all other mobile hitboxes (that belong to another object)
         for (auto &other : mobileBoxes)
             if (*(m.object) != *(other.object) and intersect((*m.hitbox), (*other.hitbox)))
-                   m.object->collide(m.colliderType, other.colliderType, *other.hitbox );
-
+                m.object->collide(m.colliderType, other);
     }
 }

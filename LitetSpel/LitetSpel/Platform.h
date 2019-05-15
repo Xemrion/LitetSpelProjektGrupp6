@@ -9,7 +9,7 @@ public:
 	Platform(glm::vec4 center, glm::vec4 halfLengths);
     virtual ~Platform() noexcept;
 	//Box& getPlatformBox() const { return this->hitbox; };
-    void collide(ColliderType ownHitbox, ColliderType otherHitbox, Box const &other) noexcept override {}
+    void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override {}
     Box hitbox;
 
 private:
