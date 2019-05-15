@@ -26,6 +26,10 @@ void Game::init() noexcept {
 	for (auto &b : player.blobs) {
 		level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
 	}
+    for ( auto &b : player.blobs ) {
+		b.gameSounds = gameSounds;
+        level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
+    }
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
@@ -114,7 +118,8 @@ void Player::move(double dt) noexcept {
 void Player::update(double dt) noexcept {
 	jumpCooldown -= float(dt);
 	shootCooldown -= float(dt);
-
+	if (velocity.y != 0)
+		landing = false;
 	if (isStanding)
 		hasExtraJump = true;
 	
@@ -307,6 +312,9 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		{
 			blobs[i].status = BlobStatus::Blob_Bouncy;
 		}
+		if (status != PlayerStatus::Bouncy) {
+			gameSounds->PlayAbsorbSound03();
+		}
 		status = PlayerStatus::Bouncy;
 	}
 	if (other.colliderType == ColliderType::powerup_heavy)
@@ -314,6 +322,9 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		for (int i = 0; i < blobCharges; i++)
 		{
 			blobs[i].status = BlobStatus::Blob_Heavy;
+		}
+		if (status != PlayerStatus::Heavy) {
+			gameSounds->PlayAbsorbSound03();
 		}
 		status = PlayerStatus::Heavy;
 	}
@@ -323,10 +334,18 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		{
 			blobs[i].status = BlobStatus::Blob_Sticky;
 		}
+		if (status != PlayerStatus::Sticky) {
+			gameSounds->PlayAbsorbSound03();
+		}
 		status = PlayerStatus::Sticky;
 	}
 	if (other.colliderType == ColliderType::level_goal)
 	{
+		if (levelCompleted != true) {
+			gameSounds->StopPlayerMoveLoop();
+			gameSounds->StopGameMusic();
+			gameSounds->PlayEndOfLevelSound();
+		}
 		levelCompleted = true;
 	}
 }
@@ -649,6 +668,9 @@ void Enemy::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		}
 		if (other.hitbox->color.w == 0.5)
 		{
+			if (isStuck != true) {
+				gameSounds->PlayEnemySound03();
+			}
 			isStuck = true;
 		}
 	}
@@ -665,6 +687,7 @@ void Enemy::update(double dt) noexcept
 		if (jumpCooldown <= 0.0) {
 			controlDir.x = -controlDir.x;
 			jumpCooldown = 1.0;
+			gameSounds->PlayEnemyJumpSound(enemyIndex, 0);
 			putForce(vec3(0.0, jumpForce, 0.0));
 		}
 	}
@@ -709,6 +732,8 @@ void Enemy::move(float dt) noexcept
 {
 	pos += velocity * dt;
 }
+
+
 
 //Adds two orbiting spheres around a sphere for animation
 void Game::animateSphere(Sphere const &sphere, vec3 const &amplitude) {

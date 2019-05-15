@@ -30,3 +30,41 @@ static const glm::vec4 playerStatusColors[4] = {
 	glm::vec4(0.05, 0.05, 1.0, 0.0),
 	glm::vec4(0.75, 0.75, 0.75, 0.1)
 };
+
+
+/*
+|----- Current Sound FileNames ----|
+2 channels, 16 bit PCM, 44100Hz, wave file
+test01.wav
+menu01.wav O
+game01.wav O
+jump01.wav O
+jump02.wav O
+jump03.wav O
+land01.wav O
+land02.wav O
+land03.wav O
+blob01.wav O
+blob02.wav O
+blob03.wav O
+enmy01.wav O
+enmy02.wav X
+enmy03.wav X
+sorb01.wav O
+sorb02.wav O
+sorb03.wav O
+pdeath.wav X
+pdmg01.wav O
+pdmg02.wav O
+pstart.wav X
+p-goal.wav O
+mhlbtn.wav O
+mclkbt.wav O
+m-back.wav O
+|----------------------------------|
+O = implemented
+X = not
+*/
+//Player sound. Wet/slimy
+//Enemy sound, robotic/metalic
+//Level sound, metalic/sci-fi or industrial?

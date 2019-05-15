@@ -20,6 +20,9 @@ Blob::Blob( glm::vec3 const &parentPosition ):
 
 void Blob::absorb() noexcept
 {
+	if (isActive != false && isBeingRecalled != false) {
+		gameSounds->PlayAbsorbSound01();
+	}
     isBeingRecalled = false;
     isActive        = false;
 }
@@ -87,6 +90,9 @@ void Blob::update(double dt) noexcept
 	{
 		deactivateHitbox();
 	}
+	if (velocity.y != 0) {
+		isLanding = false;
+	}
 	blobSphere.centerRadius = glm::vec4( pos, radius );
 }
 
@@ -128,16 +134,28 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 	if (other.colliderType == ColliderType::platform && !isBeingRecalled) {
 		if (status == BlobStatus::Blob_Bouncy) 
 		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 			this->velocity.y = -this->velocity.y;
 			this->velocity.x = 0;
 		}
 		else if (status == BlobStatus::Blob_Sticky) 
 		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 			this->velocity = glm::vec3(0.0);
 			isStuck = true;
 		}
 		else 
 		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
 			this->velocity = glm::vec3(0.0);
 		}
 		if(hitbox.color.w == 0)

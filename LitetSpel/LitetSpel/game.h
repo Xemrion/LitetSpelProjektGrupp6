@@ -45,6 +45,7 @@ public:
     vector<Blob> blobs;
     int blobCharges;
     float shootCooldown;
+	
 };
 
 class Enemy : public CollisionObject 
@@ -139,8 +140,9 @@ public:
 	void animateColor(Graphics& graphics);
 	void animateVictory(Sphere    const &sphere);
 
-	Box      EnemyBox;
-    Sphere   playerSphere;
+	Box EnemyBox;
+	Sounds* gameSounds;
+    Sphere playerSphere;
     Platform groundBox;
 	Platform testPlat;
 	Platform testplat2;
