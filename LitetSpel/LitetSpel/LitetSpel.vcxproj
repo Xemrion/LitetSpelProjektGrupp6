@@ -123,6 +123,7 @@
     <ClCompile Include="Collisions.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Graphics.cpp" />
+    <ClCompile Include="Interfaces.cpp" />
     <ClCompile Include="KeyboardInput.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MouseInput.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Interfaces.h" />
     <ClInclude Include="KeyboardInput.h" />
     <ClInclude Include="Globals.h" />
     <ClInclude Include="MouseInput.h" />

@@ -1,26 +1,21 @@
 #define NOMINMAX
 #include "Graphics.h"
 #include "game.h"
-#include "KeyboardInput.h"
-#include "MouseInput.h"
 #include <chrono>
 #include <d3d11.h>
 #include <Windows.h>
+#include "KeyboardInput.h"
+#include "MouseInput.h"
 
 KeyboardInput keyboard;
-MouseInput mouse;
-Game game;
-Graphics graphics;
+MouseInput    mouse;
+Game          game;
+Graphics      graphics;
 
-double dt;
+// int xMus = 0; // wot?
 
-int xMus = 0;
-float powerCoolDown = 0.0;
-
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -91,8 +86,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-HWND InitWindow(HINSTANCE hInstance, int width, int height)
-{
+HWND InitWindow(HINSTANCE hInstance, int width, int height) {
 	WNDCLASSEX wcex = { 0 };
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -122,120 +116,9 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	return handle;
 }
 
-void mouseFunc() 
-{
-	if (mouse.LeftIsPressed())
-	{
-		game.leftButtonDown = true;
-		game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
-	}
-	else
-		game.leftButtonDown = false;
-}
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+    using Clock = std::chrono::high_resolution_clock;
 
-void keyboardFunc()
-{
-	//Movement
-	if (keyboard.KeyIsPressed('D'))
-	{
-		game.keys[1] = true;
-	}
-	if (keyboard.KeyIsPressed('A'))
-	{
-		game.keys[0] = true;
-	}
-	if (keyboard.KeyIsPressed('W'))
-	{
-		game.keys[2] = true;
-	}
-	if (keyboard.KeyIsPressed('S'))
-	{
-		game.keys[3] = true;
-	}
-	if (keyboard.KeyIsPressed('B')) 
-	{
-		if (powerCoolDown <= 0) 
-		{
-			if (game.level.player.status == PlayerStatus::None)
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++) 
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
-				}
-				game.level.player.status = PlayerStatus::Bouncy;
-				graphics.setMetaballColorAbsorb(glm::vec3(1.0, 0.5, 0.25));
-			}
-			else
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_None;
-				}
-				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('H'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.level.player.status == PlayerStatus::None)
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
-				}
-				game.level.player.status = PlayerStatus::Heavy;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75));
-			}
-			else
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_None;
-				}
-				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('Y'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.level.player.status == PlayerStatus::None)
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
-				}
-				game.level.player.status = PlayerStatus::Sticky;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
-			}
-			else
-			{
-				for (int i = 0; i < game.level.player.blobCharges; i++)
-				{
-					game.level.player.blobs[i].status = BlobStatus::Blob_None;
-				}
-				game.level.player.status = PlayerStatus::None;
-				graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('R'))
-		game.level.player.recallBlobs();
-	if (keyboard.KeyIsPressed('P')) {
-		graphics.createShaders();
-	}
-}
-
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
-{
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
@@ -243,36 +126,37 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	game.init();
 	ShowWindow(wndHandle, nCmdShow);
 	
-	auto prevFrameTime = std::chrono::steady_clock::now();
-	while (WM_QUIT != msg.message)
-	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
+    double dt_s { .0 };
+	auto prevFrameTime = Clock::now(),
+         currFrameTime = Clock::now();
+    auto elapsedTime   = prevFrameTime - currFrameTime;
+
+    unsigned long frame_n = 0; // temp
+
+	while (WM_QUIT != msg.message) {
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
-			auto currentFrameTime = std::chrono::steady_clock::now();
-			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
-			prevFrameTime = currentFrameTime;
+		else {
+			currFrameTime = Clock::now();
+			elapsedTime   = currFrameTime - prevFrameTime;
+			prevFrameTime = currFrameTime;
+            dt_s = std::chrono::duration<double>(elapsedTime).count();
 			
+            (void)++frame_n; // temp
+
 			char title[64];
-			_itoa_s(1/dt, title, 64, 10);
+            snprintf( title, sizeof(title)/sizeof(char), "%5.1f FPS (%5.1fms/frame)", 1.0/dt_s, dt_s*1000 );
 			SetWindowTextA(wndHandle, title);
-			
-			keyboardFunc();
-			mouseFunc();
 
-			game.update(dt);
-			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
-			graphics.setBoxes(game.level.boxes);
-			graphics.setMetaballs(game.level.spheres);
+			game.update( dt_s );
+			graphics.setCameraPos(glm::vec3(game.getLevel().getPlayer().getSphere()->centerRadius) + glm::vec3(.0f, 20.0f, -100.0f));
+			graphics.setBoxes(game.getLevel().getBoxes());
+			graphics.setMetaballs(game.getLevel().getSpheres());
 			graphics.swapBuffer();
-			powerCoolDown -= (float)dt;
+			// powerCoolDown -= (float)dt; //  wot?
 		}
-		
 	}
-
 	return 0;
 }

@@ -1,24 +1,44 @@
 #pragma once
 
-const float GRAVITY_CONSTANT = 100.f;
-const float COOLDOWN_CONSTANT = 0.3f;
+#include "../../INCLUDE/glm/glm/glm.hpp"
+#include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
+#include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 
-enum class PowerType {
-	None,
-	Bouncy,
-	Heavy,
-	Sticky
-}; //Adding more requires change in PowerUp class
+// TODO: put global constants and config values in a global namespace
 
-//Colours
-static const glm::vec4 red		= glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-static const glm::vec4 green	= glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-static const glm::vec4 blue		= glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-static const glm::vec4 yellow	= glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
-static const glm::vec4 magenta	= glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
-static const glm::vec4 purple	= glm::vec4(0.5f, 0.0f, 0.5f, 1.0f);
-static const glm::vec4 cyan		= glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
-static const glm::vec4 black	= glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-static const glm::vec4 white	= glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-static const glm::vec4 grey		= glm::vec4(0.77f, 0.77f, 0.77f, 1.0f);
-static const glm::vec4 olive	= glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+float constexpr GRAVITY_CONSTANT   = 100.f; // 100.0f
+float constexpr MAX_SPEED          =  50.f;  // temp
+bool  constexpr SHOW_HITBOXES      = true;
+
+// cooldown constants
+float constexpr JUMP_CD  = .3f;
+float constexpr POWER_CD = .2f;
+float constexpr SHOOT_CD = .5f;
+
+enum class ColliderType { player,
+                          enemy,
+                          level_goal,
+                          platform,
+                          wall,
+                          powerup_bouncy,
+                          powerup_sticky,
+                          blob };
+
+// Adding more requires change in PowerUp class
+enum class PowerType { none,
+	                   bouncy,
+	                   heavy,
+	                   sticky };
+
+// Colours
+const glm::vec4 red		= glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+const glm::vec4 green	= glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+const glm::vec4 blue	= glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+const glm::vec4 yellow	= glm::vec4(1.0f, 1.0f, 0.0f, 1.0f);
+const glm::vec4 magenta	= glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+const glm::vec4 purple	= glm::vec4(0.5f, 0.0f, 0.5f, 1.0f);
+const glm::vec4 cyan	= glm::vec4(0.0f, 1.0f, 1.0f, 1.0f);
+const glm::vec4 black	= glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+const glm::vec4 white	= glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+const glm::vec4 grey    = glm::vec4(0.77f, 0.77f, 0.77f, 1.0f);
+const glm::vec4 olive	= glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);

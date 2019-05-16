@@ -6,31 +6,27 @@
 #include "Geometry.h"
 #include "globals.h"
 #include "Collisions.h"
+#include "Interfaces.h"
 
 // TODO: improve encapsulation by reducing public exposure
 
-enum BlobStatus {
-	Blob_None,
-	Blob_Bouncy,
-	Blob_Sticky,
-	Blob_Heavy
-};
-
-class Blob : public CollisionObject {
+class Blob : public IActor {
 public:
+    enum class Status { none,
+                        bouncy,
+                        sticky,
+                        heavy };
+
     Blob() = delete;
 	explicit Blob( glm::vec3 const & );
 
-	void update(double dt) noexcept;
+	virtual void update(double dt) noexcept;
 
-	void move(double dt) noexcept;
-	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
-	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
-
-	void collide(ColliderType ownType, ColliderType otherType, Box const &otherBox) noexcept override;
+	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
 
     void deactivateHitbox() noexcept;
     void reactivateHitbox() noexcept;
+    virtual void updateHitboxes() noexcept;
 
     void absorb() noexcept;
     void shoot( glm::vec3 const &direction ) noexcept;
@@ -40,18 +36,24 @@ public:
     [[nodiscard]] bool getIsBeingRecalled() const noexcept;
 	[[nodiscard]] bool getIsStuck() const noexcept;
 
+    // TODO: refactor into IActor?
+    virtual Box const& getVolume() const noexcept {
+        static Box volume { {0,0,0,0}, {3,3,3,0}, {0,1,0,0} };
+        return volume;
+    }
+
 private:
     glm::vec3 const *parentPosition;
-    bool  isActive;
-	bool isStuck;
-    bool  isBeingRecalled;
-    float recallSpeed;
-    float speed;
-    float radius;
-    glm::vec3 velocity;
+    glm::vec3        velocity;
+    bool             isActive,
+	                 isStuck,
+                     isBeingRecalled;
+    float            recallSpeed,
+                     speed,
+                     radius;
 public:
-    glm::vec3 pos;
-    Box       hitbox;
-    Sphere    blobSphere;
-	int status;
+    glm::vec3           position;
+    std::vector<Hitbox> hitboxes;
+    Sphere              blobSphere;
+	Status              status;
 };

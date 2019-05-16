@@ -7,7 +7,7 @@
 
 class Sphere {
 public:
-	Sphere() : centerRadius(0.0) {};
+	Sphere(): centerRadius(0.0) {};
 	Sphere(glm::vec4 centerRadius) : centerRadius(centerRadius) {};
 	Sphere(glm::vec3 pos, float radius) { centerRadius = glm::vec4(pos.x, pos.y, pos.z, radius); };
 
@@ -16,9 +16,7 @@ public:
 
 class Box {
 public:
-	glm::vec4 center;
-	glm::vec4 halfLengths;
-	glm::vec4 color;
-
-	
+    glm::vec4 center      {};
+    glm::vec4 halfLengths {};
+	glm::vec4 color       {};
 };

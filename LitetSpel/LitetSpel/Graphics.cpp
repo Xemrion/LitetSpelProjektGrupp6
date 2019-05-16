@@ -647,6 +647,7 @@ HRESULT Graphics::createBoxData()
 
 void Graphics::setBoxes(const vector<Box>& boxes)
 {
+    assert( boxes.size() < 100 ); // temp
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
@@ -673,6 +674,7 @@ void Graphics::setBoxes(const vector<Box>& boxes)
 
 void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 {
+    assert( metaballs.size() < 100 ); // temp
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	struct MetaballStruct {
