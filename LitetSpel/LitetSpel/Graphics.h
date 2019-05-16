@@ -59,15 +59,20 @@ private:
 
 	glm::vec3 camera;
 	glm::mat4 proj;
+	glm::mat4 invProj;
 	glm::mat4 viewProj;
 	glm::mat4 invTransposedWVP;
 	glm::vec3 boxVertices[36 * 2]; // position + normals for 36 triangles
+	glm::vec4 frustumCorners[4];
+	Box cullingBox;
 
 	HRESULT createDeviceContext(HWND wndHandle, bool windowed);
 	HRESULT createResources(HWND wndHandle);
 	HRESULT createQuadData();
 	HRESULT createBoxData();
 	void createCBuffers();
+	void updateFrustumCorners();
+	void updateCullingBox();
 public:
 	HRESULT init(HWND wndHandle, bool windowed);
 	HRESULT createShaders();

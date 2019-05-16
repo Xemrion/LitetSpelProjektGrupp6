@@ -1,4 +1,5 @@
 #include "Graphics.h"
+#include "Collisions.h"
 
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
@@ -34,8 +35,8 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 	
 	float c = 1.0 / glm::tan(glm::radians(22.5f));
 	float a = 16.f / 9.f;
-	float f = 500.f;
-	float n = 10.f;
+	float f = 200.f;
+	float n = 50.f;
 
 	proj = glm::mat4(
 		c / a, 0., 0., 0.,
@@ -46,6 +47,11 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 
 	camera = glm::vec3(0, 0, -200);
 	viewProj = glm::transpose(glm::lookAtLH(camera, camera + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 1.0, 0.0))) * proj;
+
+	invProj = glm::inverse(proj);
+	updateFrustumCorners();
+	updateCullingBox();
+
 	return hr;
 }
 
@@ -424,6 +430,28 @@ void Graphics::createCBuffers() {
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &cornerBuffer);
+}
+
+void Graphics::updateFrustumCorners() {
+	frustumCorners[0] = glm::vec4(-1.0, 1.0, 1.0, 1.0)  * invProj;
+	frustumCorners[1] = glm::vec4(1.0, 1.0, 1.0, 1.0) * invProj;
+	frustumCorners[2] = glm::vec4(-1.0, -1.0, 1.0, 1.0) * invProj;
+	frustumCorners[3] = glm::vec4(1.0, -1.0, 1.0, 1.0) * invProj;
+	frustumCorners[0] /= frustumCorners[0].w;
+	frustumCorners[1] /= frustumCorners[1].w;
+	frustumCorners[2] /= frustumCorners[2].w;
+	frustumCorners[3] /= frustumCorners[3].w;
+
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	deviceContext->Map(cornerBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, frustumCorners, sizeof(glm::vec4) * 4);
+	deviceContext->Unmap(cornerBuffer, 0);
+}
+
+void Graphics::updateCullingBox() {
+	cullingBox.center = glm::vec4(camera.x, camera.y, 0.0, 1.0);
+	cullingBox.halfLengths = frustumCorners[1] + glm::vec4(0.0, 0.0, camera.z, 0.0);
 }
 
 HRESULT Graphics::createShaders()
@@ -908,21 +936,24 @@ void Graphics::setMovingBoxes(const vector<Box>& boxes)
 		glm::mat4 WVP[maxMovingBoxes];
 		glm::vec4 color[maxMovingBoxes];
 	} transforms;
-	memset(&transforms, 0, sizeof(glm::mat4) * maxMovingBoxes + sizeof(glm::vec4) * maxMovingBoxes);
-
+	memset(&transforms, 0, sizeof(Transforms));
+	int transformIndex = 0;
 	for (int i = 0; i < boxes.size(); ++i)
 	{
-		glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
-		t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
-		transforms.WVP[i] = transpose(t) * viewProj;
-		transforms.color[i] = boxes[i].color;
+		if (CollisionManager::intersect(boxes[i], cullingBox)) {
+			glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
+			t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
+			transforms.WVP[transformIndex] = transpose(t) * viewProj;
+			transforms.color[transformIndex] = boxes[i].color;
+			++transformIndex;
+		}
 	}
 
 	deviceContext->Map(movingBoxTransformBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, &transforms, sizeof(Transforms));
 	deviceContext->Unmap(movingBoxTransformBuffer, 0);
 
-	movingBoxInstances = boxes.size();
+	movingBoxInstances = transformIndex;
 }
 
 void Graphics::setStaticBoxes(const vector<Box>& boxes)
@@ -1007,11 +1038,24 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 		Sphere spheres[maxMetaballs];
 		int nSpheres;
 	} metaballStruct;
-	ZeroMemory(metaballStruct.spheres, sizeof(Sphere) * maxMetaballs);
-	memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(maxMetaballs, (int)metaballs.size()));
-	metaballStruct.nSpheres = glm::min(maxMetaballs, (int)metaballs.size());
+	ZeroMemory(&metaballStruct, sizeof(MetaballStruct));
+
+	int structIndex = 0;
+	for (int i = 0; i < metaballs.size(); ++i) {
+		Box boundingBox;
+		boundingBox.center = metaballs[i].centerRadius;
+		boundingBox.halfLengths = glm::vec4(metaballs[i].centerRadius.w);
+
+		if (CollisionManager::intersect(boundingBox, cullingBox)) {
+			metaballStruct.spheres[structIndex++] = metaballs[i];
+			metaballStruct.nSpheres = glm::min(maxMetaballs, structIndex);
+		}
+	}
+
+	//memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(maxMetaballs, (int)metaballs.size()));
+	//metaballStruct.nSpheres = glm::min(maxMetaballs, (int)metaballs.size());
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, &metaballStruct, sizeof(Sphere) * maxMetaballs + sizeof(int));
+	memcpy(mr.pData, &metaballStruct, sizeof(MetaballStruct));
 	deviceContext->Unmap(metaballBuffer, 0);
 }
 
@@ -1020,6 +1064,16 @@ void Graphics::setCameraPos(glm::vec3 pos)
 {
 	camera = pos;
 	viewProj = glm::transpose(glm::lookAtLH(camera, camera + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 1.0, 0.0))) * proj;
+
+	updateFrustumCorners();
+	updateCullingBox();
+
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, glm::value_ptr(camera), sizeof(glm::vec3));
+	deviceContext->Unmap(cameraBuffer, 0);
+
 }
 
 void Graphics::swapBuffer()
@@ -1036,29 +1090,6 @@ void Graphics::swapBuffer()
 	deviceContext->Map(viewProjBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, glm::value_ptr(viewProj), sizeof(glm::mat4));
 	deviceContext->Unmap(viewProjBuffer, 0);
-
-	// update camera buffer
-	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, glm::value_ptr(camera), sizeof(glm::vec3));
-	deviceContext->Unmap(cameraBuffer, 0);
-
-	glm::vec4 corners[4];
-	glm::mat4 invProj = glm::inverse(proj);
-	corners[0] = glm::vec4(-1.0, 1.0, 1.0, 1.0)  * invProj;
-	corners[1] = glm::vec4(1.0, 1.0, 1.0, 1.0) * invProj;
-	corners[2] = glm::vec4(-1.0, -1.0, 1.0, 1.0) * invProj;
-	corners[3] = glm::vec4(1.0, -1.0, 1.0, 1.0) * invProj;
-	corners[0] /= corners[0].w;
-	corners[1] /= corners[1].w;
-	corners[2] /= corners[2].w;
-	corners[3] /= corners[3].w;
-
-	//update corner buffer
-	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	deviceContext->Map(cornerBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
-	memcpy(mr.pData, corners, sizeof(glm::vec4) * 4);
-	deviceContext->Unmap(cornerBuffer, 0);
 
 	// draw moving boxes
 	deviceContext->VSSetShader(movingBoxVertexShader, nullptr, 0);
