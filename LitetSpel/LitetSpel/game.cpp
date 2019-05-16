@@ -17,21 +17,24 @@ void Game::init() noexcept {
 	{
 		level.powerUps.push_back(editor.powerups.at(i));
 		level.staticBoxes.push_back(editor.powerups.at(i).hitbox);
-		if (editor.powerups.at(i).getType() == PowerType::Bouncy)
+		switch (editor.powerups.at(i).getType())
 		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, true);
-		}
-		else if (editor.powerups.at(i).getType() == PowerType::Sticky)
-		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, true);
-		}		
-		else if (editor.powerups.at(i).getType() == PowerType::Heavy)
-		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, true);
-		}
-		else
-		{
-			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->powerBox, true);
+		case PowerType::Bouncy:
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, false);
+
+			break;
+		case PowerType::Sticky:
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, false);
+
+			break;
+
+		case PowerType::Heavy:
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, false);
+
+			break;
+		default:
+			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, false);
+			break;
 		}
 	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
