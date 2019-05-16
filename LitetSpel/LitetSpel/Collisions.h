@@ -50,7 +50,7 @@ public:
     // registers a new hitbox
     void registerEntry(CollisionObject &parent, ColliderType id, Box const &hitbox, bool isStatic ) noexcept;
     bool unregisterEntry(CollisionObject const &parent) noexcept;
-    bool intersect(Box const &a, Box const &b) noexcept;
+    static bool intersect(Box const &a, Box const &b) noexcept;
     // checks if any of the mobiles have collided,
     // and if so calls their collide function
     void update() noexcept;
