@@ -1,16 +1,13 @@
 #include "Gate.h"
 
-Gate::Gate(glm::vec4 center, glm::vec4 halfLengths, glm::vec4 color, float timerAdd, vec4 buttonCenter, vec4 buttonHalflengths)
+Gate::Gate(glm::vec4 center, float timerAdd)
 {
 	this->hitbox.center = center;
-	this->hitbox.halfLengths = halfLengths;
-	this->hitbox.color = color;
+	this->hitbox.halfLengths = vec4(1,4,0,0);
+	this->hitbox.color = vec4(1,0,1,0);
 	this->timerAdd = timerAdd;
 	this->button = button;
 	isMoved = false;
-	button.hitbox.center = buttonCenter;
-	button.hitbox.halfLengths = buttonHalflengths;
-	button.hitbox.color = color;
 }
 
 Gate::~Gate()

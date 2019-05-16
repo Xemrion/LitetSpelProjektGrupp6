@@ -13,7 +13,8 @@
 #include"Platform.h"
 #include"MovingPlatform.h"
 #include"PowerUp.h"
-
+#include"Button.h"
+#include"Gate.h"
 using namespace glm;
 class Editor
 {
@@ -55,7 +56,8 @@ public:
 	vec3 startPos;
 	std::vector<PowerUp> powerups;
 	std::vector<vec3> enemyPos;
-	
+	std::vector<Gate> gates;
+	std::vector<Button> buttons;
 	void initialize(const char* filename);
 
 };

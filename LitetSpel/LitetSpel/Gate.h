@@ -4,7 +4,7 @@
 class Gate : public CollisionObject
 {
 public:
-	Gate(glm::vec4 center, glm::vec4 halfLengths, glm::vec4 color, float timerAdd, vec4 buttonCenter, vec4 buttonHalflengths);
+	Gate(glm::vec4 center, float timerAdd);
 	virtual ~Gate();
 	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
 	void move(float dt);

@@ -130,19 +130,8 @@ void Editor::initialize(const char* filename)
 			startPosY /= pixelToUnitRatio;
 			center.x = startPosX + halfLength.x;
 			center.y = startPosY - (doorHeight / 2) / pixelToUnitRatio;
-			bool found = false;
-			for (int i = 0; i < buttons.size() && !found; i++)
-			{
-				if (buttons.at(i) == getPixelColour(i).y + 10))
-				{
-				found = true;
-				}
-				this->powerups.push_back(PowerUp(center, PowerType::None));
-			}
-			if (!found)
-			{
 			
-			}
+			this->gates.insert(gates.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Gate(center, 5));
 		}
 			else if (isButton(getPixelColour(i)))
 			{
@@ -153,7 +142,7 @@ void Editor::initialize(const char* filename)
 				startPosY /= pixelToUnitRatio;
 				center.x = startPosX + (buttonWidth / 2) / pixelToUnitRatio;
 				center.y = startPosY - halfLength.y;
-				this->powerups.push_back(PowerUp(center, PowerType::None));
+				this->buttons.insert(buttons.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Button(center));
 			}
 			else
 			{

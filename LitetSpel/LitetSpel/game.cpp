@@ -59,11 +59,11 @@ void Game::init() noexcept {
 	EnemyBox.color = vec4(1, 0, 0, 0);
 
 	//Gate & button test
-	level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
+	/*level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
 	level.movingBoxes.push_back(level.gates.at(0).hitbox);
 	level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
 	level.colManager.registerEntry(level.gates.at(0), ColliderType::platform, level.gates.at(0).hitbox, true);
-	level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);
+	level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);*/
 }
 
 void Game::menuLoad()

@@ -11,6 +11,7 @@ class Button : public CollisionObject
 {
 public:
 	Button();
+	Button(vec4 buttonCenter);
 	virtual ~Button();
 	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
 
