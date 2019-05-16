@@ -38,7 +38,7 @@ private:
 
 	static const int maxMetaballs = 15;
 	static const int maxLasers = 100;
-	static const int maxStaticBoxes = 200;
+	static const int maxStaticBoxes = 300;
 	static const int maxMovingBoxes = 50;
 
 	ID3D11Buffer* staticBoxVertexBuffer;

@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeTwo.png");
+	editor.initialize("PrototypeThree.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -11,27 +11,30 @@ void Game::init() noexcept {
 	{
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
-		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, false);
+		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, true);
 	}
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
 		level.powerUps.push_back(editor.powerups.at(i));
 		level.staticBoxes.push_back(editor.powerups.at(i).hitbox);
-		if (editor.powerups.at(i).getType() == PowerType::Bouncy)
+		switch (editor.powerups.at(i).getType())
 		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, true);
-		}
-		else if (editor.powerups.at(i).getType() == PowerType::Sticky)
-		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, true);
-		}		
-		else if (editor.powerups.at(i).getType() == PowerType::Heavy)
-		{
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, true);
-		}
-		else
-		{
-			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->powerBox, true);
+		case PowerType::Bouncy:
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, false);
+
+			break;
+		case PowerType::Sticky:
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, false);
+
+			break;
+
+		case PowerType::Heavy:
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, false);
+
+			break;
+		default:
+			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, false);
+			break;
 		}
 	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
@@ -209,7 +212,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			posDiff = minDistY;
 
 			// if colliding with floor
-			if (minDistY.y > 0.0) {
+			if (minDistY.y >= 0.0) {
 				velocity.y = 0;
 				isStanding = true;
 				collidingMovingPlatform = platformPtr;
@@ -266,7 +269,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y > 0.0) {
-				velocity.y = 0;
+				//velocity.y = 0;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
@@ -394,9 +397,13 @@ void Player::shoot(vec3 mousePos) noexcept
 
 void Player::recallBlobs() noexcept
 {
-	for (auto &blob : blobs)
-		blob.recall();
-	shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
+	if (isStanding) 
+	{
+		for (auto &blob : blobs)
+			blob.recall();
+		shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
+	}
+
 }
 
 void Game::update(double dt) {
@@ -407,6 +414,7 @@ void Game::update(double dt) {
 		level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 		handleInput();
 		level.player.isStanding = false;
+		level.player.collidingMovingPlatform = nullptr;
 		level.player.update(dt);
 		if (level.enemy.alive)
 		{
@@ -478,16 +486,11 @@ void Game::handleInput() {
 void Game::updatePhysics() {
 	float timestep = PHYSICS_TIME_STEP;
 
-	// player:
+
 	auto &player = level.player;
 
 	while (physicsSimTime + timestep < time) {
-		//Moving platforms:
-		for (auto &movingPlatform : level.movingPlatforms)
-		{
-			movingPlatform.move(time);
-		}
-
+		// player:
 		if ( player.isStuck ) {
             player.setVelocity(vec3(0.0));
 		}
@@ -495,15 +498,14 @@ void Game::updatePhysics() {
 			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
         }
 		if (player.collidingMovingPlatform != nullptr) {
-			player.pos += player.collidingMovingPlatform->moveFunction(time + timestep) - player.collidingMovingPlatform->pos;
+			player.pos += player.collidingMovingPlatform->moveFunction(physicsSimTime) - player.collidingMovingPlatform->moveFunction(physicsSimTime - timestep);
 		}
         player.move(timestep);
 		player.isStuck = false;
-		player.collidingMovingPlatform = nullptr;
 // enemies:
         auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 		if (enemy.alive) {
-			player.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
+			enemy.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			enemy.move(timestep);
 		}
 
@@ -515,10 +517,15 @@ void Game::updatePhysics() {
 			blob.move(timestep);
 		}
 
+		//Moving platforms:
+		for (auto& movingPlatform : level.movingPlatforms)
+		{
+			movingPlatform.move(physicsSimTime);
+		}
+
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();
-
 		physicsSimTime += timestep;
 	}
 }
