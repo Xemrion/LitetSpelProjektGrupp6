@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeThree.png");
+	editor.initialize("Test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -54,6 +54,13 @@ void Game::init() noexcept {
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
+
+	//Gate & button test
+	level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
+	level.movingBoxes.push_back(level.gates.at(0).hitbox);
+	level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
+	level.colManager.registerEntry(level.gates.at(0), ColliderType::platform, level.gates.at(0).hitbox, true);
+	level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);
 }
 
 void Game::menuLoad()
@@ -194,6 +201,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			pos.y += 1;
 		}
 	}
+	
 	else if (other.colliderType == ColliderType::movingPlatform) {
 		MovingPlatform* platformPtr = (MovingPlatform*)other.object;
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
@@ -250,6 +258,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			pos.y += 1;
 		}
 	}
+	
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Sticky && other.hitbox->color.w != 0 && !isStuck && !isStanding)
 	{
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
@@ -301,7 +310,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y > 0.0) {
-				velocity.y = 0;
+				//velocity.y = 0;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
@@ -519,6 +528,11 @@ void Game::updatePhysics() {
 		{
 			movingPlatform.move(physicsSimTime);
 		}
+		//gates
+		for (auto& Gates : level.gates)
+		{
+			Gates.move(physicsSimTime);
+		}
 
 		updatePlayerCollision();
 		updateEnemyCollision();
@@ -531,7 +545,7 @@ void Game::updatePlayerCollision()
 {
 	auto &player = level.player;
 
-	// Bottom:
+	// player:
 	player.hitbox.center = vec4(
 		player.pos.x,
 		player.pos.y,
@@ -586,10 +600,18 @@ void Game::updateGraphics() {
 		if (level.enemy.alive) {
 			level.movingBoxes.push_back(EnemyBox);
 		}
-		for (int i = 0; i < editor.movingPlatforms.size(); i++)
+		// Moving platforms
+		for (int i = 0; i < level.movingPlatforms.size(); i++)
 		{
 			level.movingBoxes.push_back(level.movingPlatforms.at(i).hitbox);
 		}
+		// Gates
+		for (int i = 0; i < level.gates.size(); i++)
+		{
+			level.movingBoxes.push_back(level.gates.at(0).hitbox);
+			level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
+		}
+
 
 		level.spheres = vector<Sphere>();
 		playerSphere.centerRadius = vec4(
@@ -613,7 +635,7 @@ void Game::updateGraphics() {
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
 		}
 
-		//showHitboxes();
+		//showHitboxes(); 
 	}
 	else
 	{
