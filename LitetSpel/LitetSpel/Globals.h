@@ -7,8 +7,8 @@ const float PHYSICS_TIME_STEP = 0.0001f;
 enum class PowerType {
 	None,
 	Bouncy,
-	Heavy,
-	Sticky
+	Sticky,
+	Heavy
 }; //Adding more requires change in PowerUp class
 
 //Colours

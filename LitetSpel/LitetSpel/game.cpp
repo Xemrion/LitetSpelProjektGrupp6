@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeThree.png");
+	editor.initialize("PrototypeTwo.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -16,7 +16,7 @@ void Game::init() noexcept {
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
 		level.powerUps.push_back(editor.powerups.at(i));
-		level.staticBoxes.push_back(editor.powerups.at(i).hitbox);
+		
 		switch (editor.powerups.at(i).getType())
 		{
 		case PowerType::Bouncy:
@@ -614,6 +614,14 @@ void Game::updateGraphics() {
 		{
 			level.player.blobs[i].blobSphere.color = playerSphere.color;
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
+		}
+
+		for (int i = 0; i < level.powerUps.size(); ++i) {
+			Sphere powerUpSphere;
+			powerUpSphere.centerRadius = level.powerUps.at(i).hitbox.center;
+			powerUpSphere.centerRadius.w = 10.0;
+			powerUpSphere.color = playerStatusColors[level.powerUps.at(i).getTypeAsInt()];
+			level.spheres.push_back(powerUpSphere);
 		}
 
 		//showHitboxes();

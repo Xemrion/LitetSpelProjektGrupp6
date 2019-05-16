@@ -96,16 +96,14 @@ float3 calcNormal(float3 p)
 //type: 0 metaball, 1 line
 float4 calcColor(float3 p)
 {
-	float4 color = spheres[0].color;
+	float4 color = float4(0.0, 0.0, 0.0, 0.0);
 	float minDist = mb(p, spheres[0].centerRadius);
+
 	for (int i = 1; i < nSpheres; ++i) {
 		float dist = mb(p, spheres[i].centerRadius);
-
-		if (dist > minDist) {
-			color = spheres[i].color;
-			minDist = dist;
-		}
+		color += smoothstep(1.0, 0.0, 1.0 - dist) * spheres[i].color;
 	}
+
 	return color;
 }
 

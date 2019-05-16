@@ -11,7 +11,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
 	isStuck         (false),
     recallSpeed     (200.0f),
     speed           (100.1f),
-    radius          (  2.0f),
+    radius          (  2.5f),
 	status          (BlobStatus::Blob_None),
     velocity        (   .0f)
 {
