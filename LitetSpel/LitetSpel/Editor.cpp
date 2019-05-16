@@ -34,92 +34,126 @@ void Editor::initialize(const char* filename)
 	{
 		if (!isWhite(getPixelColour(i)) && isPixelUsed(i) == -1)
 		{
-			//Position baserat på mittpunkten av bilden
-			startPosX = (i % width) - middleX;
-			startPosY = middleY - floor(i / width);
+		//Position baserat på mittpunkten av bilden
+		startPosX = (i % width) - middleX;
+		startPosY = middleY - floor(i / width);
 
-			halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio;
-			halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio;
+		halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio;
+		halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio;
 
-			if (isBlue(getPixelColour(i)))
-			{
-				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-				startPosX *= minimumBoxSize;
-				startPosY *= minimumBoxSize;
-				startPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
-				center.y = startPosY - halfLength.y;
-				this->goalPos = vec3(center);
-			}
-			else if (isRed(getPixelColour(i)))
-			{
-				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-				startPosX *= minimumBoxSize;
-				startPosY *= minimumBoxSize;
-				startPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
-				center.y = startPosY - halfLength.y;
-				this->enemyPos.push_back(vec3(center));
-			}
-			else if (isGreen(getPixelColour(i)))
-			{
-				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-				startPosX *= minimumBoxSize;
-				startPosY *= minimumBoxSize;
-				startPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
-				center.y = startPosY - halfLength.y;
-				this->startPos = vec3(center);
-			}
-			else if (isBouncy(getPixelColour(i)))
-			{
-				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-				startPosX *= minimumBoxSize;
-				startPosY *= minimumBoxSize;
-				startPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
-				center.y = startPosY - halfLength.y;
-				this->powerups.push_back(PowerUp(center, PowerType::Bouncy));
-			}
-			else if (isHeavy(getPixelColour(i)))
-			{
-				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-				startPosX *= minimumBoxSize;
-				startPosY *= minimumBoxSize;
-				startPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
-				center.y = startPosY - halfLength.y;
-				this->powerups.push_back(PowerUp(center, PowerType::Heavy));
+		if (isGoal(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - halfLength.y;
+			this->goalPos = vec3(center);
+		}
+		else if (isEnemy(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - halfLength.y;
+			this->enemyPos.push_back(vec3(center));
+		}
+		else if (isStartPoint(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - halfLength.y;
+			this->startPos = vec3(center);
+		}
+		else if (isBouncy(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - halfLength.y;
+			this->powerups.push_back(PowerUp(center, PowerType::Bouncy));
+		}
+		else if (isHeavy(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - halfLength.y;
+			this->powerups.push_back(PowerUp(center, PowerType::Heavy));
 
-			}
-			else if (isSticky(getPixelColour(i)))
-			{
-				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-				startPosX *= minimumBoxSize;
-				startPosY *= minimumBoxSize;
-				startPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
-				center.y = startPosY - halfLength.y;
-				this->powerups.push_back(PowerUp(center, PowerType::Sticky));
+		}
+		else if (isSticky(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - halfLength.y;
+			this->powerups.push_back(PowerUp(center, PowerType::Sticky));
 
-			}
-			else if (isNone(getPixelColour(i)))
+		}
+		else if (isNone(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - halfLength.y;
+			this->powerups.push_back(PowerUp(center, PowerType::None));
+
+		}
+		else if (isDoor(getPixelColour(i)))
+		{
+			addBoxToUsed(startPosX, startPosY, startPosX, startPosY - doorHeight);
+			startPosX *= minimumBoxSize;
+			startPosY *= minimumBoxSize;
+			startPosX /= pixelToUnitRatio;
+			startPosY /= pixelToUnitRatio;
+			center.x = startPosX + halfLength.x;
+			center.y = startPosY - (doorHeight / 2) / pixelToUnitRatio;
+			bool found = false;
+			for (int i = 0; i < buttons.size() && !found; i++)
 			{
-				addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
+				if (buttons.at(i) == getPixelColour(i).y + 10))
+				{
+				found = true;
+				}
+				this->powerups.push_back(PowerUp(center, PowerType::None));
+			}
+			if (!found)
+			{
+			
+			}
+		}
+			else if (isButton(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + buttonWidth, startPosY - doorHeight);
 				startPosX *= minimumBoxSize;
 				startPosY *= minimumBoxSize;
 				startPosX /= pixelToUnitRatio;
 				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + halfLength.x;
+				center.x = startPosX + (buttonWidth / 2) / pixelToUnitRatio;
 				center.y = startPosY - halfLength.y;
 				this->powerups.push_back(PowerUp(center, PowerType::None));
-
 			}
 			else
 			{
@@ -157,9 +191,17 @@ void Editor::initialize(const char* filename)
 						for (int k = 1; k < abs(endPosY - startPosY) && continueLoop; k++)
 						{
 
-							for (int l = (j - 1); l > 0 && continueLoop; l--)
+							for (int l = (j); l > 0 && continueLoop; l--)
 							{
-								if (!isPlatform(getPixelColour((startPos + width * k) + l)))
+								if (l == j)
+								{
+									if (isPlatform(getPixelColour((startPos + width * k) + l)))
+									{
+										endPosY = startPosY - k;
+										continueLoop = false;
+									}
+								}
+								else if (!isPlatform(getPixelColour((startPos + width * k) + l)))
 								{
 									endPosY = startPosY - k;
 									continueLoop = false;
@@ -306,6 +348,7 @@ void Editor::initialize(const char* filename)
 
 }
 
+
 vec3 Editor::getPixelColour(int index)
 {
 	//Convert to RGB
@@ -344,17 +387,17 @@ bool Editor::isWhite(vec3 pixelColour)
 	return pixelColour.x == 255 && pixelColour.y == 255 && pixelColour.z == 255;
 }
 
-bool Editor::isBlue(vec3 pixelColour)
+bool Editor::isGoal(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 0 && pixelColour.z == 255;
 }
 
-bool Editor::isRed(vec3 pixelColour)
+bool Editor::isEnemy(vec3 pixelColour)
 {
 	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 0;
 }
 
-bool Editor::isGreen(vec3 pixelColour)
+bool Editor::isStartPoint(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z == 0;
 }
@@ -381,11 +424,20 @@ bool Editor::isNone(vec3 pixelColour)
 
 bool Editor::isPlatform(vec3 pixelColour)
 {
-	return !(isRed(pixelColour) || isGreen(pixelColour) || isBlue(pixelColour) || isWhite(pixelColour));
+	return !(isEnemy(pixelColour) || isStartPoint(pixelColour) || isGoal(pixelColour) || isWhite(pixelColour));
 }
 
 bool Editor::isMovingPlatform(vec3 pixelColour)
 {
 	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z >= 120 && pixelColour.z <= 130;
+}
+
+bool Editor::isButton(vec3 pixelColour)
+{
+	return pixelColour.x == 150 && pixelColour.y >= 70 && pixelColour.y < 80 && pixelColour.z == 0;
+}
+bool Editor::isDoor(vec3 pixelColour)
+{
+	return pixelColour.x == 150 && pixelColour.y >= 80 && pixelColour.y < 90;
 }
 

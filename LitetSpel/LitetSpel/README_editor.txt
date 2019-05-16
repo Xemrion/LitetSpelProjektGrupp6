@@ -8,4 +8,6 @@ Heavy = (192,192,192)
 Sticky = (0,64,0)
 Bouncy = (255,0,255)
 none = (128,128,0)
+Button = (150,70..79,0)
+Door = (150,80..89,0)
 Platform = allt annat.

@@ -24,15 +24,17 @@ private:
 	std::vector<int> bottomSide;
 	std::vector<int> rightSide;
 	bool isWhite(vec3 pixelColour);
-	bool isBlue(vec3 pixelColour);
-	bool isRed(vec3 pixelColour);
-	bool isGreen(vec3 pixelColour);
+	bool isGoal(vec3 pixelColour);
+	bool isEnemy(vec3 pixelColour);
+	bool isStartPoint(vec3 pixelColour);
 	bool isPlatform(vec3 pixelColour);
 	bool isBouncy(vec3 pixelColour);
 	bool isHeavy(vec3 pixelColour);
 	bool isSticky(vec3 pixelColour);
 	bool isNone(vec3 pixelColour);
 	bool isMovingPlatform(vec3 pixelColour);
+	bool isDoor(vec3 pixelColour);
+	bool isButton(vec3 pixelColour);
 	vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
 	void addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY);
@@ -40,6 +42,8 @@ private:
 	int minimumBoxSize = 30;
 	int width = 0;
 	int height = 0;
+	int doorHeight = 5;
+	int buttonWidth = 5;
 	int maxMovingPlatformLength = 30;
 
 public:
@@ -51,6 +55,7 @@ public:
 	vec3 startPos;
 	std::vector<PowerUp> powerups;
 	std::vector<vec3> enemyPos;
+	
 	void initialize(const char* filename);
 
 };
