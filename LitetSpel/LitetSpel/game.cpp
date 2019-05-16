@@ -20,20 +20,20 @@ void Game::init() noexcept {
 		switch (editor.powerups.at(i).getType())
 		{
 		case PowerType::Bouncy:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, true);
 
 			break;
 		case PowerType::Sticky:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, true);
 
 			break;
 
 		case PowerType::Heavy:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, true);
 
 			break;
 		default:
-			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, false);
+			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, true);
 			break;
 		}
 	}
