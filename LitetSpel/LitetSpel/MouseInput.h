@@ -1,6 +1,6 @@
-#ifndef MOUSEINPUT_H
-#define MOUSEINPUT_H
-#include<queue>
+#pragma once
+
+#include <queue>
 
 //Exampel if(mouseVariable.ReadEvent().GetType() == MouseInput::Event::Type::RightPress) för högerklick
 
@@ -110,7 +110,3 @@ private: //Variables
 	int wheelDeltaCarry = 0;
 	std::queue<MouseInput::Event> buffer;
 };
-
-
-#endif // !MOUSEINPUT_H
-

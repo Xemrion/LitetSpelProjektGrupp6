@@ -18,6 +18,11 @@
 #include "Globals.h"
 #include "Interfaces.h"
 
+#include "KeyboardInput.h"
+#include "MouseInput.h"
+
+// TODO: refactor into the class hierarchy
+
 class Player : public IActor, public IInputListener {
     using Blobs = std::vector<Blob>;
 
@@ -31,6 +36,7 @@ public:
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
 	void          shoot(glm::vec2 const &mousePos) noexcept;
 	void          recallBlobs() noexcept;
+    virtual void  updateRepresentation()       noexcept override;
     virtual void  updateHitboxes()             noexcept override;
     virtual void  updateInput()                noexcept override;
     virtual void  updateLogic(    double dt_s) noexcept override;
@@ -64,20 +70,19 @@ public:
 	virtual ~Enemy() noexcept;
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
+    virtual void updateRepresentation()       noexcept override;
     virtual void updateHitboxes()           noexcept override;
     virtual void updateLogic(    double dt_s) noexcept override;
     virtual void updatePhysics(  double dt_s) noexcept override;
     virtual void updateAnimation(double dt_s) noexcept override;
     virtual void die() noexcept override;
-
-    // TODO: refactor into IActor?
     [[nodiscard]] virtual inline Box const* getVolume() const noexcept {
-        static Box volume { {position,0}, {3,3,3,0}, {0,1,0,0} };
         return &volume;
     }
 
 private:
-    glm::vec3 controlDir; // wot?
+    Box volume;
+    glm::vec3 controlDir;
   //  bool      isStanding; ///, alive, isDeregistered;
 };
 
@@ -91,7 +96,8 @@ public:
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
     virtual Hitboxes const& getHitboxes() const noexcept override;
-    virtual void updateHitboxes()           noexcept override;
+    virtual void updateRepresentation()       noexcept override;
+    virtual void updateHitboxes()             noexcept override;
     virtual void updateLogic(    double dt_s) noexcept override;
     virtual void updatePhysics(  double dt_s) noexcept override;
     virtual void updateAnimation(double dt_s) noexcept override;
@@ -112,7 +118,7 @@ class Level {
 public:
     Level();
     void              add(std::unique_ptr<IObject> object) noexcept;
-    bool              remove(IObject const &target)   noexcept;
+    bool              remove(IObject &target) noexcept;
     Player&           getPlayer()  noexcept;
     SceneEntries&     getScene()   noexcept;
     Boxes&            getBoxes()   noexcept;
@@ -130,6 +136,7 @@ private:
 
 class Game {
 public:
+    Game( KeyboardInput *, MouseInput * );
 	void   init() noexcept;
 	void   update(double dt_s);
     void   loadLevel();
@@ -146,7 +153,9 @@ private:
                         glm::vec2 const &moveSpeed,
                         glm::vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 
-    double                 physicsSimTime  { .0 },
-                           time            { .0 };
-    std::unique_ptr<Level> level           {};
+    double                  physicsSimTime  { .0 },
+                            time            { .0 };
+    std::unique_ptr<Level>  level           {};
+    KeyboardInput          *keyboard;
+    MouseInput             *mouse;
 };

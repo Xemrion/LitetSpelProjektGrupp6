@@ -1,17 +1,14 @@
 #include"Platform.h"
 
-Platform::Platform(glm::vec4 center, glm::vec4 halfLengths)
+Platform::Platform( Box box, float friction ):
+    friction( friction )
 {
     // register hitbox:
     hitboxes.push_back({
-        this,                     // hitbox parent
-        ColliderType::blob,       // hitbox identifier
-        Box {                     // hitbox box
-            center,                  // box position
-            halfLengths,             // box volume
-            {}                       // box color TODO
-        },
-        true                     // hitbox is static
+        this,                   // hitbox parent
+        ColliderType::platform, // hitbox identifier
+        std::move( box ),       // hitbox box (also used for representation)
+        true                    // hitbox is static
      });
 }
 
@@ -26,18 +23,14 @@ std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Platform::getReprese
     return Boxes{ &getBox() };
 }
 
-void Platform::updateHitboxes() noexcept {
-    ; // stub
+[[nodiscard]]
+float Platform::getFriction() const noexcept {
+    return friction;
 }
 
-void Platform::updateLogic(double dt) noexcept {
-    ; // stub
-}
 
-void Platform::updatePhysics(double dt) noexcept {
-    ; // stub
-}
-
-void Platform::updateAnimation(double dt) noexcept {
-    ; // stub
-}
+void Platform::updateRepresentation()       noexcept {}; // stub
+void Platform::updateHitboxes()             noexcept {}; // stub
+void Platform::updateLogic(double dt_s)     noexcept {}; // stub
+void Platform::updatePhysics(double dt_s)   noexcept {}; // stub
+void Platform::updateAnimation(double dt_s) noexcept {}; // stub

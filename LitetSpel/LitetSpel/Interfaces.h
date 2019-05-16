@@ -6,6 +6,9 @@
 #include "Globals.h"
 #include "Geometry.h"
 
+#include "KeyboardInput.h"
+#include "MouseInput.h"
+
 // TODO: consider ECS? The current design is a clusterfuck even after all this refactoring.
 
 // interface for graphics system
@@ -14,6 +17,7 @@ public:
     using Boxes   = std::vector<Box const*>;
     using Spheres = std::vector<Sphere const*>;
     virtual ~IRepresentable() noexcept {};
+    virtual void updateRepresentation() noexcept = 0;
     virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept = 0;
 };
 
@@ -85,7 +89,12 @@ struct Input {
 };
 
 class IInputListener {
+public:
+    void         attachInput( KeyboardInput *, MouseInput * ) noexcept;
     virtual void updateInput() noexcept = 0;
+protected:
+    KeyboardInput *keyboard = nullptr;
+    MouseInput    *mouse    = nullptr;
 };
 
 class IActor : public IObject {
@@ -108,8 +117,9 @@ public:
     {}
 
     virtual ~IActor() noexcept {}
-    void         addVelocity(glm::vec3 const &velocity) noexcept;
-    void         setVelocity(glm::vec3 const &velocity) noexcept;
+    void         addVelocity( glm::vec3 const &velocity ) noexcept;
+    void         setVelocity( glm::vec3 const &velocity ) noexcept;
+    void         multiplyVelocity( glm::vec3 const &fac ) noexcept;
     void         putForce(glm::vec3 const &force) noexcept;
     virtual void updateHitboxes() noexcept = 0;
     virtual void move(double dt) noexcept;

@@ -1,8 +1,7 @@
-#ifndef KEYBOARDINPUT_H
-#define KEYBOARDINPUT_H
-#include<bitset>
-#include<queue>
+#pragma once
 
+#include <bitset>
+#include <queue>
 
 class KeyboardInput {
 
@@ -71,6 +70,3 @@ private:
 	std::queue<Event> keybuffer;
 	std::queue<char> charbuffer;
 };
-
-
-#endif // !KEYBOARDINPUT_H

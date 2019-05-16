@@ -1,18 +1,19 @@
 #include <cassert>
 
 #include "game.h"
-#include "KeyboardInput.h"
-#include "MouseInput.h"
+
 
 void Game::loadLevel() { // temp
     level = std::make_unique<Level>();
 
     auto player = std::make_unique<Player>( glm::vec3{  .0f,  .0f, .0f } );
-    auto enemy1 = std::make_unique<Enemy>(  glm::vec3{ 5.0f, 5.0f, .0f } );
+    player->attachInput(keyboard, mouse);
+
+    auto enemy1 = std::make_unique<Enemy>(  glm::vec3{ -30.0f, 15.0f, .0f } );
     auto goal   = std::make_unique<LevelGoal>( glm::vec3{70.0f,-15.0f,.0f}, 12.0f );
-    auto ground = std::make_unique<Platform>(  glm::vec4{  0, -30, 0, 0}, glm::vec4{100, 10, 10, 0} ); // groundbox; color: (1.0, 1.0, 1.0, 0.0);
-    auto plat1  = std::make_unique<Platform>(  glm::vec4{ 30,  0,  0, 0}, glm::vec4{ 10, 20, 10, 0} ); // testPlat1; color: (0.0, 1.0, 0.0, 0.0);
-    auto plat2  = std::make_unique<Platform>(  glm::vec4{-30,  10, 0, 0}, glm::vec4{ 10,  2, 10, 0} ); // testPlat2: color: (0.0, 0.5, 0.5, 0.0);
+    auto ground = std::make_unique<Platform>( Box{glm::vec4{  0, -30, 0, 0}, glm::vec4{100, 10, 10, 0}, green }, .950f ); // groundbox; color: (1.0, 1.0, 1.0, 0.0);
+    auto plat1  = std::make_unique<Platform>( Box{glm::vec4{ 30,  0,  0, 0}, glm::vec4{ 10, 20, 10, 0}, red   }, .975f ); // testPlat1; color: (0.0, 1.0, 0.0, 0.0);
+    auto plat2  = std::make_unique<Platform>( Box{glm::vec4{-30,  10, 0, 0}, glm::vec4{ 10,  2, 10, 0}, blue  }, .999f ); // testPlat2: color: (0.0, 0.5, 0.5, 0.0);
 
     level->add( std::move(player) );
     level->add( std::move(enemy1) );
@@ -21,6 +22,11 @@ void Game::loadLevel() { // temp
     level->add( std::move(plat1)  );
     level->add( std::move(plat2)  );
 }
+
+Game::Game( KeyboardInput *keyboard, MouseInput *mouse ):
+    keyboard ( keyboard ),
+    mouse    ( mouse    )
+{}
 
 void Game::init() noexcept {
     loadLevel();
@@ -54,7 +60,8 @@ void Game::init() noexcept {
 		level.spheres.push_back( player.blobs[i].blobSphere );
 	}
     for ( auto &b : player.blobs ) {
-        level.colManager.add({&b, ColliderType::blob, b.hitbox, false});  // TODO: ICollider::getHitboxes() + Level::add()
+        level.colManager.add({&b, ColliderType::blob, b.hitbox, false});  // TODO: ICollider::getHitboxes() + 
+        ()
     }
 	updatePlayerCollision();
     */
@@ -79,10 +86,10 @@ Level& Game::getLevel() noexcept {
 // TODO!!!
 Player::Player( glm::vec3 position={.0f, .0f, .0f} ):
     IActor( false,   // isStanding
-            1200.0f, // jumpForce
-            JUMP_CD, // jumpCooldown
-            10.0f,   // mass
-            150.0f,  // moveSpeed
+            PLAYER_JUMP_FORCE,
+            JUMP_CD,
+            PLAYER_MASS,
+            PLAYER_SPEED,
             position
     ),
     hasExtraJump  ( true         ),
@@ -120,7 +127,9 @@ void Player::updatePhysics( double dt_s ) noexcept {
 };
 
 [[nodiscard]]
-Sphere const * Player::getSphere() const noexcept { return &sphere; }
+Sphere const * Player::getSphere() const noexcept {
+    return &sphere;
+}
 
 void Player::updateInput() noexcept {
     processMouse();
@@ -129,94 +138,97 @@ void Player::updateInput() noexcept {
 }
 
 void Player::processMouse() noexcept {
-    static MouseInput mouse;;
-    if ( input.isPressed[Input::Key::shoot] ) {
+    if (mouse->LeftIsPressed())
         input.isPressed[Input::Key::shoot] = true;
-        input.mousePosition = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
+    if ( input.isPressed[Input::Key::shoot] ) {
+        input.mousePosition = glm::vec3(mouse->GetXPos(), mouse->GetYPos(), 0);
+        shoot( input.mousePosition );
     }
     else input.isPressed[Input::Key::shoot] = false;
 }
 
+// TODO:  Map<char,ActionEnum> keybindings
 void Player::processKeyboard() noexcept {
-    static KeyboardInput keyboard;
     // Movement
-    if (keyboard.KeyIsPressed('D'))
+    if ( keyboard->KeyIsPressed('D') )
         input.isPressed[Input::Key::right] = true;
-    if (keyboard.KeyIsPressed('A'))
+    if ( keyboard->KeyIsPressed('A') )
         input.isPressed[Input::Key::left]  = true;
-    if (keyboard.KeyIsPressed('W'))
+    if ( keyboard->KeyIsPressed('W') )
         input.isPressed[Input::Key::up]    = true;
-    if (keyboard.KeyIsPressed('S'))
+    if ( keyboard->KeyIsPressed('S') )
         input.isPressed[Input::Key::down]  = true;
-    /* TODO?
-    if (keyboard.KeyIsPressed('B')) {
+
+    if ( keyboard->KeyIsPressed('B') ) {
         if ( powerCooldown <= .0f ) {
-            if ( status == Status::none ) {
+            if ( status == Player::Status::none ) {
                 for ( int i = 0; i < blobCharges; ++i ) {
                     blobs[i].status = Blob::Status::bouncy;
                 }
-                status = Status::bouncy;
-                graphics.setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
+                status = Player::Status::bouncy;
+                //graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
             }
             else {
-                for (int i = 0; i < blobCharges; i++) {
-                    game.level.player.blobs[i].status = Blob::Status::none;
-                }
-                status = Status::none;
-                graphics.setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
+                for ( int i = 0; i < blobCharges; ++i )
+                    blobs[i].status = Blob::Status::none;
+                status = Player::Status::none;
+                //graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
             }
             powerCooldown = POWER_CD;
         }
     }
-    if (keyboard.KeyIsPressed('H')) {
-        if (powerCooldown <= .0f) {
+    if ( keyboard->KeyIsPressed('H') ) {
+        if ( powerCooldown <= .0f ) {
             if ( status == Status::none) {
-                for (int i = 0; i < blobCharges; ++i) {
+                for ( int i = 0; i < blobCharges; ++i ) {
                     blobs[i].status = Blob::Status::heavy;
                 }
-                status = Status::heavy;
-                graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
+                status = Player::Status::heavy;
+                //graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
             }
             else {
-                for (int i = 0; i < blobCharges; i++) {
+                for ( int i = 0; i < blobCharges; ++i )
                     blobs[i].status = Blob::Status::none;
-                }
                 status = Player::Status::none;
-                graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
+                //graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
             }
             powerCooldown = POWER_CD;
         }
     }
-    if (keyboard.KeyIsPressed('Y')) {
-        if (powerCoolDown <= 0) {
-            if (player.status == Player::Status::none) {
-                for (int i = 0; i < player.blobCharges; i++) {
-                    player.blobs[i].status = Blob::Status::sticky;
-                }
-                player.status = Player::Status::sticky;
-                graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+    if ( keyboard->KeyIsPressed('Y') ) {
+        if ( powerCooldown <= .0f ) {
+            if ( status == Player::Status::none) {
+                for ( int i = 0; i < blobCharges; ++i )
+                    blobs[i].status = Blob::Status::sticky;
+                status = Player::Status::sticky;
+                // graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
             }
             else {
-                for (int i = 0; i < player.blobCharges; i++) {
-                    player.blobs[i].status = Blob::Status::none;
-                }
-                player.status = Player::Status::none;
-                graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+                for ( int i = 0; i < blobCharges; ++i )
+                    blobs[i].status = Blob::Status::none;
+                status = Player::Status::none;
+                //graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
             }
-            powerCoolDown = 0.2f;
+            powerCooldown = POWER_CD;
         }
-    }*/
-    if (keyboard.KeyIsPressed('R'))
-        recallBlobs();
-    if (keyboard.KeyIsPressed('P')) {
-        ;//createShaders(); // TODO
     }
+    if ( keyboard->KeyIsPressed('R') )
+        recallBlobs();
+    if ( keyboard->KeyIsPressed('P') )
+        ;//createShaders(); // TODO
+}
+
+void Player::updateRepresentation() noexcept {
+    sphere = { position, radius };
 }
 
 void Player::updateHitboxes() noexcept {
     auto &hitbox = hitboxes[0].box;
     //level.boxes.push_back(volume); // TODO!
-    hitbox.center      = { position, .0f };
+    //hitbox.center      = { position, .0f };
+    hitbox.center.x = position.x;
+    hitbox.center.y = position.y;
+    hitbox.center.z = position.z;
     hitbox.halfLengths = { glm::vec3(radius/2), .0f };
 }
 
@@ -248,23 +260,60 @@ void Player::die() noexcept {
 
 [[nodiscard]]
 std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Player::getRepresentation() const noexcept {
-    return Spheres{ getSphere() };
+    Spheres representation;
+    representation.push_back( getSphere() );
+    for ( auto &blob : blobs )
+        representation.push_back( blob.getSphere() );
+    return representation;
 }
 
 void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
     auto &hitbox = hitboxes[0].box;
 
     if ( otherHitbox == ColliderType::platform ) {
-        auto &platBox = dynamic_cast<Platform&>(other).getBox();
-
-        if ( true ) { // direction down temp
+        auto &platform = dynamic_cast<Platform&>(other);
+        auto &platBox  = platform.getBox();
+        auto dtPos = glm::vec3(platBox.center) - position;
+        if ( dtPos.x > platBox.halfLengths.x ) { // player is to the left
+            hasExtraJump  = true;
+            // TODO: y friction?
+            velocity.x    = 0;
+            position.x    = platform.getBox().center.x
+                            - platform.getBox().halfLengths.x
+                            - radius/2;
+        }
+        else if ( dtPos.x < -platBox.halfLengths.x ) { // player is to the right
+            hasExtraJump  = true;
+            // TODO: y friction?
+            velocity.x    = 0;
+            position.x    = platform.getBox().center.x
+                            + platform.getBox().halfLengths.x
+                            + radius/2;
+        }
+        if ( dtPos.y > platBox.halfLengths.y ) { // player is below
+            velocity.y    = 0;
+            position.y    = platform.getBox().center.y
+                            - platform.getBox().halfLengths.y
+                            - radius/2;
+        }
+        else if ( dtPos.y < -platBox.halfLengths.y ) { // player is above
+            isStanding    = true;
+            hasExtraJump  = true;
+            velocity.y    = 0;
+            velocity.x   *= platform.getFriction();
+            position.y    = platform.getBox().center.y
+                            + platform.getBox().halfLengths.y
+                            + radius/2;
+        }
+            
+        if ( false ) { // direction down temp
 			isStanding    = true;
 			hasExtraJump  = true;
             velocity.y    = 0;
-			position.y    = platBox.center.y
-                            + platBox.halfLengths.y
-                            + position.y
-                            - radius/2;
+            velocity.x   *= platform.getFriction();
+			position.y    = platform.getBox().center.y
+                            + platform.getBox().halfLengths.y
+                            + radius/2;
         }/*
         else if ( ownHitbox == ColliderType::player_top ) {
             if ( status == Status::sticky ) {
@@ -355,8 +404,8 @@ void Player::shoot(glm::vec2 const &mousePos) noexcept {
     for ( auto &blob : blobs ) {
         if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
             blob.shoot(dir);
-            shootCooldown = SHOOT_CD; // TODO: refactor into a constexpr constant in Globals.h 
-            break;
+            shootCooldown = SHOOT_CD;
+            return;
         }
     }
 }
@@ -365,7 +414,7 @@ void Player::recallBlobs() noexcept {
     for ( auto &blob : blobs ) {
         blob.recall();
     }
-    shootCooldown = SHOOT_CD; // TODO: refactor into a constexpr in Globals.h 
+    shootCooldown = SHOOT_CD;
 }
 void Player::handleInput() noexcept {
     if ( input.isPressed[Input::Key::shoot] ) {
@@ -373,11 +422,11 @@ void Player::handleInput() noexcept {
     }
     if ( input.isPressed[Input::Key::left] ) {
         if ( !isStuck )
-            addVelocity(glm::vec3(-moveSpeed, .0f, .0f));
+            addVelocity(glm::vec3(isStanding? -moveSpeed : (-FLOAT_REDUCTION*moveSpeed), .0f, .0f));
     }
     if ( input.isPressed[Input::Key::right] ) {
         if ( !isStuck )
-            addVelocity(glm::vec3(moveSpeed, .0f, .0f));
+            addVelocity(glm::vec3(isStanding? moveSpeed : (FLOAT_REDUCTION*moveSpeed), .0f, .0f));
     }
     if ( input.isPressed[Input::Key::up] ) {
         if ( isStanding ) {
@@ -388,7 +437,7 @@ void Player::handleInput() noexcept {
         else if ( status == Status::bouncy
                   and hasExtraJump
                   and jumpCooldown <= .0f )
-{
+        {
             hasExtraJump = false;
             jumpCooldown = JUMP_CD;
             velocity.y   = .0f;
@@ -407,7 +456,8 @@ void Player::handleInput() noexcept {
         b = false;
  }
 
-void Game::update(double dt_s)  {
+
+void Game::update( double dt_s )  {
     level->onFrameStart(); // TEMP: clearing boxes & spheres
     Game::time += dt_s; // NOTE: Should be redundant (but would require some revamping)
     // level.player.velocity.x = 0;     // TODO: wtf?
@@ -418,7 +468,7 @@ void Game::update(double dt_s)  {
     updateGraphics();
 }
 
-void Game::updateLogic(double dt_s) {
+void Game::updateLogic( double dt_s ) {
     for ( auto &e : level->getScene() )
         e->updateLogic(dt_s);
 }
@@ -431,7 +481,7 @@ void Game::updateInput() {
 // Catches up the physics simulation time to the actual game time
 // Call last of all logic updates (but before graphics)
 void Game::updatePhysics() {
-	double constexpr timestep = .015; // TODO: refactor into Globals?
+	double constexpr timestep = .0015; // TODO: refactor into Globals?
     while ( physicsSimTime < Game::time ) {
         for ( auto &e : level->getScene() ) {
             e->updatePhysics(timestep);
@@ -471,6 +521,7 @@ void Game::updatePhysics() {
 void Game::updateGraphics() { // TODO: refactor into level?
     // TODO: make it update elements instead of repopulate vectors?
     for ( auto const &e : level->getScene() ) {
+        e->updateRepresentation();
         auto const &gfx = e->getRepresentation();
         if ( std::holds_alternative<IRepresentable::Boxes>(gfx) )
             for ( auto const *p : std::get<IRepresentable::Boxes>(gfx) )
@@ -529,12 +580,13 @@ Enemy::getRepresentation() const noexcept {
 // TODO!!!!
 Enemy::Enemy(glm::vec3 position):
     IActor( false,   // isStanding
-            450.0f,  // jumpForce
+            950.0f,  // jumpForce
             JUMP_CD, // jumpCooldown
             10.0f,   // mass
             20.0f,   // moveSpe:ed
             position
-    )
+    ),      // center      h-lenghts  colour
+    volume( {{position,0}, {3,3,3,0}, {0,1,0,0} } )
 {
     // register hitboxex:
     hitboxes.push_back({
@@ -553,9 +605,13 @@ void Enemy::die() noexcept {
 }
 
 void Enemy::updatePhysics( double dt_s ) noexcept {
-    addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT * dt_s, 0.0));
+    addVelocity(glm::vec3(.0f, -GRAVITY_CONSTANT * dt_s, .0f));
     move(dt_s);
 };
+
+void Enemy::updateRepresentation() noexcept {
+    volume.center = { position, .0f };
+}
 
 void Enemy::updateHitboxes() noexcept {
     auto &hitbox = hitboxes[0].box;
@@ -566,17 +622,15 @@ void Enemy::updateHitboxes() noexcept {
 
 void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
 	if ( otherHitbox == ColliderType::platform ) {
-        auto &platBox = dynamic_cast<Platform&>(other).getBox();
+        auto &platform = dynamic_cast<Platform&>(other);
 
-        auto direction = 1;
-        auto DOWN = 1; // TEMP
 		if ( true ) {  // direction down TEMP
-            velocity.y = 0;
-            isStanding = true;
-			position.y = platBox.center.y
-                         + platBox.halfLengths.y
-                         + position.y
-                         - getVolume()->halfLengths.y;
+            isStanding    = true;
+            velocity.y    = 0;
+            velocity.x   *= platform.getFriction();
+            position.y    = platform.getBox().center.y
+                            + platform.getBox().halfLengths.y
+                            + getVolume()->halfLengths.y;
 		}
         /*
 		else if ( ownHitbox == ColliderType::enemy_top ) {
@@ -604,17 +658,16 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &o
 
 // Updates logic, call once per frame before updatePhysics
 void Enemy::updateLogic(double dt_s) noexcept {
-	velocity.x    = .0f;
 //	velocity.y   -= float(GRAVITY_CONSTANT) * (float)dt_s;
 	jumpCooldown -= (float)dt_s;
 	if ( !isStanding ) {
 		if ( jumpCooldown <= .0f ) {
 			controlDir.x = -controlDir.x;
 			jumpCooldown = JUMP_CD;
-			putForce(glm::vec3(.0f, jumpForce, .0f));
+			putForce( glm::vec3(.0f, jumpForce, .0f) );
 		}
 	}
-	addVelocity(controlDir * moveSpeed);
+	addVelocity( controlDir * moveSpeed );
 	isStanding = false;
 }
 
@@ -668,11 +721,11 @@ void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::
 //            
 void Level::add(std::unique_ptr<IObject> object) noexcept {
     Player *player = dynamic_cast<Player*>(object.get());
-    if (player) {
+    if ( player ) {
         if ( this->player )
             assert( false and "The level already contains a player!" );
         else this->player = player;
-    }   
+    }
     collisionManager.add( *object );
     scene.push_back({ std::move(object) });
 }
@@ -689,7 +742,7 @@ void Level::onFrameStart() {
 //
 // usage:
 //     level.remove( *this );
-bool Level::remove( IObject const &target ) noexcept {
+bool Level::remove( IObject &target ) noexcept {
     // TODO: handle Player edge case
     auto unary_predicate = [&target]( auto const &e ) { 
         return *e == target;
@@ -723,22 +776,11 @@ std::variant<IRepresentable::Boxes,IRepresentable::Spheres> LevelGoal::getRepres
     return Boxes{ &representation };
 }
 
-void LevelGoal::updateHitboxes() noexcept {
-    ; // stub
-}
-
-void LevelGoal::updateLogic(double dt_s) noexcept {
-    ; // stub
-}
-
-void LevelGoal::updatePhysics(double dt_s) noexcept {
-    ; // stub
-}
-
-void LevelGoal::updateAnimation(double dt_s) noexcept {
-    ; // stub
-}
-
+void LevelGoal::updateRepresentation()       noexcept {}; // stub
+void LevelGoal::updateHitboxes()             noexcept {}; // stub
+void LevelGoal::updateLogic(double dt_s)     noexcept {}; // stub
+void LevelGoal::updatePhysics(double dt_s)   noexcept {}; // stub
+void LevelGoal::updateAnimation(double dt_s) noexcept {}; // stub
 
 LevelGoal::LevelGoal( glm::vec3 const &position, float radius, TriggerCallback cb ):
     representation({ glm::vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,.0f} }),

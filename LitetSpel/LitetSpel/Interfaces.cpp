@@ -10,7 +10,11 @@ bool IUnique::operator!=( IUnique const &other ) const noexcept {
 
 void IActor::addVelocity(glm::vec3 const &velocity) noexcept {
     this->velocity += velocity;
-    float speed = length(this->velocity);
+    _cap_speed();
+}
+
+void IActor::multiplyVelocity( glm::vec3 const &fac ) noexcept {
+    velocity *= fac;
     _cap_speed();
 }
 
@@ -38,4 +42,9 @@ void IActor::move(double dt_s) noexcept {
 
 std::vector<Hitbox> const& IActor::getHitboxes() const noexcept {
     return hitboxes;
+}
+
+void IInputListener::attachInput( KeyboardInput *keyboard, MouseInput *mouse ) noexcept {
+    this->keyboard = keyboard;
+    this->mouse    = mouse;
 }

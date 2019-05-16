@@ -6,9 +6,14 @@
 
 // TODO: put global constants and config values in a global namespace
 
-float constexpr GRAVITY_CONSTANT   = 100.f; // 100.0f
-float constexpr MAX_SPEED          =  50.f;  // temp
-bool  constexpr SHOW_HITBOXES      = true;
+float constexpr GRAVITY_CONSTANT   =  150.0f; // 100.0f
+float constexpr MAX_SPEED          =  100.0f; // temp
+float constexpr FLOAT_REDUCTION    =     .05f; // lower = more reduction
+float constexpr DEFAULT_FRICTION   =     .5f; // higher = less
+float constexpr PLAYER_JUMP_FORCE  = 4000.0f;
+float constexpr PLAYER_MASS        =   50.0f;
+float constexpr PLAYER_SPEED       =  200.0f;
+bool  constexpr SHOW_HITBOXES      =   false;
 
 // cooldown constants
 float constexpr JUMP_CD  = .3f;

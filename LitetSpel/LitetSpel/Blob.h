@@ -35,6 +35,7 @@ public:
     [[nodiscard]] bool getIsActive() const noexcept;
     [[nodiscard]] bool getIsBeingRecalled() const noexcept;
 	[[nodiscard]] bool getIsStuck() const noexcept;
+    [[nodiscard]] Sphere const *getSphere() const noexcept;
 
     // TODO: refactor into IActor?
     virtual Box const& getVolume() const noexcept {

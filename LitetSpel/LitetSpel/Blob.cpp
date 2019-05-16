@@ -68,6 +68,10 @@ bool Blob::getIsBeingRecalled() const noexcept { return isBeingRecalled; }
 
 bool Blob::getIsStuck() const noexcept { return isStuck; }
 
+[[nodiscard]] Sphere const * Blob::getSphere() const noexcept {
+    return &blobSphere;
+}
+
 // called once per frame from Player::update
 void Blob::update(double dt) noexcept {
     #undef min

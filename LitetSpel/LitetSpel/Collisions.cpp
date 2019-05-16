@@ -3,35 +3,35 @@
 #include <algorithm>
 
 CollisionManager::CollisionManager() {
-    hitboxes.reserve( 200 );
+    colliders.reserve( 1000 );
 }
 
-void CollisionManager::add( ICollider const &e ) noexcept {
-    for ( auto const &box : e.getHitboxes() ) {
-        hitboxes.push_back(box);
-    }
+void CollisionManager::add( ICollider &e ) noexcept {
+    colliders.push_back(&e);
 }
 
-bool CollisionManager::remove( ICollider const &parent ) noexcept {
-    auto unary_predicate = [&parent]( Hitbox const &e ) { return *(e.object) == parent; };
-    return std::remove_if( hitboxes.begin(), hitboxes.end(), unary_predicate ) != hitboxes.end();
+bool CollisionManager::remove( ICollider &parent ) noexcept {
+    auto unary_predicate = [&parent]( ICollider const *e ) { return *e == parent; };
+    return std::remove_if( colliders.begin(), colliders.end(), unary_predicate ) != colliders.end();
 }
 
 bool CollisionManager::intersect( Box const &a, Box const &b ) noexcept {
-    float const dx      = abs(a.center.x - b.center.x);        // midpoint delta x
-    float const dy      = abs(a.center.y - b.center.y);        // midpoint delta y
-    float const cWidth  = (a.halfLengths.x + b.halfLengths.x); // combined width
-    float const cHeight = (a.halfLengths.y + b.halfLengths.y); // combined height
+    float const dx      =  abs(a.center.x - b.center.x);     // midpoint delta x
+    float const dy      =  abs(a.center.y - b.center.y);     // midpoint delta y
+    float const cWidth  = a.halfLengths.x + b.halfLengths.x; // combined width
+    float const cHeight = a.halfLengths.y + b.halfLengths.y; // combined height
     return dx < cWidth and dy < cHeight;
 }
 
+// TODO: have IColliders request hitbox references from the CollisionManager
+//       instead of having the collision manager ask them for them?
+// Outcome: better data locality, simpler loops.
 void CollisionManager::update() noexcept {
-    // test each mobile hitbox for intersections:
-    for (auto &e : hitboxes )              // for every hitbox
-        if ( !e.isStatic )                 // that's dynamic
-            for ( auto &other : hitboxes ) // test it against all other hitboxes
-                if ( *(e.object) != *(other.object) and intersect(e.box, other.box) ) {
-                    e.object->collide( e.colliderType, other.colliderType, *other.object );
-                    //*(other.object)->collide( e.colliderType, other.colliderType, *other.object );
-                }
+    for ( auto *thisObj : colliders )
+        for ( auto &thisHb : thisObj->getHitboxes() ) if ( !thisHb.isStatic ) 
+            for ( auto *thatObj : colliders ) if ( *thisObj != *thatObj )
+                for ( auto &thatHb : thatObj->getHitboxes() ) if ( intersect(thisHb.box, thatHb.box) ) {
+                     thisObj->collide( thisHb.colliderType, thatHb.colliderType, *thatObj );
+                     thatObj->collide( thatHb.colliderType, thisHb.colliderType, *thisObj );
+                  }
 }

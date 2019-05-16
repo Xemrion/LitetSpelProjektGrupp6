@@ -1,18 +1,21 @@
 #define NOMINMAX
-#include "Graphics.h"
-#include "game.h"
-#include <chrono>
+
+#include "Globals.h"
+
 #include <d3d11.h>
 #include <Windows.h>
+#include <chrono>
+
+#include "Graphics.h"
+#include "game.h"
 #include "KeyboardInput.h"
 #include "MouseInput.h"
 
-KeyboardInput keyboard;
-MouseInput    mouse;
-Game          game;
-Graphics      graphics;
-
-// int xMus = 0; // wot?
+// TODO: refactor into the class hierarchy!
+KeyboardInput  keyboard;
+MouseInput     mouse;
+Game           game( &keyboard, &mouse );
+Graphics       graphics;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
