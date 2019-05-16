@@ -118,8 +118,9 @@ void Player::move(double dt) noexcept {
 void Player::update(double dt) noexcept {
 	jumpCooldown -= float(dt);
 	shootCooldown -= float(dt);
-	if (isStanding != true)
+	if (velocity.y > 4 || velocity.y < -4) {
 		landing = false;
+	}
 	if (isStanding)
 		hasExtraJump = true;
 	
@@ -136,7 +137,20 @@ void Player::update(double dt) noexcept {
 void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
 	if (other.colliderType == ColliderType::platform) {
-		
+		if (landing != true) {
+			if (status == PlayerStatus::Bouncy) {
+				gameSounds->PlayLandingSound03();
+				landing = true;
+			}
+			else if (status == PlayerStatus::Bouncy) {
+				gameSounds->PlayLandingSound02();
+				landing = true;
+			}
+			else {
+				gameSounds->PlayLandingSound01();
+				landing = true;
+			}
+		}
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
