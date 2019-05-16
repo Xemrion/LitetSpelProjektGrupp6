@@ -97,6 +97,7 @@ struct LevelData { // POD
 	vector<Box>      movingBoxes;
     vector<Sphere>   spheres;
 	vector<Gate>     gates;
+	vector<Button>   buttons;
     CollisionManager colManager;
 };
 

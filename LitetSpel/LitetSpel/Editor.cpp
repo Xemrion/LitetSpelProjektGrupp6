@@ -34,115 +34,118 @@ void Editor::initialize(const char* filename)
 	{
 		if (!isWhite(getPixelColour(i)) && isPixelUsed(i) == -1)
 		{
-		//Position baserat på mittpunkten av bilden
-		startPosX = (i % width) - middleX;
-		startPosY = middleY - floor(i / width);
+			//Position baserat på mittpunkten av bilden
+			startPosX = (i % width) - middleX;
+			startPosY = middleY - floor(i / width);
 
-		halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio;
-		halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio;
+			halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio;
+			halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio;
 
-		if (isGoal(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - halfLength.y;
-			this->goalPos = vec3(center);
-		}
-		else if (isEnemy(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - halfLength.y;
-			this->enemyPos.push_back(vec3(center));
-		}
-		else if (isStartPoint(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - halfLength.y;
-			this->startPos = vec3(center);
-		}
-		else if (isBouncy(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - halfLength.y;
-			this->powerups.push_back(PowerUp(center, PowerType::Bouncy));
-		}
-		else if (isHeavy(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - halfLength.y;
-			this->powerups.push_back(PowerUp(center, PowerType::Heavy));
-
-		}
-		else if (isSticky(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - halfLength.y;
-			this->powerups.push_back(PowerUp(center, PowerType::Sticky));
-
-		}
-		else if (isNone(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - halfLength.y;
-			this->powerups.push_back(PowerUp(center, PowerType::None));
-
-		}
-		else if (isDoor(getPixelColour(i)))
-		{
-			addBoxToUsed(startPosX, startPosY, startPosX, startPosY - doorHeight);
-			startPosX *= minimumBoxSize;
-			startPosY *= minimumBoxSize;
-			startPosX /= pixelToUnitRatio;
-			startPosY /= pixelToUnitRatio;
-			center.x = startPosX + halfLength.x;
-			center.y = startPosY - (doorHeight / 2) / pixelToUnitRatio;
-			
-			this->gates.insert(gates.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Gate(center, 5));
-		}
-			else if (isButton(getPixelColour(i)))
+			if (isGoal(getPixelColour(i)))
 			{
-				addBoxToUsed(startPosX, startPosY, startPosX + buttonWidth, startPosY - doorHeight);
+				addBoxToUsed(startPosX, startPosY, startPosX+1, startPosY - 1);
 				startPosX *= minimumBoxSize;
 				startPosY *= minimumBoxSize;
 				startPosX /= pixelToUnitRatio;
 				startPosY /= pixelToUnitRatio;
-				center.x = startPosX + (buttonWidth / 2) / pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->buttons.insert(buttons.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Button(center));
+				this->goalPos = vec3(center);
+			}
+			else if (isEnemy(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->enemyPos.push_back(vec3(center));
+			}
+			else if (isStartPoint(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY-1);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->startPos = vec3(center);
+			}
+			else if (isBouncy(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::Bouncy));
+			}
+			else if (isHeavy(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::Heavy));
+
+			}
+			else if (isSticky(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::Sticky));
+
+			}
+			else if (isNone(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->powerups.push_back(PowerUp(center, PowerType::None));
+
+			}
+			else if (isDoor(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - doorHeight);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio * doorHeight;
+
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+
+				this->gates.insert(gates.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Gate(center, halfLength, 5));
+			}
+			else if (isButton(getPixelColour(i)))
+			{
+				addBoxToUsed(startPosX, startPosY, startPosX + buttonWidth, startPosY - 1);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio * buttonWidth;
+				center.x = startPosX + halfLength.x;
+				center.y = startPosY - halfLength.y;
+				this->buttons.insert(buttons.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Button(center, halfLength));
 			}
 			else
 			{
