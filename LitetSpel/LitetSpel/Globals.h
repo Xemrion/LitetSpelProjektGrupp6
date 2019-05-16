@@ -5,6 +5,8 @@
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 
 // TODO: put global constants and config values in a global namespace
+                                                 // {3.0f, 3.0f, 0.5f}
+struct BLOB_ANIM_AMPLITUDE { static constexpr float X=2.4f, Y=1.7f, Z=.8f; };
 
 float constexpr GRAVITY_CONSTANT   =  150.0f; // 100.0f
 float constexpr MAX_SPEED          =  100.0f; // temp

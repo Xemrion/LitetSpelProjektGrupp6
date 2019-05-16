@@ -17,7 +17,8 @@ public:
     using Boxes   = std::vector<Box const*>;
     using Spheres = std::vector<Sphere const*>;
     virtual ~IRepresentable() noexcept {};
-    virtual void updateRepresentation() noexcept = 0;
+    virtual void updateGraphics() noexcept = 0;
+    virtual void updateAnimations( double dt_s, double t_s ) noexcept = 0;
     virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept = 0;
 };
 
@@ -71,9 +72,8 @@ public:
 
     virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept = 0;
     virtual Hitboxes const& getHitboxes() const noexcept = 0;
-    virtual void updateLogic(     double dt ) noexcept = 0;
-    virtual void updatePhysics(   double dt ) noexcept = 0;
-    virtual void updateAnimation( double dt ) noexcept = 0;
+    virtual void updateLogic(      double dt )  noexcept = 0;
+    virtual void updatePhysics(    double dt )  noexcept = 0;
 };
 
 struct Input {

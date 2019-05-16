@@ -29,8 +29,8 @@ float Platform::getFriction() const noexcept {
 }
 
 
-void Platform::updateRepresentation()       noexcept {}; // stub
-void Platform::updateHitboxes()             noexcept {}; // stub
-void Platform::updateLogic(double dt_s)     noexcept {}; // stub
-void Platform::updatePhysics(double dt_s)   noexcept {}; // stub
-void Platform::updateAnimation(double dt_s) noexcept {}; // stub
+void Platform::updateGraphics()  noexcept                           {}; // stub
+void Platform::updateHitboxes()  noexcept                           {}; // stub
+void Platform::updateLogic(      double dt_s )             noexcept {}; // stub
+void Platform::updatePhysics(    double dt_s )             noexcept {}; // stub
+void Platform::updateAnimations( double dt_s, double t_s ) noexcept {}; // stub

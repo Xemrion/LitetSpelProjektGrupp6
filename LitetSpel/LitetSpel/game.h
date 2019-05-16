@@ -20,6 +20,7 @@
 
 #include "KeyboardInput.h"
 #include "MouseInput.h"
+#include "Graphics.h"
 
 // TODO: refactor into the class hierarchy
 
@@ -31,17 +32,17 @@ public:
                         bouncy,
                         sticky,
                         heavy };
-    Player( glm::vec3 position );
+    Player( Graphics &, glm::vec3 position );
     virtual ~Player() noexcept;
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
 	void          shoot(glm::vec2 const &mousePos) noexcept;
 	void          recallBlobs() noexcept;
-    virtual void  updateRepresentation()       noexcept override;
-    virtual void  updateHitboxes()             noexcept override;
-    virtual void  updateInput()                noexcept override;
-    virtual void  updateLogic(    double dt_s) noexcept override;
-    virtual void  updatePhysics(  double dt_s) noexcept override;
-    virtual void  updateAnimation(double dt_s) noexcept override;
+    virtual void  updateGraphics() noexcept override;
+    virtual void  updateHitboxes() noexcept override;
+    virtual void  updateInput() noexcept override;
+    virtual void  updateLogic( double dt_s ) noexcept override;
+    virtual void  updatePhysics( double dt_s ) noexcept override;
+    virtual void  updateAnimations( double dt_s, double t_s ) noexcept override;
     virtual void  collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
     void          handleInput() noexcept;
     void          die() noexcept override;
@@ -50,17 +51,17 @@ public:
 private:
     void processMouse()    noexcept;
     void processKeyboard() noexcept;
-
-    Input   input;
-    bool    hasExtraJump,
-            isStuck;
-    Status  status;
-    int     blobCharges;
-    float   shootCooldown,
-            powerCooldown,
-            radius;
-    Blobs   blobs;
-    Sphere  sphere;
+    Graphics *graphics;
+    Input     input;
+    bool      hasExtraJump,
+              isStuck;
+    Status    status;
+    int       blobCharges;
+    float     shootCooldown,
+              powerCooldown,
+              radius;
+    Blobs     blobs;
+    Sphere    blobSphere, animSphere1, animSphere2;
 };
 
 
@@ -70,11 +71,11 @@ public:
 	virtual ~Enemy() noexcept;
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
-    virtual void updateRepresentation()       noexcept override;
-    virtual void updateHitboxes()           noexcept override;
-    virtual void updateLogic(    double dt_s) noexcept override;
-    virtual void updatePhysics(  double dt_s) noexcept override;
-    virtual void updateAnimation(double dt_s) noexcept override;
+    virtual void updateGraphics() noexcept override;
+    virtual void updateHitboxes() noexcept override;
+    virtual void updateLogic( double dt_s ) noexcept override;
+    virtual void updatePhysics( double dt_s ) noexcept override;
+    virtual void updateAnimations( double dt_s, double t_s ) noexcept override;
     virtual void die() noexcept override;
     [[nodiscard]] virtual inline Box const* getVolume() const noexcept {
         return &volume;
@@ -96,11 +97,11 @@ public:
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
     virtual Hitboxes const& getHitboxes() const noexcept override;
-    virtual void updateRepresentation()       noexcept override;
-    virtual void updateHitboxes()             noexcept override;
-    virtual void updateLogic(    double dt_s) noexcept override;
-    virtual void updatePhysics(  double dt_s) noexcept override;
-    virtual void updateAnimation(double dt_s) noexcept override;
+    virtual void updateGraphics() noexcept override;
+    virtual void updateHitboxes() noexcept override;
+    virtual void updateLogic( double dt_s) noexcept override;
+    virtual void updatePhysics( double dt_s) noexcept override;
+    virtual void updateAnimations( double dt_s, double t_s ) noexcept override;
 
 private:
     Box                 representation;
@@ -136,7 +137,7 @@ private:
 
 class Game {
 public:
-    Game( KeyboardInput *, MouseInput * );
+    Game( KeyboardInput &, MouseInput &, Graphics & );
 	void   init() noexcept;
 	void   update(double dt_s);
     void   loadLevel();
@@ -144,18 +145,17 @@ public:
     Level& getLevel() noexcept; // temp
 
 private:
+    void updateInput();
     void updateLogic(double dt_s);
     void updatePhysics();
-    void updateInput();
+    void updateAnimations( double dt_s ) noexcept;
     void updateGraphics();
     void showHitboxes();
-    void animateSphere( Sphere    const &sphere,
-                        glm::vec2 const &moveSpeed,
-                        glm::vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 
     double                  physicsSimTime  { .0 },
                             time            { .0 };
     std::unique_ptr<Level>  level           {};
     KeyboardInput          *keyboard;
     MouseInput             *mouse;
+    Graphics               *graphics;
 };

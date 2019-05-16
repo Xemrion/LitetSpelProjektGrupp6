@@ -6,7 +6,7 @@
 void Game::loadLevel() { // temp
     level = std::make_unique<Level>();
 
-    auto player = std::make_unique<Player>( glm::vec3{  .0f,  .0f, .0f } );
+    auto player = std::make_unique<Player>( *graphics, glm::vec3{  .0f,  .0f, .0f } );
     player->attachInput(keyboard, mouse);
 
     auto enemy1 = std::make_unique<Enemy>(  glm::vec3{ -30.0f, 15.0f, .0f } );
@@ -23,10 +23,15 @@ void Game::loadLevel() { // temp
     level->add( std::move(plat2)  );
 }
 
-Game::Game( KeyboardInput *keyboard, MouseInput *mouse ):
-    keyboard ( keyboard ),
-    mouse    ( mouse    )
-{}
+Game::Game( KeyboardInput &keyboard, MouseInput &mouse, Graphics &graphics ):
+    keyboard ( &keyboard ),
+    mouse    ( &mouse    ),
+    graphics ( &graphics )
+{
+    assert( this->keyboard and "Keyboard mustn't be null!" );
+    assert( this->mouse    and "Mouse mustn't be null!"    );
+    assert( this->graphics and "Graphics mustn't be null!" );
+}
 
 void Game::init() noexcept {
     loadLevel();
@@ -84,7 +89,7 @@ Level& Game::getLevel() noexcept {
 }
 
 // TODO!!!
-Player::Player( glm::vec3 position={.0f, .0f, .0f} ):
+Player::Player( Graphics &graphics, glm::vec3 position={.0f, .0f, .0f} ):
     IActor( false,   // isStanding
             PLAYER_JUMP_FORCE,
             JUMP_CD,
@@ -92,6 +97,7 @@ Player::Player( glm::vec3 position={.0f, .0f, .0f} ):
             PLAYER_SPEED,
             position
     ),
+    graphics      ( &graphics    ),
     hasExtraJump  ( true         ),
     isStuck       ( false        ),
     status        ( Status::none ),
@@ -100,6 +106,7 @@ Player::Player( glm::vec3 position={.0f, .0f, .0f} ):
     powerCooldown ( POWER_CD     ),
     radius        ( 5.0f         )
 {
+    assert( this->graphics and "Graphics mustn't be null!" );
     // register hitbox:
     hitboxes.push_back({
         (ICollider*)this,      // hitbox parent
@@ -128,7 +135,7 @@ void Player::updatePhysics( double dt_s ) noexcept {
 
 [[nodiscard]]
 Sphere const * Player::getSphere() const noexcept {
-    return &sphere;
+    return &blobSphere;
 }
 
 void Player::updateInput() noexcept {
@@ -150,29 +157,35 @@ void Player::processMouse() noexcept {
 // TODO:  Map<char,ActionEnum> keybindings
 void Player::processKeyboard() noexcept {
     // Movement
-    if ( keyboard->KeyIsPressed('D') )
+    if ( keyboard->KeyIsPressed('D') ) {
         input.isPressed[Input::Key::right] = true;
-    if ( keyboard->KeyIsPressed('A') )
+    }
+    if ( keyboard->KeyIsPressed('A') ) {
         input.isPressed[Input::Key::left]  = true;
-    if ( keyboard->KeyIsPressed('W') )
+    }
+    if ( keyboard->KeyIsPressed('W') ) {
         input.isPressed[Input::Key::up]    = true;
-    if ( keyboard->KeyIsPressed('S') )
+    }
+    if ( keyboard->KeyIsPressed('S') ) {
         input.isPressed[Input::Key::down]  = true;
+    }
 
+    // TODO: trim code duplication in blobs branches
     if ( keyboard->KeyIsPressed('B') ) {
         if ( powerCooldown <= .0f ) {
             if ( status == Player::Status::none ) {
-                for ( int i = 0; i < blobCharges; ++i ) {
-                    blobs[i].status = Blob::Status::bouncy;
+                for ( auto &blob : blobs ) {
+                   blob.status = Blob::Status::bouncy;
                 }
                 status = Player::Status::bouncy;
-                //graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
+                graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
             }
             else {
-                for ( int i = 0; i < blobCharges; ++i )
-                    blobs[i].status = Blob::Status::none;
+                for ( auto &blob : blobs ) {
+                    blob.status = Blob::Status::none;
+                }
                 status = Player::Status::none;
-                //graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
+                graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
             }
             powerCooldown = POWER_CD;
         }
@@ -180,17 +193,18 @@ void Player::processKeyboard() noexcept {
     if ( keyboard->KeyIsPressed('H') ) {
         if ( powerCooldown <= .0f ) {
             if ( status == Status::none) {
-                for ( int i = 0; i < blobCharges; ++i ) {
-                    blobs[i].status = Blob::Status::heavy;
+                for ( auto &blob : blobs ) {
+                    blob.status = Blob::Status::heavy;
                 }
                 status = Player::Status::heavy;
-                //graphics.setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
+                graphics->setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
             }
             else {
-                for ( int i = 0; i < blobCharges; ++i )
-                    blobs[i].status = Blob::Status::none;
+                for ( auto &blob : blobs ) {
+                    blob.status = Blob::Status::none;
+                }
                 status = Player::Status::none;
-                //graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
+                graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
             }
             powerCooldown = POWER_CD;
         }
@@ -198,16 +212,18 @@ void Player::processKeyboard() noexcept {
     if ( keyboard->KeyIsPressed('Y') ) {
         if ( powerCooldown <= .0f ) {
             if ( status == Player::Status::none) {
-                for ( int i = 0; i < blobCharges; ++i )
-                    blobs[i].status = Blob::Status::sticky;
+                for ( auto &blob : blobs ) {
+                    blob.status = Blob::Status::sticky;
+                }
                 status = Player::Status::sticky;
-                // graphics.setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+                graphics->setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
             }
             else {
-                for ( int i = 0; i < blobCharges; ++i )
-                    blobs[i].status = Blob::Status::none;
+                for ( auto &blob : blobs ) {
+                    blob.status = Blob::Status::none;
+                }
                 status = Player::Status::none;
-                //graphics.setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+                graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
             }
             powerCooldown = POWER_CD;
         }
@@ -218,8 +234,8 @@ void Player::processKeyboard() noexcept {
         ;//createShaders(); // TODO
 }
 
-void Player::updateRepresentation() noexcept {
-    sphere = { position, radius };
+void Player::updateGraphics() noexcept {
+    blobSphere = { position, radius };
 }
 
 void Player::updateHitboxes() noexcept {
@@ -238,6 +254,7 @@ Player::~Player() {}
 void Player::updateLogic(double dt_s) noexcept {
 	jumpCooldown  -= (float)dt_s;
 	shootCooldown -= (float)dt_s;
+    powerCooldown -= (float)dt_s;
 
 	if ( isStanding )
 		hasExtraJump = true;
@@ -250,8 +267,35 @@ void Player::updateLogic(double dt_s) noexcept {
         blob.update(dt_s);
 }
 
-void Player::updateAnimation( double dt_s ) noexcept {
-    ; // TODO
+void Player::updateAnimations( double dt_s, double t_s ) noexcept {
+    // move speed
+    auto movement = glm::smoothstep(-150.0f, 150.0f, glm::vec2(velocity.x, velocity.y));
+    glm::vec3 rotationSpeed = glm::vec3( .81f, .53f, .1f );
+    // Offset the start rotation of the spheres to avoid them all starting at the same place
+    glm::vec3 offset = glm::vec3(.2f, .0f, .0f);
+    // Multiplier to animate faster when moving a certain direction. Not smooth.
+    glm::vec2 movementMultiplier = glm::vec2(
+        glm::clamp( abs(movement.x) + .0f, .0f, 2.0f ),
+        glm::clamp( abs(movement.y) + .0f, .0f, 2.0f )
+    );
+
+    auto timeFactor1 = (float)sin(t_s);
+    animSphere1 = (glm::vec4(
+        blobSphere.centerRadius.x + (timeFactor1 * (rotationSpeed.x * abs(movement.x)) + offset.x) * BLOB_ANIM_AMPLITUDE::X,
+        blobSphere.centerRadius.y + (timeFactor1 * (rotationSpeed.y * abs(movement.y)) + offset.y) * BLOB_ANIM_AMPLITUDE::Y,
+        blobSphere.centerRadius.z + (timeFactor1 *  rotationSpeed.z                    + offset.z) * BLOB_ANIM_AMPLITUDE::Z,
+        blobSphere.centerRadius.w / 2
+    ));
+
+    auto timeFactor2 = (float)cos(t_s);
+    rotationSpeed = -rotationSpeed;
+    offset = glm::vec3(1.45f, .9f, 1.1f);
+    animSphere2 = (glm::vec4(
+        blobSphere.centerRadius.x + (timeFactor2 * (rotationSpeed.y * abs(movement.x)) + offset.x) * BLOB_ANIM_AMPLITUDE::X,
+        blobSphere.centerRadius.y + (timeFactor2 * (rotationSpeed.x * abs(movement.y)) + offset.y) * BLOB_ANIM_AMPLITUDE::Y,
+        blobSphere.centerRadius.z + (timeFactor2 *  rotationSpeed.z                    + offset.z) * BLOB_ANIM_AMPLITUDE::Z,
+        blobSphere.centerRadius.w / 2
+    ));
 }
 
 void Player::die() noexcept {
@@ -261,7 +305,9 @@ void Player::die() noexcept {
 [[nodiscard]]
 std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Player::getRepresentation() const noexcept {
     Spheres representation;
-    representation.push_back( getSphere() );
+    representation.push_back( &blobSphere  );
+    representation.push_back( &animSphere1 );
+    representation.push_back( &animSphere2 );
     for ( auto &blob : blobs )
         representation.push_back( blob.getSphere() );
     return representation;
@@ -271,7 +317,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
     auto &hitbox = hitboxes[0].box;
 
     if ( otherHitbox == ColliderType::platform ) {
-        auto &platform = dynamic_cast<Platform&>(other);
+        auto &platform = dynamic_cast<Platform&>( other );
         auto &platBox  = platform.getBox();
         auto dtPos = glm::vec3(platBox.center) - position;
         if ( dtPos.x > platBox.halfLengths.x ) { // player is to the left
@@ -465,17 +511,18 @@ void Game::update( double dt_s )  {
     updateInput();
     updateLogic(dt_s);
     updatePhysics();
+    updateAnimations(dt_s);
     updateGraphics();
-}
-
-void Game::updateLogic( double dt_s ) {
-    for ( auto &e : level->getScene() )
-        e->updateLogic(dt_s);
 }
 
 // Call first of all per frame updates
 void Game::updateInput() {
     level->getPlayer().updateInput();
+}
+
+void Game::updateLogic( double dt_s ) {
+    for ( auto &e : level->getScene() )
+        e->updateLogic(dt_s);
 }
 
 // Catches up the physics simulation time to the actual game time
@@ -493,6 +540,12 @@ void Game::updatePhysics() {
 		level->getCollisionManager().update();
         physicsSimTime += timestep;
 	}
+}
+
+void Game::updateAnimations( double dt_s ) noexcept {
+    for ( auto &e : level->getScene() ) {
+        e->updateAnimations( dt_s, Game::time );
+    }
 }
 
 // TODO: SphereHandle gfxManager::requestSphere();
@@ -521,7 +574,7 @@ void Game::updatePhysics() {
 void Game::updateGraphics() { // TODO: refactor into level?
     // TODO: make it update elements instead of repopulate vectors?
     for ( auto const &e : level->getScene() ) {
-        e->updateRepresentation();
+        e->updateGraphics();
         auto const &gfx = e->getRepresentation();
         if ( std::holds_alternative<IRepresentable::Boxes>(gfx) )
             for ( auto const *p : std::get<IRepresentable::Boxes>(gfx) )
@@ -532,37 +585,6 @@ void Game::updateGraphics() { // TODO: refactor into level?
     }
     if constexpr ( SHOW_HITBOXES )
         showHitboxes();
-
-//	level.boxes.push_back( groundBox.hitbox );
-//	level.boxes.push_back(  testPlat.hitbox );
-//	level.boxes.push_back( testplat2.hitbox );
-
-    // TODO: for ( auto &e : level.scene )
-    //      e.updateGraphics();
-
-//    for ( auto &enemy : level.enemies ) {
-//        Box eBox;
-//        eBox.center      = { enemy.position, .0f };
-//        eBox.halfLengths = enemyBox.halfLengths;
-//        eBox.color       = glm::vec4((float)enemy.isStanding, 1.0 - (float)enemy.isStanding, 0.0, 0.0);
-//		level.boxes.push_back(eBox);
-//    }
-//
-//
-//	level.spheres = vector<Sphere>();
-//	playerSphere.centerRadius = glm::vec4( level.player.pos, level.player.radius );
-//	level.spheres.push_back(playerSphere);
-//
-//	glm::vec2 animationSpeed = glm::smoothstep(-150.0f, 150.0f, glm::vec2(level.player.velocity.x, level.player.velocity.y));
-//	animateSphere(playerSphere, animationSpeed, glm::vec3(3.0, 3.0, 0.5));
-//
-//	for (int i = 0; i < level.player.blobs.size(); i++) {
-//		level.spheres.push_back(level.player.blobs[i].blobSphere);
-//	}
-//
-//    level.boxes.push_back(level.goal->representation);
-
-	//showHitboxes();
 }
 
 void Game::showHitboxes() {
@@ -609,7 +631,7 @@ void Enemy::updatePhysics( double dt_s ) noexcept {
     move(dt_s);
 };
 
-void Enemy::updateRepresentation() noexcept {
+void Enemy::updateGraphics() noexcept {
     volume.center = { position, .0f };
 }
 
@@ -671,39 +693,10 @@ void Enemy::updateLogic(double dt_s) noexcept {
 	isStanding = false;
 }
 
-void Enemy::updateAnimation( double dt_s ) noexcept {
+void Enemy::updateAnimations( double dt_s, double t_s ) noexcept {
     ; // stub
 }
 
-//Adds two orbiting spheres around a sphere for animation
-void Game::animateSphere(Sphere const &sphere, glm::vec2 const &moveSpeed, glm::vec3 const &amplitude) {
-	glm::vec3 rotationSpeed = glm::vec3( .81f, .53f, .1f );
-	// Offset the start rotation of the spheres to avoid them all starting at the same place
-	glm::vec3 offset = glm::vec3(.2f, .0f, .0f);
-	// Multiplier to animate faster when moving a certain direction. Not smooth.
-	glm::vec2 movementMultiplier = glm::vec2(
-		glm::clamp( abs(moveSpeed.x) + .0f, .0f, 2.0f ),
-		glm::clamp( abs(moveSpeed.y) + .0f, .0f, 2.0f )
-	);
-
-	Sphere sphere1(glm::vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
-		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
-		sphere.centerRadius.w / 2
-	));
-	level->getSpheres().push_back(sphere1);
-
-	rotationSpeed = -rotationSpeed;
-	offset = glm::vec3(1.45f, .9f, 1.1f);
-	Sphere sphere2(glm::vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * abs(moveSpeed.x)) + offset.x) * amplitude.x,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * abs(moveSpeed.y)) + offset.y) * amplitude.y,
-		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z) * amplitude.z,
-		sphere.centerRadius.w / 2
-	));
-	level->getSpheres().push_back(sphere2);
-}
 
 
 // when to use: when loading a level or dynamically spawning entities in a level.
@@ -776,11 +769,11 @@ std::variant<IRepresentable::Boxes,IRepresentable::Spheres> LevelGoal::getRepres
     return Boxes{ &representation };
 }
 
-void LevelGoal::updateRepresentation()       noexcept {}; // stub
-void LevelGoal::updateHitboxes()             noexcept {}; // stub
-void LevelGoal::updateLogic(double dt_s)     noexcept {}; // stub
-void LevelGoal::updatePhysics(double dt_s)   noexcept {}; // stub
-void LevelGoal::updateAnimation(double dt_s) noexcept {}; // stub
+void LevelGoal::updateGraphics()                            noexcept {}; // stub
+void LevelGoal::updateHitboxes()                            noexcept {}; // stub
+void LevelGoal::updateLogic(      double dt_s )             noexcept {}; // stub
+void LevelGoal::updatePhysics(    double dt_s )             noexcept {}; // stub
+void LevelGoal::updateAnimations( double dt_s, double t_s ) noexcept {}; // stub
 
 LevelGoal::LevelGoal( glm::vec3 const &position, float radius, TriggerCallback cb ):
     representation({ glm::vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,.0f} }),

@@ -14,8 +14,8 @@
 // TODO: refactor into the class hierarchy!
 KeyboardInput  keyboard;
 MouseInput     mouse;
-Game           game( &keyboard, &mouse );
 Graphics       graphics;
+Game           game( keyboard, mouse, graphics );
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
@@ -134,7 +134,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
          currFrameTime = Clock::now();
     auto elapsedTime   = prevFrameTime - currFrameTime;
 
-    unsigned long frame_n = 0; // temp
+    unsigned long frame_n = 0; // temp debug thing; feel free to remove
 
 	while (WM_QUIT != msg.message) {
 		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -147,7 +147,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			prevFrameTime = currFrameTime;
             dt_s = std::chrono::duration<double>(elapsedTime).count();
 			
-            (void)++frame_n; // temp
+            (void)++frame_n; // temp debug thing; feel free to remove
 
 			char title[64];
             snprintf( title, sizeof(title)/sizeof(char), "%5.1f FPS (%5.1fms/frame)", 1.0/dt_s, dt_s*1000 );
@@ -158,7 +158,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.setBoxes(game.getLevel().getBoxes());
 			graphics.setMetaballs(game.getLevel().getSpheres());
 			graphics.swapBuffer();
-			// powerCoolDown -= (float)dt; //  wot?
 		}
 	}
 	return 0;
