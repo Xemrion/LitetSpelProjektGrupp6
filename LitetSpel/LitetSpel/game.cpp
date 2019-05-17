@@ -395,6 +395,14 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		}
 		status = PlayerStatus::Sticky;
 	}
+	if (other.colliderType == ColliderType::powerup_none)
+	{
+		for (int i = 0; i < blobCharges; i++)
+		{
+			blobs[i].status = BlobStatus::Blob_None;
+		}
+		status = PlayerStatus::None;
+	}
 	if (other.colliderType == ColliderType::level_goal)
 	{
 		levelCompleted = true;

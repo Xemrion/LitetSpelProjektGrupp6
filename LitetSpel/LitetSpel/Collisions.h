@@ -14,6 +14,7 @@ enum ColliderType { player,
                     powerup_bouncy,
                     powerup_sticky,
 					powerup_heavy,
+					powerup_none,
 				    blob };
 
 
