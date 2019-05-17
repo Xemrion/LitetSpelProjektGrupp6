@@ -6,11 +6,12 @@ Button::Button()
 	isMoved = false;
 }
 
-Button::Button(vec4 buttonCenter, vec2 halfLength)
+Button::Button(vec4 buttonCenter, vec2 halfLength, int index)
 {
 	this->hitbox.center = buttonCenter;
 	this->hitbox.halfLengths = vec4(halfLength,0,0);
 	this->hitbox.color = vec4(1, 0, 0, 0);
+	this->index = index;
 	isPressed = false;
 	isMoved = false;
 }

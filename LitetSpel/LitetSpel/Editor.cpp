@@ -43,7 +43,7 @@ void Editor::initialize(const char* filename)
 
 			if (isGoal(getPixelColour(i)))
 			{
-				addBoxToUsed(startPosX, startPosY, startPosX+1, startPosY - 1);
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
 				startPosY *= minimumBoxSize;
 				startPosX /= pixelToUnitRatio;
@@ -65,7 +65,7 @@ void Editor::initialize(const char* filename)
 			}
 			else if (isStartPoint(getPixelColour(i)))
 			{
-				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY-1);
+				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
 				startPosY *= minimumBoxSize;
 				startPosX /= pixelToUnitRatio;
@@ -132,8 +132,7 @@ void Editor::initialize(const char* filename)
 
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-
-				this->gates.insert(gates.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Gate(center, halfLength, 5));
+				this->gates.push_back(Gate(center, halfLength, getPixelColour(i).z, int(getPixelColour(i).y) % 10));
 			}
 			else if (isButton(getPixelColour(i)))
 			{
@@ -145,7 +144,7 @@ void Editor::initialize(const char* filename)
 				halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio * buttonWidth;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->buttons.insert(buttons.begin() + glm::floatBitsToInt(getPixelColour(i).z) % 10, Button(center, halfLength));
+				this->buttons.push_back(Button(center, halfLength, int(getPixelColour(i).y) % 10));
 			}
 			else
 			{

@@ -11,10 +11,11 @@ class Button : public CollisionObject
 {
 public:
 	Button();
-	Button(vec4 buttonCenter, vec2 halfLength);
+	Button(vec4 buttonCenter, vec2 halfLength,int index);
 	virtual ~Button();
 	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
 
+	int index;
 	Box hitbox;
 	bool isPressed;
 	bool isMoved;

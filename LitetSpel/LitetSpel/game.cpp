@@ -33,12 +33,24 @@ void Game::init() noexcept {
 
 			break;
 		default:
-			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, true);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, true);
 			break;
 		}
 	}
+
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
+		while (editor.buttons.at(i).index != i)
+		{
+			std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
+
+		}
+		while (editor.gates.at(i).index != i)
+		{
+			std::swap(editor.gates.at(i), editor.gates.at(editor.gates.at(i).index));
+		}
+		std::swap(editor.gates.at(i),editor.gates.at(editor.gates.at(i).index));
+		std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
 		level.gates.push_back(editor.gates.at(i));
 		level.movingBoxes.push_back(level.gates.at(i).hitbox);
 		level.colManager.registerEntry(*(level.gates.end() - 1), ColliderType::platform, (level.gates.end() - 1)->hitbox, true);
