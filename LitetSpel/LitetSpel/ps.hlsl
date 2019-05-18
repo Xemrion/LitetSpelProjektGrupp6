@@ -61,8 +61,7 @@ float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 	intersect = false;
 
 	/* calculate ray entry */
-	for (i = 0.0; i < 30; i += 1.0)
-	{
+	for (i = 0.0; i < 30; i += 1.0) {
 		float currentDist = testScene(ro + rd * dist);
 		dist += currentDist + 0.1;
 		if (dist > maxDist) {
@@ -77,8 +76,7 @@ float castRay(float3 ro, float3 rd, out bool intersect, out float back)
 	/* calculate ray exit */
 	if (intersect) {
 		back = maxDist;
-		for (i = 0.0; i < 30; i += 1.0)
-		{
+		for (i = 0.0; i < 30; i += 1.0) {
 			float currentDist = testScene(ro + rd * back);
 			back -= currentDist + 0.1;
 			if (currentDist < 0.1) {
@@ -157,5 +155,5 @@ float4 main(VS_OUT input) : SV_Target
 		}
 	}
 	
-	return float4(pow(color, 1.0 / 2.2), 1.0);
+	return float4(pow( abs(color), 1.0 / 2.2), 1.0);
 }

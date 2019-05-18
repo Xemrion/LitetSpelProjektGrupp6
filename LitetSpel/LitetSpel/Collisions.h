@@ -3,74 +3,33 @@
 #include <vector>
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "geometry.h"
-#include <algorithm>
+#include "Interfaces.h"
+#include "Globals.h"
 
-constexpr bool debugCollisions = true;
-
-float     lerp( float src, float dest, float fac ) noexcept;
-glm::vec4 lerp( glm::vec4 const &src, glm::vec4 const &dest, float fac ) noexcept;
-Box       lerp( Box const &src, Box const &dest, float fac ) noexcept;
-Sphere    lerp( Sphere const &src, Sphere const &dest, float fac ) noexcept;
-
-// use case example:
-//
-// virtual void Player::collide( CollisionId ownHitbox, CollisionId otherHitbox, IObject &other ) override {
-//     switch (ownHitbox) {
-//         case CollisionId::player_top {
-//             if ( otherHitbox == CollisionId::wall )
-//                 // collision! return to previous position?
-//         }; break;
-// 
-//         case CollisionId::player_side {
-//             if ( otherHitbox == CollisionId::wall )
-//                 // collision! return to previous position?
-//         }; break;
-// 
-//         case CollisionId::player_bottom {
-//             if ( (!isFalling  and  otherHitbox == CollisionId::platform )
-//                                or  otherHitbox == CollisionId::wall )
-//             {
-//                 // collision! return to previous position?
-//             }
-//         }; break;
-//     }
-//
-//     // for powerups it doesn't matter which of the players hitbox collided with it,
-//     // so the check can be outside of the switch case.
-//     if ( otherHitbox == CollisionId::powerup_bouncy ) {
-//         _bouncyProjectiles = true;
-//         ((BouncyPowerup&)other).destroy(); // or via some EntityManager
-//     }
-// }
-
-// lasrar
-// spikfällor
-// pressar
-// kraftfält
-// knuffblock
-// spakar
-// knappar
+class CollisionManager {
+public:
+    CollisionManager();
+    void add( ICollider &) noexcept;
+    bool remove( ICollider &target ) noexcept;
+    bool intersect( Box const &a, Box const &b ) noexcept;
+    // checks if any of the mobiles have collided, and if so calls the appropriate collide function
+    void update() noexcept;
+private:
+    std::vector<ICollider*> colliders;
+};
 
 
-// s = playerSphere.centerRadius
-
-     // mid.X               mid.Y                    halfX       halfY
-//*A*/   x= s.x              y=s.y + 0.8*s.w          1.6*s.w     0.2*s.w
-//*B*/   x= s.x - 0.8*s.w    y=s.y                    0.2*s.w     2.0*s.w
-//*C*/   x= s.x + 0.8*s.w    y=s.y                    0.2*s.w     2.0*s.w
-//*D*/   x= s.x              y=s.y - 0.2*s.w          1.6*s.w     1.8*s.w
-
-
+/*
 // class ISlider
 // {
 // public:
 //     ISlider() {}
 //     virtual ~ISlider() {}
 // 
-//     void update(double dt) noexcept {
+//     void update(double dt_s) noexcept {
 //         
 //         if ( _target.position  != _path[_i] )
-//             ; // TODO: dt * move _speed along vector between _target.pos och *_current_target
+//             ; // TODO: dt_s * move _speed along vector between _target.pos och *_current_target
 //         else { // target reached
 //             if ( _isMovingForward ) {
 //                  ++_i;
@@ -134,8 +93,8 @@ Sphere    lerp( Sphere const &src, Sphere const &dest, float fac ) noexcept;
 //     virtual bool onActivation()   noexcept { _target.toggle(); } // forward signal
 //     virtual bool onDeactivation() noexcept { _target.toggle(); } // forward signal
 // 
-//     virtual void update( double dt ) {
-//         _timeLeft -= dt;
+//     virtual void update( double dt_s ) {
+//         _timeLeft -= dt_s;
 //         if ( _timeLeft < 0 ) {
 //             toggle();
 //             if ( isActive() )
@@ -187,150 +146,55 @@ Sphere    lerp( Sphere const &src, Sphere const &dest, float fac ) noexcept;
 // 
 // private:
 //     IActivable &_target;
-//     Sphere      _hitboxButton; // vid kollision, toggle() och höj/sänk _button
+//     Box         _hitboxButton; // vid kollision, toggle() och höj/sänk _button
 //     Box         _base;
 //     Box         _button;
 // };
 
 
-// TODO: contemplate placement;
-enum CollisionId { player_top,
-				   player_bottom,
-				   player_left,
-				   player_right,
-				   enemy_top,
-				   enemy_bottom,
-				   enemy_left,
-				   enemy_right,
-                   platform,
-                   wall,
-                   powerup_bouncy,
-                   powerup_sticky,
-                   powerup_heavy,
-                   level_goal
-                   /* TODO: populate */ };
 
-class CollisionManager; // forward decl
+LevelGoal::LevelGoal( CollisionManager &colManager, Box bounds, TriggerCallback cb ):
+_bounds(bounds),
+_triggerCallback(cb)
+{
+colManager.register_entry(*this, CollisionId::level_goal, _bounds, true );
+}
 
-// TODO: refactor into more suitable header/source?
-class IObject { // Interface / abstract base class
-public:
-    IObject(): _id( _generateId() ) {}
+void LevelGoal::collide( CollisionId  ownHitbox,
+CollisionId  otherHitbox,
+Bo          &other ) noexcept {
+if (    otherHitbox == player_top
+or otherHitbox == player_bottom
+or otherHitbox == player_left
+or otherHitbox == player_right)
+{
+_triggerCallback();
+// TODO:
+//    tone and blur screen?
+//    display text?
+//    wait for input?
+//    load next level?
+}
+}
 
-    //IObject( IObject const  & )         = delete;
-    //IObject( IObject       && )         = delete;
-    //auto& operator=( IObject const  & ) = delete;
-    //auto& operator=( IObject       && ) = delete;
 
-    virtual ~IObject() noexcept {}
 
-    virtual void collide( CollisionId             ownHitbox,
-                          CollisionId             otherHitbox,
-                          IObject                &other,
-                          CollisionManager const &collisionManager ) = 0;
 
-    virtual void update(double dt) noexcept {}
 
-    [[nodiscard]] auto inline getId() const noexcept { return _id; }
 
-    bool operator!=( IObject const &other ) const noexcept;
 
-private:
-    size_t const _id;
 
-    [[nodiscard]]
-    static size_t _generateId() noexcept {
-        static size_t next_id { 0 };
-        return next_id++;
-    }
-};
 
-class CollisionManager {
-    // step amount of the linear interpolation factor                                          
-    static float constexpr lerpFacStep = .01f;
 
-public:
-    using Ruleset = std::vector<CollisionId>;
-    CollisionManager();
 
-    // registers a new hitbox
-    void register_entry( IObject &parent, CollisionId id,    Box const &hitbox,    bool is_static ) noexcept; // call from object constructor
-    void register_entry( IObject &parent, CollisionId id, Sphere const &hitsphere, bool is_static ) noexcept; // call from object constructor
-    bool unregister_entry( IObject const &parent ) noexcept;
 
-    // tests whether the bounding box 'bounds' would be valid for object 'obj'
-    // in accordance to the bounds ruleset 'rules' (list of invalidating CollisionIds)
-    template <typename Geometry> // Box or Sphere
-    bool test( IObject  const &obj,
-               Geometry const &bounds,
-               Ruleset  const &rules ) const noexcept
-    {
-        for ( auto const &e : _mobileBoxes )
-            if ( *(e.object) != obj && intersects(e.hitbox,    &bounds) )
-                return true;
-        for ( auto const &e : _mobileSpheres )
-            if ( *(e.object) != obj && intersects(e.hitsphere, &bounds) )
-                return true;
-        for ( auto const &e : _staticBoxes )
-            if ( *(e.object) != obj && intersects(e.hitbox,    &bounds) )
-                return true;
-        for ( auto const &e : _staticSpheres )
-            if ( *(e.object) != obj && intersects(e.hitsphere, &bounds) )
-                return true;
-        return false;
-    }
 
-    // args: obj       the moving object (needed to eliminate self-collisions)
-    //       src       current position; might be mutated
-    //       dest      target position
-    //       blockers  list of types of colliders that block movement
-    //
-    // pre-conditions:
-    //       the source 'src' must be valid
-    //
-    // side-effects:
-    //       mutates 'src' to the best match found
-    template <typename Geometry> // Box or Sphere
-    void move( IObject  const &obj,
-               Geometry       &src,
-               Geometry const &dest,
-               Ruleset  const &blockers ) const noexcept
-    {
-        for ( float fac = .0f;  fac <= 1.0f;  fac += lerpFacStep ) { 
-            Geometry test = lerp( src, dest, fac );
-            if ( this->test(obj, test, blockers) )
-                src = test;
-        }
-    }
 
-    // evaluates whether two hitboxes are intersecting or not
-    [[nodiscard]]        bool intersects(    Box const * const a,    Box const * const b ) const noexcept;
-    [[nodiscard]]        bool intersects( Sphere const * const a,    Box const * const b ) const noexcept;
-    [[nodiscard]] inline bool intersects(    Box const * const a, Sphere const * const b ) const noexcept;
-    [[nodiscard]]        bool intersects( Sphere const * const a, Sphere const * const b ) const noexcept;
 
-    // checks if any of the mobiles have collided,
-    // and if so, notifies them with the relevant information
-    // needed to determine the proper collision resolution.
-    void update();
 
-private:
-    static auto constexpr sqr = []( auto n ) { return n*n; };
 
-    struct _HitboxEntry { // POD
-        IObject            *object; // parent object   (multiple hitboxes can share the same parent)
-        Box const          *hitbox; // the hitbox itself
-        CollisionId         id;     // enum identifier (provided to the parent of a hitbox on collision)
-    };
 
-    struct _HitsphereEntry { // POD
-        IObject           *object;    // parent object   (multiple hitboxes/hitspheres can share the same parent)
-        Sphere const      *hitsphere; // the hitsphere itself
-        CollisionId        id;        // enum identifier (provided to the parent of a hitbox on collision)
-    };
 
-    std::vector<_HitboxEntry>    _mobileBoxes;   // stores the dynamic hitboxes
-    std::vector<_HitboxEntry>    _staticBoxes;   // stores the  static hitboxes
-    std::vector<_HitsphereEntry> _mobileSpheres; // stores the dynamic hitspheres
-    std::vector<_HitsphereEntry> _staticSpheres; // stores the  static hitspheres
-};
+
+
+*/

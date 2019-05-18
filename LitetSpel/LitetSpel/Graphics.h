@@ -31,7 +31,7 @@ private:
 	ID3D11Buffer* boxVertexBuffer;
 	int boxInstances = 0;
 	ID3D11Buffer* metaballBuffer;
-	glm::vec4 metaballColor = glm::vec4(0.05f, 0.15f, 0.15f, 0.0f);
+	glm::vec4 metaballColor = glm::vec4(0.85, 0.25, 0.75, 0.0);
 	ID3D11Buffer* viewProjBuffer;
 	ID3D11Buffer* cameraBuffer;
 	ID3D11Buffer* cornerBuffer;
@@ -49,9 +49,9 @@ private:
 public:
 	HRESULT init(HWND wndHandle, bool windowed);
 	HRESULT createShaders();
-	void setMetaballs(vector<Sphere> metaballs);
+	void setMetaballs(const vector<Sphere>& metaballs);
 	void setMetaballColorAbsorb(glm::vec3 colorAbsorb);
-	void setBoxes(vector<Box> boxes);
+	void setBoxes(const vector<Box>& boxes);
 	void setCameraPos(glm::vec3 pos); // Set camera position before setting boxes / metaballs
 	void swapBuffer();
 	~Graphics();

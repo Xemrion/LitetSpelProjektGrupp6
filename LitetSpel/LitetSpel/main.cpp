@@ -1,24 +1,24 @@
+#define NOMINMAX
+
+#include "Globals.h"
+
+#include <d3d11.h>
 #include <Windows.h>
 #include <chrono>
-#include <d3d11.h>
+
 #include "Graphics.h"
 #include "game.h"
 #include "KeyboardInput.h"
 #include "MouseInput.h"
 
-KeyboardInput keyboard;
-MouseInput mouse;
-Game game;
+// TODO: refactor into the class hierarchy!
+KeyboardInput  keyboard;
+MouseInput     mouse;
+Graphics       graphics;
+Game           game( keyboard, mouse, graphics );
 
-double dt;
-
-int xMus = 0;
-float powerCoolDown = 0.0;
-
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
@@ -89,8 +89,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-HWND InitWindow(HINSTANCE hInstance, int width, int height)
-{
+HWND InitWindow(HINSTANCE hInstance, int width, int height) {
 	WNDCLASSEX wcex = { 0 };
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -120,126 +119,46 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 	return handle;
 }
 
-void mouseFunc() 
-{
-	if (mouse.LeftIsPressed())
-	{
-		game.leftButtonDown = true;
-		game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
-	}
-	else
-		game.leftButtonDown = false;
-}
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+    using Clock = std::chrono::high_resolution_clock;
 
-void keyboardFunc()
-{
-	//Movement
-	if (keyboard.KeyIsPressed('D'))
-	{
-		game.keys[1] = true;
-	}
-	if (keyboard.KeyIsPressed('A'))
-	{
-		game.keys[0] = true;
-	}
-	if (keyboard.KeyIsPressed('W'))
-	{
-		game.keys[2] = true;
-	}
-	if (keyboard.KeyIsPressed('S'))
-	{
-		game.keys[3] = true;
-	}
-	if (keyboard.KeyIsPressed('B')) 
-	{
-		if (powerCoolDown <= 0) 
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Bouncy;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('H'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Heavy;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('Y'))
-	{
-		if (powerCoolDown <= 0)
-		{
-			if (game.currentLevel.player.status == PlayerStatus::None)
-			{
-				game.currentLevel.player.status = PlayerStatus::Sticky;
-			}
-			else
-			{
-				game.currentLevel.player.status = PlayerStatus::None;
-			}
-			powerCoolDown = 0.2f;
-		}
-	}
-	if (keyboard.KeyIsPressed('R'))
-		game.currentLevel.player.recallBlobs();
-}
-
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
-{
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
 	MSG msg = { 0 };
-	Graphics graphics;
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
 	game.init();
 	ShowWindow(wndHandle, nCmdShow);
 	
-	auto prevFrameTime = std::chrono::steady_clock::now();
-	while (WM_QUIT != msg.message)
-	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-		{
+    double dt_s { .0 };
+	auto prevFrameTime = Clock::now(),
+         currFrameTime = Clock::now();
+    auto elapsedTime   = prevFrameTime - currFrameTime;
+
+    unsigned long frame_n = 0; // temp debug thing; feel free to remove
+
+	while (WM_QUIT != msg.message) {
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
-			auto currentFrameTime = std::chrono::steady_clock::now();
-			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
-			prevFrameTime = currentFrameTime;
+		else {
+			currFrameTime = Clock::now();
+			elapsedTime   = currFrameTime - prevFrameTime;
+			prevFrameTime = currFrameTime;
+            dt_s = std::chrono::duration<double>(elapsedTime).count();
 			
+            (void)++frame_n; // temp debug thing; feel free to remove
+
 			char title[64];
-			_itoa_s(1/dt, title, 64, 10);
+            snprintf( title, sizeof(title)/sizeof(char), "%5.1f FPS (%5.1fms/frame)", 1.0/dt_s, dt_s*1000 );
 			SetWindowTextA(wndHandle, title);
-			
-			keyboardFunc();
-			mouseFunc();
 
-			game.update(dt);
-			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
-			graphics.setBoxes(game.currentLevel.boxes);
-			graphics.setMetaballs(game.currentLevel.spheres);
+			game.update( dt_s );
+			graphics.setCameraPos(glm::vec3(game.getLevel().getPlayer().getSphere()->centerRadius) + glm::vec3(.0f, 20.0f, -100.0f));
+			graphics.setBoxes(game.getLevel().getBoxes());
+			graphics.setMetaballs(game.getLevel().getSpheres());
 			graphics.swapBuffer();
-
-			powerCoolDown -= (float)dt;
 		}
-		
 	}
-
 	return 0;
 }

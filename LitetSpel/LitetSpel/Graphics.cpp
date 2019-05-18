@@ -645,8 +645,9 @@ HRESULT Graphics::createBoxData()
 	return hr;
 }
 
-void Graphics::setBoxes(vector<Box> boxes)
+void Graphics::setBoxes(const vector<Box>& boxes)
 {
+    assert( boxes.size() < 100 ); // temp
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
@@ -671,8 +672,9 @@ void Graphics::setBoxes(vector<Box> boxes)
 	boxInstances = boxes.size();
 }
 
-void Graphics::setMetaballs(vector<Sphere> metaballs)
+void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 {
+    assert( metaballs.size() < 100 ); // temp
 	D3D11_MAPPED_SUBRESOURCE mr;
 	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
 	struct MetaballStruct {
@@ -700,7 +702,7 @@ void Graphics::setCameraPos(glm::vec3 pos)
 
 void Graphics::swapBuffer()
 {
-	float clearColor[] = { 0.0, 0.0, 0.0, 1.0 };
+	float clearColor[] = { 0.9, 0.9, 0.9, 1.0 };
 	deviceContext->ClearRenderTargetView(backBufferView, clearColor);
 	deviceContext->ClearRenderTargetView(geometryBufferView, clearColor);
 	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0, 0);

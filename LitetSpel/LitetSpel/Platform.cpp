@@ -1,18 +1,36 @@
 #include"Platform.h"
 
-Platform::Platform():
-    IObject()
+Platform::Platform( Box box, float friction ):
+    friction( friction )
 {
-	this->hitbox.center;
-	this->hitbox.halfLengths;
+    // register hitbox:
+    hitboxes.push_back({
+        this,                   // hitbox parent
+        ColliderType::platform, // hitbox identifier
+        std::move( box ),       // hitbox box (also used for representation)
+        true                    // hitbox is static
+     });
 }
 
-Platform::Platform(glm::vec4 center, glm::vec4 halfLengths)
-{
-	this->hitbox.center = center;
-	this->hitbox.halfLengths = halfLengths;
+Platform::~Platform() {}
+
+std::vector<Hitbox> const& Platform::getHitboxes() const noexcept {
+    return hitboxes;
 }
 
-Platform::~Platform()
-{
+[[nodiscard]]
+std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Platform::getRepresentation() const noexcept {
+    return Boxes{ &getBox() };
 }
+
+[[nodiscard]]
+float Platform::getFriction() const noexcept {
+    return friction;
+}
+
+
+void Platform::updateGraphics()  noexcept                           {}; // stub
+void Platform::updateHitboxes()  noexcept                           {}; // stub
+void Platform::updateLogic(      double dt_s )             noexcept {}; // stub
+void Platform::updatePhysics(    double dt_s )             noexcept {}; // stub
+void Platform::updateAnimations( double dt_s, double t_s ) noexcept {}; // stub
