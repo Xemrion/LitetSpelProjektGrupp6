@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeTwo.png");
+	editor.initialize("Test.png");
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
@@ -20,22 +20,46 @@ void Game::init() noexcept {
 		switch (editor.powerups.at(i).getType())
 		{
 		case PowerType::Bouncy:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, true);
 
 			break;
 		case PowerType::Sticky:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, true);
 
 			break;
 
 		case PowerType::Heavy:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, true);
 
 			break;
 		default:
-			//level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, false);
+			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, true);
 			break;
 		}
+	}
+
+	for (int i = 0; i < editor.buttons.size(); i++)
+	{
+		while (editor.buttons.at(i).index != i)
+		{
+			std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
+
+		}
+		while (editor.gates.at(i).index != i)
+		{
+			std::swap(editor.gates.at(i), editor.gates.at(editor.gates.at(i).index));
+		}
+		std::swap(editor.gates.at(i),editor.gates.at(editor.gates.at(i).index));
+		std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
+		level.gates.push_back(editor.gates.at(i));
+		level.movingBoxes.push_back(level.gates.at(i).hitbox);
+		level.colManager.registerEntry(*(level.gates.end() - 1), ColliderType::platform, (level.gates.end() - 1)->hitbox, true);
+
+		level.buttons.push_back(editor.buttons.at(i));
+		level.movingBoxes.push_back(level.buttons.at(i).hitbox);
+		level.colManager.registerEntry(*(level.buttons.end() - 1), ColliderType::platform, (level.buttons.end() - 1)->hitbox, false);	
+		
+		level.gates.at(i).button = &level.buttons.at(i);
 	}
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
 	level.staticBoxes.push_back(level.goal->representation);
@@ -57,6 +81,13 @@ void Game::init() noexcept {
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
+
+	//Gate & button test
+	/*level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
+	level.movingBoxes.push_back(level.gates.at(0).hitbox);
+	level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
+	level.colManager.registerEntry(level.gates.at(0), ColliderType::platform, level.gates.at(0).hitbox, true);
+	level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);*/
 }
 
 void Game::menuLoad()
@@ -197,6 +228,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			pos.y += 1;
 		}
 	}
+	
 	else if (other.colliderType == ColliderType::movingPlatform) {
 		MovingPlatform* platformPtr = (MovingPlatform*)other.object;
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
@@ -253,6 +285,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			pos.y += 1;
 		}
 	}
+	
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Sticky && other.hitbox->color.w != 0 && !isStuck && !isStanding)
 	{
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
@@ -304,7 +337,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y > 0.0) {
-				velocity.y = 0;
+				//velocity.y = 0;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
@@ -373,6 +406,14 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			blobs[i].status = BlobStatus::Blob_Sticky;
 		}
 		status = PlayerStatus::Sticky;
+	}
+	if (other.colliderType == ColliderType::powerup_none)
+	{
+		for (int i = 0; i < blobCharges; i++)
+		{
+			blobs[i].status = BlobStatus::Blob_None;
+		}
+		status = PlayerStatus::None;
 	}
 	if (other.colliderType == ColliderType::level_goal)
 	{
@@ -522,6 +563,11 @@ void Game::updatePhysics() {
 		{
 			movingPlatform.move(physicsSimTime);
 		}
+		//gates
+		for (auto& Gates : level.gates)
+		{
+			Gates.move(physicsSimTime);
+		}
 
 		updatePlayerCollision();
 		updateEnemyCollision();
@@ -534,7 +580,7 @@ void Game::updatePlayerCollision()
 {
 	auto &player = level.player;
 
-	// Bottom:
+	// player:
 	player.hitbox.center = vec4(
 		player.pos.x,
 		player.pos.y,
@@ -589,10 +635,18 @@ void Game::updateGraphics() {
 		if (level.enemy.alive) {
 			level.movingBoxes.push_back(EnemyBox);
 		}
-		for (int i = 0; i < editor.movingPlatforms.size(); i++)
+		// Moving platforms
+		for (int i = 0; i < level.movingPlatforms.size(); i++)
 		{
 			level.movingBoxes.push_back(level.movingPlatforms.at(i).hitbox);
 		}
+		// Gates & buttons
+		for (int i = 0; i < level.gates.size(); i++)
+		{
+			level.movingBoxes.push_back(level.gates.at(i).hitbox);
+			level.movingBoxes.push_back(level.buttons.at(i).hitbox);
+		}
+
 
 		level.spheres = vector<Sphere>();
 		playerSphere.centerRadius = vec4(

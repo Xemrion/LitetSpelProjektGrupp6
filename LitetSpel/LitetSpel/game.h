@@ -14,6 +14,7 @@
 #include "PowerUp.h"
 #include "Graphics.h"
 #include "Editor.h"
+#include "Gate.h"
 
 using namespace glm;
 enum PlayerStatus {
@@ -95,6 +96,8 @@ struct LevelData { // POD
     vector<Box>      staticBoxes;
 	vector<Box>      movingBoxes;
     vector<Sphere>   spheres;
+	vector<Gate>     gates;
+	vector<Button>   buttons;
     CollisionManager colManager;
 };
 
