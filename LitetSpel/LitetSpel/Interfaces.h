@@ -72,8 +72,8 @@ public:
 
     virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept = 0;
     virtual Hitboxes const& getHitboxes() const noexcept = 0;
-    virtual void updateLogic(      double dt )  noexcept = 0;
-    virtual void updatePhysics(    double dt )  noexcept = 0;
+    virtual void updateLogic( double dt_s ) noexcept = 0;
+    virtual void updatePhysics( double dt_s ) noexcept = 0;
 };
 
 struct Input {

@@ -26,13 +26,12 @@
 
 class Player : public IActor, public IInputListener {
     using Blobs = std::vector<Blob>;
-
 public:
     enum class Status { none,
                         bouncy,
                         sticky,
                         heavy };
-    Player( Graphics &, glm::vec3 position );
+    Player( Graphics &, CollisionManager &, glm::vec3 position );
     virtual ~Player() noexcept;
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
 	void          shoot(glm::vec2 const &mousePos) noexcept;
@@ -51,17 +50,18 @@ public:
 private:
     void processMouse()    noexcept;
     void processKeyboard() noexcept;
-    Graphics *graphics;
-    Input     input;
-    bool      hasExtraJump,
-              isStuck;
-    Status    status;
-    int       blobCharges;
-    float     shootCooldown,
-              powerCooldown,
-              radius;
-    Blobs     blobs;
-    Sphere    blobSphere, animSphere1, animSphere2;
+    CollisionManager *colMan;
+    Graphics         *graphics;
+    Input             input;
+    bool              hasExtraJump,
+                      isStuck;
+    Status            status;
+    int               blobCharges;
+    float             shootCooldown,
+                      powerCooldown,
+                      radius;
+    Blobs             blobs;
+    Sphere            blobSphere, animSphere1, animSphere2;
 };
 
 

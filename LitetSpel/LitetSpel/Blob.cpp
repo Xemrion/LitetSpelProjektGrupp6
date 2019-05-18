@@ -6,20 +6,20 @@
 // intermediate class (IMobile, situated between IObject and IActor)
 // instead of IMobile. TODO.
 Blob::Blob( glm::vec3 const &parentPosition ):
-    IActor( false,         // unused
-            .0f,           // unused
-            .0f,           // unused
-            .0f,           // unused
-            100.0f,        // moveSpeed
-            parentPosition // position
+    IActor( false,            // unused
+            .0f,              // unused
+            .0f,              // unused
+            .0f,              // unused
+            BLOB_SHOOT_SPEED, // moveSpeed
+            parentPosition    // position
     ),
     parentPosition  ( &parentPosition                  ),
     blobSphere      ( glm::vec4(parentPosition,radius) ),
     isActive        ( false                            ),
     isBeingRecalled ( true                             ),
 	isStuck         ( false                            ),
-    recallSpeed     ( 200.0f                           ),
-    radius          (   2.0f                           ),
+    recallSpeed     ( BLOB_RECALL_SPEED                ),
+    radius          ( BLOB_ACTIVE_RADIUS               ),
 	status          ( Status::none                     )
 {
     // register hitbox:
@@ -33,7 +33,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
          },
          false                     // hitbox is not static
     });
-	deactivateHitbox();
+    updateHitboxes();
 }
 
 void Blob::absorb() noexcept {
@@ -41,28 +41,21 @@ void Blob::absorb() noexcept {
     isActive        = false;
 }
 
-void Blob::deactivateHitbox() noexcept {
-	hitboxes[0].box.color.w = 0; // temp hack; TODO: find cleaner solution
-}
-
-void Blob::reactivateHitbox() noexcept {
-	hitboxes[0].box.color.w = 1; // temp hack; TODO: find cleaner solution
-}
-
+// FIND ISSUE HERE WITH ISACTIVE AND IS STUCK !!!
 void Blob::shoot( glm::vec3 const &direction ) noexcept {
+    assert( glm::length(direction) >  .95f and 
+            glm::length(direction) < 1.05f and "Needs to be a unit vector!" );
     if ( !isActive and !isBeingRecalled ) {
-        reactivateHitbox();
         isActive = true;
-        velocity = (status == Status::heavy)?  direction * speed/3.0f  :  direction * speed;
+        addVelocity( status == Status::heavy?  (direction * moveSpeed/3.0f) : (direction * moveSpeed) );
 	}
 }
 
 void Blob::recall() noexcept {
-    deactivateHitbox();
     isBeingRecalled = true;
 }
 
-bool Blob::getIsActive()        const noexcept { return isActive; }
+bool Blob::getIsActive() const noexcept { return isActive; }
 
 bool Blob::getIsBeingRecalled() const noexcept { return isBeingRecalled; }
 
@@ -73,49 +66,73 @@ bool Blob::getIsStuck() const noexcept { return isStuck; }
 }
 
 // called once per frame from Player::update
-void Blob::update(double dt) noexcept {
+void Blob::updateLogic( double dt_s ) noexcept {
     #undef min
     if ( isBeingRecalled ) {
-        float speed          = std::min( recallSpeed * (float)dt,
-                                         glm::distance(position, *parentPosition) );
-        glm::vec3 direction  = glm::normalize( *parentPosition - position );
-        position            += speed * direction;
-		isStuck              = false;
+        isStuck = false;
+        glm::vec3 direction = glm::normalize( *parentPosition - position );
+        addVelocity( (float)dt_s * recallSpeed * direction );
 	}
+
     if ( !isActive ) {
-        position = *parentPosition + glm::vec3(.0f, 2.0f, .0f);
-        setVelocity(glm::vec3(0.0));
-        blobSphere.centerRadius = glm::vec4(*parentPosition, 2.0f);
-        deactivateHitbox();
+        position = *parentPosition + glm::vec3(.0f, 2.0f, .0f); // ?
+        setVelocity( glm::vec3(0.0) );
+        radius = BLOB_INACTIVE_RADIUS;
     }
-	if  ( isStuck and status != Status::sticky) {
-		isStuck = false;
-	}
-	blobSphere.centerRadius = glm::vec4( position, radius );
+    else {
+        radius = BLOB_ACTIVE_RADIUS;
+        if ( isStuck and status != Status::sticky )
+		    isStuck = false;
+    }
 }
 
 void Blob::updateHitboxes() noexcept {
-    hitboxes[0].box.center = glm::vec4( position, .0f );
+    hitboxes[0].box.center = glm::vec4( position, radius );
+}
+
+void Blob::updateGraphics() noexcept {
+    blobSphere.centerRadius = glm::vec4( position, radius );
+};
+
+void Blob::updatePhysics( double dt_s ) noexcept {
+    if ( isActive and !isStuck ) {
+       addVelocity( glm::vec3(.0f, -GRAVITY_CONSTANT * dt_s, .0f) );
+    }
+    move( dt_s );
+}
+void Blob::updateAnimations( double dt_s, double t_s ) noexcept {}; // stub
+void Blob::die() noexcept {}; // stub
+
+[[nodiscard]]
+std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Blob::getRepresentation() const noexcept {
+    Spheres representation;
+    representation.push_back( &blobSphere  );
+    return representation;
 }
 
 void Blob::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
-    if ( isBeingRecalled and otherHitbox == ColliderType::player )
-        absorb();
+    if ( isBeingRecalled ) {
+        if ( otherHitbox == ColliderType::player )
+            absorb();
+        else return; // early exit to avoid colliding with the level
+    }
+    
     if ( !isActive )
-        return; // early exit
+        return; // early exit to avoid colliding with the player?
+
     else if ( otherHitbox == ColliderType::platform ) {
         auto &platBox     = dynamic_cast<Platform&>(other).getBox();
         auto const &myBox = hitboxes[0].box;
         if (status == Status::sticky) {
-            velocity            = glm::vec3(0.0);
-            isStuck = true;
+            velocity = glm::vec3(0.0);
+            isStuck  = true;
         }
         else if (status == Status::bouncy) {
-            velocity.y          = -velocity.y;
-            velocity.x          = 0;
+            velocity.y = -velocity.y;
+            velocity.x = 0;
         }
         else {
-            velocity            = glm::vec3(0.0);
+            velocity = glm::vec3(0.0);
         }
         glm::vec3 pushUp    = glm::vec3(0.0, platBox.center.y + platBox.halfLengths.y + (-myBox.center.y + myBox.halfLengths.y), 0.0);
         glm::vec3 pushDown  = glm::vec3(0.0, platBox.center.y - platBox.halfLengths.y + (-myBox.center.y - myBox.halfLengths.y), 0.0);

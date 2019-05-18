@@ -20,13 +20,19 @@ public:
     Blob() = delete;
 	explicit Blob( glm::vec3 const & );
 
-	virtual void update(double dt) noexcept;
+    virtual void updateGraphics() noexcept override;
+    virtual void updateHitboxes() noexcept override;
+    virtual void updateLogic( double dt_s ) noexcept override;
+    virtual void updatePhysics( double dt_s ) noexcept override;
+    virtual void updateAnimations( double dt_s, double t_s ) noexcept override;
+
+    [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
+
 
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
 
     void deactivateHitbox() noexcept;
     void reactivateHitbox() noexcept;
-    virtual void updateHitboxes() noexcept;
 
     void absorb() noexcept;
     void shoot( glm::vec3 const &direction ) noexcept;
@@ -43,18 +49,17 @@ public:
         return volume;
     }
 
+    virtual void die() noexcept override;
+
 private:
     glm::vec3 const *parentPosition;
-    glm::vec3        velocity;
     bool             isActive,
 	                 isStuck,
                      isBeingRecalled;
     float            recallSpeed,
-                     speed,
                      radius;
 public:
-    glm::vec3           position;
-    std::vector<Hitbox> hitboxes;
-    Sphere              blobSphere;
-	Status              status;
+    // TODO: refactor away:
+    Sphere           blobSphere;
+	Status           status;
 };

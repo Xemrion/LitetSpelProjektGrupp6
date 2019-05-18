@@ -2,11 +2,13 @@
 
 #include "game.h"
 
+// TODO: "updateHitbox ... add box to boxes!"? hmm
+
 
 void Game::loadLevel() { // temp
     level = std::make_unique<Level>();
 
-    auto player = std::make_unique<Player>( *graphics, glm::vec3{  .0f,  .0f, .0f } );
+    auto player = std::make_unique<Player>( *graphics, level->getCollisionManager(), glm::vec3{  .0f,  .0f, .0f } );
     player->attachInput(keyboard, mouse);
 
     auto enemy1 = std::make_unique<Enemy>(  glm::vec3{ -30.0f, 15.0f, .0f } );
@@ -58,16 +60,7 @@ void Game::init() noexcept {
 
 // player & blobs:
     /*
-    auto &player = level.player;
-	for ( int i = 0;  i < player.blobCharges;  ++i ) {
-        Blob b { player.pos };
-		player.blobs.push_back( Blob(player.pos) );
-		level.spheres.push_back( player.blobs[i].blobSphere );
-	}
-    for ( auto &b : player.blobs ) {
-        level.colManager.add({&b, ColliderType::blob, b.hitbox, false});  // TODO: ICollider::getHitboxes() + 
-        ()
-    }
+
 	updatePlayerCollision();
     */
 
@@ -89,7 +82,7 @@ Level& Game::getLevel() noexcept {
 }
 
 // TODO!!!
-Player::Player( Graphics &graphics, glm::vec3 position={.0f, .0f, .0f} ):
+Player::Player( Graphics &graphics, CollisionManager &colMan, glm::vec3 position={.0f, .0f, .0f} ):
     IActor( false,   // isStanding
             PLAYER_JUMP_FORCE,
             JUMP_CD,
@@ -98,6 +91,7 @@ Player::Player( Graphics &graphics, glm::vec3 position={.0f, .0f, .0f} ):
             position
     ),
     graphics      ( &graphics    ),
+    colMan        ( &colMan      ), // hacky evil to deal with blob registration
     hasExtraJump  ( true         ),
     isStuck       ( false        ),
     status        ( Status::none ),
@@ -106,6 +100,7 @@ Player::Player( Graphics &graphics, glm::vec3 position={.0f, .0f, .0f} ):
     powerCooldown ( POWER_CD     ),
     radius        ( 5.0f         )
 {
+    blobs.reserve( blobCharges );
     assert( this->graphics and "Graphics mustn't be null!" );
     // register hitbox:
     hitboxes.push_back({
@@ -124,13 +119,8 @@ void Player::updatePhysics( double dt_s ) noexcept {
         setVelocity(glm::vec3(.0f));
     }
     move(dt_s);
-    for ( auto &blob : blobs ) {
-        if ( blob.getIsActive() and !blob.getIsStuck() ) {
-            blob.addVelocity(glm::vec3(.0f, -GRAVITY_CONSTANT * dt_s, .0f)); // TODO: refactor into blob
-        }
-        blob.move(dt_s);
-        // blob.updateCollisions(); ?
-    }
+    for ( auto &blob : blobs )
+        blob.updatePhysics( dt_s );
 };
 
 [[nodiscard]]
@@ -236,9 +226,23 @@ void Player::processKeyboard() noexcept {
 
 void Player::updateGraphics() noexcept {
     blobSphere = { position, radius };
+    for ( auto &blob : blobs )
+        blob.updateGraphics();
 }
 
+// TODO: refactor blob code
 void Player::updateHitboxes() noexcept {
+    // account for charge count decreasing
+    while ( hitboxes.size() > blobCharges ) {
+        blobs.pop_back();
+        // TODO: unregister
+    }
+    // account for charge count increasing
+    while ( blobs.size() != blobCharges ) {
+        blobs.push_back( Blob(position) );
+        colMan->add( *(blobs.end()-1) );
+    }
+    assert(  blobs.size() == blobCharges );
     auto &hitbox = hitboxes[0].box;
     //level.boxes.push_back(volume); // TODO!
     //hitbox.center      = { position, .0f };
@@ -264,10 +268,12 @@ void Player::updateLogic(double dt_s) noexcept {
 		isStuck = false;
 
 	for ( auto &blob : blobs ) 
-        blob.update(dt_s);
+        blob.updateLogic( dt_s );
 }
 
 void Player::updateAnimations( double dt_s, double t_s ) noexcept {
+    for ( auto &blob : blobs )
+        blob.updateAnimations( dt_s, t_s );
     // move speed
     auto movement = glm::smoothstep(-150.0f, 150.0f, glm::vec2(velocity.x, velocity.y));
     glm::vec3 rotationSpeed = glm::vec3( .81f, .53f, .1f );
@@ -446,7 +452,7 @@ void Player::shoot(glm::vec2 const &mousePos) noexcept {
     if ( shootCooldown > .0f )
         return;
     auto mouseScreenPos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0); // TODO
-    glm::vec3 dir = glm::normalize( mouseScreenPos - position);
+    glm::vec3 dir = glm::normalize( mouseScreenPos - position );
     for ( auto &blob : blobs ) {
         if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
             blob.shoot(dir);
@@ -680,7 +686,6 @@ void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &o
 
 // Updates logic, call once per frame before updatePhysics
 void Enemy::updateLogic(double dt_s) noexcept {
-//	velocity.y   -= float(GRAVITY_CONSTANT) * (float)dt_s;
 	jumpCooldown -= (float)dt_s;
 	if ( !isStanding ) {
 		if ( jumpCooldown <= .0f ) {
