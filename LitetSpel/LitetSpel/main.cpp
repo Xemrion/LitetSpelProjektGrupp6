@@ -126,7 +126,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
-	game.init();
+
+	bool gameLoaded = false;
+	game.menuLoad();
 	ShowWindow(wndHandle, nCmdShow);
 	
     double dt_s { .0 };
