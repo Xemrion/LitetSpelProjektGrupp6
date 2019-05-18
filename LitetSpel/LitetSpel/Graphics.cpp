@@ -430,6 +430,16 @@ void Graphics::createCBuffers() {
 	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
 	device->CreateBuffer(&constBufferDesc, NULL, &cornerBuffer);
+
+
+
+	memset(&constBufferDesc, 0, sizeof(constBufferDesc));
+	constBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constBufferDesc.ByteWidth = sizeof(glm::vec4);
+	constBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	device->CreateBuffer(&constBufferDesc, NULL, &shadowBuffer);
 }
 
 void Graphics::updateFrustumCorners() {
@@ -943,7 +953,7 @@ void Graphics::setMovingBoxes(const vector<Box>& boxes)
 		if (CollisionManager::intersect(boxes[i], cullingBox)) {
 			glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
 			t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
-			transforms.WVP[transformIndex] = transpose(t) * viewProj;
+			transforms.WVP[transformIndex] = transpose(t);
 			transforms.color[transformIndex] = boxes[i].color;
 			++transformIndex;
 		}
@@ -1076,6 +1086,17 @@ void Graphics::setCameraPos(glm::vec3 pos)
 
 }
 
+void Graphics::castPlayerShadow(glm::vec3 playerPos)
+{
+	glm::vec4 shadowPoint = glm::vec4(playerPos, 100.0);
+
+	D3D11_MAPPED_SUBRESOURCE mr;
+	ZeroMemory(&mr, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	deviceContext->Map(shadowBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+	memcpy(mr.pData, glm::value_ptr(shadowPoint), sizeof(glm::vec4));
+	deviceContext->Unmap(shadowBuffer, 0);
+}
+
 void Graphics::swapBuffer()
 {
 	// clear buffers
@@ -1096,7 +1117,8 @@ void Graphics::swapBuffer()
 	deviceContext->PSSetShader(movingBoxPixelShader, nullptr, 0);
 
 	deviceContext->VSSetConstantBuffers(0, 1, &movingBoxTransformBuffer);
-
+	deviceContext->VSSetConstantBuffers(1, 1, &viewProjBuffer);
+	deviceContext->PSSetConstantBuffers(0, 1, &shadowBuffer);
 	UINT32 vertexSize = sizeof(glm::vec3) * 2;
 	UINT32 offset = 0;
 	
@@ -1112,6 +1134,7 @@ void Graphics::swapBuffer()
 
 	deviceContext->VSSetConstantBuffers(0, 1, &staticBoxColorBuffer);
 	deviceContext->VSSetConstantBuffers(1, 1, &viewProjBuffer);
+	deviceContext->PSSetConstantBuffers(0, 1, &shadowBuffer);
 
 	deviceContext->IASetVertexBuffers(0, 1, &staticBoxVertexBuffer, &vertexSize, &offset);
 	//deviceContext->DrawInstanced(36, staticBoxInstances, 0, 0);

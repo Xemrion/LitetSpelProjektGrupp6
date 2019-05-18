@@ -56,6 +56,7 @@ private:
 	ID3D11Buffer* viewProjBuffer;
 	ID3D11Buffer* cameraBuffer;
 	ID3D11Buffer* cornerBuffer;
+	ID3D11Buffer* shadowBuffer;
 
 	glm::vec3 camera;
 	glm::mat4 proj;
@@ -81,6 +82,7 @@ public:
 	void setMovingBoxes(const vector<Box>& boxes);
 	void setStaticBoxes(const vector<Box>& boxes);
 	void setCameraPos(glm::vec3 pos); // Set camera position before setting boxes / metaballs
+	void castPlayerShadow(glm::vec3 playerPos); // Casts the player shadow on the currently loaded geometry
 	void swapBuffer();
 	~Graphics();
 };
