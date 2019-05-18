@@ -27,10 +27,6 @@
 class Player : public IActor, public IInputListener {
     using Blobs = std::vector<Blob>;
 public:
-    enum class Status { none,
-                        bouncy,
-                        sticky,
-                        heavy };
     Player( Graphics &, CollisionManager &, glm::vec3 position );
     virtual ~Player() noexcept;
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
@@ -55,13 +51,15 @@ private:
     Input             input;
     bool              hasExtraJump,
                       isStuck;
-    Status            status;
+    PowerType         status;
     int               blobCharges;
     float             shootCooldown,
                       powerCooldown,
                       radius;
     Blobs             blobs;
-    Sphere            blobSphere, animSphere1, animSphere2;
+    Sphere            blobSphere,
+                      animSphere1,
+                      animSphere2;
 };
 
 

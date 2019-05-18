@@ -12,11 +12,6 @@
 
 class Blob : public IActor {
 public:
-    enum class Status { none,
-                        bouncy,
-                        sticky,
-                        heavy };
-
     Blob() = delete;
 	explicit Blob( glm::vec3 const & );
 
@@ -61,5 +56,5 @@ private:
 public:
     // TODO: refactor away:
     Sphere           blobSphere;
-	Status           status;
+	PowerType        status;
 };

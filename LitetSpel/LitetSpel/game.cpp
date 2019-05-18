@@ -94,7 +94,7 @@ Player::Player( Graphics &graphics, CollisionManager &colMan, glm::vec3 position
     colMan        ( &colMan      ), // hacky evil to deal with blob registration
     hasExtraJump  ( true         ),
     isStuck       ( false        ),
-    status        ( Status::none ),
+    status        ( PowerType::none ),
     blobCharges   ( 5            ),
     shootCooldown ( SHOOT_CD     ),
     powerCooldown ( POWER_CD     ),
@@ -163,18 +163,18 @@ void Player::processKeyboard() noexcept {
     // TODO: trim code duplication in blobs branches
     if ( keyboard->KeyIsPressed('B') ) {
         if ( powerCooldown <= .0f ) {
-            if ( status == Player::Status::none ) {
+            if ( status == PowerType::none ) {
                 for ( auto &blob : blobs ) {
-                   blob.status = Blob::Status::bouncy;
+                   blob.status = PowerType::bouncy;
                 }
-                status = Player::Status::bouncy;
+                status = PowerType::bouncy;
                 graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
             }
             else {
                 for ( auto &blob : blobs ) {
-                    blob.status = Blob::Status::none;
+                    blob.status = PowerType::none;
                 }
-                status = Player::Status::none;
+                status = PowerType::none;
                 graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
             }
             powerCooldown = POWER_CD;
@@ -182,18 +182,18 @@ void Player::processKeyboard() noexcept {
     }
     if ( keyboard->KeyIsPressed('H') ) {
         if ( powerCooldown <= .0f ) {
-            if ( status == Status::none) {
+            if ( status == PowerType::none) {
                 for ( auto &blob : blobs ) {
-                    blob.status = Blob::Status::heavy;
+                    blob.status = PowerType::heavy;
                 }
-                status = Player::Status::heavy;
+                status = PowerType::heavy;
                 graphics->setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
             }
             else {
                 for ( auto &blob : blobs ) {
-                    blob.status = Blob::Status::none;
+                    blob.status = PowerType::none;
                 }
-                status = Player::Status::none;
+                status = PowerType::none;
                 graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
             }
             powerCooldown = POWER_CD;
@@ -201,18 +201,18 @@ void Player::processKeyboard() noexcept {
     }
     if ( keyboard->KeyIsPressed('Y') ) {
         if ( powerCooldown <= .0f ) {
-            if ( status == Player::Status::none) {
+            if ( status == PowerType::none) {
                 for ( auto &blob : blobs ) {
-                    blob.status = Blob::Status::sticky;
+                    blob.status = PowerType::sticky;
                 }
-                status = Player::Status::sticky;
+                status = PowerType::sticky;
                 graphics->setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
             }
             else {
                 for ( auto &blob : blobs ) {
-                    blob.status = Blob::Status::none;
+                    blob.status = PowerType::none;
                 }
-                status = Player::Status::none;
+                status = PowerType::none;
                 graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
             }
             powerCooldown = POWER_CD;
@@ -262,9 +262,9 @@ void Player::updateLogic(double dt_s) noexcept {
 
 	if ( isStanding )
 		hasExtraJump = true;
-    mass = (status == Status::heavy)?  20.0f : 10.0f;
+    mass = (status == PowerType::heavy)?  20.0f : 10.0f;
 
-	if ( status != Status::sticky )
+	if ( status != PowerType::sticky )
 		isStuck = false;
 
 	for ( auto &blob : blobs ) 
@@ -368,7 +368,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
                             + radius/2;
         }/*
         else if ( ownHitbox == ColliderType::player_top ) {
-            if ( status == Status::sticky ) {
+            if ( status == PowerType::sticky ) {
                 isStuck = true;
             }
             velocity.y = 0;
@@ -379,7 +379,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
                          - top.halfLengths.y;
         }
         else if ( ownHitbox == ColliderType::player_left ) {
-            if ( status == Status::sticky ) {
+            if ( status == PowerType::sticky ) {
                 isStuck = true;
             }
             position.x = platBox.center.x
@@ -389,7 +389,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
                          + top.halfLengths.x;
         }
         else if ( ownHitbox == ColliderType::player_right ) {
-            if ( status == Status::sticky ) {
+            if ( status == PowerType::sticky ) {
                 isStuck = true;
             }
             position.x = platBox.center.x
@@ -406,7 +406,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
         auto const &blobVolume = blob.getVolume();
         
         if ( ownHitbox == ColliderType::player_bottom ) { 
-            if ( status == Status::sticky and !isStuck ) {/// and other.color.w == 1
+            if ( status == PowerType::sticky and !isStuck ) {/// and other.color.w == 1
                 isStanding   = true;
                 hasExtraJump = true;
                 velocity.y   = 0;
@@ -416,7 +416,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
                                - bottom.center.y
                                + bottom.halfLengths.y;
             }
-            else if ( status == Status::bouncy ) { /// and other.color.w == 1
+            else if ( status == PowerType::bouncy ) { /// and other.color.w == 1
                 isStanding   = true;
                 hasExtraJump = true;
                 velocity.y   = 0;
@@ -486,7 +486,7 @@ void Player::handleInput() noexcept {
             jumpCooldown = JUMP_CD;
             putForce(glm::vec3(.0f, jumpForce, .0f));
         }
-        else if ( status == Status::bouncy
+        else if ( status == PowerType::bouncy
                   and hasExtraJump
                   and jumpCooldown <= .0f )
         {
@@ -497,7 +497,7 @@ void Player::handleInput() noexcept {
         }
     }
     if ( input.isPressed[Input::Key::down] ) {
-        if ( status == Status::sticky ) {
+        if ( status == PowerType::sticky ) {
             isStuck = false;
             //if ( !isStanding )
             //    ;/// addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0)); // wot?
@@ -534,17 +534,16 @@ void Game::updateLogic( double dt_s ) {
 // Catches up the physics simulation time to the actual game time
 // Call last of all logic updates (but before graphics)
 void Game::updatePhysics() {
-	double constexpr timestep = .0015; // TODO: refactor into Globals?
     while ( physicsSimTime < Game::time ) {
         for ( auto &e : level->getScene() ) {
-            e->updatePhysics(timestep);
+            e->updatePhysics(PHYSICS_TIME_STEP);
         }
 /// TODO: refactor into colManager!
 ///        for ( auto &e : level.scene ) {
 ///            e.object->updateCollisions();
 ///        }
 		level->getCollisionManager().update();
-        physicsSimTime += timestep;
+        physicsSimTime += PHYSICS_TIME_STEP ;
 	}
 }
 

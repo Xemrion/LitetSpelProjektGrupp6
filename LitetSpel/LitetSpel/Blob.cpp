@@ -20,7 +20,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
 	isStuck         ( false                            ),
     recallSpeed     ( BLOB_RECALL_SPEED                ),
     radius          ( BLOB_ACTIVE_RADIUS               ),
-	status          ( Status::none                     )
+	status          ( PowerType::none                     )
 {
     // register hitbox:
     hitboxes.push_back({
@@ -47,7 +47,7 @@ void Blob::shoot( glm::vec3 const &direction ) noexcept {
             glm::length(direction) < 1.05f and "Needs to be a unit vector!" );
     if ( !isActive and !isBeingRecalled ) {
         isActive = true;
-        addVelocity( status == Status::heavy?  (direction * moveSpeed/3.0f) : (direction * moveSpeed) );
+        addVelocity( status == PowerType::heavy?  (direction * moveSpeed/3.0f) : (direction * moveSpeed) );
 	}
 }
 
@@ -81,7 +81,7 @@ void Blob::updateLogic( double dt_s ) noexcept {
     }
     else {
         radius = BLOB_ACTIVE_RADIUS;
-        if ( isStuck and status != Status::sticky )
+        if ( isStuck and status != PowerType::sticky )
 		    isStuck = false;
     }
 }
@@ -123,11 +123,11 @@ void Blob::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &ot
     else if ( otherHitbox == ColliderType::platform ) {
         auto &platBox     = dynamic_cast<Platform&>(other).getBox();
         auto const &myBox = hitboxes[0].box;
-        if (status == Status::sticky) {
+        if (status == PowerType::sticky) {
             velocity = glm::vec3(0.0);
             isStuck  = true;
         }
-        else if (status == Status::bouncy) {
+        else if (status == PowerType::bouncy) {
             velocity.y = -velocity.y;
             velocity.x = 0;
         }
