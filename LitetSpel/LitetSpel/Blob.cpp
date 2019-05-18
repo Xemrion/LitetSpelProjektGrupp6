@@ -20,7 +20,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
 	isStuck         ( false                            ),
     recallSpeed     ( BLOB_RECALL_SPEED                ),
     radius          ( BLOB_ACTIVE_RADIUS               ),
-	status          ( PowerType::none                     )
+	status          ( PowerType::none                  )
 {
     // register hitbox:
     hitboxes.push_back({
