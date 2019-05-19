@@ -1,0 +1,9 @@
+blob collide, mid section!
+
+bool gameEnd i main
+
+main loop
+
+all of game
+
+interface editor with level::add

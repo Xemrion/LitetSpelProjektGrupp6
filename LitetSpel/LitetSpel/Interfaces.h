@@ -9,6 +9,8 @@
 #include "KeyboardInput.h"
 #include "MouseInput.h"
 
+// Tekniskt sett inte interfaces längre, men kan byta namn senare.
+
 // TODO: consider ECS? The current design is a clusterfuck even after all this refactoring.
 
 // interface for graphics system

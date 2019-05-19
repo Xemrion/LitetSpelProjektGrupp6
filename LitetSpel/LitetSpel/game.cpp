@@ -1,522 +1,52 @@
 #include <cassert>
 
+// TODO: rename to Game.cpp|h
 #include "game.h"
-
-// TODO: "updateHitbox ... add box to boxes!"? hmm
-
+#include "Globals.h"
 
 void Game::loadLevel() { // temp
-    level = std::make_unique<Level>();
-
-    auto player = std::make_unique<Player>( *graphics, level->getCollisionManager(), glm::vec3{  .0f,  .0f, .0f } );
-    player->attachInput(keyboard, mouse);
-
-    auto enemy1 = std::make_unique<Enemy>(  glm::vec3{ -30.0f, 15.0f, .0f } );
-    auto goal   = std::make_unique<LevelGoal>( glm::vec3{70.0f,-15.0f,.0f}, 12.0f );
-    auto ground = std::make_unique<Platform>( Box{glm::vec4{  0, -30, 0, 0}, glm::vec4{100, 10, 10, 0}, green }, .950f ); // groundbox; color: (1.0, 1.0, 1.0, 0.0);
-    auto plat1  = std::make_unique<Platform>( Box{glm::vec4{ 30,  0,  0, 0}, glm::vec4{ 10, 20, 10, 0}, red   }, .975f ); // testPlat1; color: (0.0, 1.0, 0.0, 0.0);
-    auto plat2  = std::make_unique<Platform>( Box{glm::vec4{-30,  10, 0, 0}, glm::vec4{ 10,  2, 10, 0}, blue  }, .999f ); // testPlat2: color: (0.0, 0.5, 0.5, 0.0);
-
-    level->add( std::move(player) );
-    level->add( std::move(enemy1) );
-    level->add( std::move(goal)   );
-    level->add( std::move(ground) );
-    level->add( std::move(plat1)  );
-    level->add( std::move(plat2)  );
+    level = levelLoader.load( LEVEL_NAME );
+    level->getPlayer().attachInput(keyboard, mouse);
+    state = State::level;
+// TODO:
+    //Gate & button test
+    /*level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
+    level.movingBoxes.push_back(level.gates.at(0).hitbox);
+    level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
+    level.colManager.registerEntry(level.gates.at(0), ColliderType::platform, level.gates.at(0).hitbox, true);
+    level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);*/
 }
 
 Game::Game( KeyboardInput &keyboard, MouseInput &mouse, Graphics &graphics ):
-    keyboard ( &keyboard ),
-    mouse    ( &mouse    ),
-    graphics ( &graphics )
+    physicsSimTime ( .0        ),
+    time           ( .0        ),
+    level          ( nullptr   ),
+    keyboard       ( &keyboard ),
+    mouse          ( &mouse    ),
+    graphics       ( &graphics ),
+    levelLoader    (  graphics )
 {
     assert( this->keyboard and "Keyboard mustn't be null!" );
     assert( this->mouse    and "Mouse mustn't be null!"    );
     assert( this->graphics and "Graphics mustn't be null!" );
+    menuLoad();
 }
 
 void Game::init() noexcept {
     loadLevel();
-// TODO!!!!
-///    level.goal = std::make_unique<LevelGoal>( level.colManager, glm::vec3{70.0f,-15.0f,.0f}, 12.0f );
-///    groundBox.hitbox.center      = glm::vec4(0, -30, 0, 0);
-///    groundBox.hitbox.halfLengths = glm::vec4(100, 10, 10, 0);
-///	groundBox.hitbox.color          = glm::vec4(1.0, 1.0, 1.0, 0.0);
-///	level.boxes.push_back(groundBox.hitbox);
-///
-///    level.colManager.add({&groundBox, ColliderType::platform, groundBox.hitbox, true }); // TODO: ICollider::getHitboxes() + Level::add()
-///
-///	testPlat.hitbox.center      = glm::vec4(30.0f, 0.0f, 0.0f, 0.0f);
-///	testPlat.hitbox.halfLengths = glm::vec4(10.0f, 20.0f, 10.0f, 0.0f);
-///	testPlat.hitbox.color       = glm::vec4(0.0, 1.0, 0.0, 0.0);
-///	level.boxes.push_back(testPlat.hitbox);
-///    level.colManager.add({&testPlat, ColliderType::platform, testPlat.hitbox, true }); // TODO: ICollider::getHitboxes() + Level::add()
-///
-///	testplat2.hitbox.center      = glm::vec4(-30.0f, 10.0f, 0.0f, 0.0f);
-///	testplat2.hitbox.halfLengths = glm::vec4(10.0f, 2.0f, 10.0f, 0.0f);
-///	testplat2.hitbox.color       = glm::vec4(0.0, 0.5, 0.5, 0.0);
-///	level.boxes.push_back(testplat2.hitbox);
-///    level.colManager.add({&testplat2, ColliderType::platform, testplat2.hitbox, true}); // TODO: ICollider::getHitboxes() + Level::add()
-
-// player & blobs:
-    /*
-
-	updatePlayerCollision();
-    */
-
-// enemies:
-    /*
-    level.enemies.emplace_back( glm::vec3( -25.0f, 20.0f, 0.0f) );
-    enemyBox.color = glm::vec4(1,0,0,0);
-    for ( auto &enemy : level.enemies ) {
-	    level.colManager.add({&enemy, ColliderType::enemy_bottom, enemy.HitboxBottom, false});  // TODO: ICollider::getHitboxes() + Level::add()
-	    level.colManager.add({&enemy, ColliderType::enemy_top,    enemy.HitboxTop,    false});  // TODO: ICollider::getHitboxes() + Level::add()
-	    level.colManager.add({&enemy, ColliderType::enemy_left,   enemy.HitboxLeft,   false});  // TODO: ICollider::getHitboxes() + Level::add()
-	    level.colManager.add({&enemy, ColliderType::enemy_right,  enemy.HitboxRight,  false});  // TODO: ICollider::getHitboxes() + Level::add()
-    }
-    */
 }
 
 Level& Game::getLevel() noexcept {
     return *level;
 }
 
-// TODO!!!
-Player::Player( Graphics         &graphics,
-                CollisionManager &colMan,
-                glm::vec3         position={.0f, .0f, .0f} ): // TODO: const ref or value+move
-    IActor( false, // isStanding
-            PLAYER_JUMP_FORCE,
-            JUMP_CD,
-            PLAYER_MASS,
-            PLAYER_SPEED,
-            position
-    ),
-    graphics      ( &graphics       ),
-    colMan        ( &colMan         ), // hacky evil to deal with blob registration
-    hasExtraJump  ( true            ),
-    isStuck       ( false           ),
-    status        ( PowerType::none ),
-    blobCharges   ( 5               ),
-    shootCooldown ( SHOOT_CD        ),
-    powerCooldown ( POWER_CD        ),
-    radius        ( 5.0f            )
-{
-    blobs.reserve( blobCharges );
-    assert( this->graphics and "Graphics mustn't be null!" );
-    // register hitbox:
-    hitboxes.push_back({
-        (ICollider*)this,      // hitbox parent
-        ColliderType::player,  // hitbox identifier
-        Box {},                // box (default constructed; will be generated with updateHitboxes)
-        false                  // hitbox is not static
-    });
-    updateHitboxes(); // generate hitbox
+Game::State Game::getState() const noexcept {
+    return state;
 }
-
-void Player::updatePhysics( double dt_s ) noexcept {
-    if ( !isStuck )
-        addVelocity(glm::vec3(.0f, -GRAVITY_CONSTANT * dt_s, .0f));
-    else {
-        setVelocity(glm::vec3(.0f));
-    }
-    move(dt_s);
-    for ( auto &blob : blobs )
-        blob.updatePhysics( dt_s );
-};
-
-[[nodiscard]]
-Sphere const * Player::getSphere() const noexcept {
-    return &blobSphere;
-}
-
-void Player::updateInput() noexcept {
-    processMouse();
-    processKeyboard();
-    handleInput();
-}
-
-void Player::processMouse() noexcept {
-    if (mouse->LeftIsPressed())
-        input.isPressed[Input::Key::shoot] = true;
-    if ( input.isPressed[Input::Key::shoot] ) {
-        input.mousePosition = glm::vec3(mouse->GetXPos(), mouse->GetYPos(), 0);
-        shoot( input.mousePosition );
-    }
-    else input.isPressed[Input::Key::shoot] = false;
-}
-
-// TODO:  Map<char,ActionEnum> keybindings
-void Player::processKeyboard() noexcept {
-    // Movement
-    if ( keyboard->KeyIsPressed('D') ) {
-        input.isPressed[Input::Key::right] = true;
-    }
-    if ( keyboard->KeyIsPressed('A') ) {
-        input.isPressed[Input::Key::left]  = true;
-    }
-    if ( keyboard->KeyIsPressed('W') ) {
-        input.isPressed[Input::Key::up]    = true;
-    }
-    if ( keyboard->KeyIsPressed('S') ) {
-        input.isPressed[Input::Key::down]  = true;
-    }
-
-    // TODO: trim code duplication in blobs branches
-    if ( keyboard->KeyIsPressed('B') ) {
-        if ( powerCooldown <= .0f ) {
-            if ( status == PowerType::none ) {
-                for ( auto &blob : blobs ) {
-                   blob.status = PowerType::bouncy;
-                }
-                status = PowerType::bouncy;
-                // graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
-            }
-            else {
-                for ( auto &blob : blobs ) {
-                    blob.status = PowerType::none;
-                }
-                status = PowerType::none;
-                // graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
-            }
-            powerCooldown = POWER_CD;
-        }
-    }
-    if ( keyboard->KeyIsPressed('H') ) {
-        if ( powerCooldown <= .0f ) {
-            if ( status == PowerType::none) {
-                for ( auto &blob : blobs ) {
-                    blob.status = PowerType::heavy;
-                }
-                status = PowerType::heavy;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
-            }
-            else {
-                for ( auto &blob : blobs ) {
-                    blob.status = PowerType::none;
-                }
-                status = PowerType::none;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
-            }
-            powerCooldown = POWER_CD;
-        }
-    }
-    if ( keyboard->KeyIsPressed('Y') ) {
-        if ( powerCooldown <= .0f ) {
-            if ( status == PowerType::none) {
-                for ( auto &blob : blobs ) {
-                    blob.status = PowerType::sticky;
-                }
-                status = PowerType::sticky;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
-            }
-            else {
-                for ( auto &blob : blobs ) {
-                    blob.status = PowerType::none;
-                }
-                status = PowerType::none;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
-            }
-            powerCooldown = POWER_CD;
-        }
-    }
-    if ( keyboard->KeyIsPressed('R') )
-        recallBlobs();
-    // if ( keyboard->KeyIsPressed('P') )
-    //     createShaders(); // TODO
-}
-
-void Player::updateGraphics() noexcept {
-    blobSphere = { position, radius };
-    for ( auto &blob : blobs )
-        blob.updateGraphics();
-}
-
-// TODO: refactor blob code
-void Player::updateHitboxes() noexcept {
-    // account for charge count decreasing
-    while ( hitboxes.size() > blobCharges ) {
-        blobs.pop_back();
-        // TODO: unregister
-    }
-    // account for charge count increasing
-    while ( blobs.size() != blobCharges ) {
-        blobs.push_back( Blob(position) );
-        colMan->add( *(blobs.end()-1) );
-    }
-    assert(  blobs.size() == blobCharges );
-    auto &hitbox = hitboxes[0].box;
-    //level.boxes.push_back(volume); // TODO!
-    //hitbox.center      = { position, .0f };
-    hitbox.center.x = position.x;
-    hitbox.center.y = position.y;
-    hitbox.center.z = position.z;
-    hitbox.halfLengths = { glm::vec3(radius/2), .0f };
-}
-
-Player::~Player() {}
-
-// Updates logic, call once per frame
-void Player::updateLogic(double dt_s) noexcept {
-	jumpCooldown  -= (float)dt_s;
-	shootCooldown -= (float)dt_s;
-    powerCooldown -= (float)dt_s;
-
-	if ( isStanding )
-		hasExtraJump = true;
-    mass = (status == PowerType::heavy)?  20.0f : 10.0f;
-
-	if ( status != PowerType::sticky )
-		isStuck = false;
-
-	for ( auto &blob : blobs ) 
-        blob.updateLogic( dt_s );
-}
-
-void Player::updateAnimations( double dt_s, double t_s ) noexcept {
-    for ( auto &blob : blobs )
-        blob.updateAnimations( dt_s, t_s );
-    // move speed
-    auto movement = glm::smoothstep(-150.0f, 150.0f, glm::vec2(velocity.x, velocity.y));
-    glm::vec3 rotationSpeed = glm::vec3( .81f, .53f, .1f );
-    // Offset the start rotation of the spheres to avoid them all starting at the same place
-    glm::vec3 offset = glm::vec3(.2f, .0f, .0f);
-    // Multiplier to animate faster when moving a certain direction. Not smooth.
-    glm::vec2 movementMultiplier = glm::vec2(
-        glm::clamp( abs(movement.x) + .0f, .0f, 2.0f ),
-        glm::clamp( abs(movement.y) + .0f, .0f, 2.0f )
-    );
-
-    auto timeFactor1 = (float)sin(t_s);
-    animSphere1 = (glm::vec4(
-        blobSphere.centerRadius.x + (timeFactor1 * (rotationSpeed.x * abs(movement.x)) + offset.x) * BLOB_ANIM_AMPLITUDE::X,
-        blobSphere.centerRadius.y + (timeFactor1 * (rotationSpeed.y * abs(movement.y)) + offset.y) * BLOB_ANIM_AMPLITUDE::Y,
-        blobSphere.centerRadius.z + (timeFactor1 *  rotationSpeed.z                    + offset.z) * BLOB_ANIM_AMPLITUDE::Z,
-        blobSphere.centerRadius.w / 2
-    ));
-
-    auto timeFactor2 = (float)cos(t_s);
-    rotationSpeed = -rotationSpeed;
-    offset = glm::vec3(1.45f, .9f, 1.1f);
-    animSphere2 = (glm::vec4(
-        blobSphere.centerRadius.x + (timeFactor2 * (rotationSpeed.y * abs(movement.x)) + offset.x) * BLOB_ANIM_AMPLITUDE::X,
-        blobSphere.centerRadius.y + (timeFactor2 * (rotationSpeed.x * abs(movement.y)) + offset.y) * BLOB_ANIM_AMPLITUDE::Y,
-        blobSphere.centerRadius.z + (timeFactor2 *  rotationSpeed.z                    + offset.z) * BLOB_ANIM_AMPLITUDE::Z,
-        blobSphere.centerRadius.w / 2
-    ));
-}
-
-void Player::die() noexcept {
-    ; // TODO
-}
-
-[[nodiscard]]
-std::variant<IRepresentable::Boxes,IRepresentable::Spheres>
-Player::getRepresentation() const noexcept {
-    Spheres representation;
-    representation.push_back( &blobSphere  );
-    representation.push_back( &animSphere1 );
-    representation.push_back( &animSphere2 );
-    for ( auto &blob : blobs )
-        representation.push_back( blob.getSphere() );
-    return representation;
-}
-
-void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
-    auto &hitbox = hitboxes[0].box;
-
-    if ( otherHitbox == ColliderType::platform ) {
-        auto &platform = dynamic_cast<Platform&>( other );
-        auto &platBox  = platform.getBox();
-        auto dtPos = glm::vec3(platBox.center) - position;
-        if ( dtPos.x > platBox.halfLengths.x ) { // player is to the left
-            hasExtraJump  = true;
-            // TODO: y friction?
-            velocity.x    = 0;
-            position.x    = platform.getBox().center.x
-                            - platform.getBox().halfLengths.x
-                            - radius/2;
-        }
-        else if ( dtPos.x < -platBox.halfLengths.x ) { // player is to the right
-            hasExtraJump  = true;
-            // TODO: y friction?
-            velocity.x    = 0;
-            position.x    = platform.getBox().center.x
-                            + platform.getBox().halfLengths.x
-                            + radius/2;
-        }
-        if ( dtPos.y > platBox.halfLengths.y ) { // player is below
-            velocity.y    = 0;
-            position.y    = platform.getBox().center.y
-                            - platform.getBox().halfLengths.y
-                            - radius/2;
-        }
-        else if ( dtPos.y < -platBox.halfLengths.y ) { // player is above
-            isStanding    = true;
-            hasExtraJump  = true;
-            velocity.y    = 0;
-            velocity.x   *= platform.getFriction();
-            position.y    = platform.getBox().center.y
-                            + platform.getBox().halfLengths.y
-                            + radius/2;
-        }
-            
-        if ( false ) { // direction down temp
-			isStanding    = true;
-			hasExtraJump  = true;
-            velocity.y    = 0;
-            velocity.x   *= platform.getFriction();
-			position.y    = platform.getBox().center.y
-                            + platform.getBox().halfLengths.y
-                            + radius/2;
-        }/*
-        else if ( ownHitbox == ColliderType::player_top ) {
-            if ( status == PowerType::sticky ) {
-                isStuck = true;
-            }
-            velocity.y = 0;
-            position.y = platBox.center.y
-                         - platBox.halfLengths.y
-                         + position.y
-                         - top.center.y
-                         - top.halfLengths.y;
-        }
-        else if ( ownHitbox == ColliderType::player_left ) {
-            if ( status == PowerType::sticky ) {
-                isStuck = true;
-            }
-            position.x = platBox.center.x
-                         + platBox.halfLengths.x
-                         + position.x
-                         - top.center.x
-                         + top.halfLengths.x;
-        }
-        else if ( ownHitbox == ColliderType::player_right ) {
-            if ( status == PowerType::sticky ) {
-                isStuck = true;
-            }
-            position.x = platBox.center.x
-                         - platBox.halfLengths.x
-                         + position.x
-                         - right.center.x
-                         - right.halfLengths.x;
-        }*/
-    }
-    /*
-    // TODO: get delta vector between player/enemy, invert, normalize, multiply by knockback factor
-    else if ( otherHitbox == ColliderType::blob ) { ///and other.color.w == 1
-        auto       &blob       = dynamic_cast<Blob&>(other);
-        auto const &blobVolume = blob.getVolume();
-        
-        if ( ownHitbox == ColliderType::player_bottom ) { 
-            if ( status == PowerType::sticky and !isStuck ) {/// and other.color.w == 1
-                isStanding   = true;
-                hasExtraJump = true;
-                velocity.y   = 0;
-                position.y   = blobVolume.center.y
-                               + blobVolume.halfLengths.y
-                               + position.y
-                               - bottom.center.y
-                               + bottom.halfLengths.y;
-            }
-            else if ( status == PowerType::bouncy ) { /// and other.color.w == 1
-                isStanding   = true;
-                hasExtraJump = true;
-                velocity.y   = 0;
-                position.y   = blobVolume.center.y
-                               + blobVolume.halfLengths.y
-                               + position.y
-                               - bottom.center.y
-                               + bottom.halfLengths.y;
-            }
-        }
-    }
-    // TODO: get delta vector between player/enemy, invert, normalize, multiply by knockback factor
-    else if ( otherHitbox == ColliderType::enemy_left ) {
-        auto &enemyBox  = dynamic_cast<Enemy&>(other).getHitboxes()[hitboxLeft].box;
-        position.x = enemyBox.center.x
-                     - enemyBox.halfLengths.x
-                     + position.x
-                     - right.center.x
-                     - right.halfLengths.x;
-    }
-    else if ( otherHitbox == ColliderType::enemy_right ) {
-        auto &enemyBox  = dynamic_cast<Enemy&>(other).getHitboxes()[hitboxRight].box;
-        position.x = enemyBox.center.x
-                     + enemyBox.halfLengths.x
-                     + position.x
-                     - left.center.x
-                     + left.halfLengths.x;
-    }
-    */
-}
-
-void Player::shoot(glm::vec2 const &mousePos) noexcept {
-    if ( shootCooldown > .0f )
-        return;
-    auto mouseScreenPos = glm::vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0); // TODO
-    glm::vec3 dir = glm::normalize( mouseScreenPos - position );
-    for ( auto &blob : blobs ) {
-        if ( !blob.getIsActive() and !blob.getIsBeingRecalled() ) {
-            blob.shoot(dir);
-            shootCooldown = SHOOT_CD;
-            return;
-        }
-    }
-}
-
-void Player::recallBlobs() noexcept {
-    for ( auto &blob : blobs ) {
-        blob.recall();
-    }
-    shootCooldown = SHOOT_CD;
-}
-void Player::handleInput() noexcept {
-    if ( input.isPressed[Input::Key::shoot] ) {
-        shoot(input.mousePosition);
-    }
-    if ( input.isPressed[Input::Key::left] ) {
-        if ( !isStuck )
-            addVelocity(glm::vec3(isStanding? -moveSpeed : (-FLOAT_REDUCTION*moveSpeed), .0f, .0f));
-    }
-    if ( input.isPressed[Input::Key::right] ) {
-        if ( !isStuck )
-            addVelocity(glm::vec3(isStanding? moveSpeed : (FLOAT_REDUCTION*moveSpeed), .0f, .0f));
-    }
-    if ( input.isPressed[Input::Key::up] ) {
-        if ( isStanding ) {
-            isStanding   = false;
-            jumpCooldown = JUMP_CD;
-            putForce(glm::vec3(.0f, jumpForce, .0f));
-        }
-        else if ( status == PowerType::bouncy
-                  and hasExtraJump
-                  and jumpCooldown <= .0f )
-        {
-            hasExtraJump = false;
-            jumpCooldown = JUMP_CD;
-            velocity.y   = .0f;
-            putForce(glm::vec3(.0f, jumpForce, .0f));
-        }
-    }
-    if ( input.isPressed[Input::Key::down] ) {
-        if ( status == PowerType::sticky ) {
-            isStuck = false;
-            //if ( !isStanding )
-            //    ;/// addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0)); // wot?
-        }
-    }
-    // clear input
-    for ( auto &b : input.isPressed )
-        b = false;
- }
-
 
 void Game::update( double dt_s )  {
-    level->onFrameStart(); // TEMP: clearing boxes & spheres
+    level->onFrameStart(); // TEMP: clears dynamic boxes & spheres
     Game::time += dt_s; // NOTE: Should be redundant (but would require some revamping)
-    // level.player.velocity.x = 0;     // TODO: wtf?
-    // level.player.isStanding = false; // TODO: put at end of Player::update()?
     updateInput();
     updateLogic(dt_s);
     updatePhysics();
@@ -541,10 +71,6 @@ void Game::updatePhysics() {
         for ( auto &e : level->getScene() ) {
             e->updatePhysics(PHYSICS_TIME_STEP);
         }
-/// TODO: refactor into colManager!
-///        for ( auto &e : level.scene ) {
-///            e.object->updateCollisions();
-///        }
 		level->getCollisionManager().update();
         physicsSimTime += PHYSICS_TIME_STEP ;
 	}
@@ -559,34 +85,18 @@ void Game::updateAnimations( double dt_s ) noexcept {
 // TODO: SphereHandle gfxManager::requestSphere();
 // TODO: BoxHandle    gfxManager::requestBox();
 
-// TODO:
-//template <typename Location, class T>
-//class Handle {
-//public:
-//    Handle( T &data, Container &container ): IObject(), data(data), container(container) {}
-//    Handle( Handle       && ) = default;
-//    Handle( Handle const  & ) = delete;
-//    auto operator=( Handle       && ) = delete;
-//    auto operator=( Handle const  & ) = delete;
-//    virtual ~Handle() noexcept { container.remove(data); }
-//    &operator T() { return data; }
-//    const &operator T() const { return data; }
-//private:
-//    T         &data;
-//    Container &container;
-//};
-//template <typename Location, class T>
-//Handle<Location,T> make_handle( )
-
 // Call after all other per frame updates
 void Game::updateGraphics() { // TODO: refactor into level?
     // TODO: make it update elements instead of repopulate vectors?
     for ( auto const &e : level->getScene() ) {
         e->updateGraphics();
         auto const &gfx = e->getRepresentation();
-        if ( std::holds_alternative<IRepresentable::Boxes>(gfx) )
+        auto platform = dynamic_cast<Platform const *>( e.get() );
+        if ( platform )
+            ; // do nothing; statics are already loaded!
+        else if ( std::holds_alternative<IRepresentable::Boxes>(gfx) )
             for ( auto const *p : std::get<IRepresentable::Boxes>(gfx) )
-                level->getBoxes().push_back( *p );
+                level->getDynamicBoxes().push_back( *p );
         else if ( std::holds_alternative<IRepresentable::Spheres>(gfx) )
             for ( auto const *p : std::get<IRepresentable::Spheres>(gfx) )
                 level->getSpheres().push_back( *p );
@@ -595,226 +105,31 @@ void Game::updateGraphics() { // TODO: refactor into level?
         showHitboxes();
 }
 
-void Game::showHitboxes() {
-    for ( auto const &e : level->getScene() )
-        for ( auto const &hitbox : e->getHitboxes() )
-            level->getBoxes().push_back(hitbox.box);
-}
-
-[[nodiscard]]
-std::variant<IRepresentable::Boxes,IRepresentable::Spheres>
-Enemy::getRepresentation() const noexcept {
-    return Boxes{ getVolume() };
-}
-
-// TODO!!!!
-Enemy::Enemy(glm::vec3 position):
-    IActor( false,   // isStanding
-            950.0f,  // jumpForce
-            JUMP_CD, // jumpCooldown
-            10.0f,   // mass
-            20.0f,   // moveSpe:ed
-            position
-    ),      // center      h-lenghts  colour
-    volume( {{position,0}, {3,3,3,0}, {0,1,0,0} } )
-{
-    // register hitboxex:
-    hitboxes.push_back({
-        (ICollider*)this,     // hitbox parent
-        ColliderType::enemy,  // hitbox identifier
-        Box {},               // box (default constructed; will be generated with updateHitboxes)
-        false                 // hitbox is not static
-    });
-    updateHitboxes(); // generate hitbox
-}
-
-Enemy::~Enemy() {}
-
-void Enemy::die() noexcept {
-    ;// TODO: level->remove(*this); ?
-}
-
-void Enemy::updatePhysics( double dt_s ) noexcept {
-    addVelocity(glm::vec3(.0f, -GRAVITY_CONSTANT * dt_s, .0f));
-    move(dt_s);
-};
-
-void Enemy::updateGraphics() noexcept {
-    volume.center = { position, .0f };
-}
-
-void Enemy::updateHitboxes() noexcept {
-    auto &hitbox = hitboxes[0].box;
-    //level.boxes.push_back(volume); // TODO!
-    hitbox.center      = { position, .0f };
-    hitbox.halfLengths = { getVolume()->halfLengths };
-}
-
-void Enemy::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
-	if ( otherHitbox == ColliderType::platform ) {
-        auto &platform = dynamic_cast<Platform&>(other);
-
-		if ( true ) {  // direction down TEMP
-            isStanding    = true;
-            velocity.y    = 0;
-            velocity.x   *= platform.getFriction();
-            position.y    = platform.getBox().center.y
-                            + platform.getBox().halfLengths.y
-                            + getVolume()->halfLengths.y;
-		}
-        /*
-		else if ( ownHitbox == ColliderType::enemy_top ) {
-            velocity.y = 0;
-			position.y = platBox.center.y
-                         - platBox.halfLengths.y
-                         + position.y
-                         - top.center.y
-                         - top.halfLengths.y;
-		}
-		else if ( ownHitbox == ColliderType::enemy_left ) {
-			controlDir.x = -controlDir.x;
-			velocity.x   = -velocity.x;
-		}
-		else if ( ownHitbox == ColliderType::enemy_right ) {
-			controlDir.x = -controlDir.x;
-			velocity.x   = -velocity.x;
-		}*/
-	}
-    /*
-	else if ( otherHitbox == ColliderType::player_bottom and ownHitbox == ColliderType::enemy_top )
-        die();
-    */
-}
-
-// Updates logic, call once per frame before updatePhysics
-void Enemy::updateLogic(double dt_s) noexcept {
-	jumpCooldown -= (float)dt_s;
-	if ( !isStanding ) {
-		if ( jumpCooldown <= .0f ) {
-			controlDir.x = -controlDir.x;
-			jumpCooldown = JUMP_CD;
-			putForce( glm::vec3(.0f, jumpForce, .0f) );
-		}
-	}
-	addVelocity( controlDir * moveSpeed );
-	isStanding = false;
-}
-
-void Enemy::updateAnimations( double dt_s, double t_s ) noexcept {
-    ; // stub
-}
-
-
-
-// when to use: when loading a level or dynamically spawning entities in a level.
-//
-// usage:
-//            LevelData level = /*...*/;
-//            // ...
-//
-//            // either:
-//            auto enemy = std::make_unique<Enemy>(/*some_constructor_params*/);
-//            level.add( {10.0f, .0f, .0f}, std::move(enemy) }; // transfer ownership to level
-//
-//            // or:
-//            level.add( {10.0f, .0f, .0f}, std::make_unique<Enemy>(/*some_constructor_params*/) );
-//            
-void Level::add(std::unique_ptr<IObject> object) noexcept {
-    Player *player = dynamic_cast<Player*>(object.get());
-    if ( player ) {
-        if ( this->player )
-            assert( false and "The level already contains a player!" );
-        else this->player = player;
+void Game::showHitboxes() noexcept {
+    auto &dynamics = level->getDynamicBoxes();
+    auto &statics  = level->getStaticBoxes();
+    for ( auto const &e : level->getScene() ) {
+        auto platform = dynamic_cast<Platform const *>( e.get() );
+        if ( platform )
+            for ( auto const &hitbox : e->getHitboxes() )
+                statics.push_back(hitbox.box);
+        else for ( auto const &hitbox : e->getHitboxes() )
+            dynamics.push_back(hitbox.box);
     }
-    collisionManager.add( *object );
-    scene.push_back({ std::move(object) });
 }
 
-Level::Level() {}
+void Game::menuLoad() {
+    menuBg  = { {    .0f,    .0f,  5.0f,  .0f },   // position
+                { 100.0f, 100.0f,   .0f,  .0f },   // dimensions
+                {    .0f,    .0f,  1.0f,  .0f } }; // color
 
-void Level::onFrameStart() {
-    // TODO: let IRepresentables have mutable handles to a GraphicsManager instead!
-    boxes.clear();
-    spheres.clear();
-}
+    menuYes = { {  30.0f,  10.0f,   .0f,  .0f },   // position
+                {  20.0f,  20.0f,   .0f,  .0f },   // dimensions
+                {    .0f,   1.0f,   .0f,  .0f } }; // color
+                                   
+    menuNo  = { { -30.0f,  10.0f,   .0f,  .0f },   // position
+                {  20.0f,  20.0f,   .0f,  .0f },   // dimensions
+                {   1.0f,    .0f,   .0f,  .0f } }; // color
 
-// when to use: when a level in an entity is destroyed by game logic (e.g. an enemy dies)
-//
-// usage:
-//     level.remove( *this );
-bool Level::remove( IObject &target ) noexcept {
-    // TODO: handle Player edge case
-    auto unary_predicate = [&target]( auto const &e ) { 
-        return *e == target;
-    };
-    return std::remove_if( scene.begin(), scene.end(), unary_predicate ) != scene.end() 
-           or collisionManager.remove(target);
-}
-
-Player& Level::getPlayer() noexcept {
-    return *player;
-}
-
-CollisionManager & Level::getCollisionManager() noexcept {
-    return collisionManager;
-}
-
-Level::Boxes & Level::getBoxes() noexcept {
-    return boxes;
-}
-
-Level::Spheres & Level::getSpheres() noexcept {
-    return spheres;
-}
-
-Level::SceneEntries & Level::getScene() noexcept {
-    return scene;
-}
-
-[[nodiscard]]
-std::variant<IRepresentable::Boxes,IRepresentable::Spheres> LevelGoal::getRepresentation() const noexcept {
-    return Boxes{ &representation };
-}
-
-void LevelGoal::updateGraphics()                            noexcept {}; // stub
-void LevelGoal::updateHitboxes()                            noexcept {}; // stub
-void LevelGoal::updateLogic(      double dt_s )             noexcept {}; // stub
-void LevelGoal::updatePhysics(    double dt_s )             noexcept {}; // stub
-void LevelGoal::updateAnimations( double dt_s, double t_s ) noexcept {}; // stub
-
-LevelGoal::LevelGoal( glm::vec3 const &position, float radius, TriggerCallback cb ):
-    IObject(position),
-    representation({ glm::vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,.0f} }),
-    triggerCallback(cb)
-{
-    // register hitbox:
-    hitboxes.push_back({
-        (ICollider*)this,         // hitbox parent
-        ColliderType::level_goal, // hitbox identifier
-        Box {                     // hitbox box
-            {position,.0f},             // box position
-            {radius,radius,radius,.0f}, // box volume
-            {}                          // box color
-        },
-        true                     // hitbox is static
-    });
-///    _colMan->add({&*this, ColliderType::level_goal, _bounds, true});  // TODO: ICollider::getHitboxes() + Level::add()
-}
-
-ICollider::Hitboxes const & LevelGoal::getHitboxes() const noexcept {
-    return hitboxes;
-}
-
-LevelGoal::~LevelGoal() {}
-
-void LevelGoal::collide( ColliderType,
-                         ColliderType  otherHitbox,
-                         IUnique& ) noexcept {
-    if ( otherHitbox == ColliderType::player )
-        triggerCallback();
-    // TODO (in callback):
-    ///    tone and blur screen?
-    ///    display text?
-    ///    wait for input?
-    ///    load next level?
+    state = State::menu;
 }

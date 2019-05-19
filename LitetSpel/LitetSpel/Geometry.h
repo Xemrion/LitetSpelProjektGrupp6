@@ -5,26 +5,19 @@
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 
-class Sphere {
-public:
-	Sphere(): centerRadius(0.0) {};
-	Sphere(glm::vec4 centerRadius) : centerRadius(centerRadius) {};
-	Sphere(glm::vec3 pos, float radius) { centerRadius = glm::vec4(pos.x, pos.y, pos.z, radius); };
-
-	glm::vec4 centerRadius;
-	glm::vec4 color; //w is reflectivity 0.0 is completely non-reflective and 1.0 is completely reflective
+struct Sphere {
+    glm::vec4 centerRadius { .0f };
+    glm::vec4 color        { .0f }; //w is reflectivity 0.0 is completely non-reflective and 1.0 is completely reflective
 };
 
-class Box {
-public:
-    glm::vec4 center      {};
-    glm::vec4 halfLengths {};
-	glm::vec4 color       {};
+struct Box {
+    glm::vec4 center      { .0f };
+    glm::vec4 halfLengths { .0f };
+	glm::vec4 color       { .0f };
 };
 
-class Line {
-public:
-	glm::vec3 start;
-	glm::vec3 end;
-	glm::vec3 color;
+struct Line {
+	glm::vec3 start { .0f };
+	glm::vec3 end   { .0f };
+	glm::vec3 color { .0f };
 };

@@ -123,17 +123,21 @@
     <ClCompile Include="Blob.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Collisions.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Gate.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Interfaces.cpp" />
     <ClCompile Include="KeyboardInput.cpp" />
+    <ClCompile Include="Level.cpp" />
+    <ClCompile Include="LevelGoal.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MouseInput.cpp" />
     <ClCompile Include="MovingPlatform.cpp" />
     <ClCompile Include="Platform.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="PowerUp.cpp" />
-    <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="LevelLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -142,6 +146,7 @@
     <ClInclude Include="Blob.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Collisions.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Gate.h" />
     <ClInclude Include="Geometry.h" />
@@ -149,11 +154,14 @@
     <ClInclude Include="Interfaces.h" />
     <ClInclude Include="KeyboardInput.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Level.h" />
+    <ClInclude Include="LevelGoal.h" />
     <ClInclude Include="MouseInput.h" />
     <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="Platform.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="PowerUp.h" />
-    <ClInclude Include="Editor.h" />
+    <ClInclude Include="LevelLoader.h" />
     <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +221,9 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

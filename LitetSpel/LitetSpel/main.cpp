@@ -12,10 +12,8 @@
 #include "MouseInput.h"
 
 // TODO: refactor into the class hierarchy!
-KeyboardInput  keyboard;
-MouseInput     mouse;
-Graphics       graphics;
-Game           game( keyboard, mouse, graphics );
+KeyboardInput  keyboard{};
+MouseInput     mouse{};
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
@@ -100,21 +98,20 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height) {
 		return false;
 
 	RECT rc = { 0, 0, width, height };
-	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+	AdjustWindowRect( &rc, WS_OVERLAPPEDWINDOW, FALSE );
 	
-	HWND handle = CreateWindowEx(
-		0,
-		"Game Project",
-		"Game Project",
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		rc.right - rc.left,
-		rc.bottom - rc.top,
-		nullptr,
-		nullptr,
-		hInstance,
-		nullptr);
+	HWND handle = CreateWindowEx( 0,
+		                          "Game Project",
+		                          "Game Project",
+		                          WS_OVERLAPPEDWINDOW,
+		                          CW_USEDEFAULT,
+		                          CW_USEDEFAULT,
+		                          rc.right - rc.left,
+		                          rc.bottom - rc.top,
+		                          nullptr,
+		                          nullptr,
+		                          hInstance,
+		                          nullptr );
 
 	return handle;
 }
@@ -122,13 +119,15 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height) {
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
     using Clock = std::chrono::high_resolution_clock;
 
+    Graphics       graphics;
+    Game           game { keyboard, mouse, graphics };
+
 	HWND wndHandle = InitWindow(hInstance, 1280, 720);
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
-	if (FAILED(hr)) return 2;
+	if (FAILED(hr))
+        return 2;
 
-	bool gameLoaded = false;
-	// game.menuLoad(); // TODO
 	ShowWindow(wndHandle, nCmdShow);
 	
     double dt_s { .0 };
@@ -138,26 +137,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
     unsigned long frame_n = 0; // temp debug thing; feel free to remove
 
-    bool gameEnd = false; // TODO: refactor into game?
-	while  (WM_QUIT != msg.message and !gameEnd ) {
+    game.menuLoad(); // TODO
+    game.init();
+    while ( game.getState() != Game::State::level ); // blocked wait
+    graphics.setStaticBoxes( game.getLevel().getStaticBoxes() );
+	while ( WM_QUIT != msg.message ) {
 		if ( PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) ) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else {// TODO
-            // if (game.state == GameState::LevelState && !gameLoaded) {
-            //     game.init();
-            //     graphics.setStaticBoxes(game.level.staticBoxes);
-            //     gameLoaded = true;
-            // }
-
+		else { // TODO
 			currFrameTime = Clock::now();
 			elapsedTime   = currFrameTime - prevFrameTime;
 			prevFrameTime = currFrameTime;
             dt_s = std::chrono::duration<double>(elapsedTime).count();
 			
-            (void)++frame_n; // temp debug thing; feel free to remove
-
 			char title[64];
             snprintf( title, sizeof(title)/sizeof(char), "%5.1f FPS (%5.1fms/frame)", 1.0/dt_s, dt_s*1000 );
 			SetWindowTextA(wndHandle, title);
@@ -175,7 +169,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 			game.update( dt_s );
 			graphics.setCameraPos( game.getLevel().getPlayer().getPosition() + glm::vec3(.0f, 20.0f, -100.0f));
-			graphics.setMovingBoxes( game.getLevel().getBoxes() ); // TODO: not moving boxes?
+			graphics.setMovingBoxes( game.getLevel().getDynamicBoxes() );
 			graphics.setMetaballs( game.getLevel().getSpheres() );
             graphics.castPlayerShadow( game.getLevel().getPlayer().getPosition() );
 			graphics.swapBuffer();

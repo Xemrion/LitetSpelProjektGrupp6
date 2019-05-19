@@ -13,14 +13,14 @@ Blob::Blob( glm::vec3 const &parentPosition ):
             BLOB_SHOOT_SPEED, // moveSpeed
             parentPosition    // position
     ),
-    parentPosition  ( &parentPosition                  ),
-    blobSphere      ( glm::vec4(parentPosition,radius) ),
-    isActive        ( false                            ),
-    isBeingRecalled ( true                             ),
-	isStuck         ( false                            ),
-    recallSpeed     ( BLOB_RECALL_SPEED                ),
-    radius          ( BLOB_ACTIVE_RADIUS               ),
-	status          ( PowerType::none                  )
+    parentPosition  ( &parentPosition               ),
+    blobSphere      ( {{parentPosition,radius}, {}} ),
+    isActive        ( false                         ),
+    isBeingRecalled ( true                          ),
+	isStuck         ( false                         ),
+    recallSpeed     ( BLOB_RECALL_SPEED             ),
+    radius          ( BLOB_ACTIVE_RADIUS            ),
+	status          ( PowerType::none               )
 {
     // register hitbox:
     hitboxes.push_back({
@@ -91,7 +91,8 @@ void Blob::updateHitboxes() noexcept {
 }
 
 void Blob::updateGraphics() noexcept {
-    blobSphere.centerRadius = glm::vec4( position, radius );
+    auto color = PowerTypeColor[ static_cast<size_t>(status)];
+    blobSphere = { {position, radius}, color };
 };
 
 void Blob::updatePhysics( double dt_s ) noexcept {

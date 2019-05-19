@@ -45,9 +45,6 @@
     <ClCompile Include="Interfaces.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Editor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\INCLUDE\DDSTextureLoader\DDSTextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -58,6 +55,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelGoal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LevelLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -101,9 +113,6 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MovingPlatform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -111,6 +120,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Gate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelGoal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -123,5 +147,10 @@
     <FxCompile Include="laser_raster_vs.hlsl" />
     <FxCompile Include="static_box_raster_ps.hlsl" />
     <FxCompile Include="static_box_raster_vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

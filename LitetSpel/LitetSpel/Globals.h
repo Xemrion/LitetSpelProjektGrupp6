@@ -6,7 +6,9 @@
 
 // TODO: put global constants and config values in a global namespace
 
-float constexpr PHYSICS_TIME_STEP = 0.0015f;
+char const * const LEVEL_NAME        = "Test.png"; //  "PrototypeThree.png";
+
+float constexpr PHYSICS_TIME_STEP    = 0.005f;
 
 // debug constants
 bool  constexpr SHOW_HITBOXES        =    false;
@@ -57,6 +59,7 @@ enum class ColliderType { player,
                           powerup_bouncy,
                           powerup_sticky,
                           powerup_heavy,
+                          powerup_none,
                           blob };
 
 // Adding more requires change in PowerUp class
@@ -67,9 +70,9 @@ enum class PowerType { none,
 
 
 // Use player.status as index
-static const glm::vec4 playerPowerTypeColors[] = {
+const glm::vec4 PowerTypeColor[] = {
     glm::vec4( 0.85f, 0.05f, 0.75f, 0.0f ),
     glm::vec4( 1.00f, 0.75f, 0.05f, 0.0f ),
     glm::vec4( 0.05f, 0.05f, 1.00f, 0.0f ),
-    glm::vec4( 0.75f, 0.75f, 0.75f, 0.1f ) // ?
+    glm::vec4( 0.75f, 0.75f, 0.75f, 0.1f )
 };

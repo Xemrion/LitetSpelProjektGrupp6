@@ -9,31 +9,20 @@
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 #include<math.h>
 #define STB_IMAGE_IMPLEMENTATION
+#include <memory>
+#include "Level.h"
+#include "Geometry.h"
 
-#include"Geometry.h"
-#include"Platform.h"
-#include"MovingPlatform.h"
-#include"PowerUp.h"
-#include"Button.h"
-#include"Gate.h"
 
-class Editor {
+class LevelLoader {
 public:
-	Editor();
-	~Editor();
-    void initialize( const char* filename );
+    LevelLoader( Graphics & );
+
+    std::unique_ptr<Level> load( const char* filename );
 
     // TODO: privatize?
 	glm::vec3                    goalPos,
                                  startPos;
-
-    // TODO: replace with a private level pointer
-	std::vector<PowerUp>         powerups;
-	std::vector<glm::vec3>       enemyPos; // TODO
-	std::vector<Gate>            gates;
-	std::vector<Button>          buttons;
-    std::vector<Platform>        platforms;
-    std::vector<MovingPlatform>  movingPlatforms;
 
 private:
     [[nodiscard]] inline bool isWhite(          glm::vec3 const &pixelColour ) const noexcept;
@@ -53,6 +42,8 @@ private:
     void addBoxToUsed( int startPosX, int startPosY, int endPosX, int endPosY );
 
     unsigned char   *rgb;
+
+    Graphics        *graphics;
 
     int              minimumBoxSize          = 30,
                      width                   =  0,
