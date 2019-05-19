@@ -5,19 +5,20 @@
 #include "Globals.h"
 #include "Collisions.h"
 
-using namespace glm;
-
-class Button : public CollisionObject
-{
+class Button : public IObject {
 public:
-	Button();
-	Button(vec4 buttonCenter, vec2 halfLength,int index);
+	Button( Box box, int index );
 	virtual ~Button();
-	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
-
-	int index;
-	Box hitbox;
-	bool isPressed;
-	bool isMoved;
+	virtual void collide( ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other ) noexcept override;
+    virtual void updateLogic( double dt_s ) noexcept override {} // stub
+    virtual void updatePhysics( double dt_s ) noexcept override {} // stub
+    virtual void updateHitboxes() noexcept override {} // stub
+    virtual void updateGraphics() noexcept override {} // stub
+    virtual void updateAnimations( double dt_s, double t_s ) noexcept override {} // stub
+    [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
+private:
+    // IActivable target; TODO!
+	int  index;
+	bool isPressed,
+         isMoved;
 };
-

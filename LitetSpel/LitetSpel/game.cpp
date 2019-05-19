@@ -82,23 +82,25 @@ Level& Game::getLevel() noexcept {
 }
 
 // TODO!!!
-Player::Player( Graphics &graphics, CollisionManager &colMan, glm::vec3 position={.0f, .0f, .0f} ):
-    IActor( false,   // isStanding
+Player::Player( Graphics         &graphics,
+                CollisionManager &colMan,
+                glm::vec3         position={.0f, .0f, .0f} ): // TODO: const ref or value+move
+    IActor( false, // isStanding
             PLAYER_JUMP_FORCE,
             JUMP_CD,
             PLAYER_MASS,
             PLAYER_SPEED,
             position
     ),
-    graphics      ( &graphics    ),
-    colMan        ( &colMan      ), // hacky evil to deal with blob registration
-    hasExtraJump  ( true         ),
-    isStuck       ( false        ),
+    graphics      ( &graphics       ),
+    colMan        ( &colMan         ), // hacky evil to deal with blob registration
+    hasExtraJump  ( true            ),
+    isStuck       ( false           ),
     status        ( PowerType::none ),
-    blobCharges   ( 5            ),
-    shootCooldown ( SHOOT_CD     ),
-    powerCooldown ( POWER_CD     ),
-    radius        ( 5.0f         )
+    blobCharges   ( 5               ),
+    shootCooldown ( SHOOT_CD        ),
+    powerCooldown ( POWER_CD        ),
+    radius        ( 5.0f            )
 {
     blobs.reserve( blobCharges );
     assert( this->graphics and "Graphics mustn't be null!" );
@@ -168,14 +170,14 @@ void Player::processKeyboard() noexcept {
                    blob.status = PowerType::bouncy;
                 }
                 status = PowerType::bouncy;
-                graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
+                // graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
             }
             else {
                 for ( auto &blob : blobs ) {
                     blob.status = PowerType::none;
                 }
                 status = PowerType::none;
-                graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
+                // graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
             }
             powerCooldown = POWER_CD;
         }
@@ -187,14 +189,14 @@ void Player::processKeyboard() noexcept {
                     blob.status = PowerType::heavy;
                 }
                 status = PowerType::heavy;
-                graphics->setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
+                // graphics->setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
             }
             else {
                 for ( auto &blob : blobs ) {
                     blob.status = PowerType::none;
                 }
                 status = PowerType::none;
-                graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
+                // graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
             }
             powerCooldown = POWER_CD;
         }
@@ -206,22 +208,22 @@ void Player::processKeyboard() noexcept {
                     blob.status = PowerType::sticky;
                 }
                 status = PowerType::sticky;
-                graphics->setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
+                // graphics->setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
             }
             else {
                 for ( auto &blob : blobs ) {
                     blob.status = PowerType::none;
                 }
                 status = PowerType::none;
-                graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
+                // graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
             }
             powerCooldown = POWER_CD;
         }
     }
     if ( keyboard->KeyIsPressed('R') )
         recallBlobs();
-    if ( keyboard->KeyIsPressed('P') )
-        ;//createShaders(); // TODO
+    // if ( keyboard->KeyIsPressed('P') )
+    //     createShaders(); // TODO
 }
 
 void Player::updateGraphics() noexcept {
@@ -309,7 +311,8 @@ void Player::die() noexcept {
 }
 
 [[nodiscard]]
-std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Player::getRepresentation() const noexcept {
+std::variant<IRepresentable::Boxes,IRepresentable::Spheres>
+Player::getRepresentation() const noexcept {
     Spheres representation;
     representation.push_back( &blobSphere  );
     representation.push_back( &animSphere1 );
@@ -780,19 +783,20 @@ void LevelGoal::updatePhysics(    double dt_s )             noexcept {}; // stub
 void LevelGoal::updateAnimations( double dt_s, double t_s ) noexcept {}; // stub
 
 LevelGoal::LevelGoal( glm::vec3 const &position, float radius, TriggerCallback cb ):
+    IObject(position),
     representation({ glm::vec4(position,0), {2.0f,5.0f,2.0f,.0f}, {1.0f,.0f,1.0f,.0f} }),
     triggerCallback(cb)
 {
     // register hitbox:
     hitboxes.push_back({
         (ICollider*)this,         // hitbox parent
-        ColliderType::blob,       // hitbox identifier
+        ColliderType::level_goal, // hitbox identifier
         Box {                     // hitbox box
-            {position,.0f},            // box position
-            {radius,radius,radius,.0f},// box volume
-            {}                         // box color
+            {position,.0f},             // box position
+            {radius,radius,radius,.0f}, // box volume
+            {}                          // box color
         },
-        false                     // hitbox is not static
+        true                     // hitbox is static
     });
 ///    _colMan->add({&*this, ColliderType::level_goal, _bounds, true});  // TODO: ICollider::getHitboxes() + Level::add()
 }

@@ -1,7 +1,8 @@
 #include"Platform.h"
 
 Platform::Platform( Box box, float friction ):
-    friction( friction )
+    IObject  ( box.center ),
+    friction ( friction   )
 {
     // register hitbox:
     hitboxes.push_back({

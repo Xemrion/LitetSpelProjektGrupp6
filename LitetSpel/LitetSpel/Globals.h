@@ -52,8 +52,11 @@ enum class ColliderType { player,
                           level_goal,
                           platform,
                           wall,
+                          gate,
+                          button,
                           powerup_bouncy,
                           powerup_sticky,
+                          powerup_heavy,
                           blob };
 
 // Adding more requires change in PowerUp class

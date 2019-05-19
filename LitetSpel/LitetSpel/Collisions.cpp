@@ -15,9 +15,10 @@ bool CollisionManager::remove( ICollider &parent ) noexcept {
     return std::remove_if( colliders.begin(), colliders.end(), unary_predicate ) != colliders.end();
 }
 
+[[nodiscard]]
 bool CollisionManager::intersect( Box const &a, Box const &b ) noexcept {
-    float const dx      =  abs(a.center.x - b.center.x);     // midpoint delta x
-    float const dy      =  abs(a.center.y - b.center.y);     // midpoint delta y
+    float const dx      = fabsf(a.center.x - b.center.x);    // midpoint delta x
+    float const dy      = fabsf(a.center.y - b.center.y);    // midpoint delta y
     float const cWidth  = a.halfLengths.x + b.halfLengths.x; // combined width
     float const cHeight = a.halfLengths.y + b.halfLengths.y; // combined height
     return dx < cWidth and dy < cHeight;

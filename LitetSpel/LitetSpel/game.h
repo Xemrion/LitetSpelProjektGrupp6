@@ -90,7 +90,7 @@ class LevelGoal : public IObject {
 public:
     using TriggerCallback = std::function<void(void)>;
 
-    LevelGoal(glm::vec3 const &pos, float radius, TriggerCallback cb=[](){});
+    LevelGoal(glm::vec3 const &position, float radius, TriggerCallback cb=[](){});
     virtual ~LevelGoal();
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
     virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;

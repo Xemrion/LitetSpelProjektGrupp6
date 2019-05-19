@@ -64,6 +64,7 @@ public:
 class IObject : public IRepresentable,
                 public ICollider {
 public:
+    IObject( glm::vec3 position );
     virtual ~IObject() noexcept {}
     // inherited:
     //    comparable    (operator!=, operator==, getID)
@@ -71,12 +72,18 @@ public:
     //    representable (getRepresentation)
 
     virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept = 0;
-    virtual Hitboxes const& getHitboxes() const noexcept = 0;
     virtual void updateLogic( double dt_s ) noexcept = 0;
     virtual void updatePhysics( double dt_s ) noexcept = 0;
+    virtual void updateHitboxes() noexcept = 0;
+    virtual Hitboxes const& getHitboxes() const noexcept;
+    glm::vec3 const& getPosition() const noexcept;
+protected:
+    std::vector<Hitbox> hitboxes;
+    glm::vec3           position;
 };
 
 struct Input {
+    // TODO: do a better proper keymapping solution
     enum Key { left,
                right,
                up,
@@ -97,7 +104,33 @@ protected:
     MouseInput    *mouse    = nullptr;
 };
 
-class IActor : public IObject {
+class IMobile : public IObject {
+public:
+    IMobile( float     mass     = 1.0f,
+             glm::vec3 position = glm::vec3(.0f),
+             glm::vec3 velocity = glm::vec3( .0f ) ):
+        IObject   ( position ),
+        mass      ( mass     ),
+        velocity  ( velocity )
+    {}
+
+    virtual ~IMobile() noexcept {};
+    void         addVelocity( glm::vec3 const &velocity ) noexcept;
+    void         setVelocity( glm::vec3 const &velocity ) noexcept;
+    void         multiplyVelocity( glm::vec3 const &fac ) noexcept;
+    void         putForce(glm::vec3 const &force) noexcept;
+    virtual void move(double dt) noexcept;
+
+protected:
+    float      mass;
+    glm::vec3  velocity;
+
+private:
+    // makes sure that the IMobile doesn't exceed a maximum speed
+    void _cap_speed() noexcept;
+};
+
+class IActor : public IMobile {
 public:
     IActor( bool      isStanding   = false,
             float     jumpForce    = 1.0f,
@@ -106,37 +139,19 @@ public:
             float     moveSpeed    = 1.0f,
             glm::vec3 position     = glm::vec3(.0f),
             glm::vec3 velocity     = glm::vec3(.0f) ):
-        IObject(),
+        IMobile(mass, position, velocity),
         isStanding(isStanding),
         jumpForce(jumpForce),
         jumpCooldown(jumpCooldown),
-        mass(mass),
-        moveSpeed(moveSpeed),
-        position(position),
-        velocity(velocity)
+        moveSpeed(moveSpeed)
     {}
 
     virtual ~IActor() noexcept {}
-    void         addVelocity( glm::vec3 const &velocity ) noexcept;
-    void         setVelocity( glm::vec3 const &velocity ) noexcept;
-    void         multiplyVelocity( glm::vec3 const &fac ) noexcept;
-    void         putForce(glm::vec3 const &force) noexcept;
-    virtual void updateHitboxes() noexcept = 0;
-    virtual void move(double dt) noexcept;
     virtual void die() noexcept = 0;
-    virtual      Hitboxes const& getHitboxes() const noexcept override;
 
 protected:
     bool                isStanding;
     float               jumpForce,
                         jumpCooldown,
-                        mass,
                         moveSpeed;
-    glm::vec3           position,
-                        velocity;
-    std::vector<Hitbox> hitboxes;
-
-private:
-    // makes sure that the IActor doesn't exceed a maximum speed
-    void _cap_speed() noexcept;
 };

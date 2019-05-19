@@ -1,21 +1,26 @@
 #pragma once
 #include "Button.h"
 
-class Gate : public CollisionObject
-{
+class Gate : public IMobile { // TODO: IActivable
 public:
 	Gate();
-	Gate(glm::vec4 center,glm::vec2 halfLength, float timerAdd, int index);
+	Gate( Box box, double timerAdd_s, int index );
 	virtual ~Gate();
-	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
-	void move(float dt);
+	virtual void collide( ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other ) noexcept override;
 
-	int index;
-	Box hitbox;
-	Button* button;
-	float timer;
-	float timerAdd;
-	bool isMoved;
+    virtual void updateLogic( double dt_s ) noexcept override {} // stub
+    virtual void updatePhysics( double dt_s ) noexcept override {} // stub
+    virtual void updateHitboxes() noexcept override {} // stub
+    virtual void updateGraphics() noexcept override {} // stub
+    virtual void updateAnimations( double dt_s, double t_s ) noexcept override {} // stub
+    [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
 
+ // TODO:
+//    void bindButton( Button *button ) noexcept;
+private:
+	int     index;
+	Button *button;
+	double  timer_s, 
+            timerAdd_s;
+	bool    isMoved;
 };
-

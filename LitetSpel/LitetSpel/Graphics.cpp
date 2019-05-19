@@ -33,16 +33,16 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 	createQuadData();
 	createBoxData();
 	
-	float c = 1.0 / glm::tan(glm::radians(22.5f));
+	float c = 1.f / glm::tan(glm::radians(22.5f));
 	float a = 16.f / 9.f;
 	float f = 200.f;
 	float n = 50.f;
 
 	proj = glm::mat4(
-		c / a, 0., 0., 0.,
-		0.   , c , 0., 0.,
-		0.   , 0., f/(f-n), -(f*n)/(f-n),
-		0.   , 0., 1, 0.
+		c / a,  .0f,  .0f,     .0f,
+		.0f,    c,    .0f,     .0f,
+		.0f,    .0f,  f/(f-n), -(f*n)/(f-n),
+	    .0f,    .0f,  1.f,     .0f
 	);
 
 	camera = glm::vec3(0, 0, -200);
@@ -949,9 +949,8 @@ void Graphics::setMovingBoxes(const vector<Box>& boxes)
 	} transforms;
 	memset(&transforms, 0, sizeof(Transforms));
 	int transformIndex = 0;
-	for (int i = 0; i < boxes.size(); ++i)
-	{
-		if (CollisionManager::intersect(boxes[i], cullingBox)) {
+	for ( int i = 0; i < boxes.size(); ++i ) {
+		if ( CollisionManager::intersect( boxes[i], cullingBox) ) {
 			glm::mat4 t = glm::translate(glm::mat4(1.0), glm::vec3(boxes[i].center));
 			t = glm::scale(t, glm::vec3(boxes[i].halfLengths));
 			transforms.WVP[transformIndex] = transpose(t);

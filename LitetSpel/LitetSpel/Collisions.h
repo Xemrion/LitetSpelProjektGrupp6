@@ -11,7 +11,7 @@ public:
     CollisionManager();
     void add( ICollider &) noexcept;
     bool remove( ICollider &target ) noexcept;
-    bool intersect( Box const &a, Box const &b ) noexcept;
+    [[nodiscard]] static bool intersect( Box const &a, Box const &b ) noexcept;
     // checks if any of the mobiles have collided, and if so calls the appropriate collide function
     void update() noexcept;
 private:

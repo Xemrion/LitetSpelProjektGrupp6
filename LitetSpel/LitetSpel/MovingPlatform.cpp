@@ -1,27 +1,38 @@
 #include "MovingPlatform.h"
 
-MovingPlatform::MovingPlatform(vec3 startPos, vec3 endPos, vec4 center, vec4 halfLength,vec4 color)
+MovingPlatform::MovingPlatform( glm::vec3 startPos, glm::vec3 endPos, Box box ):
+    IMobile  ( 1.0f, startPos ),
+    box      ( box ),
+    period   ( glm::length( endPos - startPos) ),
+    startPos ( startPos ),
+    endPos   ( endPos )
 {
-	this->startPos = startPos;
-	this->pos = startPos;
-	this->endPos = endPos;
-	this->period = glm::length(endPos - startPos) / 20; // move 20 units per second by default
-	this->hitbox.center = center;
-	this->hitbox.halfLengths = halfLength;
-	this->hitbox.color = color;
+    // register hitbox:
+    hitboxes.push_back({
+        (ICollider*)this,       // hitbox parent
+        ColliderType::platform, // hitbox identifier          (TODO)
+        box,                    // the hitbox box
+        false                   // hitbox is not static       (TODO)
+    });
 }
 
-MovingPlatform::~MovingPlatform()
-{
+[[nodiscard]]
+glm::vec3 MovingPlatform::moveFunction( double dt_s ) const {
+	return startPos + abs(glm::mod((float)dt_s / period, 2.0f) - 1.0f) * (endPos - startPos);
 }
 
-void MovingPlatform::move(double physicsTime)
-{
-	pos = moveFunction(physicsTime);
-	this->hitbox.center = vec4(pos, 0);
+[[nodiscard]]
+std::variant<IRepresentable::Boxes,IRepresentable::Spheres>
+MovingPlatform::getRepresentation() const noexcept {
+    Boxes representation;
+    representation.push_back( &box );
+    return representation;
 }
 
-vec3 MovingPlatform::moveFunction(double time) const
-{
-	return startPos + abs(glm::mod((float)time / period, 2.0f) - 1.0f) * (endPos - startPos);
+void MovingPlatform::updateLogic( double dt_s ) noexcept {
+    position = moveFunction( dt_s );
+}
+
+void MovingPlatform::updateHitboxes() noexcept {
+    box.center = { position, .0f };
 }

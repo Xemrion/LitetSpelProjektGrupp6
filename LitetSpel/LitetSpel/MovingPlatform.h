@@ -2,26 +2,27 @@
 
 #include"Geometry.h"
 #include "Collisions.h"
+#include "Interfaces.h"
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
 
-using namespace glm;
-
-class MovingPlatform : public CollisionObject
-{
+class MovingPlatform : public IMobile {
 public:
-	MovingPlatform(vec3 StartPos, vec3 endPos, vec4 center, vec4 halfLength, vec4 color);
-	virtual ~MovingPlatform();
-	void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override {};
-	void move(double time);
-	vec3 moveFunction(double time) const;
+	MovingPlatform( glm::vec3 startPos, glm::vec3 endPos, Box box ); // TODO: box
+    virtual ~MovingPlatform() noexcept {};
+	void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override {}; // stub
+    [[nodiscard]] glm::vec3 moveFunction(double dt_s) const;
+    [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
+    virtual void updateLogic( double dt_s ) noexcept override;
+    virtual void updatePhysics( double dt_s ) noexcept override {} // stub
+    virtual void updateHitboxes() noexcept override;
+    virtual void updateGraphics() noexcept override {} // stub
+    virtual void updateAnimations( double dt_s, double t_s ) noexcept override {} // stub
 
-	vec3 pos;
+private:
+    Box box;
 	float period; // time in seconds that the full path takes
-	vec3 startPos;
-	vec3 endPos;
-
-	Box hitbox;
+    glm::vec3 startPos,
+              endPos;
 };
-

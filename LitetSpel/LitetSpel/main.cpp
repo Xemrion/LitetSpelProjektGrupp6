@@ -128,7 +128,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	if (FAILED(hr)) return 2;
 
 	bool gameLoaded = false;
-	game.menuLoad();
+	// game.menuLoad(); // TODO
 	ShowWindow(wndHandle, nCmdShow);
 	
     double dt_s { .0 };
@@ -138,12 +138,19 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
     unsigned long frame_n = 0; // temp debug thing; feel free to remove
 
-	while (WM_QUIT != msg.message) {
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+    bool gameEnd = false; // TODO: refactor into game?
+	while  (WM_QUIT != msg.message and !gameEnd ) {
+		if ( PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE) ) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else {
+		else {// TODO
+            // if (game.state == GameState::LevelState && !gameLoaded) {
+            //     game.init();
+            //     graphics.setStaticBoxes(game.level.staticBoxes);
+            //     gameLoaded = true;
+            // }
+
 			currFrameTime = Clock::now();
 			elapsedTime   = currFrameTime - prevFrameTime;
 			prevFrameTime = currFrameTime;
@@ -155,10 +162,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
             snprintf( title, sizeof(title)/sizeof(char), "%5.1f FPS (%5.1fms/frame)", 1.0/dt_s, dt_s*1000 );
 			SetWindowTextA(wndHandle, title);
 
+            // TODO
+            // if (!game.level.player.levelCompleted) 
+            // {
+            //     keyboardFunc();
+            //     mouseFunc();
+            // }
+            // else  {
+            //     //game.animateColor(graphics);
+            //     //game.animateVictory(game.playerSphere);
+            // }
+
 			game.update( dt_s );
-			graphics.setCameraPos(glm::vec3(game.getLevel().getPlayer().getSphere()->centerRadius) + glm::vec3(.0f, 20.0f, -100.0f));
-			graphics.setBoxes(game.getLevel().getBoxes());
-			graphics.setMetaballs(game.getLevel().getSpheres());
+			graphics.setCameraPos( game.getLevel().getPlayer().getPosition() + glm::vec3(.0f, 20.0f, -100.0f));
+			graphics.setMovingBoxes( game.getLevel().getBoxes() ); // TODO: not moving boxes?
+			graphics.setMetaballs( game.getLevel().getSpheres() );
+            graphics.castPlayerShadow( game.getLevel().getPlayer().getPosition() );
 			graphics.swapBuffer();
 		}
 	}
