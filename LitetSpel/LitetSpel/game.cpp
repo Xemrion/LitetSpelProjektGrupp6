@@ -489,6 +489,7 @@ void Game::update(double dt) {
 		else if (!level.enemy.alive && level.enemy.isDeregistered)
 		{
 			level.colManager.unregisterEntry(level.enemy);
+			level.enemy.isDeregistered = true;
 		}
 		updatePhysics();
 		level.player.addVelocity(temp, true);
@@ -868,7 +869,7 @@ void Enemy::update(double dt) noexcept
 		if (jumpCooldown <= 0.0) {
 			controlDir.x = -controlDir.x;
 			jumpCooldown = 1.0;
-			putForce(vec3(0.0, jumpForce, 0.0));
+			putForce(vec3(0.0, jumpForce*2, 0.0));
 		}
 	}
 	if (!isStuck)
