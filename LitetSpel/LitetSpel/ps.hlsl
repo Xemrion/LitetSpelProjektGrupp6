@@ -96,9 +96,8 @@ float3 calcNormal(float3 p)
 float4 calcColor(float3 p)
 {
 	float4 color = float4(0.0, 0.0, 0.0, 0.0);
-	float minDist = mb(p, spheres[0].centerRadius);
 
-	for (int i = 1; i < nSpheres; ++i) {
+	for (int i = 0; i < nSpheres; ++i) {
 		float dist = mb(p, spheres[i].centerRadius);
 		color += smoothstep(1.0, 0.0, 1.0 - dist) * spheres[i].color;
 	}
@@ -159,7 +158,7 @@ float4 main(VS_OUT input) : SV_Target
 			float back = castRay(backRayOrigin, -refractDir, minDist);
 			float3 backp = backRayOrigin - (refractDir * back);
 			float3 backNormal = calcNormal(backp);
-			float3 backSample = backp * 0.01 + refract(refractDir, backNormal, refractiveIndex / 1.00029);
+			float3 backSample = refract(refractDir, backNormal, refractiveIndex / 1.00029);
 			float3 irradiance = irradianceMap.Sample(samp, backSample);
 			
 			/* absorbtion diffuse */
@@ -171,8 +170,9 @@ float4 main(VS_OUT input) : SV_Target
 			/* refraction diffuse */
 			float3 refractColor = float3(0.0, 0.0, 0.0);
 			if (length(refractColor) <= 0.00001) {
-				refractColor += radianceMap.Sample(samp, backSample) * absorbed;
-				refractColor *= irradiance * absorbed;
+				refractColor = irradianceMap.Sample(samp, backSample + parallax);
+				refractColor *= irradiance;
+				refractColor *= absorbed;
 			}
 
 			/* specular */
@@ -182,16 +182,16 @@ float4 main(VS_OUT input) : SV_Target
 				reflectSamplePoint.xy = (reflectSamplePoint.xy / resolution) + 0.5;
 				reflectSamplePoint.y = 1 - reflectSamplePoint.y;
 				specularColor = geometryTexture.Sample(samp, reflectSamplePoint.xy);
-				specularColor = geometryTexture.Sample(samp, reflectSamplePoint.xy);
 			}
 			if (length(specularColor) <= 0.00001) {
-				specularColor += radianceMap.Sample(samp, reflectDir + parallax * 2);
-				specularColor *= 2.0;
-				specularColor *= irradianceMap.Sample(samp, reflectDir + parallax * 2);
+				specularColor += radianceMap.Sample(samp, reflectDir + parallax);
+				//specularColor *= 2.0;
+				specularColor *= irradianceMap.Sample(samp, reflectDir + parallax);
 			}
 
 			/* final color */
-			color.rgb = (1.0 - specularity) * (diffuseColor + refractColor) + specularity * specularColor;
+			color.rgb = (1.0 - specularity) * (refractColor) + specularity * specularColor;
+			//color.rgb = refractColor;
 		}
 	}
 	
