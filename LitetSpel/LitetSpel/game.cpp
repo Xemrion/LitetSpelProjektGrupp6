@@ -81,9 +81,9 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
 	// enemies:
-//	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	//level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
-	//EnemyBox.color = vec4(1, 0, 0, 0);
+	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
+	EnemyBox.color = vec4(1, 0, 0, 0);
 }
 
 void Game::menuLoad()
@@ -478,8 +478,6 @@ void Game::update(double dt) {
 		{
 			level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 		}
-
-
 		handleInput();
 		level.player.isStanding = false;
 		level.player.collidingMovingPlatform = nullptr;
