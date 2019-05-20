@@ -30,17 +30,16 @@ void Game::init() noexcept {
 		{
 		case PowerType::Bouncy:
 			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_bouncy, (level.powerUps.at(i)).hitbox, true);
-
 			break;
 		case PowerType::Sticky:
 			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_sticky, (level.powerUps.at(i)).hitbox, true);
 			break;
-
 		case PowerType::Heavy:
 			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_heavy, (level.powerUps.at(i)).hitbox, true);
 			break;
 		default:
-			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_none, (level.powerUps.at(i)).hitbox, true);			break;
+			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_none, (level.powerUps.at(i)).hitbox, true);			
+			break;
 		}
 	}
 	// Buttons and Gates
@@ -82,9 +81,9 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
 	// enemies:
-	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
-	EnemyBox.color = vec4(1, 0, 0, 0);
+//	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	//level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
+	//EnemyBox.color = vec4(1, 0, 0, 0);
 }
 
 void Game::menuLoad()

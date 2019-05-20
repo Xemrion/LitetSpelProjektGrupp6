@@ -9,7 +9,7 @@ Gate::Gate(glm::vec4 center,glm::vec2 halfLength, float timerAdd, int index)
 	this->index = index;
 	this->hitbox.center = center;
 	this->hitbox.halfLengths = vec4(halfLength,10,0);
-	this->hitbox.color = vec4(1,0,1,0);
+	this->hitbox.color = vec4(0.2f,0.1f,0,0);
 	this->timerAdd = timerAdd;
 	isMoved = false;
 }
