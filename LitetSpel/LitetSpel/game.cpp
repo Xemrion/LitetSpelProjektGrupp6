@@ -2,44 +2,48 @@
 
 void Game::init() noexcept {
 	editor.initialize("Test.png");
+	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
 		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
+	// Moving Platforms
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
-		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, true);
 	}
+	// Moving Platform hitboxes
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
 		level.colManager.registerEntry((level.movingPlatforms.at(i)), ColliderType::movingPlatform, (level.movingPlatforms.at(i)).hitbox, true);
 	}
+	// Power Ups
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
 		level.powerUps.push_back(editor.powerups.at(i));
-		
+	}
+	// Power up hitboxes
+	for (int i = 0; i < editor.powerups.size(); i++)
+	{	
 		switch (editor.powerups.at(i).getType())
 		{
 		case PowerType::Bouncy:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_bouncy, (level.powerUps.end() - 1)->hitbox, true);
+			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_bouncy, (level.powerUps.at(i)).hitbox, true);
 
 			break;
 		case PowerType::Sticky:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_sticky, (level.powerUps.end() - 1)->hitbox, true);
-
+			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_sticky, (level.powerUps.at(i)).hitbox, true);
 			break;
 
 		case PowerType::Heavy:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_heavy, (level.powerUps.end() - 1)->hitbox, true);
-
+			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_heavy, (level.powerUps.at(i)).hitbox, true);
 			break;
 		default:
-			level.colManager.registerEntry(*(level.powerUps.end() - 1), ColliderType::powerup_none, (level.powerUps.end() - 1)->hitbox, true);
-			break;
+			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_none, (level.powerUps.at(i)).hitbox, true);			break;
 		}
 	}
+	// Buttons and Gates
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
 	
@@ -53,11 +57,9 @@ void Game::init() noexcept {
 			std::swap(editor.gates.at(i), editor.gates.at(editor.gates.at(i).index));
 		}
 		level.gates.push_back(editor.gates.at(i));
-		level.movingBoxes.push_back(level.gates.at(i).hitbox);
-
-		level.buttons.push_back(editor.buttons.at(i));
-		level.movingBoxes.push_back(level.buttons.at(i).hitbox);
+		level.buttons.push_back(editor.buttons.at(i));	
 	}
+	// Button and Gate hitboxes
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
 		level.gates.at(i).button = &level.buttons.at(i);
@@ -65,8 +67,6 @@ void Game::init() noexcept {
 		level.colManager.registerEntry(level.buttons.at(i), ColliderType::platform, level.buttons.at(i).hitbox, false);
 		level.colManager.registerEntry(level.gates.at(i), ColliderType::platform, level.gates.at(i).hitbox, true);
 	}
-	//level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
-	//level.staticBoxes.push_back(level.goal->representation);
 	// player & blobs:
 	auto &player = level.player;
 	player.pos = editor.startPos;
@@ -85,13 +85,6 @@ void Game::init() noexcept {
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
-
-	//Gate & button test
-	/*level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
-	level.movingBoxes.push_back(level.gates.at(0).hitbox);
-	level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
-	level.colManager.registerEntry(level.gates.at(0), ColliderType::platform, level.gates.at(0).hitbox, true);
-	level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);*/
 }
 
 void Game::menuLoad()
@@ -120,7 +113,6 @@ Player::Player(vec3 position) :
 	moveSpeed(75.0f),
 	mass(10.0),
 	blobCharges(5),
-	lifeCharges(3),
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
@@ -173,6 +165,12 @@ void Player::update(double dt) noexcept {
 	if (status != PlayerStatus::Sticky) {
 		isStuck = false;
 	}
+	if(status == PlayerStatus::Heavy)
+	{
+		hitbox.color.w = 0.1;
+	}
+	else
+		hitbox.color.w = 0;
 
 	for (auto &blob : blobs)
 		blob.update(dt);
@@ -372,7 +370,8 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
+		if (glm::length(minDistY) < glm::length(minDistX)) 
+		{
 		}
 		// if colliding in X-axis
 		else {
@@ -380,9 +379,9 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			if(status != PlayerStatus::Heavy)
 			{
-				putForce(vec3((hitbox.center.x - other.hitbox->center.x), 3, 0));
+				//putForce(vec3(-20, 30, 0));
+				addVelocity(vec3(-20,20,0));
 				knockBack = true;
-				lifeCharges -= 1;
 			}
 		}
 
@@ -473,9 +472,6 @@ void Game::update(double dt) {
 		}
 		updatePhysics();
 		level.player.addVelocity(temp, true);
-		if (level.player.lifeCharges <= 0) {
-			//Restart level
-		}
 	}
 	updateGraphics();
 }
@@ -730,52 +726,109 @@ Enemy::~Enemy() {}
 void Enemy::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
 	if (other.colliderType == ColliderType::platform) {
-		if (pos.y > (other.hitbox->center.y + other.hitbox->halfLengths.y))
-		{
-			pos.y = other.hitbox->center.y + other.hitbox->halfLengths.y + (pos.y - hitbox.center.y + hitbox.halfLengths.y);
-			velocity.y = 0;
-			isStanding = true;
+		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+			posDiff = minDistY;
+
+			// if colliding with floor
+			if (minDistY.y >= 0.0) {
+				velocity.y = 0;
+				isStanding = true;
+			}
+			//if colliding with ceiling
+			else {
+				velocity.y = 0;
+				velocity.y = min(0, velocity.y);
+			}
 		}
-		else if (pos.y < (other.hitbox->center.y - other.hitbox->halfLengths.y))
-		{
-			pos.y = other.hitbox->center.y - other.hitbox->halfLengths.y + (pos.y - hitbox.center.y - hitbox.halfLengths.y);
-			velocity.y = 0;
-		}
-		else if (pos.x > (other.hitbox->center.x + other.hitbox->halfLengths.x))
-		{
+		// if colliding in X-axis
+		else {
+			posDiff = minDistX;
 			controlDir.x = -controlDir.x;
 			velocity.x = -velocity.x;
 		}
-		else if (pos.x < (other.hitbox->center.x - other.hitbox->halfLengths.x))
-		{
-			controlDir.x = -controlDir.x;
-			velocity.x = -velocity.x;
-		}
+
+		pos += posDiff;
 	}
-	else if (other.colliderType == ColliderType::player && (other.hitbox->center.y+other.hitbox->halfLengths.y) > (pos.y+hitbox.halfLengths.y)) 
+	else if (other.colliderType == ColliderType::player) 
 	{
-		alive = false;
+		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+			posDiff = minDistY;
+
+			// if colliding with floor
+			if (minDistY.y >= 0.0) {
+				velocity.y = 0;
+				isStanding = true;
+			}
+			//if colliding with ceiling
+			else {
+				alive = false;
+			}
+		}
+		// if colliding in X-axis
+		else {
+			if(other.hitbox->color.w != 0)
+			{
+				posDiff = minDistX;
+				controlDir.x = -controlDir.x;
+				velocity.x = -velocity.x;
+			}
+		}
+		pos += posDiff;
+
 	}
 	else if (other.colliderType == ColliderType::blob)
 	{
 		if (other.hitbox->color.w == 0.25)
 		{
-			if (pos.y > (other.hitbox->center.y + other.hitbox->halfLengths.y))
-			{
-				pos.y = other.hitbox->center.y + other.hitbox->halfLengths.y + (pos.y - hitbox.center.y + hitbox.halfLengths.y);
-				velocity.y = 0;
-				isStanding = true;
+			glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+			glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+			glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+			glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+			glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+			glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+			glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+			// if colliding in Y-axis
+			if (glm::length(minDistY) < glm::length(minDistX)) {
+				posDiff = minDistY;
+
+				// if colliding with floor
+				if (minDistY.y >= 0.0) {
+					velocity.y = 0;
+					isStanding = true;
+				}
+				//if colliding with ceiling
+				else {
+					velocity.y = 0;
+					velocity.y = min(0, velocity.y);
+				}
 			}
-			else if (pos.x > (other.hitbox->center.x + other.hitbox->halfLengths.x))
-			{
+			// if colliding in X-axis
+			else {
+				posDiff = minDistX;
 				controlDir.x = -controlDir.x;
 				velocity.x = -velocity.x;
 			}
-			else if (pos.x < (other.hitbox->center.x - other.hitbox->halfLengths.x))
-			{
-				controlDir.x = -controlDir.x;
-				velocity.x = -velocity.x;
-			}
+
+			pos += posDiff;
 		}
 		if (other.hitbox->color.w == 0.5)
 		{
@@ -901,9 +954,6 @@ void Game::animateVictory(Sphere const & sphere)
 	sphere2.color = sphere.color;
 	level.spheres.push_back(sphere2);
 }
-
-
-
 
 // TODO: commented lines
 LevelGoal::LevelGoal(CollisionManager &colMan, vec3 const &position, float radius, TriggerCallback cb) :
