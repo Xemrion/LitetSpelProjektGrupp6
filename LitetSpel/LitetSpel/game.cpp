@@ -2,28 +2,30 @@
 
 void Game::init() noexcept {
 	editor.initialize("Test.png");
+	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
 		level.staticBoxes.push_back(editor.platforms.at(i).hitbox);
 		level.colManager.registerEntry(editor.platforms.at(i), ColliderType::platform, editor.platforms.at(i).hitbox, true);
 	}
+	// Moving platforms 
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
-		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, true);
 	}
+	// Moving platform hitboxes
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
 		level.colManager.registerEntry((level.movingPlatforms.at(i)), ColliderType::movingPlatform, (level.movingPlatforms.at(i)).hitbox, true);
 	}
+	// Power Up
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
 		level.powerUps.push_back(editor.powerups.at(i));
 	}
-
+	// Power Up hitboxes
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
-		
 		switch (editor.powerups.at(i).getType())
 		{
 		case PowerType::Bouncy:
@@ -41,9 +43,9 @@ void Game::init() noexcept {
 			level.colManager.registerEntry((level.powerUps.at(i)), ColliderType::powerup_none, (level.powerUps.at(i)).hitbox, true);			break;
 		}
 	}
+	// Buttons and Gates
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
-	
 		while (editor.buttons.at(i).index != i)
 		{
 			std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
@@ -59,6 +61,7 @@ void Game::init() noexcept {
 		level.buttons.push_back(editor.buttons.at(i));
 		level.movingBoxes.push_back(level.buttons.at(i).hitbox);
 	}
+	// Button and Gate hitboxes
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
 		level.gates.at(i).button = &level.buttons.at(i);
@@ -66,8 +69,7 @@ void Game::init() noexcept {
 		level.colManager.registerEntry(level.buttons.at(i), ColliderType::platform, level.buttons.at(i).hitbox, false);
 		level.colManager.registerEntry(level.gates.at(i), ColliderType::platform, level.gates.at(i).hitbox, true);
 	}
-	//level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
-	//level.staticBoxes.push_back(level.goal->representation);
+
 	// player & blobs:
 	auto &player = level.player;
 	player.pos = editor.startPos;
@@ -86,13 +88,6 @@ void Game::init() noexcept {
 	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
 	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
-
-	//Gate & button test
-	/*level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
-	level.movingBoxes.push_back(level.gates.at(0).hitbox);
-	level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
-	level.colManager.registerEntry(level.gates.at(0), ColliderType::platform, level.gates.at(0).hitbox, true);
-	level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);*/
 }
 
 void Game::menuLoad()
