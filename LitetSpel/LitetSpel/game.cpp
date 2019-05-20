@@ -116,7 +116,7 @@ Player::Player(vec3 position) :
 	moveSpeed(75.0f),
 	mass(10.0),
 	blobCharges(5),
-	shootCooldown(0),
+	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
 	hasExtraJump(true),
