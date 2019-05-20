@@ -412,6 +412,9 @@ void Game::update(double dt) {
 		time += dt;
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 		level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
+		cameraPos = level.player.pos + cameraOffset;
+		panCamera = true;
+
 		handleInput();
 		level.player.isStanding = false;
 		level.player.collidingMovingPlatform = nullptr;
@@ -473,6 +476,9 @@ void Game::handleInput() {
 		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
 			player.isStuck = false;
 			//player.pos.y -= 0.001;
+		}
+		else {
+			cameraPos = level.player.pos + cameraLookDownOffset;
 		}
 	}
 	
@@ -838,7 +844,6 @@ void Game::animateVictory(Sphere const & sphere)
 	sphere2.color = sphere.color;
 	level.spheres.push_back(sphere2);
 }
-
 
 
 

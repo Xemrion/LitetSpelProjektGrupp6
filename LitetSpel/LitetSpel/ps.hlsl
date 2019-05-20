@@ -86,15 +86,13 @@ float castRay(float3 ro, float3 rd, out float minDist)
 
 float3 calcNormal(float3 p)
 {
-	const float h = 0.0001;
-	const float2 k = float2(1, -1);
-	return normalize(k.xyy * testScene(p + k.xyy * h) +
-		k.yyx * testScene(p + k.yyx * h) +
-		k.yxy * testScene(p + k.yxy * h) +
-		k.xxx * testScene(p + k.xxx * h));
+	const float eps = 0.001;
+	const float2 h = float2(eps, 0);
+	return normalize(float3(testScene(p + h.xyy) - testScene(p - h.xyy),
+		testScene(p + h.yxy) - testScene(p - h.yxy),
+		testScene(p + h.yyx) - testScene(p - h.yyx)));
 }
 
-//type: 0 metaball, 1 line
 float4 calcColor(float3 p)
 {
 	float4 color = float4(0.0, 0.0, 0.0, 0.0);
@@ -134,8 +132,7 @@ float4 main(VS_OUT input) : SV_Target
 
 		if (color.a < 1.0) {
 			float4 radiance = radianceMap.Sample(samp, parallax + rd);
-			//color.rgb = color.a * color.rgb + float3(1.0,1.0,1.0)*(1.0 - color.a);
-			color.rgb += color.a * color.rgb + ((1.0 - color.a) * radiance.rgb);
+			color.rgb += color.a * color.rgb + ((1.0 - color.a) * radiance.rgb * 2.0);
 		}
 	}
 	else {
@@ -166,10 +163,10 @@ float4 main(VS_OUT input) : SV_Target
 			float3 irradiance = irradianceMap.Sample(samp, backSample);
 			
 			/* absorbtion diffuse */
-			float3 absorbed = exp2(-sphereColor * max(length(backp - p), 9.0));
+			float3 absorbed = exp2(-sphereColor * length(backp - p));
 			diffuseColor = absorbed;
 			float roughness = 1.0 - clamp(sphereColor.a, 0.01, 0.99);
-			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(sphereColor.a, sphereColor.a, sphereColor.a), roughness);
+			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(0.2, 0.2, 0.2) - sphereColor.rgb, roughness);
 
 			/* refraction diffuse */
 			float3 refractColor = float3(0.0, 0.0, 0.0);
@@ -188,9 +185,9 @@ float4 main(VS_OUT input) : SV_Target
 				specularColor = geometryTexture.Sample(samp, reflectSamplePoint.xy);
 			}
 			if (length(specularColor) <= 0.00001) {
-				specularColor += radianceMap.Sample(samp, reflectDir);
-				specularColor *= irradianceMap.Sample(samp, reflectDir);
-				specularColor += 0.5;
+				specularColor += radianceMap.Sample(samp, reflectDir + parallax * 2);
+				specularColor *= 2.0;
+				specularColor *= irradianceMap.Sample(samp, reflectDir + parallax * 2);
 			}
 
 			/* final color */
@@ -198,6 +195,6 @@ float4 main(VS_OUT input) : SV_Target
 		}
 	}
 	
-	color.rgb = color.rgb / (color.rgb + float3(1.0, 1.0, 1.0));
+	color.rgb = color.rgb / (color.rgb + float3(0.75, 0.75, 0.75));
 	return float4(pow(color.rgb, 1.0 / 2.2), 1.0);
 }
