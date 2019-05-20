@@ -169,6 +169,12 @@ void Player::update(double dt) noexcept {
 	if (status != PlayerStatus::Sticky) {
 		isStuck = false;
 	}
+	if(status == PlayerStatus::Heavy)
+	{
+		hitbox.color.w = 0.1;
+	}
+	else
+		hitbox.color.w = 0;
 
 	for (auto &blob : blobs)
 		blob.update(dt);
@@ -368,7 +374,8 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
+		if (glm::length(minDistY) < glm::length(minDistX)) 
+		{
 		}
 		// if colliding in X-axis
 		else {
@@ -376,7 +383,8 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			if(status != PlayerStatus::Heavy)
 			{
-				putForce(vec3((hitbox.center.x - other.hitbox->center.x), 3, 0));
+				//putForce(vec3(-20, 30, 0));
+				addVelocity(vec3(-20,20,0));
 				knockBack = true;
 				lifeCharges -= 1;
 			}
@@ -726,52 +734,109 @@ Enemy::~Enemy() {}
 void Enemy::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
 	if (other.colliderType == ColliderType::platform) {
-		if (pos.y > (other.hitbox->center.y + other.hitbox->halfLengths.y))
-		{
-			pos.y = other.hitbox->center.y + other.hitbox->halfLengths.y + (pos.y - hitbox.center.y + hitbox.halfLengths.y);
-			velocity.y = 0;
-			isStanding = true;
+		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+			posDiff = minDistY;
+
+			// if colliding with floor
+			if (minDistY.y >= 0.0) {
+				velocity.y = 0;
+				isStanding = true;
+			}
+			//if colliding with ceiling
+			else {
+				velocity.y = 0;
+				velocity.y = min(0, velocity.y);
+			}
 		}
-		else if (pos.y < (other.hitbox->center.y - other.hitbox->halfLengths.y))
-		{
-			pos.y = other.hitbox->center.y - other.hitbox->halfLengths.y + (pos.y - hitbox.center.y - hitbox.halfLengths.y);
-			velocity.y = 0;
-		}
-		else if (pos.x > (other.hitbox->center.x + other.hitbox->halfLengths.x))
-		{
+		// if colliding in X-axis
+		else {
+			posDiff = minDistX;
 			controlDir.x = -controlDir.x;
 			velocity.x = -velocity.x;
 		}
-		else if (pos.x < (other.hitbox->center.x - other.hitbox->halfLengths.x))
-		{
-			controlDir.x = -controlDir.x;
-			velocity.x = -velocity.x;
-		}
+
+		pos += posDiff;
 	}
-	else if (other.colliderType == ColliderType::player && (other.hitbox->center.y+other.hitbox->halfLengths.y) > (pos.y+hitbox.halfLengths.y)) 
+	else if (other.colliderType == ColliderType::player) 
 	{
-		alive = false;
+		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+			posDiff = minDistY;
+
+			// if colliding with floor
+			if (minDistY.y >= 0.0) {
+				velocity.y = 0;
+				isStanding = true;
+			}
+			//if colliding with ceiling
+			else {
+				alive = false;
+			}
+		}
+		// if colliding in X-axis
+		else {
+			if(other.hitbox->color.w != 0)
+			{
+				posDiff = minDistX;
+				controlDir.x = -controlDir.x;
+				velocity.x = -velocity.x;
+			}
+		}
+		pos += posDiff;
+
 	}
 	else if (other.colliderType == ColliderType::blob)
 	{
 		if (other.hitbox->color.w == 0.25)
 		{
-			if (pos.y > (other.hitbox->center.y + other.hitbox->halfLengths.y))
-			{
-				pos.y = other.hitbox->center.y + other.hitbox->halfLengths.y + (pos.y - hitbox.center.y + hitbox.halfLengths.y);
-				velocity.y = 0;
-				isStanding = true;
+			glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+			glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+			glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+			glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+			glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+			glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+			glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+			// if colliding in Y-axis
+			if (glm::length(minDistY) < glm::length(minDistX)) {
+				posDiff = minDistY;
+
+				// if colliding with floor
+				if (minDistY.y >= 0.0) {
+					velocity.y = 0;
+					isStanding = true;
+				}
+				//if colliding with ceiling
+				else {
+					velocity.y = 0;
+					velocity.y = min(0, velocity.y);
+				}
 			}
-			else if (pos.x > (other.hitbox->center.x + other.hitbox->halfLengths.x))
-			{
+			// if colliding in X-axis
+			else {
+				posDiff = minDistX;
 				controlDir.x = -controlDir.x;
 				velocity.x = -velocity.x;
 			}
-			else if (pos.x < (other.hitbox->center.x - other.hitbox->halfLengths.x))
-			{
-				controlDir.x = -controlDir.x;
-				velocity.x = -velocity.x;
-			}
+
+			pos += posDiff;
 		}
 		if (other.hitbox->color.w == 0.5)
 		{
