@@ -10,8 +10,11 @@ void Game::init() noexcept {
 	for (int i = 0; i < editor.movingPlatforms.size(); i++)
 	{
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
-		level.movingBoxes.push_back(editor.movingPlatforms.at(i).hitbox);
 		level.colManager.registerEntry(*(level.movingPlatforms.end() - 1), ColliderType::movingPlatform, (level.movingPlatforms.end() - 1)->hitbox, true);
+	}
+	for (int i = 0; i < editor.movingPlatforms.size(); i++)
+	{
+		level.colManager.registerEntry((level.movingPlatforms.at(i)), ColliderType::movingPlatform, (level.movingPlatforms.at(i)).hitbox, true);
 	}
 	for (int i = 0; i < editor.powerups.size(); i++)
 	{
@@ -37,7 +40,6 @@ void Game::init() noexcept {
 			break;
 		}
 	}
-
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
 	
@@ -55,8 +57,6 @@ void Game::init() noexcept {
 
 		level.buttons.push_back(editor.buttons.at(i));
 		level.movingBoxes.push_back(level.buttons.at(i).hitbox);
-		
-
 	}
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
