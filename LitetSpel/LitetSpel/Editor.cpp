@@ -132,7 +132,7 @@ void Editor::initialize(const char* filename)
 
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->gates.push_back(Gate(center, halfLength, 100, int(getPixelColour(i).y) % 10));
+				this->gates.push_back(Gate(center, halfLength, int(getPixelColour(i).z) * 10, int(getPixelColour(i).y) % 10));
 			}
 			else if (isButton(getPixelColour(i)))
 			{
