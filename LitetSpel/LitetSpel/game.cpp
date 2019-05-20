@@ -51,12 +51,7 @@ void Game::init() noexcept {
 			std::swap(editor.gates.at(i), editor.gates.at(editor.gates.at(i).index));
 		}
 		level.gates.push_back(editor.gates.at(i));
-		level.movingBoxes.push_back(level.gates.at(i).hitbox);
-
-		level.buttons.push_back(editor.buttons.at(i));
-		level.movingBoxes.push_back(level.buttons.at(i).hitbox);
-		
-
+		level.buttons.push_back(editor.buttons.at(i));	
 	}
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
