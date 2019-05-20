@@ -377,10 +377,16 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		else {
 			posDiff = minDistX;
 
-			if(status != PlayerStatus::Heavy)
+			if(status != PlayerStatus::Heavy && knockBack != true)
 			{
-				//putForce(vec3(-20, 30, 0));
-				addVelocity(vec3(-20,20,0));
+				if (other.hitbox->center.x > hitbox.center.x) {
+					//putForce(vec3(-20, 30, 0));
+					addVelocity(vec3(-45, 65, 0));
+				}
+				else if (other.hitbox->center.x < hitbox.center.x) {
+					//putForce(vec3(-20, 30, 0));
+					addVelocity(vec3(45, 65, 0));
+				}
 				knockBack = true;
 			}
 		}
@@ -457,7 +463,9 @@ void Game::update(double dt) {
 	{
 		time += dt;
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
-		level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
+		if (level.player.knockBack != true) {
+			level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
+		}
 		handleInput();
 		level.player.isStanding = false;
 		level.player.collidingMovingPlatform = nullptr;
