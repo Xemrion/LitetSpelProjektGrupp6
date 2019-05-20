@@ -40,6 +40,7 @@ void Game::init() noexcept {
 
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
+	
 		while (editor.buttons.at(i).index != i)
 		{
 			std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
@@ -49,20 +50,23 @@ void Game::init() noexcept {
 		{
 			std::swap(editor.gates.at(i), editor.gates.at(editor.gates.at(i).index));
 		}
-		std::swap(editor.gates.at(i),editor.gates.at(editor.gates.at(i).index));
-		std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
 		level.gates.push_back(editor.gates.at(i));
 		level.movingBoxes.push_back(level.gates.at(i).hitbox);
-		level.colManager.registerEntry(*(level.gates.end() - 1), ColliderType::platform, (level.gates.end() - 1)->hitbox, true);
 
 		level.buttons.push_back(editor.buttons.at(i));
 		level.movingBoxes.push_back(level.buttons.at(i).hitbox);
-		level.colManager.registerEntry(*(level.buttons.end() - 1), ColliderType::platform, (level.buttons.end() - 1)->hitbox, false);	
 		
-		level.gates.at(i).button = &level.buttons.at(i);
+
 	}
-	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
-	level.staticBoxes.push_back(level.goal->representation);
+	for (int i = 0; i < editor.buttons.size(); i++)
+	{
+		level.gates.at(i).button = &level.buttons.at(i);
+
+		level.colManager.registerEntry(level.buttons.at(i), ColliderType::platform, level.buttons.at(i).hitbox, false);
+		level.colManager.registerEntry(level.gates.at(i), ColliderType::platform, level.gates.at(i).hitbox, true);
+	}
+	//level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
+	//level.staticBoxes.push_back(level.goal->representation);
 	// player & blobs:
 	auto &player = level.player;
 	player.pos = editor.startPos;
