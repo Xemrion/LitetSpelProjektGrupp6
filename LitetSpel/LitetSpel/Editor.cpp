@@ -318,13 +318,11 @@ void Editor::initialize(const char* filename)
 
 						center.x = startPosX + halfLength.x;
 						center.y = startPosY - halfLength.y;
-						vec4 color = vec4(getPixelColour(startPos), 0);
-						color /= 255;
+
 						this->movingPlatforms.push_back(MovingPlatform(vec3(MPstartPosX, MPstartPosY, 0),
 							vec3(MPendPosX, MPendPosY, 0),
 							center,
-							halfLength,
-							color));
+							halfLength));
 
 					}
 				}
