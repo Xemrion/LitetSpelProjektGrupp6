@@ -59,7 +59,7 @@ private:
 	ID3D11Buffer* shadowBuffer;
 
 	glm::vec3 camera;
-	glm::vec3 cameraSpeed = glm::vec3(5.0, 1.0, 1.0);
+	glm::vec3 cameraSpeed = glm::vec3(5.0, 5.0, 1.0);
 	glm::mat4 proj;
 	glm::mat4 invProj;
 	glm::mat4 viewProj;
