@@ -157,7 +157,7 @@ std::unique_ptr<Level> LevelLoader::load(const char* filename) {
 						int MPendPosY   = INFINITE;
 						int MPstartPosX = INFINITE;
 						int MPstartPosY = INFINITE;
-						for ( int j = 1; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++ ) {
+						for ( int j = 1; j < maxMovingPlatformLength and MPstartPosX == INFINITE; j++ ) {
 							if (getPixelColour(lowerHalf - j) == getPixelColour(i)) {
 								MPstartPosX = ((lowerHalf - j) % width) - middleX;;
 								MPstartPosY = middleY - int(floor((lowerHalf - j) / width));
@@ -170,7 +170,8 @@ std::unique_ptr<Level> LevelLoader::load(const char* filename) {
 						// right side
 						upperHalf += endPosX - int(startPosX);
 						lowerHalf += endPosX - int(startPosX);
-						for ( int j = 1; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++ ) {
+						for ( int j = 1; j < maxMovingPlatformLength
+                              and MPstartPosX != INFINITE and MPendPosX == INFINITE; j++ ) {
 							if ( getPixelColour(lowerHalf + j) == getPixelColour(i) ) {
 								MPendPosX = ((lowerHalf + j) % width) - middleX;;
 								MPendPosY = middleY - int(floor((lowerHalf + j) / width));
@@ -196,7 +197,8 @@ std::unique_ptr<Level> LevelLoader::load(const char* filename) {
 						// bottom side
 						upperHalf += (int(startPosY) - (endPosY + 1)) * width;
 						lowerHalf += (int(startPosY) - (endPosY + 1)) * width;
-						for ( int j = 1; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++) {
+						for ( int j = 1; j < maxMovingPlatformLength
+                              and MPstartPosX != INFINITE and MPendPosX == INFINITE; j++) {
 							// TODO: add check for edge of png
 							if ( getPixelColour(lowerHalf + j * width) == getPixelColour(i) ) {
 								MPendPosX = (lowerHalf % width) - middleX;;

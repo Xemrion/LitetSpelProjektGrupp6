@@ -8,7 +8,7 @@ Platform::Platform( Box box, float friction ):
     hitboxes.push_back({
         this,                   // hitbox parent
         ColliderType::platform, // hitbox identifier
-        std::move( box ),       // hitbox box (also used for representation)
+        box,       // hitbox box (also used for representation)
         true                    // hitbox is static
      });
 }

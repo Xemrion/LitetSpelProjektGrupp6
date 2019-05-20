@@ -6,7 +6,7 @@
 
 // TODO: put global constants and config values in a global namespace
 
-char const * const LEVEL_NAME        = "Test.png"; //  "PrototypeThree.png";
+char const * const LEVEL_NAME        = "Test.png"; //"Test.png"; //  "PrototypeThree.png";
 
 float constexpr PHYSICS_TIME_STEP    = 0.005f;
 

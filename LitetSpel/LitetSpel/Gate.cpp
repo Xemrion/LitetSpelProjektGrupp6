@@ -16,7 +16,7 @@ Gate::Gate( Box box, double timerAdd_s, int index ):
     hitboxes.push_back({
         (ICollider*)this,   // hitbox parent
         ColliderType::gate, // hitbox identifier
-        box,                // hitbox bounds
+        std::move(box),     // hitbox bounds
         false               // hitbox is not static
     });
     updateHitboxes();

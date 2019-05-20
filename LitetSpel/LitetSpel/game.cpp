@@ -77,9 +77,8 @@ void Game::updatePhysics() {
 }
 
 void Game::updateAnimations( double dt_s ) noexcept {
-    for ( auto &e : level->getScene() ) {
+    for ( auto &e : level->getScene() )
         e->updateAnimations( dt_s, Game::time );
-    }
 }
 
 // TODO: SphereHandle gfxManager::requestSphere();

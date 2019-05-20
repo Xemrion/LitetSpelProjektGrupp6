@@ -7,3 +7,12 @@ main loop
 all of game
 
 interface editor with level::add
+
+Player knockback
+TODO: set static boxes from level
+
+RESERVE!
+
+request box/sphere & get index handle
+wrap in handle class
+use tombstone markers
