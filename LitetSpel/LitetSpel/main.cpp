@@ -13,7 +13,7 @@ Game game;
 Graphics graphics;
 
 double dt;
-
+glm::vec3 cameraOffset = glm::vec3(0.0, 20.0, -150.0);
 int xMus = 0;
 float powerCoolDown = 0.0;
 bool gameEnd = false;
@@ -248,6 +248,14 @@ void keyboardFunc()
 		if (keyboard.KeyIsPressed('P')) {
 			graphics.createShaders();
 		}
+		if (keyboard.KeyIsPressed('Z')) {
+			if (cameraOffset == glm::vec3(0.0, 20.0, -150.0)) {
+				cameraOffset = glm::vec3(0.0, 20.0, -250.0);
+			}
+			else {
+				cameraOffset = glm::vec3(0.0, 20.0, -150.0);
+			}
+		}
 	}
 	
 }
@@ -298,7 +306,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				//game.animateVictory(game.playerSphere);
 			}
 			game.update(dt);
-			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
+			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + cameraOffset, game.state == GameState::LevelState);
 			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
 			graphics.castPlayerShadow(game.level.player.pos);

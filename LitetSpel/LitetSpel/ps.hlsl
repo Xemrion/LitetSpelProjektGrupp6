@@ -60,15 +60,16 @@ float testScene(float3 p)
 
 float castRay(float3 ro, float3 rd, out float minDist)
 {
-	float dist = -ro.z - (15 * rd.z);
+	float dist = (-15 - ro.z) / rd.z;
 	float i;
-	float maxDist = -ro.z + (30 / rd.z);
+	float maxDist = (15 - ro.z) / rd.z;
 	minDist = 1000000.0;
 
 	/* calculate ray entry */
 	for (i = 0.0; i < 20; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
+		//currentDist = min(currentDist, (ro + rd * dist).z + 100);
 		dist += currentDist + 0.1;
 		minDist = min(currentDist, minDist);
 
@@ -134,7 +135,7 @@ float4 main(VS_OUT input) : SV_Target
 		if (color.a < 1.0) {
 			float4 radiance = radianceMap.Sample(samp, parallax + rd);
 			//color.rgb = color.a * color.rgb + float3(1.0,1.0,1.0)*(1.0 - color.a);
-			color.rgb += color.a * color.rgb + ((1.0 - color.a) * (radiance.rgb * radiance.rgb));
+			color.rgb += color.a * color.rgb + ((1.0 - color.a) * radiance.rgb);
 		}
 	}
 	else {
@@ -168,7 +169,7 @@ float4 main(VS_OUT input) : SV_Target
 			float3 absorbed = exp2(-sphereColor * max(length(backp - p), 9.0));
 			diffuseColor = absorbed;
 			float roughness = 1.0 - clamp(sphereColor.a, 0.01, 0.99);
-			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(0.05,0.05,0.05), roughness);
+			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(sphereColor.a, sphereColor.a, sphereColor.a), roughness);
 
 			/* refraction diffuse */
 			float3 refractColor = float3(0.0, 0.0, 0.0);
@@ -197,6 +198,6 @@ float4 main(VS_OUT input) : SV_Target
 		}
 	}
 	
-	//color.rgb = color.rgb / (color.rgb + float3(1.0, 1.0, 1.0));
+	color.rgb = color.rgb / (color.rgb + float3(1.0, 1.0, 1.0));
 	return float4(pow(color.rgb, 1.0 / 2.2), 1.0);
 }

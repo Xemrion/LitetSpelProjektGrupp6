@@ -109,7 +109,7 @@ private:
 public:
 	double physicsSimTime = 0.0;
 	double time = 0.0;
-	double state;
+	GameState state;
 
 	enum Keys {
 		left,
