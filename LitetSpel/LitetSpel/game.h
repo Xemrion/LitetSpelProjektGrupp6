@@ -45,6 +45,7 @@ public:
 	Box hitbox;
     vector<Blob> blobs;
     int blobCharges;
+	int lifeCharges;
     float shootCooldown;
 	const MovingPlatform* collidingMovingPlatform = nullptr;
 };

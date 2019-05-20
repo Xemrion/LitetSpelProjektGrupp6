@@ -120,6 +120,7 @@ Player::Player(vec3 position) :
 	moveSpeed(75.0f),
 	mass(10.0),
 	blobCharges(5),
+	lifeCharges(3),
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
@@ -381,6 +382,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			{
 				putForce(vec3((hitbox.center.x - other.hitbox->center.x), 3, 0));
 				knockBack = true;
+				lifeCharges -= 1;
 			}
 		}
 
@@ -471,6 +473,9 @@ void Game::update(double dt) {
 		}
 		updatePhysics();
 		level.player.addVelocity(temp, true);
+		if (level.player.lifeCharges <= 0) {
+			//Restart level
+		}
 	}
 	updateGraphics();
 }
