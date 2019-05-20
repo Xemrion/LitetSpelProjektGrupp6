@@ -372,17 +372,35 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		// if colliding in Y-axis
 		if (glm::length(minDistY) < glm::length(minDistX)) 
 		{
+			if (minDistY.y >= 0.0) {
+				velocity.y = 0;
+				isStanding = true;
+				hasExtraJump = true;
+				isStuck = false;
+			}
 		}
 		// if colliding in X-axis
 		else {
+			if (status != PlayerStatus::Heavy && !knockBack)
+			{
+				
+				if (minDistX.x >= 0.0) 
+				{
+					putForce(vec3(jumpForce / 3, jumpForce/2, 0));
+					knockBack = true;
+				}
+				else 
+				{
+					putForce(vec3(-jumpForce / 3, jumpForce/2, 0));
+					knockBack = true;
+				}
+
+			}
+
+
 			posDiff = minDistX;
 
-			if(status != PlayerStatus::Heavy)
-			{
-				//putForce(vec3(-20, 30, 0));
-				addVelocity(vec3(-20,20,0));
-				knockBack = true;
-			}
+
 		}
 
 		pos += posDiff;
@@ -457,7 +475,12 @@ void Game::update(double dt) {
 	{
 		time += dt;
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
-		level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
+		if(!level.player.knockBack)
+		{
+			level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
+		}
+
+
 		handleInput();
 		level.player.isStanding = false;
 		level.player.collidingMovingPlatform = nullptr;
