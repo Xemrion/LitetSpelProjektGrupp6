@@ -192,6 +192,11 @@ void Player::updateLogic(double dt_s) noexcept {
 }
 
 void Player::updateAnimations( double dt_s, double t_s ) noexcept {
+    if ( hasWon ) {
+        animateVictory( dt_s, t_s );
+        return;
+    }
+
     for ( auto &blob : blobs )
         blob.updateAnimations( dt_s, t_s );
     // move speed
@@ -220,10 +225,6 @@ void Player::updateAnimations( double dt_s, double t_s ) noexcept {
         blobSphere.centerRadius.z + (timeFactor2 *  rotationSpeed.z                    + offset.z) * BLOB_ANIM_AMPLITUDE::Z,
         blobSphere.centerRadius.w / 2
     };
-
-    // TODO: verify placement
-    if ( hasWon )
-        animateVictory( dt_s, t_s );
 }
 
 void Player::die() noexcept {
@@ -489,7 +490,6 @@ void Player::animateVictory( double dt_s, double t_s ) noexcept {
 
     animateColor( t_s );
 }
-
 
 void Player::win( std::function<void(void)> f ) {
     assert( f and "Invalid f; must not be null!" );
