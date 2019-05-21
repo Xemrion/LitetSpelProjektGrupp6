@@ -8,8 +8,10 @@ char const * const getNextLevelName() {
     static size_t currentLevelNo = 0;
     if ( currentLevelNo < NUMBER_OF_LEVELS )
         return LEVELS[currentLevelNo++];
-    else
+    else {
         assert(false and "You beat the game!"); // TODO: handle victory properly
+        return *LEVELS;
+    }
 }
 
 void Game::loadLevel() { // temp

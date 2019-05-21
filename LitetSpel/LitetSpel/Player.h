@@ -26,7 +26,7 @@ public:
     virtual void  collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
     void          handleInput() noexcept;
     void          die() noexcept override;
-    void          animateColor( Graphics& graphics ); // remove?
+    void          animateColor( double t_s );
     void          animateVictory( double dt_s, double t_s ) noexcept; // Merge with updateAnimations
     [[nodiscard]] Sphere const *getSphere() const noexcept;
     void win( std::function<void(void)> f );

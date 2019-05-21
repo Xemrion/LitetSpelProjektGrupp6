@@ -33,6 +33,9 @@ public:
     void shoot( glm::vec3 const &direction ) noexcept;
     void recall() noexcept;
 
+    // for Player::animateColor() to call upom victory
+    void setColor( glm::vec4 const &color ) noexcept;
+
     [[nodiscard]] bool getIsActive() const noexcept;
     [[nodiscard]] bool getIsBeingRecalled() const noexcept;
 	[[nodiscard]] bool getIsStuck() const noexcept;
@@ -50,7 +53,8 @@ private:
     glm::vec3 const *parentPosition;
     bool             isActive,
 	                 isStuck,
-                     isBeingRecalled;
+                     isBeingRecalled,
+                     hasWon;
     float            recallSpeed,
                      radius;
 public:

@@ -1,5 +1,7 @@
 #include "Player.h"
 #include "Platform.h"
+#include "Gate.h"
+#include "Button.h"
 
 Player::Player( Graphics         &graphics,
                 CollisionManager &colMan,
@@ -139,12 +141,17 @@ void Player::processKeyboard() noexcept {
 }
 
 void Player::updateGraphics() noexcept {
-    auto color = PowerTypeColor[ static_cast<size_t>(status)];
-    blobSphere = { {position, radius}, color };
+    if ( !hasWon ) {
+        auto color = PowerTypeColor[ static_cast<size_t>(status)];
+        animSphere1.color = color;
+        animSphere2.color = color;
+        blobSphere.color  = color;
+    }
+    
+    blobSphere.centerRadius = {position, radius};
     for ( auto &blob : blobs )
         blob.updateGraphics();
-    animSphere1.color = color;
-    animSphere2.color = color;
+ 
 }
 
 // TODO: refactor blob code
@@ -238,51 +245,61 @@ Player::getRepresentation() const noexcept {
 void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
     auto &hitbox = hitboxes[0].box;
 
+    Box const *collidedBox = nullptr;
+    float      friction    = DEFAULT_FRICTION;
+
     if ( otherHitbox == ColliderType::platform ) {
         auto &platform = dynamic_cast<Platform&>( other );
-        auto &platBox  = platform.getBox();
-        auto dtPos = glm::vec3(platBox.center) - position;
-        if ( dtPos.x > platBox.halfLengths.x ) { // player is to the left
-            hasExtraJump  = true;
-            // TODO: y friction?
-            velocity.x    = 0;
-            position.x    = platform.getBox().center.x
-                            - platform.getBox().halfLengths.x
-                            - radius/2;
-        }
-        else if ( dtPos.x < -platBox.halfLengths.x ) { // player is to the right
-            hasExtraJump  = true;
-            // TODO: y friction?
-            velocity.x    = 0;
-            position.x    = platform.getBox().center.x
-                            + platform.getBox().halfLengths.x
-                            + radius/2;
-        }
-        if ( dtPos.y > platBox.halfLengths.y ) { // player is below
-            velocity.y    = 0;
-            position.y    = platform.getBox().center.y
-                            - platform.getBox().halfLengths.y
-                            - radius/2;
-        }
-        else if ( dtPos.y < -platBox.halfLengths.y ) { // player is above
-            isStanding    = true;
-            hasExtraJump  = true;
-            velocity.y    = 0;
-            velocity.x   *= platform.getFriction();
-            position.y    = platform.getBox().center.y
-                            + platform.getBox().halfLengths.y
-                            + radius/2;
-        }
+        collidedBox = &platform.getBox();
+        friction    =  platform.getFriction();
+    }
 
-        if ( false ) { // direction down temp
+    if ( otherHitbox == ColliderType::gate ) {
+        auto &gate = dynamic_cast<Gate&>( other );
+        collidedBox = &gate.getHitboxes()[0].box;
+    }
+
+    if ( otherHitbox == ColliderType::button ) {
+        auto &button = dynamic_cast<Button&>( other );
+        collidedBox = &button.getHitboxes()[0].box;
+    }
+
+    if ( collidedBox ) {
+        auto dtPos = glm::vec3(collidedBox->center) - position;
+
+        if ( dtPos.x > collidedBox->halfLengths.x ) { // player is to the left
+            hasExtraJump  = true;
+            // TODO: y friction?
+            velocity.x    = 0;
+            position.x    = collidedBox->center.x
+                            - collidedBox->halfLengths.x
+                            - radius/2;
+        }
+        else if ( dtPos.x < -collidedBox->halfLengths.x ) { // player is to the right
+            hasExtraJump  = true;
+            // TODO: y friction?
+            velocity.x    = 0;
+            position.x    = collidedBox->center.x
+                            + collidedBox->halfLengths.x
+                            + radius/2;
+        }
+        if ( dtPos.y > collidedBox->halfLengths.y ) { // player is below
+            velocity.y    = 0;
+            position.y    = collidedBox->center.y
+                            - collidedBox->halfLengths.y
+                            - radius/2;
+        }
+        else if ( dtPos.y < -collidedBox->halfLengths.y ) { // player is above
             isStanding    = true;
             hasExtraJump  = true;
             velocity.y    = 0;
-            velocity.x   *= platform.getFriction();
-            position.y    = platform.getBox().center.y
-                            + platform.getBox().halfLengths.y
+            velocity.x   *= friction;
+            position.y    = collidedBox->center.y
+                            + collidedBox->halfLengths.y
                             + radius/2;
-        }/*
+        }
+    }
+/*
          else if ( ownHitbox == ColliderType::player_top ) {
          if ( status == PowerType::sticky ) {
          isStuck = true;
@@ -314,7 +331,7 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
          - right.center.x
          - right.halfLengths.x;
          }*/
-    }
+
     /*
     // TODO: get delta vector between player/enemy, invert, normalize, multiply by knockback factor
     else if ( otherHitbox == ColliderType::blob ) { ///and other.color.w == 1
@@ -427,9 +444,19 @@ void Player::handleInput() noexcept {
         b = false;
 }
 
-void Player::animateColor(Graphics& graphics) {
-    // TODO: remove?
-    //graphics.setMetaballColorAbsorb(vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
+void Player::animateColor( double t_s ) {
+    auto getColor = [&t_s]( double offset ) {
+        return glm::vec4(  sin(float(t_s+offset)),
+                          -sin(float(t_s+offset)),
+                           cos(float(t_s+offset)),
+                           1.0f );
+    };
+    double offset = 0.0;
+    blobSphere.color  = getColor( offset );
+    for ( auto &blob : blobs )
+        blob.setColor(  getColor( offset += 1.0 ) );
+    animSphere1.color = getColor( offset += 3.0 );
+    animSphere2.color = getColor( offset += 5.0 );
 }
 
 // Code duplication yet again... ffs.
@@ -447,7 +474,6 @@ void Player::animateVictory( double dt_s, double t_s ) noexcept {
             blobSphere.centerRadius.z + (distance * (timeSin+timeCos)/2),
             blobSphere.centerRadius.w / (3.f + .6f * (timeSin + .7f))
         };
-        animSphere1.color = blobSphere.color;
     }
 
     { // blob 2
@@ -459,8 +485,9 @@ void Player::animateVictory( double dt_s, double t_s ) noexcept {
             blobSphere.centerRadius.z - (distance * (timeSin+timeCos)/2),
             blobSphere.centerRadius.w / (2.f + .3f * (timeCos + .5f))
         };
-        animSphere2.color = blobSphere.color;
     }
+
+    animateColor( t_s );
 }
 
 

@@ -18,6 +18,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
     isActive        ( false                         ),
     isBeingRecalled ( true                          ),
 	isStuck         ( false                         ),
+    hasWon          ( false                         ),
     recallSpeed     ( BLOB_RECALL_SPEED             ),
     radius          ( BLOB_ACTIVE_RADIUS            ),
 	status          ( PowerType::none               )
@@ -65,6 +66,11 @@ bool Blob::getIsStuck() const noexcept { return isStuck; }
     return &blobSphere;
 }
 
+void Blob::setColor( glm::vec4 const &color ) noexcept {
+    hasWon = true;
+    blobSphere.color = color;
+}
+
 // called once per frame from Player::update
 void Blob::updateLogic( double dt_s ) noexcept {
     #undef min
@@ -91,8 +97,9 @@ void Blob::updateHitboxes() noexcept {
 }
 
 void Blob::updateGraphics() noexcept {
-    auto color = PowerTypeColor[ static_cast<size_t>(status)];
-    blobSphere = { {position, radius}, color };
+    blobSphere.centerRadius = { position, radius };
+    if ( !hasWon )
+        blobSphere.color = PowerTypeColor[ static_cast<size_t>(status)];
 };
 
 void Blob::updatePhysics( double dt_s ) noexcept {
