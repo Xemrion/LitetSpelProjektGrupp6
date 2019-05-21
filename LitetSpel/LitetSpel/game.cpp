@@ -1,20 +1,22 @@
 #include <cassert>
-
+#include <functional>
 // TODO: rename to Game.cpp|h
 #include "game.h"
 #include "Globals.h"
 
+char const * const getNextLevelName() {
+    static size_t currentLevelNo = 0;
+    if ( currentLevelNo < NUMBER_OF_LEVELS )
+        return LEVELS[currentLevelNo++];
+    else
+        assert(false and "You beat the game!"); // TODO: handle victory properly
+}
+
 void Game::loadLevel() { // temp
-    level = levelLoader.load( LEVEL_NAME );
+    level = levelLoader.load( getNextLevelName() );
     level->getPlayer().attachInput(keyboard, mouse);
     state = State::level;
-// TODO:
-    //Gate & button test
-    /*level.gates.push_back(Gate(vec4(30,10,0,0), vec4(2,10,2,0), vec4(0,0,0,0), 10, vec4(40,0,0,0), vec4(2,2,2,2)));
-    level.movingBoxes.push_back(level.gates.at(0).hitbox);
-    level.movingBoxes.push_back(level.gates.at(0).button.hitbox);
-    level.colManager.registerEntry(level.gates.at(0), ColliderType::platform, level.gates.at(0).hitbox, true);
-    level.colManager.registerEntry(level.gates.at(0).button, ColliderType::platform, level.gates.at(0).button.hitbox, false);*/
+    level->setLevelChangeFunction( std::bind(&Game::loadLevel, this) );
 }
 
 Game::Game( KeyboardInput &keyboard, MouseInput &mouse, Graphics &graphics ):

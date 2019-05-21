@@ -387,7 +387,9 @@ void Player::recallBlobs() noexcept {
 
 void Player::handleInput() noexcept {
     if ( input.isPressed[Input::Key::shoot] ) {
-        shoot(input.mousePosition);
+        if ( hasWon )
+            changeLevelFunction();
+        else shoot(input.mousePosition);
     }
     if ( input.isPressed[Input::Key::left] ) {
         if ( !isStuck )
@@ -462,6 +464,8 @@ void Player::animateVictory( double dt_s, double t_s ) noexcept {
 }
 
 
-void Player::win() noexcept {
+void Player::win( std::function<void(void)> f ) {
+    assert( f and "Invalid f; must not be null!" );
     hasWon = true;
+    changeLevelFunction = f;
 }

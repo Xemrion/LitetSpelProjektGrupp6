@@ -22,14 +22,15 @@ public:
     Spheres&          getSpheres()            noexcept;
     CollisionManager& getCollisionManager()   noexcept;
     void              onFrameStart();
+    void              setLevelChangeFunction( std::function<void(void)> f );
 
 private:
     void notifyOfVictory() noexcept; // for LevelGoal callback
- 
-    Boxes             dynamicBoxes,
-                      staticBoxes;
-    Spheres           spheres;
-    CollisionManager  collisionManager;
-    SceneEntries      scene;
-    Player           *player;
+    std::function<void(void)> changeLevelFunction = nullptr;
+    Boxes                     dynamicBoxes,
+                              staticBoxes;
+    Spheres                   spheres;
+    CollisionManager          collisionManager;
+    SceneEntries              scene;
+    Player                   *player;
 };

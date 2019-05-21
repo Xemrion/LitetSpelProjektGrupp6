@@ -87,5 +87,11 @@ Level::SceneEntries & Level::getScene() noexcept {
 }
 
 void Level::notifyOfVictory() noexcept {
-    getPlayer().win();
+    assert( changeLevelFunction and "changeLevelFunction must be set first!" );
+    getPlayer().win(changeLevelFunction); // give callback function to switch to the next level?
+}
+
+void Level::setLevelChangeFunction( std::function<void(void)> f ) {
+    assert( f and "Invalid f; must not be null!" );
+    changeLevelFunction = f;
 }

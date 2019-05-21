@@ -1,8 +1,8 @@
 #pragma once
 
+#include <functional>
 #include "Globals.h"
 #include "Interfaces.h"
-
 #include "Blob.h"
 #include "Collisions.h"
 #include "KeyboardInput.h"
@@ -29,11 +29,12 @@ public:
     void          animateColor( Graphics& graphics ); // remove?
     void          animateVictory( double dt_s, double t_s ) noexcept; // Merge with updateAnimations
     [[nodiscard]] Sphere const *getSphere() const noexcept;
-    void win() noexcept;
+    void win( std::function<void(void)> f );
 
 private:
     void processMouse()    noexcept;
     void processKeyboard() noexcept;
+    std::function<void(void)> changeLevelFunction = nullptr;
     CollisionManager *colMan;
     Graphics         *graphics;
     Input             input;

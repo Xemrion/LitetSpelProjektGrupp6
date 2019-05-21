@@ -6,7 +6,10 @@
 
 // TODO: put global constants and config values in a global namespace
 
-char const * const LEVEL_NAME        = "Test3.png";
+char const * const LEVELS[] = { "test2.png",
+                                "test3.png",
+                                "test.png"  };
+size_t constexpr NUMBER_OF_LEVELS = sizeof(LEVELS)/sizeof(*LEVELS);
 
 float constexpr PHYSICS_TIME_STEP    = 0.001f;
 
