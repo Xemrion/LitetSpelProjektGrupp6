@@ -30,7 +30,7 @@ void IMobile::multiplyVelocity( glm::vec3 const &fac ) noexcept {
     _cap_speed();
 }
 
-void IMobile::setVelocity(glm::vec3 const &velocity) noexcept {
+void IMobile::setVelocity( glm::vec3 const &velocity ) noexcept {
     this->velocity = velocity;
     float speed = length(this->velocity);
     _cap_speed();

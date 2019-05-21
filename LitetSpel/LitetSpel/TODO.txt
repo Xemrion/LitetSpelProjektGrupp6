@@ -16,3 +16,7 @@ RESERVE!
 request box/sphere & get index handle
 wrap in handle class
 use tombstone markers
+
+// logik collide()
+// gate/button
+mergea plattformar i andra ledet

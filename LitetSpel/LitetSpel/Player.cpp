@@ -90,14 +90,12 @@ void Player::processKeyboard() noexcept {
                     blob.status = PowerType::bouncy;
                 }
                 status = PowerType::bouncy;
-                // graphics->setMetaballColorAbsorb(glm::vec3(1.0f, .5f, .25f)); // TODO!
             }
             else {
                 for ( auto &blob : blobs ) {
                     blob.status = PowerType::none;
                 }
                 status = PowerType::none;
-                // graphics->setMetaballColorAbsorb(glm::vec3(.85f, .25f, .75f)); // TODO
             }
             powerCooldown = POWER_CD;
         }
@@ -109,14 +107,12 @@ void Player::processKeyboard() noexcept {
                     blob.status = PowerType::heavy;
                 }
                 status = PowerType::heavy;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.75, 0.75, 0.75)); // TODO
             }
             else {
                 for ( auto &blob : blobs ) {
                     blob.status = PowerType::none;
                 }
                 status = PowerType::none;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75)); // TODO
             }
             powerCooldown = POWER_CD;
         }
@@ -128,22 +124,18 @@ void Player::processKeyboard() noexcept {
                     blob.status = PowerType::sticky;
                 }
                 status = PowerType::sticky;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.2, 0.2, 0.5));
             }
             else {
                 for ( auto &blob : blobs ) {
                     blob.status = PowerType::none;
                 }
                 status = PowerType::none;
-                // graphics->setMetaballColorAbsorb(glm::vec3(0.85, 0.25, 0.75));
             }
             powerCooldown = POWER_CD;
         }
     }
     if ( keyboard->KeyIsPressed('R') )
         recallBlobs();
-    // if ( keyboard->KeyIsPressed('P') )
-    //     createShaders(); // TODO
 }
 
 void Player::updateGraphics() noexcept {
@@ -151,6 +143,8 @@ void Player::updateGraphics() noexcept {
     blobSphere = { {position, radius}, color };
     for ( auto &blob : blobs )
         blob.updateGraphics();
+    animSphere1.color = color;
+    animSphere2.color = color;
 }
 
 // TODO: refactor blob code
@@ -167,11 +161,7 @@ void Player::updateHitboxes() noexcept {
     }
     assert(  blobs.size() == blobCharges );
     auto &hitbox = hitboxes[0].box;
-    //level.boxes.push_back(volume); // TODO!
-    //hitbox.center      = { position, .0f };
-    hitbox.center.x = position.x;
-    hitbox.center.y = position.y;
-    hitbox.center.z = position.z;
+    hitbox.center = glm::vec4( position, .0f );
     hitbox.halfLengths = { glm::vec3(radius/2), .0f };
 }
 
@@ -195,7 +185,6 @@ void Player::updateLogic(double dt_s) noexcept {
 }
 
 void Player::updateAnimations( double dt_s, double t_s ) noexcept {
-    auto color = PowerTypeColor[ static_cast<size_t>(status)];
     for ( auto &blob : blobs )
         blob.updateAnimations( dt_s, t_s );
     // move speed
@@ -214,7 +203,6 @@ void Player::updateAnimations( double dt_s, double t_s ) noexcept {
         blobSphere.centerRadius.z + (timeFactor1 *  rotationSpeed.z                    + offset.z) * BLOB_ANIM_AMPLITUDE::Z,
         blobSphere.centerRadius.w / 2
     };
-    animSphere1.color = color;
 
     auto timeFactor2 = (float)cos(t_s);
     rotationSpeed = -rotationSpeed;
@@ -225,7 +213,6 @@ void Player::updateAnimations( double dt_s, double t_s ) noexcept {
         blobSphere.centerRadius.z + (timeFactor2 *  rotationSpeed.z                    + offset.z) * BLOB_ANIM_AMPLITUDE::Z,
         blobSphere.centerRadius.w / 2
     };
-    animSphere2.color = color;
 
     // TODO: verify placement
     if ( hasWon )
@@ -445,31 +432,33 @@ void Player::animateColor(Graphics& graphics) {
 
 // Code duplication yet again... ffs.
 void Player::animateVictory( double dt_s, double t_s ) noexcept {
-    float distance = 2.f;
-    float orbit    = 8.f;
-    glm::vec3 rotationSpeed = { 0.81f, 0.53f, 0.1f };
-    // Offset the start rotation of the spheres to avoid them all starting at the same place
-    glm::vec3 offset = { distance, distance, 2.f };
+    float distance      = 3.6f;
+    auto  rotationSpeed = glm::vec3{ 4.8f, 5.3f, .9f };
+    auto  offset        = glm::vec3( distance );
 
-    auto timeFactor1 = (float)sin(t_s);
-    animSphere1.centerRadius = {                                                                                 
-        blobSphere.centerRadius.x + (timeFactor1 * (rotationSpeed.x * timeFactor1) + offset.x) * orbit,
-        blobSphere.centerRadius.y + (timeFactor1 * (rotationSpeed.y * timeFactor1) + offset.y) * orbit,
-        blobSphere.centerRadius.z + (timeFactor1 *  rotationSpeed.z                + offset.z)  * orbit,
-        blobSphere.centerRadius.w / 2
-    };
-    animSphere1.color = blobSphere.color;
+    { // blob 1
+        auto timeSin = (float)sin(5.f * t_s);
+        auto timeCos = (float)cos(5.f * t_s);
+        animSphere1.centerRadius = {                                                                                 
+            blobSphere.centerRadius.x + (distance * timeCos),
+            blobSphere.centerRadius.y + (distance * timeSin),
+            blobSphere.centerRadius.z + (distance * (timeSin+timeCos)/2),
+            blobSphere.centerRadius.w / (3.f + .6f * (timeSin + .7f))
+        };
+        animSphere1.color = blobSphere.color;
+    }
 
-    auto timeFactor2 = (float)cos(t_s);
-    rotationSpeed = -rotationSpeed;
-    offset = glm::vec3(-distance, -distance, -2.0);
-    animSphere2.centerRadius = {
-        blobSphere.centerRadius.x + (timeFactor2 * (rotationSpeed.x * timeFactor2) + offset.x) * orbit,
-        blobSphere.centerRadius.y + (timeFactor2 * (rotationSpeed.y * timeFactor2) + offset.y) * orbit,
-        blobSphere.centerRadius.z + (timeFactor2 *  rotationSpeed.z                + offset.z) * orbit,
-        blobSphere.centerRadius.w / 2
-    };
-    animSphere2.color = blobSphere.color;
+    { // blob 2
+        auto timeSin = (float)sin(7.f * t_s + 3.7f);
+        auto timeCos = (float)cos(7.f * t_s + 3.7f);
+        animSphere2.centerRadius = {                                                                                 
+            blobSphere.centerRadius.x - (distance * timeSin),
+            blobSphere.centerRadius.y - (distance * timeCos),
+            blobSphere.centerRadius.z - (distance * (timeSin+timeCos)/2),
+            blobSphere.centerRadius.w / (2.f + .3f * (timeCos + .5f))
+        };
+        animSphere2.color = blobSphere.color;
+    }
 }
 
 

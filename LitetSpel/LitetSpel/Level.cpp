@@ -16,7 +16,7 @@
 //            level.add( {10.0f, .0f, .0f}, std::make_unique<Enemy>(/*some_constructor_params*/) );
 //
 // TODO: make it so that not all IObjects are IColliders and account for the edge case where they're not
-void Level::add(std::unique_ptr<IObject> object) noexcept {
+IObject* Level::add( std::unique_ptr<IObject> object ) noexcept {
     Player *player = dynamic_cast<Player*>(object.get());
     if ( player ) {
         if ( this->player )
@@ -35,9 +35,12 @@ void Level::add(std::unique_ptr<IObject> object) noexcept {
 
     collisionManager.add( *object );
     scene.push_back({ std::move(object) });
+    return (*(scene.end()-1)).get();
 }
 
-Level::Level() {}
+Level::Level() {
+    scene.reserve( LEVEL_SCENE_INITIAL_RESERVATIONS );
+}
 
 void Level::onFrameStart() {
     // TODO: let IRepresentables have mutable handles to a GraphicsManager instead!

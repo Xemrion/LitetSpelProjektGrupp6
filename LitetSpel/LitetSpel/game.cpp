@@ -99,6 +99,7 @@ void Game::updateGraphics() { // TODO: refactor into level?
         else if ( std::holds_alternative<IRepresentable::Spheres>(gfx) )
             for ( auto const *p : std::get<IRepresentable::Spheres>(gfx) )
                 level->getSpheres().push_back( *p );
+        e->updateHitboxes();
     }
     if constexpr ( SHOW_HITBOXES )
         showHitboxes();

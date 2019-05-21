@@ -4,6 +4,7 @@
 #include <d3dcompiler.h>
 #include "stb_image.h"
 #include <vector>
+#include <unordered_map>
 #include "../../INCLUDE/glm/glm/glm.hpp"
 #include "../../INCLUDE/glm/glm/gtc/type_ptr.hpp"
 #include "../../INCLUDE/glm/glm/gtc/matrix_transform.hpp"
@@ -12,7 +13,6 @@
 #include <memory>
 #include "Level.h"
 #include "Geometry.h"
-
 
 class LevelLoader {
 public:
@@ -56,4 +56,7 @@ private:
                      topSide,
                      bottomSide,
                      rightSide;
+
+    std::unordered_map<int,std::vector<IObject*>> activableMap {};
+    std::unordered_map<int,std::vector<IObject*>> buttonMap {};
 };

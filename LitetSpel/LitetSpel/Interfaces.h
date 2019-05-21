@@ -157,3 +157,31 @@ protected:
                         jumpCooldown,
                         moveSpeed;
 };
+
+class IActivable : public IObject {
+public:
+    IActivable( glm::vec3 position, bool isActive=false ):
+        IObject( std::move(position) ),
+        _isActive(isActive)
+    {
+        if ( isActive )
+            toggle();
+    }
+
+    virtual ~IActivable() {}
+
+    virtual void onActivation()   noexcept {} // hookpoint
+    virtual void onDeactivation() noexcept {} // hookpoint
+
+    void toggle() noexcept {
+        _isActive = !_isActive;
+        if ( _isActive )
+            onActivation();
+        else onDeactivation();
+    }
+
+    bool isActive() const { return _isActive; }
+
+private:
+    bool _isActive;
+};

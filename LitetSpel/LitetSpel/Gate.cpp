@@ -1,16 +1,8 @@
 #include "Gate.h"
 
-Gate::Gate() {}
-
-// TODO: bryt ut all jävla buttonlogik till button
-
-Gate::Gate( Box box, double timerAdd_s, int index ):
-    IMobile    ( 100.0f, box.center ),
-    index      ( index              ),
-    button     ( nullptr            ),
-    timer_s    ( .0f                ), // TODO: verify
-    timerAdd_s ( timerAdd_s         ),
-    isMoved    ( false              )
+Gate::Gate( Box box ):
+    IActivable( box.center  ),
+    openFactor( .0f )
 {
     // register hitbox:
     hitboxes.push_back({
@@ -20,36 +12,24 @@ Gate::Gate( Box box, double timerAdd_s, int index ):
         false               // hitbox is not static
     });
     updateHitboxes();
-	button = button; // wtf?
+}
+
+void Gate::updateLogic( double dt_s ) noexcept {
+    // TODO: slerp instead of lerp
+    if ( isActive() )
+       openFactor = min( 1.0f, openFactor + float(dt_s) * DOOR_MOVEMENT_SPEED );
+    else
+       openFactor = max( 0.0f, openFactor - float(dt_s) * DOOR_MOVEMENT_SPEED );
+}
+
+void Gate::updateHitboxes() noexcept {
+    auto    &box = hitboxes[0].box;
+    box.center.y = position.y + (openFactor * box.halfLengths.y * 2.0f );
 }
 
 Gate::~Gate() {}
 
 void Gate::collide( ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other ) noexcept {} // stub
-
-/*void Gate::move( double dt_s ) noexcept {
-	if( button->isPressed() and !isMoved ) {
-		hitbox.center.y -= hitbox.halfLengths.y * 2;
-		isMoved = true;
-		if ( timerAdd_s > 0 and timer_s <= 0 ) {
-			timer_s = timerAdd_s;
-		}
-	}
-	else if ( !button->isPressed() and isMoved ) {
-		hitbox.center.y += hitbox.halfLengths.y * 2;
-		isMoved = false;
-		button->hitbox.center.y += button->hitbox.halfLengths.y * 2;
-		button->isMoved = false;
-	}
-	if( timerAdd_s > .0f ) {
-		if ( timer_s > .0f ) {
-			timer_s -= dt_s;
-		}
-		else if ( button->isPressed and timer_s < .0f ) {
-			button->isPressed = false;
-		}
-	}
-}*/
 
 [[nodiscard]]
 std::variant<IRepresentable::Boxes, IRepresentable::Spheres>

@@ -29,7 +29,6 @@ float Platform::getFriction() const noexcept {
     return friction;
 }
 
-
 void Platform::updateGraphics()  noexcept                           {}; // stub
 void Platform::updateHitboxes()  noexcept                           {}; // stub
 void Platform::updateLogic(      double dt_s )             noexcept {}; // stub

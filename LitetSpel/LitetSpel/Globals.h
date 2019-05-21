@@ -6,12 +6,12 @@
 
 // TODO: put global constants and config values in a global namespace
 
-char const * const LEVEL_NAME        = "Test.png"; //"Test.png"; //  "PrototypeThree.png";
+char const * const LEVEL_NAME        = "Test3.png";
 
-float constexpr PHYSICS_TIME_STEP    = 0.005f;
+float constexpr PHYSICS_TIME_STEP    = 0.001f;
 
 // debug constants
-bool  constexpr SHOW_HITBOXES        =    false;
+bool  constexpr SHOW_HITBOXES        = false;
 
 // player constants                                // {3.0f, 3.0f, 0.5f}
 struct BLOB_ANIM_AMPLITUDE { static constexpr float X=2.4f, Y=1.7f, Z=.8f; };
@@ -23,7 +23,10 @@ float constexpr PLAYER_SPEED         =  200.00f;
 float constexpr GRAVITY_CONSTANT     =  150.00f;
 float constexpr MAX_SPEED            =  100.00f;
 float constexpr FLOAT_REDUCTION      =     .05f; // lower = more reduction
-float constexpr DEFAULT_FRICTION     =     .50f; // higher = less
+float constexpr DEFAULT_FRICTION     =     .90f; // higher = less
+
+// door
+float constexpr DOOR_MOVEMENT_SPEED  = .5f; // higher = faster
 
 // blob constants
 float constexpr BLOB_SHOOT_SPEED     =  150.00f;
@@ -35,6 +38,9 @@ float constexpr BLOB_INACTIVE_RADIUS =    2.00f;
 float constexpr  JUMP_CD = .3f;
 float constexpr POWER_CD = .2f;
 float constexpr SHOOT_CD = .5f;
+
+// level
+size_t constexpr LEVEL_SCENE_INITIAL_RESERVATIONS = 32;
 
 // colour constants
 const glm::vec4 red		= glm::vec4( 1.00f, 0.00f, 0.00f, 1.0f );

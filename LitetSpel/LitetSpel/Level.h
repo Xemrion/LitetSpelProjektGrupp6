@@ -13,7 +13,7 @@ class Level {
 
 public:
     Level();
-    void              add(std::unique_ptr<IObject> object) noexcept;
+    IObject*          add(std::unique_ptr<IObject> object) noexcept;
     bool              remove(IObject &target) noexcept;
     Player&           getPlayer()             noexcept;
     SceneEntries&     getScene()              noexcept;
