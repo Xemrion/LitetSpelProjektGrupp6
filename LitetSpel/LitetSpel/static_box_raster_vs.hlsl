@@ -13,7 +13,7 @@ struct VS_OUT
 };
 
 cbuffer Colors : register(b0) {
-	float4 color[300];
+	float4 color[4096];
 };
 
 cbuffer Matrices : register(b1) {

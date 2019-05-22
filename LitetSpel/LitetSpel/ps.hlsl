@@ -15,7 +15,7 @@ struct Sphere {
 	float4 color;
 };
 
-#define MAX_SPHERES 15
+#define MAX_SPHERES 25
 cbuffer SphereBuffer : register(b1) {
 	Sphere spheres[MAX_SPHERES];
 	int nSpheres;
@@ -35,11 +35,6 @@ cbuffer Corners : register(b3) {
 cbuffer Matrices : register(b4) {
 	float4x4 viewProj;
 };
-
-float testSphere(float3 p, float4 s)
-{
-	return length(s.xyz - p) - s.w;
-}
 
 float mb(float3 p, float4 mb)
 {

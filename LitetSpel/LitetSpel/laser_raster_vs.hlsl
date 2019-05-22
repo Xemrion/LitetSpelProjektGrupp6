@@ -10,8 +10,8 @@ struct VS_OUT
 };
 
 cbuffer Transforms {
-	float4x4 worldTransforms[100];
-	float4 color[100];
+	float4x4 worldTransforms[50];
+	float4 color[50];
 };
 
 VS_OUT main(VS_IN input, uint instanceID : SV_InstanceID)
