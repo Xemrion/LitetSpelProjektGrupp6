@@ -47,6 +47,7 @@ public:
     int blobCharges;
 	int lifeCharges;
     float shootCooldown;
+	float takeDamageCooldown;
 	const MovingPlatform* collidingMovingPlatform = nullptr;
 };
 

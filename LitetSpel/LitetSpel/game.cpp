@@ -115,6 +115,7 @@ Player::Player(vec3 position) :
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
+	takeDamageCooldown(3.0f),
 	hasExtraJump(true),
 	isStanding(false),
 	isStuck(false),
@@ -155,6 +156,7 @@ void Player::move(double dt) noexcept {
 void Player::update(double dt) noexcept {
 	jumpCooldown -= float(dt);
 	shootCooldown -= float(dt);
+	takeDamageCooldown -= float(dt);
 
 	if (isStanding)
 		hasExtraJump = true;
@@ -255,7 +257,6 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			}
 			//if colliding with ceiling
 			else {
-				velocity.y = 0;
 				velocity.y = min(0, velocity.y);
 			}
 		}
@@ -383,15 +384,21 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			if (status != PlayerStatus::Heavy && !knockBack)
 			{
 				
-				if (minDistX.x >= 0.0) 
+				if (minDistX.x >= 0.0)
 				{
-					putForce(vec3(jumpForce / 3, jumpForce/2, 0));
+					putForce(vec3(jumpForce / 3, jumpForce / 2, 0));
 					knockBack = true;
+					if (takeDamageCooldown <= 0) {
+						lifeCharges -= 1;
+					}
 				}
 				else 
 				{
 					putForce(vec3(-jumpForce / 3, jumpForce/2, 0));
 					knockBack = true;
+					if (takeDamageCooldown <= 0) {
+						lifeCharges -= 1;
+					}
 				}
 
 			}
