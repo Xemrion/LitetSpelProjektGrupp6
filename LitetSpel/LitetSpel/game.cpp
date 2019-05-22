@@ -511,6 +511,7 @@ void Game::handleInput() {
 		if (player.isStanding) {
 			player.isStanding = false;
 			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.velocity.y = 0;
 			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
 		}
 		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
