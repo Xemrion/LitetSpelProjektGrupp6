@@ -36,6 +36,7 @@ private:
 	bool isMovingPlatform(vec3 pixelColour);
 	bool isDoor(vec3 pixelColour);
 	bool isButton(vec3 pixelColour);
+	bool isLaser(vec3 pixelColour);
 	vec3 getPixelColour(int index);
 	int isPixelUsed(int index);
 	void addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY);
@@ -46,6 +47,7 @@ private:
 	int doorHeight = 5;
 	int buttonWidth = 5;
 	int maxMovingPlatformLength = 100;
+	int maxLaserLength = 100;
 
 public:
 	Editor();

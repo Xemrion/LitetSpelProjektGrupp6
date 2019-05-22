@@ -146,6 +146,44 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				this->buttons.push_back(Button(center, halfLength, int(getPixelColour(i).y) % 10));
 			}
+			else if (isLaser(getPixelColour(i)))
+			{
+
+				bool edgeFound = false;
+				for (int j = 1; j < maxLaserLength && !edgeFound; j++)
+				{
+					if (!isLaser(getPixelColour(i + j)))
+					{
+						endPosX = startPosX + j;
+						endPosY = startPosY;
+						edgeFound = true;
+					}
+				}
+				if (!edgeFound)
+				{
+					for (int j = 0; j < maxLaserLength && !edgeFound; j++)
+					{
+						if (!isLaser(getPixelColour(i + j * width)))
+						{
+							endPosX = startPosX;
+							endPosY = startPosY - j;
+							edgeFound = true;
+
+						}
+					}
+				}
+				addBoxToUsed(startPosX, startPosY, endPosX, endPosY);
+				startPosX *= minimumBoxSize;
+				startPosY *= minimumBoxSize;
+				endPosY *= minimumBoxSize;
+				endPosX *= minimumBoxSize;
+				startPosX /= pixelToUnitRatio;
+				endPosX /= pixelToUnitRatio;
+				startPosY /= pixelToUnitRatio;
+				endPosY /= pixelToUnitRatio;
+				halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio * doorHeight;
+
+			}
 			else
 			{
 				startPosX = (i % width) - middleX;
@@ -413,8 +451,8 @@ bool Editor::isNone(vec3 pixelColour)
 
 bool Editor::isPlatform(vec3 pixelColour)
 {
-	return !(isEnemy(pixelColour) || isStartPoint(pixelColour) || isGoal(pixelColour) || isWhite(pixelColour) || isButton(pixelColour) 
-		|| isDoor(pixelColour) || isSticky(pixelColour) || isBouncy(pixelColour) || isHeavy(pixelColour) || isNone(pixelColour));
+	return !(isEnemy(pixelColour) || isStartPoint(pixelColour) || isGoal(pixelColour) || isWhite(pixelColour) || isButton(pixelColour)
+		|| isDoor(pixelColour) || isSticky(pixelColour) || isBouncy(pixelColour) || isHeavy(pixelColour) || isNone(pixelColour) || isLaser(pixelColour));
 }
 
 bool Editor::isMovingPlatform(vec3 pixelColour)
@@ -425,6 +463,10 @@ bool Editor::isMovingPlatform(vec3 pixelColour)
 bool Editor::isButton(vec3 pixelColour)
 {
 	return pixelColour.x == 150 && pixelColour.y >= 70 && pixelColour.y < 80 && pixelColour.z == 0;
+}
+bool Editor::isLaser(vec3 pixelColour)
+{
+	return pixelColour.x == 255 && pixelColour.y >= 50 && pixelColour.y < 60;
 }
 bool Editor::isDoor(vec3 pixelColour)
 {

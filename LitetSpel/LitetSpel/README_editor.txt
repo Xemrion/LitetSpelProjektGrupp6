@@ -10,4 +10,5 @@ Bouncy = (255,0,255)
 none = (128,128,0)
 Button = (150,70..79,0) (Placera 5 pixlar horisontalt) (första måste va på 70, sen 71 osv..)
 Door = (150,80..89,0..255(Timer)) (placera 5 pixlar vertikalt) (första måste va på 80, sen 81 osv..)
+Laser =(255,50..59,0..255(timer)) (placera 5 pixlar vertikalt eller horisontalt) (första måste va på 50, sen 51 osv..)
 Platform = allt annat.
