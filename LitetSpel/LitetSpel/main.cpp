@@ -13,7 +13,6 @@ Game game;
 Graphics graphics;
 
 double dt;
-
 int xMus = 0;
 float powerCoolDown = 0.0;
 bool gameEnd = false;
@@ -301,7 +300,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				//game.animateVictory(game.playerSphere);
 			}
 			game.update(dt);
-			graphics.setCameraPos(glm::vec3(game.playerSphere.centerRadius) + glm::vec3(0.0, 20.0, -100.0));
+			graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
 			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
 			graphics.castPlayerShadow(game.level.player.pos);

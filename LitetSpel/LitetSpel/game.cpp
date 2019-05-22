@@ -478,6 +478,9 @@ void Game::update(double dt) {
 		{
 			level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 		}
+		cameraPos = level.player.pos + cameraOffset;
+		panCamera = true;
+
 		handleInput();
 		level.player.isStanding = false;
 		level.player.collidingMovingPlatform = nullptr;
@@ -508,6 +511,7 @@ void Game::handleInput() {
 		if (player.isStanding) {
 			player.isStanding = false;
 			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.velocity.y = 0;
 			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
 		}
 		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
@@ -540,6 +544,9 @@ void Game::handleInput() {
 		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
 			player.isStuck = false;
 			//player.pos.y -= 0.001;
+		}
+		else {
+			cameraPos = level.player.pos + cameraLookDownOffset;
 		}
 	}
 	
