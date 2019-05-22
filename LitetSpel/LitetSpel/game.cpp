@@ -189,7 +189,8 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
+		float eps = 0.1; // fixes some issues with platform edges
+		if (glm::length(minDistY) <= glm::length(minDistX) - eps) {
 			posDiff = minDistY;
 
 			// if colliding with floor
@@ -201,7 +202,6 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			}
 			//if colliding with ceiling
 			else {
-				velocity.y = 0;
 				velocity.y = min(0, velocity.y);
 			}
 		}
