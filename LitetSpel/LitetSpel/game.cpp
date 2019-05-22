@@ -81,8 +81,8 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
 	// enemies:
-	//auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	//level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
+	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
 }
 
@@ -494,12 +494,12 @@ void Game::update(double dt) {
 		level.player.update(dt);
 		if (level.enemy.alive)
 		{
-		// 	level.enemy.update(dt);
+		 	level.enemy.update(dt);
 		}
-		else if (!level.enemy.alive && level.enemy.isDeregistered)
+		else if (!level.enemy.alive && !level.enemy.isDeregistered)
 		{
-			level.colManager.unregisterEntry(level.enemy);
 			level.enemy.isDeregistered = true;
+			level.enemy.pos = vec3(0, -1000, 0);
 		}
 		updatePhysics();
 		level.player.addVelocity(temp, true);
