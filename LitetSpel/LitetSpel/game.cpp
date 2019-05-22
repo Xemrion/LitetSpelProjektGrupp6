@@ -82,9 +82,9 @@ void Game::init() noexcept {
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
 	// enemies:
-	//auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
-	//enemy.gameSounds = gameSounds;
-	//level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
+	auto &enemy = level.enemy; // TODO: for ( auto &enemy : level.enemies )
+	enemy.gameSounds = gameSounds;
+	level.colManager.registerEntry(enemy, ColliderType::enemy, enemy.hitbox, false);
 	EnemyBox.color = vec4(1, 0, 0, 0);
 }
 
