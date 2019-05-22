@@ -478,6 +478,9 @@ void Game::update(double dt) {
 		{
 			level.player.velocity.x = max(level.player.velocity.x - level.player.moveSpeed, 0.0);
 		}
+		cameraPos = level.player.pos + cameraOffset;
+		panCamera = true;
+
 		handleInput();
 		level.player.isStanding = false;
 		level.player.collidingMovingPlatform = nullptr;
@@ -540,6 +543,9 @@ void Game::handleInput() {
 		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
 			player.isStuck = false;
 			//player.pos.y -= 0.001;
+		}
+		else {
+			cameraPos = level.player.pos + cameraLookDownOffset;
 		}
 	}
 	
