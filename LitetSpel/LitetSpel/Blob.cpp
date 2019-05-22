@@ -48,7 +48,7 @@ void Blob::shoot( glm::vec3 const &direction ) noexcept {
             glm::length(direction) < 1.05f and "Needs to be a unit vector!" );
     if ( !isActive and !isBeingRecalled ) {
         isActive = true;
-        addVelocity( status == PowerType::heavy?  (direction * moveSpeed/3.0f) : (direction * moveSpeed) );
+        addVelocity( direction * moveSpeed );
 	}
 }
 
@@ -104,7 +104,7 @@ void Blob::updateGraphics() noexcept {
 
 void Blob::updatePhysics( double dt_s ) noexcept {
     if ( isActive and !isStuck ) {
-       addVelocity( glm::vec3(.0f, -GRAVITY_CONSTANT * dt_s, .0f) );
+       addVelocity( glm::vec3(.0f, (status==PowerType::heavy? 3.f : 1.f) * -GRAVITY_CONSTANT * dt_s, .0f) );
     }
     move( dt_s );
 }
@@ -119,39 +119,73 @@ std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Blob::getRepresentat
 }
 
 void Blob::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
+    Box const *collidedBox = nullptr;
+    float friction = 1.0f;
+    
     if ( isBeingRecalled ) {
         if ( otherHitbox == ColliderType::player )
             absorb();
         else return; // early exit to avoid colliding with the level
     }
+    
+    if ( !isActive )
+        return; // early exit to avoid colliding with the player?
 
-//	if (other.colliderType == ColliderType::platform && !isBeingRecalled) {
-//		if (status == PowerType::Blob_Bouncy) 
-//		{
-//			this->velocity.y = -this->velocity.y;
-//			this->velocity.x = 0;
-//		}
-//		else if (status == PowerType::Blob_Sticky) 
-//		{
-//			this->velocity = glm::vec3(0.0);
-//			isStuck = true;
-//		}
-//		else 
-//		{
-//			this->velocity = glm::vec3(0.0);
-//		}
-//		if(hitbox.color.w == 0)
-//		{
-//			reactivateHitbox();
-//		}
-//		glm::vec3 pushUp    = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
-//		glm::vec3 pushDown  = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
-//		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-//		glm::vec3 pushLeft  = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-//		glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
-//		glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-//		pos                += glm::length(minDistY) < glm::length(minDistX)  ? minDistY : minDistX;
-//	}
+    // not being recalled:
+  	if ( otherHitbox == ColliderType::platform ) {
+        auto const *box = dynamic_cast<Platform*>(&other);
+        friction        =  box->getFriction();
+        collidedBox     = &box->getBox();
+
+  		if ( status == PowerType::bouncy )
+  			velocity *= -0.95f;
+  		else {
+            velocity.x = .0f;
+            if ( status == PowerType::sticky )
+  			    isStuck  = true;
+  		}
+    }
+
+    if ( collidedBox ) {
+        auto dtPos = glm::vec3(collidedBox->center) - position;
+
+        if ( dtPos.x > collidedBox->halfLengths.x ) { // blob hit left side
+            // TODO: y friction?
+            velocity.x    = 0;
+            position.x    = collidedBox->center.x
+                            - collidedBox->halfLengths.x
+                            - radius/2;
+        }
+        else if ( dtPos.x < -collidedBox->halfLengths.x ) { // blob hit right side
+            // TODO: y friction?
+            velocity.x    = 0;
+            position.x    = collidedBox->center.x
+                            + collidedBox->halfLengths.x
+                            + radius/2;
+        }
+        if ( dtPos.y > collidedBox->halfLengths.y ) { // blob hit bottom
+            velocity.y    = 0;
+            position.y    = collidedBox->center.y
+                            - collidedBox->halfLengths.y
+                            - radius/2;
+        }
+        else if ( dtPos.y < -collidedBox->halfLengths.y ) { // blob hit top
+            velocity.y    = 0;
+            velocity.x   *= friction;
+            position.y    = collidedBox->center.y
+                            + collidedBox->halfLengths.y
+                            + radius/2;
+        }
+    }
+
+  		//glm::vec3 pushUp    = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+  		//glm::vec3 pushDown  = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+  		//glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+  		//glm::vec3 pushLeft  = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+  		//glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
+  		//glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+  		//pos                += glm::length(minDistY) < glm::length(minDistX)  ? minDistY : minDistX;
+
     /*
 	else if (isActive and otherHitbox == ColliderType::enemy)
 	{
@@ -196,29 +230,27 @@ void Blob::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &ot
 		}	
 	}
     */
-    if ( !isActive )
-        return; // early exit to avoid colliding with the player?
 
-    else if ( otherHitbox == ColliderType::platform ) {
-        auto &platBox     = dynamic_cast<Platform&>(other).getBox();
-        auto const &myBox = hitboxes[0].box;
-        if (status == PowerType::sticky) {
-            velocity = glm::vec3(0.0);
-            isStuck  = true;
-        }
-        else if (status == PowerType::bouncy) {
-            velocity.y = -velocity.y;
-            velocity.x = 0;
-        }
-        else {
-            velocity = glm::vec3(0.0);
-        }
-        glm::vec3 pushUp    = glm::vec3(0.0, platBox.center.y + platBox.halfLengths.y + (-myBox.center.y + myBox.halfLengths.y), 0.0);
-        glm::vec3 pushDown  = glm::vec3(0.0, platBox.center.y - platBox.halfLengths.y + (-myBox.center.y - myBox.halfLengths.y), 0.0);
-        glm::vec3 pushRight = glm::vec3(platBox.center.x + platBox.halfLengths.x + (-myBox.center.x + myBox.halfLengths.x), 0.0, 0.0);
-        glm::vec3 pushLeft  = glm::vec3(platBox.center.x - platBox.halfLengths.x + (-myBox.center.x - myBox.halfLengths.x), 0.0, 0.0);
-        glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
-        glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-        position           += glm::length(minDistY) < glm::length(minDistX)  ? minDistY : minDistX;
-    }
+//    else if ( otherHitbox == ColliderType::platform ) {
+//        auto &platBox     = dynamic_cast<Platform&>(other).getBox();
+//        auto const &myBox = hitboxes[0].box;
+//        if (status == PowerType::sticky) {
+//            velocity = glm::vec3(0.0);
+//            isStuck  = true;
+//        }
+//        else if (status == PowerType::bouncy) {
+//            velocity.y = -velocity.y;
+//            velocity.x = 0;
+//        }
+//        else {
+//            velocity = glm::vec3(0.0);
+//        }
+//        glm::vec3 pushUp    = glm::vec3(0.0, platBox.center.y + platBox.halfLengths.y + (-myBox.center.y + myBox.halfLengths.y), 0.0);
+//        glm::vec3 pushDown  = glm::vec3(0.0, platBox.center.y - platBox.halfLengths.y + (-myBox.center.y - myBox.halfLengths.y), 0.0);
+//        glm::vec3 pushRight = glm::vec3(platBox.center.x + platBox.halfLengths.x + (-myBox.center.x + myBox.halfLengths.x), 0.0, 0.0);
+//        glm::vec3 pushLeft  = glm::vec3(platBox.center.x - platBox.halfLengths.x + (-myBox.center.x - myBox.halfLengths.x), 0.0, 0.0);
+//        glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
+//        glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+//        position           += glm::length(minDistY) < glm::length(minDistX)  ? minDistY : minDistX;
+//    }
 }

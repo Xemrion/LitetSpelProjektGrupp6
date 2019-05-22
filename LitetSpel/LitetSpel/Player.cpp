@@ -32,13 +32,13 @@ Player::Player( Graphics         &graphics,
         ColliderType::player,  // hitbox identifier
         Box {},                // box (default constructed; will be generated with updateHitboxes)
         false                  // hitbox is not static
-                        });
+    });
     updateHitboxes(); // generate hitbox
 }
 
 void Player::updatePhysics( double dt_s ) noexcept {
     if ( !isStuck )
-        addVelocity(glm::vec3(.0f, -GRAVITY_CONSTANT * dt_s, .0f));
+        addVelocity(glm::vec3(.0f, (status==PowerType::heavy? 3.f : 1.f) * -GRAVITY_CONSTANT * dt_s, .0f));
     else {
         setVelocity(glm::vec3(.0f));
     }
@@ -495,4 +495,6 @@ void Player::win( std::function<void(void)> f ) {
     assert( f and "Invalid f; must not be null!" );
     hasWon = true;
     changeLevelFunction = f;
+    recallBlobs();
+    status = PowerType::none;
 }

@@ -26,14 +26,11 @@ public:
 
 	virtual void collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept override;
 
-    void deactivateHitbox() noexcept;
-    void reactivateHitbox() noexcept;
-
     void absorb() noexcept;
     void shoot( glm::vec3 const &direction ) noexcept;
     void recall() noexcept;
 
-    // for Player::animateColor() to call upom victory
+    // for Player::animateColor() to call upon victory
     void setColor( glm::vec4 const &color ) noexcept;
 
     [[nodiscard]] bool getIsActive() const noexcept;

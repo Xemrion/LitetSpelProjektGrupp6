@@ -7,8 +7,8 @@
 // TODO: put global constants and config values in a global namespace
 
 char const * const LEVELS[] = { "test2.png",
-                                "test3.png",
-                                "test.png"  };
+                                "test.png",
+                                "test3.png"  };
 size_t constexpr NUMBER_OF_LEVELS = sizeof(LEVELS)/sizeof(*LEVELS);
 
 float constexpr PHYSICS_TIME_STEP    = 0.001f;
@@ -82,6 +82,6 @@ enum class PowerType { none,
 const glm::vec4 PowerTypeColor[] = {
     glm::vec4( 0.85f, 0.05f, 0.75f, 0.0f ),
     glm::vec4( 1.00f, 0.75f, 0.05f, 0.0f ),
-    glm::vec4( 0.05f, 0.05f, 1.00f, 0.0f ),
-    glm::vec4( 0.75f, 0.75f, 0.75f, 0.1f )
+    glm::vec4( 0.75f, 0.75f, 0.75f, 0.1f ),
+    glm::vec4( 0.05f, 0.05f, 1.00f, 0.0f )
 };
