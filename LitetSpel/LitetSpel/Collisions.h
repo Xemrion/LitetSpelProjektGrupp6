@@ -10,10 +10,12 @@ enum ColliderType { player,
                     level_goal,
                     platform,
 					movingPlatform,
+					damagePlatform,
                     wall,
                     powerup_bouncy,
                     powerup_sticky,
 					powerup_heavy,
+					powerup_none,
 				    blob };
 
 

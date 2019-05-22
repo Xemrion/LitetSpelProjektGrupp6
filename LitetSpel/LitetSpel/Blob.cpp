@@ -9,7 +9,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
     isActive        (false),
     isBeingRecalled (true),
 	isStuck         (false),
-    recallSpeed     (200.0f),
+    recallSpeed     (400.0f),
     speed           (100.1f),
     radius          (  2.5f),
 	status          (BlobStatus::Blob_None),
@@ -68,15 +68,16 @@ bool Blob::getIsStuck() const noexcept { return isStuck; }
 void Blob::update(double dt) noexcept
 {
     #undef min
-    if ( isBeingRecalled ) {
+    if ( isBeingRecalled ) 
+	{
         float speed          = std::min( recallSpeed * float(dt), glm::distance(pos, *parentPosition) );
         glm::vec3 direction  = glm::normalize( *parentPosition - pos );
-		pos                 += speed * direction;
+		pos                 += recallSpeed * direction *float(dt);
 		isStuck              = false;
 	}
     if (!isActive) {
         pos = *parentPosition + glm::vec3(0.0, 2.0, 0.0);
-        setVelocity(glm::vec3(0.0));
+		setVelocity(glm::vec3(0.0));
         blobSphere.centerRadius = glm::vec4(*parentPosition, 2);
     }
 	if (isStuck == true && status != BlobStatus::Blob_Sticky) 

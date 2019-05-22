@@ -121,8 +121,11 @@
   <ItemGroup>
     <ClCompile Include="..\..\INCLUDE\DDSTextureLoader\DDSTextureLoader.cpp" />
     <ClCompile Include="Blob.cpp" />
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="Collisions.cpp" />
+    <ClCompile Include="DamagePlatform.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="Gate.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="KeyboardInput.cpp" />
     <ClCompile Include="main.cpp" />
@@ -137,8 +140,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Blob.h" />
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Collisions.h" />
+    <ClInclude Include="DamagePlatform.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="Gate.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="KeyboardInput.h" />

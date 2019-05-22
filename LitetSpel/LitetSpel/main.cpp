@@ -156,19 +156,19 @@ void keyboardFunc()
 	//Movement
 	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
 	{
-		if (keyboard.KeyIsPressed('D'))
+		if (keyboard.KeyIsPressed('D') || keyboard.KeyIsPressed(VK_RIGHT))
 		{
 			game.keys[Game::Keys::right] = true;
 		}
-		if (keyboard.KeyIsPressed('A'))
+		if (keyboard.KeyIsPressed('A') || keyboard.KeyIsPressed(VK_LEFT))
 		{
 			game.keys[Game::Keys::left] = true;
 		}
-		if (keyboard.KeyIsPressed('W'))
+		if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
 		{
 			game.keys[Game::Keys::up] = true;
 		}
-		if (keyboard.KeyIsPressed('S'))
+		if (keyboard.KeyIsPressed('S') || keyboard.KeyIsPressed(VK_DOWN))
 		{
 			game.keys[Game::Keys::down] = true;
 		}
@@ -246,6 +246,9 @@ void keyboardFunc()
 			game.level.player.recallBlobs();
 		if (keyboard.KeyIsPressed('P')) {
 			graphics.createShaders();
+		}
+		if (keyboard.KeyIsPressed('K')) {
+			game.level.player.lifeCharges = 0;
 		}
 	}
 	

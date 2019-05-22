@@ -14,6 +14,7 @@
 #include "PowerUp.h"
 #include "Graphics.h"
 #include "Editor.h"
+#include "Gate.h"
 
 using namespace glm;
 enum PlayerStatus {
@@ -44,14 +45,16 @@ public:
 	Box hitbox;
     vector<Blob> blobs;
     int blobCharges;
+	int lifeCharges;
     float shootCooldown;
+	float takeDamageCooldown;
 	const MovingPlatform* collidingMovingPlatform = nullptr;
 };
 
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(vec3 position = { 0.0f, 0.0f, 0.0f });
+	Enemy(vec3 position = { 0.0f, 20.0f, 0.0f });
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
 	void update(double dt) noexcept;
@@ -95,6 +98,8 @@ struct LevelData { // POD
     vector<Box>      staticBoxes;
 	vector<Box>      movingBoxes;
     vector<Sphere>   spheres;
+	vector<Gate>     gates;
+	vector<Button>   buttons;
     CollisionManager colManager;
 };
 
