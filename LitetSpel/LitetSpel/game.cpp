@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeThree.png");
+	editor.initialize("test.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -213,17 +213,20 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 		pos += posDiff;
 		
-		if (status == PlayerStatus::Sticky && !isStanding)
+		// if the player is sticky, not standing and holding a control button
+		if (status == PlayerStatus::Sticky && !isStanding && length(controlDir))
 		{
 			isStuck = true;
+
+			// push the player a little into the platform to ensure they collide with it as long as they are sticky
 			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
-				pos.y += 0.001f;
+				pos.y += 0.005f;
 			}
 			else if (controlDir.x > 0.0) {
-				pos.x += 0.001f;
+				pos.x += 0.005f;
 			}
 			else if (controlDir.x < 0.0) {
-				pos.x -= 0.001f;
+				pos.x -= 0.005f;
 			}
 		}
 		else if (knockBack)
@@ -245,7 +248,8 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
+		float eps = 0.1; // fixes some issues with platform edges
+		if (glm::length(minDistY) < glm::length(minDistX) - eps) {
 			posDiff = minDistY;
 
 			// if colliding with floor
@@ -268,18 +272,22 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 		pos += posDiff;
 
-		if (status == PlayerStatus::Sticky && !isStanding)
+		//if the player is sticky, not standing and holding a control button
+		if (status == PlayerStatus::Sticky && !isStanding && length(controlDir))
 		{
 			isStuck = true;
 			collidingMovingPlatform = platformPtr;
+
+			// push the player a little into the platform to ensure they collide with it as long as they are sticky
+			// if holding up and colliding with ceiling
 			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
-				pos.y += 0.001f;
+				pos.y += 0.005f;
 			}
 			else if (controlDir.x > 0.0) {
-				pos.x += 0.001f;
+				pos.x += 0.005f;
 			}
 			else if (controlDir.x < 0.0) {
-				pos.x -= 0.001f;
+				pos.x -= 0.005f;
 			}
 		}
 		else if (knockBack)
