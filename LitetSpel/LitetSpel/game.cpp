@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeThree.png");
+	editor.initialize("test.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -45,7 +45,6 @@ void Game::init() noexcept {
 	// Buttons and Gates
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
-	
 		while (editor.buttons.at(i).index != i)
 		{
 			std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
@@ -68,15 +67,17 @@ void Game::init() noexcept {
 	}
 	// player & blobs:
 	auto &player = level.player;
+	player.gameSounds = gameSounds;
 	player.pos = editor.startPos;
 	for (int i = 0; i < player.blobCharges; ++i) {
 		Blob b{ player.pos };
 		player.blobs.push_back(Blob(player.pos));
 		level.spheres.push_back(player.blobs[i].blobSphere);
 	}
-	for (auto &b : player.blobs) {
-		level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
-	}
+    for ( auto &b : player.blobs ) {
+		b.gameSounds = gameSounds;
+        level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
+    }
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
@@ -168,7 +169,9 @@ void Player::update(double dt) noexcept {
 
 	if (isStanding)
 		hasExtraJump = true;
-	
+	if (velocity.y < -4 || velocity.y > 4) {
+		landing = false;
+	}
     mass = (status == PlayerStatus::Heavy)? 20.0f : 10.0f;
 	isStuck = false;
 	if (status != PlayerStatus::Sticky) {
@@ -194,6 +197,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
 		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		// posDiff is the direction and amount to push the player away from the platform
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
@@ -203,10 +207,22 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y >= 0.0) {
-				velocity.y = 0;
+				velocity.y = -15;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
+				if (landing != true) {
+					if (status == PlayerStatus::Bouncy) {
+						gameSounds->PlayJumpSound03();
+					}
+					else if (status == PlayerStatus::Heavy) {
+						gameSounds->PlayJumpSound02();
+					}
+					else {
+						gameSounds->PlayJumpSound01();
+					}
+					landing = true;
+				}
 			}
 			//if colliding with ceiling
 			else {
@@ -220,17 +236,20 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 		pos += posDiff;
 		
-		if (status == PlayerStatus::Sticky && !isStanding)
+		// if the player is sticky, not standing and holding a control button
+		if (status == PlayerStatus::Sticky && !isStanding && length(controlDir))
 		{
 			isStuck = true;
+
+			// push the player a little into the platform to ensure they collide with it as long as they are sticky
 			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
-				pos.y += 0.001f;
+				pos.y += 0.005f;
 			}
 			else if (controlDir.x > 0.0) {
-				pos.x += 0.001f;
+				pos.x += 0.005f;
 			}
 			else if (controlDir.x < 0.0) {
-				pos.x -= 0.001f;
+				pos.x -= 0.005f;
 			}
 		}
 		else if (knockBack)
@@ -252,16 +271,29 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
+		float eps = 0.1; // fixes some issues with platform edges
+		if (glm::length(minDistY) < glm::length(minDistX) - eps) {
 			posDiff = minDistY;
 
 			// if colliding with floor
 			if (minDistY.y >= 0.0) {
-				velocity.y = 0;
+				velocity.y = -15;
 				isStanding = true;
 				collidingMovingPlatform = platformPtr;
 				hasExtraJump = true;
 				isStuck = false;
+				if (landing != true) {
+					if (status == PlayerStatus::Bouncy) {
+						gameSounds->PlayJumpSound03();
+					}
+					else if (status == PlayerStatus::Heavy) {
+						gameSounds->PlayJumpSound02();
+					}
+					else {
+						gameSounds->PlayJumpSound01();
+					}
+					landing = true;
+				}
 			}
 			//if colliding with ceiling
 			else {
@@ -275,18 +307,22 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 		pos += posDiff;
 
-		if (status == PlayerStatus::Sticky && !isStanding)
+		//if the player is sticky, not standing and holding a control button
+		if (status == PlayerStatus::Sticky && !isStanding && length(controlDir))
 		{
 			isStuck = true;
 			collidingMovingPlatform = platformPtr;
+
+			// push the player a little into the platform to ensure they collide with it as long as they are sticky
+			// if holding up and colliding with ceiling
 			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
-				pos.y += 0.001f;
+				pos.y += 0.005f;
 			}
 			else if (controlDir.x > 0.0) {
-				pos.x += 0.001f;
+				pos.x += 0.005f;
 			}
 			else if (controlDir.x < 0.0) {
-				pos.x -= 0.001f;
+				pos.x -= 0.005f;
 			}
 		}
 		else if (knockBack)
@@ -301,35 +337,35 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	{
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
-		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
-		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
-		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
-			posDiff = minDistY;
+// if colliding in Y-axis
+if (glm::length(minDistY) < glm::length(minDistX)) {
+	posDiff = minDistY;
 
-			// if colliding with floor
-			if (minDistY.y > 0.0) {
-				//velocity.y = 0;
-				isStanding = true;
-				hasExtraJump = true;
-				isStuck = false;
-			}
-			//if colliding with ceiling
-			else {
-				velocity.y = 0;
-				velocity.y = min(0, velocity.y);
-			}
-		}
-		// if colliding in X-axis
-		else {
-			posDiff = minDistX;
-		}
+	// if colliding with floor
+	if (minDistY.y > 0.0) {
+		//velocity.y = 0;
+		isStanding = true;
+		hasExtraJump = true;
+		isStuck = false;
+	}
+	//if colliding with ceiling
+	else {
+		velocity.y = 0;
+		velocity.y = min(0, velocity.y);
+	}
+}
+// if colliding in X-axis
+else {
+	posDiff = minDistX;
+}
 
-		pos += posDiff;
+pos += posDiff;
 	}
 
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Bouncy && other.hitbox->color.w != 0)
@@ -366,8 +402,8 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 		pos += posDiff;
 		}
-	
-	else if (other.colliderType == ColliderType::enemy) 
+
+	else if (other.colliderType == ColliderType::enemy)
 		{
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
@@ -378,7 +414,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) 
+		if (glm::length(minDistY) < glm::length(minDistX))
 		{
 			if (minDistY.y >= 0.0) {
 				velocity.y = 0;
@@ -391,12 +427,18 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		else {
 			if (status != PlayerStatus::Heavy && !knockBack)
 			{
-				
+
 				if (minDistX.x >= 0.0)
 				{
 					putForce(vec3(jumpForce / 3, jumpForce / 2, 0));
 					knockBack = true;
 					if (takeDamageCooldown <= 0) {
+						if (lifeCharges >= 2) {
+							gameSounds->PlayDamagedSound01();
+						}
+						else if(lifeCharges = 1){
+							gameSounds->PlayDamagedSound02();
+						}
 						lifeCharges -= 1;
 					}
 				}
@@ -405,6 +447,12 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					putForce(vec3(-jumpForce / 3, jumpForce/2, 0));
 					knockBack = true;
 					if (takeDamageCooldown <= 0) {
+						if (lifeCharges >= 2) {
+							gameSounds->PlayDamagedSound01();
+						}
+						else if (lifeCharges = 1) {
+							gameSounds->PlayDamagedSound02();
+						}
 						lifeCharges -= 1;
 					}
 				}
@@ -426,6 +474,9 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		{
 			blobs[i].status = BlobStatus::Blob_Bouncy;
 		}
+		if (status != PlayerStatus::Bouncy) {
+			gameSounds->PlayAbsorbSound03();
+		}
 		status = PlayerStatus::Bouncy;
 	}
 	if (other.colliderType == ColliderType::powerup_heavy)
@@ -433,6 +484,9 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		for (int i = 0; i < blobCharges; i++)
 		{
 			blobs[i].status = BlobStatus::Blob_Heavy;
+		}
+		if (status != PlayerStatus::Heavy) {
+			gameSounds->PlayAbsorbSound03();
 		}
 		status = PlayerStatus::Heavy;
 	}
@@ -442,6 +496,9 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		{
 			blobs[i].status = BlobStatus::Blob_Sticky;
 		}
+		if (status != PlayerStatus::Sticky) {
+			gameSounds->PlayAbsorbSound03();
+		}
 		status = PlayerStatus::Sticky;
 	}
 	if (other.colliderType == ColliderType::powerup_none)
@@ -450,11 +507,15 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		{
 			blobs[i].status = BlobStatus::Blob_None;
 		}
+		if (status != PlayerStatus::None) {
+			gameSounds->PlayAbsorbSound03();
+		}
 		status = PlayerStatus::None;
 	}
 	if (other.colliderType == ColliderType::level_goal)
 	{
 		levelCompleted = true;
+		gameSounds->PlayEndOfLevelSound();
 	}
 }
 
@@ -466,6 +527,7 @@ void Player::shoot(vec3 mousePos) noexcept
 	for (auto &blob : blobs) {
 		if (!blob.getIsActive() and !blob.getIsBeingRecalled()) {
 			blob.shoot(dir);
+			gameSounds->PlayBlobSound01();
 			shootCooldown = .5f; // TODO: refactor into a constexpr constant in Globals.h 
 			break;
 		}
@@ -592,6 +654,7 @@ void Game::updatePhysics() {
 		if (player.collidingMovingPlatform != nullptr) {
 			player.pos += player.collidingMovingPlatform->moveFunction(physicsSimTime) - player.collidingMovingPlatform->moveFunction(physicsSimTime - timestep);
 		}
+		
         player.move(timestep);
 		player.isStuck = false;
 		// enemies:
@@ -628,6 +691,7 @@ void Game::updatePhysics() {
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();
+
 		physicsSimTime += timestep;
 	}
 }
@@ -876,6 +940,9 @@ void Enemy::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		}
 		if (other.hitbox->color.w == 0.5)
 		{
+			if (isStuck != true) {
+				gameSounds->PlayEnemySound03();
+			}
 			isStuck = true;
 		}
 	}
@@ -936,6 +1003,8 @@ void Enemy::move(float dt) noexcept
 {
 	pos += velocity * dt;
 }
+
+
 
 //Adds two orbiting spheres around a sphere for animation
 void Game::animateSphere(Sphere const &sphere, vec3 const &amplitude) {

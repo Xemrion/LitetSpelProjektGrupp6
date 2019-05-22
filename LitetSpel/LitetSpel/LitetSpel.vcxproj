@@ -133,6 +133,7 @@
     <ClCompile Include="MovingPlatform.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="PowerUp.cpp" />
+    <ClCompile Include="Sounds.cpp" />
     <ClCompile Include="Editor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +156,7 @@
     <ClInclude Include="PowerUp.h" />
     <ClInclude Include="Editor.h" />
     <ClInclude Include="stb_image.h" />
+    <ClInclude Include="Sounds.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="laser_raster_ps.hlsl">
