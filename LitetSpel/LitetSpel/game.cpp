@@ -384,8 +384,7 @@ void Player::shoot(vec3 mousePos) noexcept
 {
 	if (shootCooldown > 0) return;
 
-	auto mouseScreenPos = vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
-	vec3 dir = normalize(mouseScreenPos - pos);
+	vec3 dir = normalize(mousePos - pos);
 	for (auto &blob : blobs) {
 		if (!blob.getIsActive() and !blob.getIsBeingRecalled()) {
 			blob.shoot(dir);

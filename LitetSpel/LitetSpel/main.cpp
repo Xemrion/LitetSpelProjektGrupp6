@@ -129,7 +129,7 @@ void mouseFunc()
 		if (mouse.LeftIsPressed())
 		{
 			game.leftButtonDown = true;
-			game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
+			game.mousePos = graphics.windowToWorldCoord(glm::vec2(mouse.GetXPos(), mouse.GetYPos()));
 		}
 		else
 			game.leftButtonDown = false;
@@ -253,7 +253,7 @@ void keyboardFunc()
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	HWND wndHandle = InitWindow(hInstance, 1280, 720);
+	HWND wndHandle = InitWindow(hInstance, WINDOW_WIDTH, WINDOW_HEIGHT);
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;

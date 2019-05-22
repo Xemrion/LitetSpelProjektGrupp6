@@ -1,3 +1,4 @@
+#include "Globals.h"
 #include "Graphics.h"
 #include "Collisions.h"
 
@@ -1059,7 +1060,7 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 
 		if (CollisionManager::intersect(boundingBox, cullingBox)) {
 			metaballStruct.spheres[structIndex++] = metaballs[i];
-			metaballStruct.nSpheres = glm::min(maxMetaballs, structIndex);
+			metaballStruct.nSpheres = min(maxMetaballs, structIndex);
 		}
 	}
 
@@ -1221,4 +1222,14 @@ Graphics::~Graphics()
 	SAFE_RELEASE(viewProjBuffer);
 	SAFE_RELEASE(cameraBuffer);
 	SAFE_RELEASE(cornerBuffer);
+}
+
+glm::vec3 Graphics::windowToWorldCoord(glm::vec2 windowCoord) {
+	windowCoord.y = WINDOW_HEIGHT - windowCoord.y;
+	glm::vec4 projected = glm::transpose(viewProj) * glm::vec4(0.0, 0.0, 0.0, 1.0);
+	projected.x = ((windowCoord.x / WINDOW_WIDTH) * 2.0 - 1.0) * projected.w;
+	projected.y = ((windowCoord.y / WINDOW_HEIGHT) * 2.0 - 1.0) * projected.w;
+
+	glm::vec3 worldPos = glm::inverse(glm::transpose(viewProj)) * projected;
+	return worldPos;
 }
