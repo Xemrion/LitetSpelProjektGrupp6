@@ -123,6 +123,7 @@
     <ClCompile Include="Blob.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Collisions.cpp" />
+    <ClCompile Include="DamagePlatform.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="Gate.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="Collisions.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="DamagePlatform.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="Gate.h" />
     <ClInclude Include="Geometry.h" />
