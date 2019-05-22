@@ -63,8 +63,9 @@ public:
 	void putForce(vec3 const &force) noexcept;
 	void move(float dt) noexcept;
 
-    vec3 pos, velocity, controlDir;
+    vec3 pos, velocity, controlDir, playerPos;
     float moveSpeed, jumpForce, jumpCooldown, mass;
+	int enemyIndex;
     bool isStanding, alive, isDeregistered, isStuck;
     Box hitbox;
 };
