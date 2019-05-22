@@ -585,7 +585,8 @@ void Game::updatePhysics() {
 
 		// blobs:
 		for (auto &blob : player.blobs) {
-			if (blob.getIsActive() && blob.getIsStuck() == false) {
+			if (blob.getIsActive() && blob.getIsStuck() == false && !blob.getIsBeingRecalled()) 
+			{
 				blob.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
 			blob.move(timestep);
