@@ -9,7 +9,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
     isActive        (false),
     isBeingRecalled (true),
 	isStuck         (false),
-    recallSpeed     (200.0f),
+    recallSpeed     (400.0f),
     speed           (100.1f),
     radius          (  2.5f),
 	status          (BlobStatus::Blob_None),
@@ -71,15 +71,16 @@ bool Blob::getIsStuck() const noexcept { return isStuck; }
 void Blob::update(double dt) noexcept
 {
     #undef min
-    if ( isBeingRecalled ) {
+    if ( isBeingRecalled ) 
+	{
         float speed          = std::min( recallSpeed * float(dt), glm::distance(pos, *parentPosition) );
         glm::vec3 direction  = glm::normalize( *parentPosition - pos );
-		pos                 += speed * direction;
+		pos                 += recallSpeed * direction *float(dt);
 		isStuck              = false;
 	}
     if (!isActive) {
         pos = *parentPosition + glm::vec3(0.0, 2.0, 0.0);
-        setVelocity(glm::vec3(0.0));
+		setVelocity(glm::vec3(0.0));
         blobSphere.centerRadius = glm::vec4(*parentPosition, 2);
     }
 	if (isStuck == true && status != BlobStatus::Blob_Sticky) 
@@ -132,7 +133,23 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
     }
 
 	if (other.colliderType == ColliderType::platform && !isBeingRecalled) {
-		if (status == BlobStatus::Blob_Bouncy) 
+		if(hitbox.color.w == 0)
+		{
+			reactivateHitbox();
+		}
+		float eps = 0.1; // fixes some issues with platform edges
+		glm::vec3 pushUp    = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushDown  = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft  = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
+		glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		// posDiff is the direction and amount to push the blob away from the platform
+		glm::vec3 posDiff   = glm::length(minDistY) < glm::length(minDistX) - eps ? minDistY : minDistX;
+		pos				   += posDiff;
+
+		// if a bouncy blob collides with a floor
+		if (status == BlobStatus::Blob_Bouncy && posDiff.y > 0.0)
 		{
 			if (isBeingRecalled == false && isLanding == false) {
 				gameSounds->PlayBlobSound02();
@@ -158,17 +175,6 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 			}
 			this->velocity = glm::vec3(0.0);
 		}
-		if(hitbox.color.w == 0)
-		{
-			reactivateHitbox();
-		}
-		glm::vec3 pushUp    = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
-		glm::vec3 pushDown  = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
-		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-		glm::vec3 pushLeft  = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-		glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
-		glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-		pos                += glm::length(minDistY) < glm::length(minDistX)  ? minDistY : minDistX;
 	}
 	else if (isActive and other.colliderType == ColliderType::enemy)
 	{

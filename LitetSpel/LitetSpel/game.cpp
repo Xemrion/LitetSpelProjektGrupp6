@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeThree.png");
+	editor.initialize("test.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -190,10 +190,12 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
 		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		// posDiff is the direction and amount to push the player away from the platform
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
+		float eps = 0.1; // fixes some issues with platform edges
+		if (glm::length(minDistY) <= glm::length(minDistX) - eps) {
 			posDiff = minDistY;
 
 			// if colliding with floor
@@ -217,7 +219,6 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			}
 			//if colliding with ceiling
 			else {
-				velocity.y = 0;
 				velocity.y = min(0, velocity.y);
 			}
 		}
@@ -228,17 +229,20 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 		pos += posDiff;
 		
-		if (status == PlayerStatus::Sticky && !isStanding)
+		// if the player is sticky, not standing and holding a control button
+		if (status == PlayerStatus::Sticky && !isStanding && length(controlDir))
 		{
 			isStuck = true;
+
+			// push the player a little into the platform to ensure they collide with it as long as they are sticky
 			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
-				pos.y += 0.001f;
+				pos.y += 0.005f;
 			}
 			else if (controlDir.x > 0.0) {
-				pos.x += 0.001f;
+				pos.x += 0.005f;
 			}
 			else if (controlDir.x < 0.0) {
-				pos.x -= 0.001f;
+				pos.x -= 0.005f;
 			}
 		}
 		else if (knockBack)
@@ -260,7 +264,8 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
 		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
+		float eps = 0.1; // fixes some issues with platform edges
+		if (glm::length(minDistY) < glm::length(minDistX) - eps) {
 			posDiff = minDistY;
 
 			// if colliding with floor
@@ -295,18 +300,22 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 		pos += posDiff;
 
-		if (status == PlayerStatus::Sticky && !isStanding)
+		//if the player is sticky, not standing and holding a control button
+		if (status == PlayerStatus::Sticky && !isStanding && length(controlDir))
 		{
 			isStuck = true;
 			collidingMovingPlatform = platformPtr;
+
+			// push the player a little into the platform to ensure they collide with it as long as they are sticky
+			// if holding up and colliding with ceiling
 			if (controlDir.y > 0.0 && posDiff.y < 0.0) {
-				pos.y += 0.001f;
+				pos.y += 0.005f;
 			}
 			else if (controlDir.x > 0.0) {
-				pos.x += 0.001f;
+				pos.x += 0.005f;
 			}
 			else if (controlDir.x < 0.0) {
-				pos.x -= 0.001f;
+				pos.x -= 0.005f;
 			}
 		}
 		else if (knockBack)
@@ -507,8 +516,7 @@ void Player::shoot(vec3 mousePos) noexcept
 {
 	if (shootCooldown > 0) return;
 
-	auto mouseScreenPos = vec3((mousePos.x - 1280 / 2) * 9, (-(mousePos.y - 980 / 2)) * 16, 0);
-	vec3 dir = normalize(mouseScreenPos - pos);
+	vec3 dir = normalize(mousePos - pos);
 	for (auto &blob : blobs) {
 		if (!blob.getIsActive() and !blob.getIsBeingRecalled()) {
 			blob.shoot(dir);
@@ -548,12 +556,12 @@ void Game::update(double dt) {
 		level.player.update(dt);
 		if (level.enemy.alive)
 		{
-		// 	level.enemy.update(dt);
+		 	level.enemy.update(dt);
 		}
-		else if (!level.enemy.alive && level.enemy.isDeregistered)
+		else if (!level.enemy.alive && !level.enemy.isDeregistered)
 		{
-			level.colManager.unregisterEntry(level.enemy);
 			level.enemy.isDeregistered = true;
+			level.enemy.pos = vec3(0, -1000, 0);
 		}
 		updatePhysics();
 		level.player.addVelocity(temp, true);
@@ -646,7 +654,8 @@ void Game::updatePhysics() {
 
 		// blobs:
 		for (auto &blob : player.blobs) {
-			if (blob.getIsActive() && blob.getIsStuck() == false) {
+			if (blob.getIsActive() && blob.getIsStuck() == false && !blob.getIsBeingRecalled()) 
+			{
 				blob.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
 			blob.move(timestep);

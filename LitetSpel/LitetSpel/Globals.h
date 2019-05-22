@@ -1,8 +1,12 @@
 #pragma once
+#include "../../INCLUDE/glm/glm/glm.hpp"
 
 const float GRAVITY_CONSTANT = 200.f;
 const float COOLDOWN_CONSTANT = 0.3f;
 const float PHYSICS_TIME_STEP = 0.0001f;
+
+const int WINDOW_WIDTH = 1280;
+const int WINDOW_HEIGHT = 720;
 
 enum class PowerType {
 	None,

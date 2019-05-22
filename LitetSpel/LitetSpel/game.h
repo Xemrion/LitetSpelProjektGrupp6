@@ -54,7 +54,7 @@ public:
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(vec3 position = { 0.0f, 20.0f, 0.0f });
+	Enemy(vec3 position = { 0.0f, 40.0f, 0.0f });
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
 	void update(double dt) noexcept;
