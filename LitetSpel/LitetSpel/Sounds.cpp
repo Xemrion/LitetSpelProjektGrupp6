@@ -887,6 +887,10 @@ void Sounds::ShutdownWaveFile(IDirectSoundBuffer8** soundBuffer) {
 bool Sounds::PlayMusicWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 
+	if (sound == nullptr) {
+		return false;
+	}
+
 	hr = sound->SetCurrentPosition(0);
 	if (FAILED(hr)) {
 		return false;
@@ -913,6 +917,10 @@ bool Sounds::PlayMusicWaveFile(IDirectSoundBuffer8* sound) {
 }
 bool Sounds::PlaySFXWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
+
+	if (sound == nullptr) {
+		return false;
+	}
 
 	hr = sound->SetCurrentPosition(0);
 	if (FAILED(hr)) {
@@ -941,6 +949,10 @@ bool Sounds::PlaySFXWaveFile(IDirectSoundBuffer8* sound) {
 bool Sounds::PlayLoopingMusicWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 
+	if (sound == nullptr) {
+		return false;
+	}
+
 	hr = sound->SetCurrentPosition(0);
 	if (FAILED(hr)) {
 		return false;
@@ -967,6 +979,10 @@ bool Sounds::PlayLoopingMusicWaveFile(IDirectSoundBuffer8* sound) {
 }
 bool Sounds::PlayLoopingSFXWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
+
+	if (sound == nullptr) {
+		return false;
+	}
 
 	hr = sound->SetCurrentPosition(0);
 	if (FAILED(hr)) {
@@ -995,6 +1011,10 @@ bool Sounds::PlayLoopingSFXWaveFile(IDirectSoundBuffer8* sound) {
 bool Sounds::StopLoopingWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 
+	if (sound == nullptr) {
+		return false;
+	}
+
 	hr = sound->Stop();
 	if (FAILED(hr)) {
 		return false;
@@ -1006,6 +1026,11 @@ bool Sounds::ContinueLoopingWaveFile(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 	UINT totalMusic = this->masterVolume + this->musicVolume;
 	LONG music;
+
+	if (sound == nullptr) {
+		return false;
+	}
+
 	if (masterVolume == 0 || musicVolume == 0) {
 		music = -10000;
 	}
@@ -1027,6 +1052,10 @@ bool Sounds::ContinueLoopingWaveFile(IDirectSoundBuffer8* sound) {
 bool Sounds::SetVolume(IDirectSoundBuffer8* sound, LONG volume) {
 	HRESULT hr;
 
+	if (sound == nullptr) {
+		return false;
+	}
+
 	hr = sound->SetVolume(volume);
 	if (FAILED(hr)) {
 		return false;
@@ -1035,6 +1064,10 @@ bool Sounds::SetVolume(IDirectSoundBuffer8* sound, LONG volume) {
 }
 bool Sounds::StopSFX(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
+
+	if (sound == nullptr) {
+		return false;
+	}
 
 	hr = sound->Stop();
 	if (FAILED(hr)) {
@@ -1046,6 +1079,10 @@ bool Sounds::StopSFX(IDirectSoundBuffer8* sound) {
 bool Sounds::ContinueSFX(IDirectSoundBuffer8* sound) {
 	HRESULT hr;
 	LPDWORD position = NULL;
+
+	if (sound == nullptr) {
+		return false;
+	}
 
 	UINT totalSfx = this->masterVolume + this->sfxVolume;
 	LONG sfx;
