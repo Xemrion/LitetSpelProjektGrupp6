@@ -200,7 +200,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y >= 0.0) {
-				velocity.y = 0;
+				velocity.y = -15;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
@@ -270,7 +270,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y >= 0.0) {
-				velocity.y = 0;
+				velocity.y = -15;
 				isStanding = true;
 				collidingMovingPlatform = platformPtr;
 				hasExtraJump = true;
@@ -643,6 +643,7 @@ void Game::updatePhysics() {
 		if (player.collidingMovingPlatform != nullptr) {
 			player.pos += player.collidingMovingPlatform->moveFunction(physicsSimTime) - player.collidingMovingPlatform->moveFunction(physicsSimTime - timestep);
 		}
+		
         player.move(timestep);
 		player.isStuck = false;
 // enemies:
@@ -675,6 +676,7 @@ void Game::updatePhysics() {
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();
+
 		physicsSimTime += timestep;
 	}
 }
