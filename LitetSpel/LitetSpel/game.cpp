@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("Test.png");
+	editor.initialize("PrototypeThree.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -14,7 +14,7 @@ void Game::init() noexcept {
 		level.movingPlatforms.push_back(editor.movingPlatforms.at(i));
 	}
 	// Moving Platform hitboxes
-	for (int i = 0; i < editor.movingPlatforms.size(); i++)
+	for (int i = 0; i < level.movingPlatforms.size(); i++)
 	{
 		level.colManager.registerEntry((level.movingPlatforms.at(i)), ColliderType::movingPlatform, (level.movingPlatforms.at(i)).hitbox, true);
 	}
@@ -24,7 +24,7 @@ void Game::init() noexcept {
 		level.powerUps.push_back(editor.powerups.at(i));
 	}
 	// Power up hitboxes
-	for (int i = 0; i < editor.powerups.size(); i++)
+	for (int i = 0; i < level.powerUps.size(); i++)
 	{	
 		switch (editor.powerups.at(i).getType())
 		{
@@ -59,7 +59,7 @@ void Game::init() noexcept {
 		level.buttons.push_back(editor.buttons.at(i));	
 	}
 	// Button and Gate hitboxes
-	for (int i = 0; i < editor.buttons.size(); i++)
+	for (int i = 0; i < level.buttons.size(); i++)
 	{
 		level.gates.at(i).button = &level.buttons.at(i);
 
