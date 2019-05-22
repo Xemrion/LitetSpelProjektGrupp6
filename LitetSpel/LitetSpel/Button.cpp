@@ -27,7 +27,7 @@ void Button::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 		isPressed = true;
 		if (!isMoved && isPressed)
 		{
-			hitbox.center.y -= hitbox.halfLengths.y * 2;
+			hitbox.center.y -= (hitbox.halfLengths.y * 2)+0.1;
 			isMoved = true;
 		}
 	}

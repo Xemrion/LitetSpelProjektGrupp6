@@ -27,7 +27,7 @@ void Gate::move(float dt)
 {
 	if(button->isPressed && !isMoved)
 	{
-		this->hitbox.center.y -= hitbox.halfLengths.y * 2;
+		this->hitbox.center.y -= (hitbox.halfLengths.y * 2)+0.1;
 		isMoved = true;
 		if (timerAdd > 0 && timer <= 0)
 		{
@@ -38,7 +38,7 @@ void Gate::move(float dt)
 	{
 		this->hitbox.center.y += hitbox.halfLengths.y * 2;
 		isMoved = false;
-		button->hitbox.center.y += button->hitbox.halfLengths.y * 2;
+		button->hitbox.center.y += (button->hitbox.halfLengths.y * 2)+0.1;
 		button->isMoved = false;
 	}
 	if(timerAdd > 0)
