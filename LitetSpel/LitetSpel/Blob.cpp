@@ -90,7 +90,7 @@ void Blob::update(double dt) noexcept
 	{
 		deactivateHitbox();
 	}
-	if (velocity.y != 0) {
+	if (velocity.y > 4 || velocity.y < -4) {
 		isLanding = false;
 	}
 	blobSphere.centerRadius = glm::vec4( pos, radius );

@@ -182,102 +182,120 @@ void mouseFunc()
 void keyboardFunc()
 {
 	//Movement
-	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
-	{
-		if (keyboard.KeyIsPressed('D') || keyboard.KeyIsPressed(VK_RIGHT))
+	if (game.state == GameState::LevelState) {
+		if (game.level.player.knockBack == false)
 		{
-			game.keys[Game::Keys::right] = true;
-		}
-		if (keyboard.KeyIsPressed('A') || keyboard.KeyIsPressed(VK_LEFT))
-		{
-			game.keys[Game::Keys::left] = true;
-		}
-		if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
-		{
-			game.keys[Game::Keys::up] = true;
-		}
-		if (keyboard.KeyIsPressed('S') || keyboard.KeyIsPressed(VK_DOWN))
-		{
-			game.keys[Game::Keys::down] = true;
-		}
+			if (keyboard.KeyIsPressed('D') || keyboard.KeyIsPressed(VK_RIGHT))
+			{
+				game.keys[Game::Keys::right] = true;
+			}
+			if (keyboard.KeyIsPressed('A') || keyboard.KeyIsPressed(VK_LEFT))
+			{
+				game.keys[Game::Keys::left] = true;
+			}
+			if (game.keys[Game::Keys::left] == true || game.keys[Game::Keys::right] == true) {
+				if (playerMove != true) {
+					gameSounds.StartPlayerMoveLoop();
+					playerMove = true;
+				}
+			}
+			if (game.keys[Game::Keys::left] != true && game.keys[Game::Keys::right] != true) {
+				if (playerMove != false) {
+					gameSounds.StopPlayerMoveLoop();
+					playerMove = false;
+				}
+			}
+			if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
+			{
+				game.keys[Game::Keys::up] = true;
+			}
+			if (keyboard.KeyIsPressed('S') || keyboard.KeyIsPressed(VK_DOWN))
+			{
+				game.keys[Game::Keys::down] = true;
+			}
 
-		if (keyboard.KeyIsPressed('B'))
-		{
-			if (powerCoolDown <= 0)
+			if (keyboard.KeyIsPressed('B'))
 			{
-				if (game.level.player.status == PlayerStatus::None)
+				if (powerCoolDown <= 0)
 				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					if (game.level.player.status == PlayerStatus::None)
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+						}
+						game.level.player.status = PlayerStatus::Bouncy;
 					}
-					game.level.player.status = PlayerStatus::Bouncy;
-				}
-				else
-				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					else
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						}
+						game.level.player.status = PlayerStatus::None;
 					}
-					game.level.player.status = PlayerStatus::None;
+					powerCoolDown = 0.2f;
 				}
-				powerCoolDown = 0.2f;
 			}
-		}
-		if (keyboard.KeyIsPressed('H'))
-		{
-			if (powerCoolDown <= 0)
+			if (keyboard.KeyIsPressed('H'))
 			{
-				if (game.level.player.status == PlayerStatus::None)
+				if (powerCoolDown <= 0)
 				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					if (game.level.player.status == PlayerStatus::None)
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
+						}
+						game.level.player.status = PlayerStatus::Heavy;
 					}
-					game.level.player.status = PlayerStatus::Heavy;
-				}
-				else
-				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					else
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						}
+						game.level.player.status = PlayerStatus::None;
 					}
-					game.level.player.status = PlayerStatus::None;
+					powerCoolDown = 0.2f;
 				}
-				powerCoolDown = 0.2f;
 			}
-		}
-		if (keyboard.KeyIsPressed('Y'))
-		{
-			if (powerCoolDown <= 0)
+			if (keyboard.KeyIsPressed('Y'))
 			{
-				if (game.level.player.status == PlayerStatus::None)
+				if (powerCoolDown <= 0)
 				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					if (game.level.player.status == PlayerStatus::None)
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
+						}
+						game.level.player.status = PlayerStatus::Sticky;
 					}
-					game.level.player.status = PlayerStatus::Sticky;
-				}
-				else
-				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					else
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						}
+						game.level.player.status = PlayerStatus::None;
 					}
-					game.level.player.status = PlayerStatus::None;
+					powerCoolDown = 0.2f;
 				}
-				powerCoolDown = 0.2f;
 			}
-		}
-		if (keyboard.KeyIsPressed('R')) {
-			game.level.player.recallBlobs();
-		}
-		if (keyboard.KeyIsPressed('P')) {
-			graphics.createShaders();
-		}
-		if (keyboard.KeyIsPressed('K')) {
-			game.level.player.lifeCharges = 0;
+			if (keyboard.KeyIsPressed('R')) {
+				game.level.player.recallBlobs();
+			}
+			if (keyboard.KeyIsPressed('P')) {
+				graphics.createShaders();
+			}
+			if (keyboard.KeyIsPressed('K')) {
+				game.level.player.lifeCharges = 0;
+			}
+		} 
+		else if (game.level.player.knockBack == true && playerMove != false) {
+			gameSounds.StopPlayerMoveLoop();
+			playerMove = false;
 		}
 	}
 }
@@ -288,9 +306,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
-	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
+	//if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game.gameSounds = &gameSounds;
-	game.init();
 
 	bool gameLoaded = false;
 	game.menuLoad();

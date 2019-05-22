@@ -39,7 +39,7 @@ public:
 
     vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
+    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted, landing;
     PlayerStatus status;
 	double radius;
 	Box hitbox;
@@ -120,6 +120,7 @@ public:
 	double physicsSimTime = 0.0;
 	double time = 0.0;
 	GameState state;
+	
 
 	enum Keys {
 		left,
@@ -152,6 +153,7 @@ public:
 	glm::vec3 getCameraPos() { return cameraPos; };
 	bool getCameraPan() { return panCamera; };
 
+	Sounds* gameSounds;
 	Box      EnemyBox;
     Sphere   playerSphere;
     Platform groundBox;
