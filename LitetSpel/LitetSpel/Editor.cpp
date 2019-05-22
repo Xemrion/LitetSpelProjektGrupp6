@@ -413,7 +413,8 @@ bool Editor::isNone(vec3 pixelColour)
 
 bool Editor::isPlatform(vec3 pixelColour)
 {
-	return !(isEnemy(pixelColour) || isStartPoint(pixelColour) || isGoal(pixelColour) || isWhite(pixelColour));
+	return !(isEnemy(pixelColour) || isStartPoint(pixelColour) || isGoal(pixelColour) || isWhite(pixelColour) || isButton(pixelColour) 
+		|| isDoor(pixelColour) || isSticky(pixelColour) || isBouncy(pixelColour) || isHeavy(pixelColour) || isNone(pixelColour));
 }
 
 bool Editor::isMovingPlatform(vec3 pixelColour)

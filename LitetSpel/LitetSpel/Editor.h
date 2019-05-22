@@ -45,7 +45,7 @@ private:
 	int height = 0;
 	int doorHeight = 5;
 	int buttonWidth = 5;
-	int maxMovingPlatformLength = 30;
+	int maxMovingPlatformLength = 100;
 
 public:
 	Editor();
