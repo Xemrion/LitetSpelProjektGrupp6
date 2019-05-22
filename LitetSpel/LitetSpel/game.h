@@ -54,7 +54,7 @@ public:
 class Enemy : public CollisionObject 
 {
 public:
-	Enemy(vec3 position = { 0.0f, 40.0f, 0.0f });
+	Enemy(vec3 position);
 	virtual ~Enemy() noexcept;
 	virtual void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override;
 	void update(double dt) noexcept;
@@ -92,7 +92,7 @@ struct LevelData { // POD
     // TODO: switch from POD struct to class 
     // and merge in level start / goal code from falk branch
     Player           player;
-	Enemy            enemy;
+	vector<Enemy>    enemies;
 	vector<PowerUp>  powerUps;
 	std::unique_ptr<LevelGoal> goal;
 	vector<MovingPlatform> movingPlatforms;
