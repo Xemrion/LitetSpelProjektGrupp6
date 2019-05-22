@@ -35,7 +35,7 @@ HRESULT Graphics::init(HWND wndHandle, bool windowed)
 	
 	float c = 1.0 / glm::tan(glm::radians(22.5f));
 	float a = 16.f / 9.f;
-	float f = 200.f;
+	float f = 300.f;
 	float n = 50.f;
 
 	proj = glm::mat4(
@@ -1070,9 +1070,21 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 }
 
 
-void Graphics::setCameraPos(glm::vec3 pos)
+void Graphics::setCameraPos(glm::vec3 pos, bool panCamera)
 {
-	camera = pos;
+	if (panCamera && pos != camera) {
+		glm::vec3 cameraDir = pos - camera;
+		glm::vec3 delta = glm::normalize(cameraDir) * glm::smoothstep(-10.f, 75.f, glm::length(cameraDir)) * cameraSpeed;
+		if (glm::length(delta) > glm::length(pos - camera)) {
+			camera = pos;
+		}
+		else {
+			camera += delta;
+		}
+	}
+	else {
+		camera = pos;
+	}
 	viewProj = glm::transpose(glm::lookAtLH(camera, camera + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, 1.0, 0.0))) * proj;
 
 	updateFrustumCorners();

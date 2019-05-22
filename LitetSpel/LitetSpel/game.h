@@ -111,10 +111,14 @@ enum GameState
 
 class Game {
 private:
+	glm::vec3 cameraOffset = glm::vec3(0.0, 20.0, -150.0);
+	glm::vec3 cameraLookDownOffset = glm::vec3(0.0, -20.0, -150);
+	glm::vec3 cameraPos = glm::vec3(0.0, 20.0, -100.0);
+	bool panCamera = false;
 public:
 	double physicsSimTime = 0.0;
 	double time = 0.0;
-	double state;
+	GameState state;
 
 	enum Keys {
 		left,
@@ -143,6 +147,9 @@ public:
                         vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
 	void animateColor(Graphics& graphics);
 	void animateVictory(Sphere    const &sphere);
+
+	glm::vec3 getCameraPos() { return cameraPos; };
+	bool getCameraPan() { return panCamera; };
 
 	Box      EnemyBox;
     Sphere   playerSphere;
