@@ -42,6 +42,8 @@ public:
 
 private:
     glm::vec3 const *parentPosition;
+	glm::vec3 followParentSpeed = glm::vec3(20.0, 35.0, 1.0);
+	glm::vec3 offsetFromParent;
     bool  isActive;
 	bool isStuck;
     bool  isBeingRecalled;

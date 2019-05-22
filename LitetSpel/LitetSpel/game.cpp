@@ -48,7 +48,6 @@ void Game::init() noexcept {
 		while (editor.buttons.at(i).index != i)
 		{
 			std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
-
 		}
 		while (editor.gates.at(i).index != i)
 		{
@@ -70,7 +69,6 @@ void Game::init() noexcept {
 	player.gameSounds = gameSounds;
 	player.pos = editor.startPos;
 	for (int i = 0; i < player.blobCharges; ++i) {
-		Blob b{ player.pos };
 		player.blobs.push_back(Blob(player.pos));
 		level.spheres.push_back(player.blobs[i].blobSphere);
 	}
@@ -252,7 +250,6 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			pos.y += 1;
 		}
 	}
-	
 	else if (other.colliderType == ColliderType::movingPlatform) {
 		MovingPlatform* platformPtr = (MovingPlatform*)other.object;
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
@@ -330,35 +327,35 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	{
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
-glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
-glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
-glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
-glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+		glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
-// if colliding in Y-axis
-if (glm::length(minDistY) < glm::length(minDistX)) {
-	posDiff = minDistY;
-
-	// if colliding with floor
-	if (minDistY.y > 0.0) {
-		//velocity.y = 0;
-		isStanding = true;
-		hasExtraJump = true;
-		isStuck = false;
+	// if colliding in Y-axis
+	if (glm::length(minDistY) < glm::length(minDistX)) {
+		posDiff = minDistY;
+	
+		// if colliding with floor
+		if (minDistY.y > 0.0) {
+			//velocity.y = 0;
+			isStanding = true;
+			hasExtraJump = true;
+			isStuck = false;
+		}
+		//if colliding with ceiling
+		else {
+			velocity.y = 0;
+			velocity.y = min(0, velocity.y);
+		}
 	}
-	//if colliding with ceiling
+	// if colliding in X-axis
 	else {
-		velocity.y = 0;
-		velocity.y = min(0, velocity.y);
+		posDiff = minDistX;
 	}
-}
-// if colliding in X-axis
-else {
-	posDiff = minDistX;
-}
 
-pos += posDiff;
+	pos += posDiff;
 	}
 
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Bouncy && other.hitbox->color.w != 0)

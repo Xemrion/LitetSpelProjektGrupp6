@@ -16,6 +16,9 @@ Blob::Blob( glm::vec3 const &parentPosition ):
     velocity        (   .0f)
 {
 	deactivateHitbox();
+
+	int hashVal = (int)this;
+	offsetFromParent = (glm::fract(glm::vec3(sin(hashVal) * 123987.f, sin(hashVal) * 97623.f, sin(hashVal) * 8911.f)) * 2.0f - 1.0f) * glm::vec3(2.0, 2.0, 1.0);
 }
 
 void Blob::absorb() noexcept
@@ -74,14 +77,28 @@ void Blob::update(double dt) noexcept
     if ( isBeingRecalled ) 
 	{
         float speed          = std::min( recallSpeed * float(dt), glm::distance(pos, *parentPosition) );
-        glm::vec3 direction  = glm::normalize( *parentPosition - pos );
-		pos                 += recallSpeed * direction *float(dt);
+        if (glm::length(*parentPosition - pos) > 0.0) {
+			glm::vec3 direction  = glm::normalize( *parentPosition - pos );
+			pos += recallSpeed * direction * float(dt);
+		}
 		isStuck              = false;
 	}
-    if (!isActive) {
-        pos = *parentPosition + glm::vec3(0.0, 2.0, 0.0);
+	if (!isActive) {
+		glm::vec3 targetPos = *parentPosition + offsetFromParent;
 		setVelocity(glm::vec3(0.0));
-        blobSphere.centerRadius = glm::vec4(*parentPosition, 2);
+
+		glm::vec3 moveDir = targetPos - pos;
+		if (glm::length(moveDir) > 0) {
+			glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(-10.f, 75.f, glm::length(moveDir)) * followParentSpeed;
+			
+			if (glm::length(delta) > glm::length(moveDir)) {
+				pos = targetPos;
+			}
+			else {
+				pos += delta;
+			}
+		}
+        blobSphere.centerRadius = glm::vec4(pos, 2);
     }
 	if (isStuck == true && status != BlobStatus::Blob_Sticky) 
 	{
@@ -132,7 +149,7 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
         absorb();
     }
 
-	if (other.colliderType == ColliderType::platform && !isBeingRecalled) {
+	if (other.colliderType == ColliderType::platform || other.colliderType == ColliderType::movingPlatform && !isBeingRecalled) {
 		if(hitbox.color.w == 0)
 		{
 			reactivateHitbox();

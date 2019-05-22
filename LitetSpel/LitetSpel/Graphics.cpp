@@ -1077,7 +1077,7 @@ void Graphics::setCameraPos(glm::vec3 pos, bool panCamera)
 	if (panCamera && pos != camera) {
 		glm::vec3 cameraDir = pos - camera;
 		glm::vec3 delta = glm::normalize(cameraDir) * glm::smoothstep(-10.f, 75.f, glm::length(cameraDir)) * cameraSpeed;
-		if (glm::length(delta) > glm::length(pos - camera)) {
+		if (glm::length(delta) > glm::length(cameraDir)) {
 			camera = pos;
 		}
 		else {
