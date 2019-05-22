@@ -39,7 +39,7 @@ public:
 
     vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted;
+    bool hasExtraJump, isStanding, isStuck, knockBack, levelCompleted, landing;
     PlayerStatus status;
 	double radius;
 	Box hitbox;
@@ -63,8 +63,9 @@ public:
 	void putForce(vec3 const &force) noexcept;
 	void move(float dt) noexcept;
 
-    vec3 pos, velocity, controlDir;
+    vec3 pos, velocity, controlDir, playerPos;
     float moveSpeed, jumpForce, jumpCooldown, mass;
+	int enemyIndex;
     bool isStanding, alive, isDeregistered, isStuck;
     Box hitbox;
 };
@@ -119,6 +120,7 @@ public:
 	double physicsSimTime = 0.0;
 	double time = 0.0;
 	GameState state;
+	
 
 	enum Keys {
 		left,
@@ -151,6 +153,7 @@ public:
 	glm::vec3 getCameraPos() { return cameraPos; };
 	bool getCameraPan() { return panCamera; };
 
+	Sounds* gameSounds;
 	Box      EnemyBox;
     Sphere   playerSphere;
     Platform groundBox;
