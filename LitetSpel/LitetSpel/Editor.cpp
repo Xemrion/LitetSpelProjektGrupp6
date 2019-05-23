@@ -132,7 +132,7 @@ void Editor::initialize(const char* filename)
 
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				vec4 color = vec4(getPixelColour(startPos), 0);
+				vec4 color = vec4(getPixelColour(i), 0);
 				color /= 255;
 				this->gates.push_back(Gate(center, halfLength, color, int(getPixelColour(i).y) % 10));
 			}
@@ -146,7 +146,7 @@ void Editor::initialize(const char* filename)
 				halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio * buttonWidth;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				vec4 color = vec4(getPixelColour(startPos), 0);
+				vec4 color = vec4(getPixelColour(i), 0);
 				color /= 255;
 				this->buttons.push_back(Button(center, halfLength, color, 10, int(getPixelColour(i).y) % 10));
 			}
