@@ -1,6 +1,7 @@
 #include "Blob.h"
 #include <algorithm>
 
+
 Blob::Blob( glm::vec3 const &parentPosition ):
     parentPosition  ( &parentPosition ),
     pos             (  parentPosition ),
@@ -54,6 +55,7 @@ void Blob::shoot( glm::vec3 const &direction ) noexcept
 {
     if ( !isActive && !isBeingRecalled ) {
         isActive = true;
+		pos = *parentPosition;
         velocity = (status == BlobStatus::Blob_Heavy)?  direction * speed/3.0f  :  direction * speed;
 	}
 }
@@ -84,21 +86,7 @@ void Blob::update(double dt) noexcept
 		isStuck              = false;
 	}
 	if (!isActive) {
-		glm::vec3 targetPos = *parentPosition + offsetFromParent;
-		setVelocity(glm::vec3(0.0));
-
-		glm::vec3 moveDir = targetPos - pos;
-		if (glm::length(moveDir) > 0) {
-			glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(-10.f, 75.f, glm::length(moveDir)) * followParentSpeed;
-			
-			if (glm::length(delta) > glm::length(moveDir)) {
-				pos = targetPos;
-			}
-			else {
-				pos += delta;
-			}
-		}
-        blobSphere.centerRadius = glm::vec4(pos, 2);
+		
     }
 	if (isStuck == true && status != BlobStatus::Blob_Sticky) 
 	{
@@ -147,7 +135,9 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
          other.colliderType == ColliderType::player ))
     {
         absorb();
+		return;
     }
+	if (!isActive) return;
 
 	if (other.colliderType == ColliderType::platform || other.colliderType == ColliderType::movingPlatform && !isBeingRecalled) {
 		if(hitbox.color.w == 0)
@@ -235,4 +225,59 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 			pos += glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 		}	
 	}
+}
+
+void Blob::followPlayer() {
+	const auto random2 = [&](glm::vec2 xy) {
+		float hash = float(((int(this) * 987231) >> 4) & 0xFF) * float(((int(this) * 9102301) >> 3) & 0xFF);
+		xy = glm::vec2(
+			glm::dot(xy, glm::vec2(13.26, 17.97)),
+			glm::dot(xy, glm::vec2(19.29, 16.47))
+		);
+
+		return 1.0f - 2.0f * glm::fract(glm::sin(xy) * hash);
+	};
+
+	const auto perlinNoise = [&](glm::vec2 pos) {
+		glm::vec2 i = glm::floor(pos);
+		glm::vec2 f = glm::fract(pos);
+		glm::vec2 curve = 6.f *f*f*f*f*f - 15.f *f*f*f*f + 10.f *f*f*f;
+
+		glm::vec2 a = glm::vec2(0.0, 0.0);
+		glm::vec2 b = glm::vec2(1.0, 0.0);
+		glm::vec2 c = glm::vec2(0.0, 1.0);
+		glm::vec2 d = glm::vec2(1.0, 1.0);
+
+		float wa = glm::dot(random2(i + a), f - a);
+		float wb = glm::dot(random2(i + b), f - b);
+		float wc = glm::dot(random2(i + c), f - c);
+		float wd = glm::dot(random2(i + d), f - d);
+
+		return glm::mix(
+			glm::mix(wa, wb, curve.x),
+			glm::mix(wc, wd, curve.x),
+			curve.y
+		);
+	};
+
+	offsetFromParent = glm::vec3(
+		perlinNoise(glm::vec2(parentPosition->x, parentPosition->y) * 0.01f),
+		perlinNoise(glm::vec2(parentPosition->x + 111.1, parentPosition->y + 111.1) * 0.01f),
+		perlinNoise(glm::vec2(parentPosition->x - 123.4, parentPosition->y - 432.1) * 0.01f)) *
+		glm::vec3(11.0, 11.0, 5.0);
+	glm::vec3 targetPos = *parentPosition + offsetFromParent;
+	setVelocity(glm::vec3(0.0));
+
+	glm::vec3 moveDir = targetPos - pos;
+	if (glm::length(moveDir) > 0) {
+		glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(0.f, 12.0f, glm::length(moveDir)) * followParentSpeed;
+
+		if (glm::length(delta) > glm::length(moveDir)) {
+			pos = targetPos;
+		}
+		else {
+			pos += delta;
+		}
+	}
+
 }

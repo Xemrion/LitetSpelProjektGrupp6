@@ -573,6 +573,12 @@ void Game::update(double dt) {
 
 		updatePhysics();
 		level.player.addVelocity(temp, true);
+		
+		for (Blob& b : level.player.blobs) {
+			if (!b.getIsActive()) {
+				b.followPlayer();
+			}
+		}
 	}
 	updateGraphics();
 }
@@ -1005,7 +1011,7 @@ void Enemy::move(float dt) noexcept
 
 //Adds two orbiting spheres around a sphere for animation
 void Game::animateSphere(Sphere const &sphere, vec3 const &amplitude) {
-	vec3 rotationSpeed = vec3(0.81, 0.53, 0.1);
+	vec3 rotationSpeed = vec3(2.81, 2.53, 0.1);
 	// Offset the start rotation of the spheres to avoid them all starting at the same place
 	vec3 offset = vec3(0.2, 0.0, 0.0);
 	// Multiplier to animate faster when moving a certain direction. Not smooth.
