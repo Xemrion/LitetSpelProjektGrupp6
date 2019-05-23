@@ -4,13 +4,12 @@ Gate::Gate()
 {
 }
 
-Gate::Gate(glm::vec4 center,glm::vec2 halfLength,vec4 color, float timerAdd, int index)
+Gate::Gate(glm::vec4 center, glm::vec2 halfLength, vec4 color, int index)
 {
 	this->index = index;
 	this->hitbox.center = center;
-	this->hitbox.halfLengths = vec4(halfLength,10,0);
+	this->hitbox.halfLengths = vec4(halfLength, 10, 0);
 	this->hitbox.color = color;
-	this->timerAdd = timerAdd;
 	isMoved = false;
 }
 
@@ -25,32 +24,15 @@ void Gate::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 
 void Gate::move(float dt)
 {
-	if(button->isPressed && !isMoved)
+	if(button->isMoved && !isMoved)
 	{
-		this->hitbox.center.y -= (hitbox.halfLengths.y * 2)+0.1;
+		this->hitbox.center.y -= hitbox.halfLengths.y * 2 + 0.01;
 		isMoved = true;
-		if (timerAdd > 0 && timer <= 0)
-		{
-			timer = timerAdd;
-		}
 	}
-	else if (!button->isPressed && isMoved)
+	else if(!button->isMoved && isMoved)
 	{
-		this->hitbox.center.y += hitbox.halfLengths.y * 2;
+		this->hitbox.center.y += hitbox.halfLengths.y * 2 + 0.01;
 		isMoved = false;
-		button->hitbox.center.y += (button->hitbox.halfLengths.y * 2)+0.1;
-		button->isMoved = false;
-	}
-	if(timerAdd > 0)
-	{
-		if (timer > 0)
-		{
-			timer -= dt/10000;
-		}
-		else if (button->isPressed && timer < 0)
-		{
-			button->isPressed = false;
-		}
 	}
 
 }

@@ -134,7 +134,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				vec4 color = vec4(getPixelColour(startPos), 0);
 				color /= 255;
-				this->gates.push_back(Gate(center, halfLength, color, 10, int(getPixelColour(i).y) % 10));
+				this->gates.push_back(Gate(center, halfLength, color, int(getPixelColour(i).y) % 10));
 			}
 			else if (isButton(getAlpha(i)))
 			{
@@ -148,7 +148,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				vec4 color = vec4(getPixelColour(startPos), 0);
 				color /= 255;
-				this->buttons.push_back(Button(center, halfLength, color, int(getPixelColour(i).y) % 10));
+				this->buttons.push_back(Button(center, halfLength, color, 10, int(getPixelColour(i).y) % 10));
 			}
 			else
 			{
