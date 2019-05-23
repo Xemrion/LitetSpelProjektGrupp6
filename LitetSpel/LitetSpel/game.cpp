@@ -331,6 +331,87 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 			pos.y += 1;
 		}
 	}
+	else if (other.colliderType == ColliderType::damagePlatform) {
+	glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
+	glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
+	glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
+	glm::vec3 pushLeft = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
+	glm::vec3 minDistY = glm::length(pushUp) < glm::length(pushDown) ? pushUp : pushDown;
+	glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
+	// posDiff is the direction and amount to push the player away from the platform
+	glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
+
+	float eps = 0.1; // fixes some issues with platform edges
+	if (glm::length(minDistY) <= glm::length(minDistX) - eps) {
+		posDiff = minDistY;
+
+		// if colliding with floor
+		if (minDistY.y >= 0.0) {
+			putForce(vec3(0, jumpForce / 2, 0));
+			knockBack = false;
+			if (takeDamageCooldown <= 0) {
+				if (lifeCharges >= 2) {
+					gameSounds->PlayDamagedSound01();
+				}
+				else if (lifeCharges = 1) {
+					gameSounds->PlayDamagedSound02();
+				}
+				lifeCharges -= 1;
+				takeDamageCooldown = 3.0f;
+			}
+			
+		}
+		//if colliding with ceiling
+		else {
+			putForce(vec3(0, -(jumpForce / 2), 0));
+			knockBack = false;
+			if (takeDamageCooldown <= 0) {
+				if (lifeCharges >= 2) {
+					gameSounds->PlayDamagedSound01();
+				}
+				else if (lifeCharges = 1) {
+					gameSounds->PlayDamagedSound02();
+				}
+				lifeCharges -= 1;
+				takeDamageCooldown = 3.0f;
+			}
+		}
+	}
+	// if colliding in X-axis
+	else {
+		if (minDistX.x >= 0) {
+			putForce(vec3(jumpForce / 3, jumpForce / 2, 0));
+			knockBack = true;
+			if (takeDamageCooldown <= 0) {
+				if (lifeCharges >= 2) {
+					gameSounds->PlayDamagedSound01();
+				}
+				else if (lifeCharges = 1) {
+					gameSounds->PlayDamagedSound02();
+				}
+				lifeCharges -= 1;
+				takeDamageCooldown = 3.0f;
+			}
+		}
+		else {
+			putForce(vec3(-jumpForce / 3, jumpForce / 2, 0));
+			knockBack = true;
+			if (takeDamageCooldown <= 0) {
+				if (lifeCharges >= 2) {
+					gameSounds->PlayDamagedSound01();
+				}
+				else if (lifeCharges = 1) {
+					gameSounds->PlayDamagedSound02();
+				}
+				lifeCharges -= 1;
+				takeDamageCooldown = 3.0f;
+			}
+		}
+		posDiff = minDistX;
+	}
+
+	pos += posDiff;
+}
 	
 	else if (other.colliderType == ColliderType::blob && status == PlayerStatus::Sticky && other.hitbox->color.w != 0 && !isStuck && !isStanding)
 	{
@@ -439,6 +520,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 							gameSounds->PlayDamagedSound02();
 						}
 						lifeCharges -= 1;
+						takeDamageCooldown = 3.0f;
 					}
 				}
 				else 
@@ -453,6 +535,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 							gameSounds->PlayDamagedSound02();
 						}
 						lifeCharges -= 1;
+						takeDamageCooldown = 3.0f;
 					}
 				}
 
