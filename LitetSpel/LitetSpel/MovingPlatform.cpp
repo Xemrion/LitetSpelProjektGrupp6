@@ -1,6 +1,6 @@
 #include "MovingPlatform.h"
 
-MovingPlatform::MovingPlatform(vec3 startPos, vec3 endPos, vec4 center, vec4 halfLength)
+MovingPlatform::MovingPlatform(vec3 startPos, vec3 endPos, vec4 center, vec4 halfLength, vec4 color)
 {
 	this->startPos = startPos;
 	this->pos = startPos;
@@ -8,7 +8,7 @@ MovingPlatform::MovingPlatform(vec3 startPos, vec3 endPos, vec4 center, vec4 hal
 	this->period = glm::length(endPos - startPos) / 20; // move 20 units per second by default
 	this->hitbox.center = center;
 	this->hitbox.halfLengths = halfLength;
-	this->hitbox.color = vec4(0.0f,0.2f,1,0);
+	this->hitbox.color = color;
 }
 
 MovingPlatform::~MovingPlatform()

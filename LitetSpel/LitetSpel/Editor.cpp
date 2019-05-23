@@ -14,7 +14,7 @@ void Editor::initialize(const char* filename)
 {
 
 	int bpp = 0;
-	rgb = stbi_load(filename, &width, &height, &bpp, 3);
+	rgba = stbi_load(filename, &width, &height, &bpp, 4);
 	int startPos = 0;
 	float startPosX = 0;
 	float startPosY = 0;
@@ -32,7 +32,7 @@ void Editor::initialize(const char* filename)
 
 	for (int i = 0; i < width * height; i++)
 	{
-		if (!isWhite(getPixelColour(i)) && isPixelUsed(i) == -1)
+		if (!isBackground(getAlpha(i)) && isPixelUsed(i) == -1)
 		{
 			//Position baserat på mittpunkten av bilden
 			startPosX = (i % width) - middleX;
@@ -41,7 +41,7 @@ void Editor::initialize(const char* filename)
 			halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio;
 			halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio;
 
-			if (isGoal(getPixelColour(i)))
+			if (isGoal(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -52,7 +52,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				this->goalPos = vec3(center);
 			}
-			else if (isEnemy(getPixelColour(i)))
+			else if (isEnemy(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -63,7 +63,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				this->enemyPos.push_back(vec3(center));
 			}
-			else if (isStartPoint(getPixelColour(i)))
+			else if (isStartPoint(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -74,7 +74,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				this->startPos = vec3(center);
 			}
-			else if (isBouncy(getPixelColour(i)))
+			else if (isBouncy(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -85,7 +85,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				this->powerups.push_back(PowerUp(center, PowerType::Bouncy));
 			}
-			else if (isHeavy(getPixelColour(i)))
+			else if (isHeavy(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -97,7 +97,7 @@ void Editor::initialize(const char* filename)
 				this->powerups.push_back(PowerUp(center, PowerType::Heavy));
 
 			}
-			else if (isSticky(getPixelColour(i)))
+			else if (isSticky(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -109,7 +109,7 @@ void Editor::initialize(const char* filename)
 				this->powerups.push_back(PowerUp(center, PowerType::Sticky));
 
 			}
-			else if (isNone(getPixelColour(i)))
+			else if (isNone(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -121,7 +121,7 @@ void Editor::initialize(const char* filename)
 				this->powerups.push_back(PowerUp(center, PowerType::None));
 
 			}
-			else if (isDoor(getPixelColour(i)))
+			else if (isDoor(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + 1, startPosY - doorHeight);
 				startPosX *= minimumBoxSize;
@@ -132,9 +132,11 @@ void Editor::initialize(const char* filename)
 
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->gates.push_back(Gate(center, halfLength, 10, int(getPixelColour(i).y) % 10));
+				vec4 color = vec4(getPixelColour(startPos), 0);
+				color /= 255;
+				this->gates.push_back(Gate(center, halfLength, color, 10, int(getPixelColour(i).y) % 10));
 			}
-			else if (isButton(getPixelColour(i)))
+			else if (isButton(getAlpha(i)))
 			{
 				addBoxToUsed(startPosX, startPosY, startPosX + buttonWidth, startPosY - 1);
 				startPosX *= minimumBoxSize;
@@ -144,7 +146,9 @@ void Editor::initialize(const char* filename)
 				halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio * buttonWidth;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->buttons.push_back(Button(center, halfLength, int(getPixelColour(i).y) % 10));
+				vec4 color = vec4(getPixelColour(startPos), 0);
+				color /= 255;
+				this->buttons.push_back(Button(center, halfLength, color, int(getPixelColour(i).y) % 10));
 			}
 			else
 			{
@@ -155,7 +159,7 @@ void Editor::initialize(const char* filename)
 				{
 
 					if (startPosY - j <= (-height / 2)
-						|| !isPlatform(getPixelColour(startPos + (width * j))))
+						|| !isPlatform(getAlpha(startPos + width * j)))
 					{
 						endPosY = startPosY - j;
 						foundEdge = true;
@@ -165,12 +169,12 @@ void Editor::initialize(const char* filename)
 				for (int j = 1; !foundEdge && drawThis; j++)
 				{
 					if ((startPosX + j) >= width / 2
-						|| !isPlatform(getPixelColour(startPos + j))
+						|| !isPlatform(getAlpha(startPos + j))
 						|| isPixelUsed(startPos + j) != -1)
 					{
 						endPosX = startPosX + j;
 						//if its a moving platform and 1x1 size, its a startpoint/endpoint, don't draw
-						if (abs(endPosX - startPosX) == 1 && abs(endPosY - startPosY) == 1 && isMovingPlatform(getPixelColour(i)))
+						if (abs(endPosX - startPosX) == 1 && abs(endPosY - startPosY) == 1 && isMovingPlatform(getAlpha(i)))
 							drawThis = false;
 
 						foundEdge = true;
@@ -186,13 +190,13 @@ void Editor::initialize(const char* filename)
 							{
 								if (l == j)
 								{
-									if (isPlatform(getPixelColour((startPos + width * k) + l)))
+									if (isPlatform(getAlpha(startPos + width * k + l)))
 									{
 										endPosY = startPosY - k;
 										continueLoop = false;
 									}
 								}
-								else if (!isPlatform(getPixelColour((startPos + width * k) + l)))
+								else if (!isPlatform(getAlpha(startPos + width * k + l)))
 								{
 									endPosY = startPosY - k;
 									continueLoop = false;
@@ -209,7 +213,7 @@ void Editor::initialize(const char* filename)
 				if (drawThis)
 				{
 					foundEdge = false;
-					if (!isMovingPlatform(getPixelColour(i)))
+					if (!isMovingPlatform(getAlpha(i)))
 					{
 						startPosX *= minimumBoxSize;
 						startPosY *= minimumBoxSize;
@@ -230,18 +234,18 @@ void Editor::initialize(const char* filename)
 						//left side
 						int upperHalf = startPos + (floor((startPosY - endPosY) / 2) * width);
 						int lowerHalf = startPos + (ceil((startPosY - endPosY) / 2 - 1) * width);
-						int MPendPosX = INFINITE;
-						int MPendPosY = INFINITE;
-						int MPstartPosX = INFINITE;
-						int MPstartPosY = INFINITE;
-						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++)
+						int MPendPosX = 10000;
+						int MPendPosY = 10000;
+						int MPstartPosX = 10000;
+						int MPstartPosY = 10000;
+						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX == 10000; j++)
 						{
-							if (getPixelColour(lowerHalf - j) == getPixelColour(i))
+							if (getPixelColour(lowerHalf - j) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf - j)))
 							{
 								MPstartPosX = ((lowerHalf - j) % width) - middleX;;
 								MPstartPosY = middleY - floor((lowerHalf - j) / width);
 							}
-							else if (getPixelColour(upperHalf - j) == getPixelColour(i))
+							else if (getPixelColour(upperHalf - j) == getPixelColour(i) && isMovingPlatform(getAlpha(upperHalf - j)))
 							{
 								MPstartPosX = ((upperHalf - j) % width) - middleX;;
 								MPstartPosY = middleY - floor((upperHalf - j) / width);
@@ -250,14 +254,14 @@ void Editor::initialize(const char* filename)
 						//Right side
 						upperHalf += endPosX - startPosX;
 						lowerHalf += endPosX - startPosX;
-						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++)
+						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX != 10000 && MPendPosX == 10000; j++)
 						{
-							if (getPixelColour(lowerHalf + j) == getPixelColour(i))
+							if (getPixelColour(lowerHalf + j) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf + j)))
 							{
 								MPendPosX = ((lowerHalf + j) % width) - middleX;;
 								MPendPosY = middleY - floor((lowerHalf + j) / width);
 							}
-							else if (getPixelColour(upperHalf + j) == getPixelColour(i))
+							else if (getPixelColour(upperHalf + j) == getPixelColour(i) && isMovingPlatform(getAlpha(upperHalf + j)))
 							{
 								MPendPosX = ((upperHalf + j) % width) - middleX;
 								MPendPosY = middleY - floor((upperHalf + j) / width);
@@ -266,14 +270,14 @@ void Editor::initialize(const char* filename)
 						//top side
 						upperHalf = startPos + floor((endPosX - startPosX) / 2);
 						lowerHalf = startPos + ceil((endPosX - startPosX) / 2 - 1);
-						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX == INFINITE; j++)
+						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX == 10000; j++)
 						{
-							if (getPixelColour(lowerHalf - j * width) == getPixelColour(i))
+							if (getPixelColour(lowerHalf - j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf - j * width)))
 							{
 								MPstartPosX = (lowerHalf % width) - middleX;;
 								MPstartPosY = middleY - floor((lowerHalf + j * width) / width);
 							}
-							else if (getPixelColour(upperHalf - j * width) == getPixelColour(i))
+							else if (getPixelColour(upperHalf - j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(upperHalf - j * width)))
 							{
 								MPstartPosX = (upperHalf % width) - middleX;;
 								MPstartPosY = middleY - floor((upperHalf + j * width) / width);
@@ -282,15 +286,15 @@ void Editor::initialize(const char* filename)
 						//bottom side
 						upperHalf += (startPosY - (endPosY + 1)) * width;
 						lowerHalf += (startPosY - (endPosY + 1)) * width;
-						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX != INFINITE && MPendPosX == INFINITE; j++)
+						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX != 10000 && MPendPosX == 10000; j++)
 						{
 							//TODO: add check for edge of png
-							if (getPixelColour(lowerHalf + j * width) == getPixelColour(i))
+							if (getPixelColour(lowerHalf + j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf+ j * width)))
 							{
 								MPendPosX = (lowerHalf % width) - middleX;;
 								MPendPosY = middleY - floor((lowerHalf - j * width) / width);
 							}
-							else if (getPixelColour(upperHalf + j * width) == getPixelColour(i))
+							else if (getPixelColour(upperHalf + j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(upperHalf + j * width)))
 							{
 								MPendPosX = (upperHalf % width) - middleX;;
 								MPendPosY = middleY - floor((upperHalf - j * width) / width);
@@ -318,11 +322,13 @@ void Editor::initialize(const char* filename)
 
 						center.x = startPosX + halfLength.x;
 						center.y = startPosY - halfLength.y;
-
+						vec4 color = vec4(getPixelColour(startPos), 0);
+						color /= 255;
 						this->movingPlatforms.push_back(MovingPlatform(vec3(MPstartPosX, MPstartPosY, 0),
 							vec3(MPendPosX, MPendPosY, 0),
 							center,
-							halfLength));
+							halfLength,
+							color));
 
 					}
 				}
@@ -340,15 +346,19 @@ void Editor::initialize(const char* filename)
 
 vec3 Editor::getPixelColour(int index)
 {
-	//Convert to RGB
-	index *= 3;
-	if (index > width * height * 3)
+	//Convert to RGBA
+	index *= 4;
+	if (index > width * height * 4)
 	{
 		return vec3(0, 0, 0);
 	}
-	return vec3(rgb[index], rgb[index + 1], rgb[index + 2]);
+	return vec3(rgba[index], rgba[index + 1], rgba[index + 2]);
 }
-
+int Editor::getAlpha(int index)
+{
+	index *= 4;
+	return rgba[index + 3];
+}
 int Editor::isPixelUsed(int index)
 {
 	int posY = (height / 2) - floor(index / width);
@@ -371,63 +381,62 @@ void Editor::addBoxToUsed(int startPosX, int startPosY, int endPosX, int endPosY
 	topSide.push_back(startPosY);
 	bottomSide.push_back(endPosY);
 }
-bool Editor::isWhite(vec3 pixelColour)
+bool Editor::isBackground(int alpha)
 {
-	return pixelColour.x == 255 && pixelColour.y == 255 && pixelColour.z == 255;
+	return alpha == 255;
 }
 
-bool Editor::isGoal(vec3 pixelColour)
+bool Editor::isGoal(int alpha)
 {
-	return pixelColour.x == 0 && pixelColour.y == 0 && pixelColour.z == 255;
+	return alpha == 250;
 }
 
-bool Editor::isEnemy(vec3 pixelColour)
+bool Editor::isEnemy(int alpha)
 {
-	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 0;
+	return alpha == 249;
 }
 
-bool Editor::isStartPoint(vec3 pixelColour)
+bool Editor::isStartPoint(int alpha)
 {
-	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z == 0;
+	return alpha == 248;
 }
-bool Editor::isBouncy(vec3 pixelColour)
+bool Editor::isBouncy(int alpha)
 {
-	return pixelColour.x == 255 && pixelColour.y == 0 && pixelColour.z == 255;
-}
-
-bool Editor::isHeavy(vec3 pixelColour)
-{
-	return pixelColour.x == 192 && pixelColour.y == 192 && pixelColour.z == 192;
+	return alpha == 245;
 }
 
-bool Editor::isSticky(vec3 pixelColour)
+bool Editor::isHeavy(int alpha)
 {
-	return pixelColour.x == 0 && pixelColour.y == 64 && pixelColour.z == 0;
+	return alpha == 247;
 }
 
-bool Editor::isNone(vec3 pixelColour)
+bool Editor::isSticky(int alpha)
 {
-	return pixelColour.x == 128 && pixelColour.y == 128 && pixelColour.z == 0;
+	return alpha == 246;
+}
+
+bool Editor::isNone(int alpha)
+{
+	return alpha == 244;
 
 }
 
-bool Editor::isPlatform(vec3 pixelColour)
+bool Editor::isPlatform(int alpha)
 {
-	return !(isEnemy(pixelColour) || isStartPoint(pixelColour) || isGoal(pixelColour) || isWhite(pixelColour) || isButton(pixelColour) 
-		|| isDoor(pixelColour) || isSticky(pixelColour) || isBouncy(pixelColour) || isHeavy(pixelColour) || isNone(pixelColour));
+	return alpha == 254 || alpha == 253;
 }
 
-bool Editor::isMovingPlatform(vec3 pixelColour)
+bool Editor::isMovingPlatform(int alpha)
 {
-	return pixelColour.x == 0 && pixelColour.y == 255 && pixelColour.z >= 120 && pixelColour.z <= 130;
+	return alpha == 253;
 }
 
-bool Editor::isButton(vec3 pixelColour)
+bool Editor::isButton(int alpha)
 {
-	return pixelColour.x == 150 && pixelColour.y >= 70 && pixelColour.y < 80 && pixelColour.z == 0;
+	return alpha == 251;
 }
-bool Editor::isDoor(vec3 pixelColour)
+bool Editor::isDoor(int alpha)
 {
-	return pixelColour.x == 150 && pixelColour.y >= 80 && pixelColour.y < 90;
+	return alpha == 252;
 }
 
