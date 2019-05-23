@@ -26,11 +26,7 @@ void Button::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 	if (other.colliderType == ColliderType::player && (other.hitbox->center.y >= hitbox.center.y) or other.colliderType == ColliderType::blob && (other.hitbox->center.y >= hitbox.center.y))
 	{
 		isPressed = true;
-		if (!isMoved && isPressed)
-		{
-			hitbox.center.y -= (hitbox.halfLengths.y * 2)+0.1;
-			isMoved = true;
-		}
+		timer = timerAdd;
 	}
 }
 
@@ -44,6 +40,7 @@ void Button::move(float dt)
 		{
 			timer = timerAdd;
 		}
+		
 	}
 	else if (!isPressed && isMoved)
 	{
@@ -61,4 +58,5 @@ void Button::move(float dt)
 			isPressed = false;
 		}
 	}
+
 }

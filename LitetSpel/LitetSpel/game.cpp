@@ -691,6 +691,7 @@ void Game::updatePhysics() {
 		for (auto& Gates : level.gates)
 		{
 			Gates.move(physicsSimTime);
+			Gates.button->move(physicsSimTime);
 		}
 
 		updatePlayerCollision();
