@@ -36,7 +36,7 @@ private:
 	ID3D11InputLayout* quadVertexLayout;
 	ID3D11Buffer* quadBuffer;
 
-	static const int maxMetaballs = 25;
+	static const int maxMetaballs = 50;
 	static const int maxLasers = 50;
 	static const int maxStaticBoxes = 4096;
 	static const int maxMovingBoxes = 50;

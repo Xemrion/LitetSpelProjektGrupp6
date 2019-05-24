@@ -15,7 +15,7 @@ struct Sphere {
 	float4 color;
 };
 
-#define MAX_SPHERES 25
+#define MAX_SPHERES 50
 cbuffer SphereBuffer : register(b1) {
 	Sphere spheres[MAX_SPHERES];
 	int nSpheres;
