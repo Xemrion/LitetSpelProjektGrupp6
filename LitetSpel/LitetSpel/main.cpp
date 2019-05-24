@@ -193,13 +193,13 @@ void keyboardFunc()
 			{
 				game.keys[Game::Keys::left] = true;
 			}
-			if (game.keys[Game::Keys::left] == true || game.keys[Game::Keys::right] == true) {
+			if ((game.keys[Game::Keys::left] == true || game.keys[Game::Keys::right] == true) && !game.level.player.isStuck) {
 				if (playerMove != true) {
 					gameSounds.StartPlayerMoveLoop();
 					playerMove = true;
 				}
 			}
-			if (game.keys[Game::Keys::left] != true && game.keys[Game::Keys::right] != true) {
+			if (game.keys[Game::Keys::left] != true && game.keys[Game::Keys::right] != true || game.level.player.isStuck) {
 				if (playerMove != false) {
 					gameSounds.StopPlayerMoveLoop();
 					playerMove = false;

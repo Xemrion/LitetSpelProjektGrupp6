@@ -169,7 +169,7 @@ void Player::update(double dt) noexcept {
 
 	if (isStanding)
 		hasExtraJump = true;
-	if (velocity.y < -4 || velocity.y > 4) {
+	if (velocity.y < -40 || velocity.y > 40) {
 		landing = false;
 	}
     mass = (status == PlayerStatus::Heavy)? 20.0f : 10.0f;
@@ -213,13 +213,13 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 				isStuck = false;
 				if (landing != true) {
 					if (status == PlayerStatus::Bouncy) {
-						gameSounds->PlayJumpSound03();
+						gameSounds->PlayLandingSound03();
 					}
 					else if (status == PlayerStatus::Heavy) {
-						gameSounds->PlayJumpSound02();
+						gameSounds->PlayLandingSound02();
 					}
 					else {
-						gameSounds->PlayJumpSound01();
+						gameSounds->PlayLandingSound01();
 					}
 					landing = true;
 				}
@@ -283,13 +283,13 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 				isStuck = false;
 				if (landing != true) {
 					if (status == PlayerStatus::Bouncy) {
-						gameSounds->PlayJumpSound03();
+						gameSounds->PlayLandingSound03();
 					}
 					else if (status == PlayerStatus::Heavy) {
-						gameSounds->PlayJumpSound02();
+						gameSounds->PlayLandingSound02();
 					}
 					else {
-						gameSounds->PlayJumpSound01();
+						gameSounds->PlayLandingSound01();
 					}
 					landing = true;
 				}
@@ -681,6 +681,15 @@ void Game::handleInput() {
 			player.jumpCooldown = COOLDOWN_CONSTANT;
 			player.velocity.y = 0;
 			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
+			if (player.status == PlayerStatus::Bouncy) {
+				gameSounds->PlayJumpSound03();
+			}
+			else if (player.status == PlayerStatus::Heavy) {
+				gameSounds->PlayJumpSound02();
+			}
+			else {
+				gameSounds->PlayJumpSound01();
+			}
 		}
 		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
 			player.hasExtraJump = false;
@@ -922,7 +931,7 @@ Enemy::~Enemy() {}
 
 void Enemy::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
-	if (other.colliderType == ColliderType::platform) {
+	if (other.colliderType == ColliderType::platform || other.colliderType == ColliderType::damagePlatform) {
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
