@@ -15,7 +15,12 @@ Laser::Laser(vec3 start, vec3 end, vec3 color, int index)
 	//hitbox.center = vec4(start,0);
 	hitbox.center = vec4(start - end/vec3(2), 0);
 	//hitbox.halfLengths = vec4(0.1, 20, 5 ,0);
-	hitbox.halfLengths = vec4((start-end)/vec3(2),0);
+	//hitbox.halfLengths = vec4((start-end)/vec3(2),0);
+	hitbox.halfLengths = vec4(vec3(
+		0.1,
+		(start.y - end.y)/2,
+		0.1),
+		0);
 	hitbox.color = vec4(color, 0);
 
 	this->index = index;
