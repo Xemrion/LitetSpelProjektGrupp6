@@ -117,7 +117,7 @@ private:
 	glm::vec3 cameraOffset = glm::vec3(0.0, 20.0, -150.0);
 	glm::vec3 cameraLookDownOffset = glm::vec3(0.0, -20.0, -150);
 	glm::vec3 cameraPos = glm::vec3(0.0, 20.0, -100.0);
-	bool panCamera = false;
+	bool panCamera = true;
 public:
 	double physicsSimTime = 0.0;
 	double time = 0.0;
