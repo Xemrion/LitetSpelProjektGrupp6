@@ -131,12 +131,12 @@ private:
 
 	//SFX
 	IDirectSoundBuffer8* jump01; //Jump for different power ups
-	IDirectSoundBuffer8* jump02;
-	IDirectSoundBuffer8* jump03;
+	IDirectSoundBuffer8* jump02; //Heavy
+	IDirectSoundBuffer8* jump03; //Bouncy
 
 	IDirectSoundBuffer8* land01; //Landing for different power ups
-	IDirectSoundBuffer8* land02;
-	IDirectSoundBuffer8* land03;
+	IDirectSoundBuffer8* land02; //Heavy
+	IDirectSoundBuffer8* land03; //Bouncy
 
 	IDirectSoundBuffer8* blob01; //Shoot
 	IDirectSoundBuffer8* blob02; //Landing
