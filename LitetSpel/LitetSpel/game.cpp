@@ -777,7 +777,6 @@ void Game::updatePhysics() {
 			}
 		}
 
-
 		// blobs:
 		for (auto &blob : player.blobs) {
 			if (blob.getIsActive() && blob.getIsStuck() == false && !blob.getIsBeingRecalled())
@@ -796,7 +795,6 @@ void Game::updatePhysics() {
 		for (auto& Gates : level.gates)
 		{
 			Gates.move(physicsSimTime);
-			Gates.button->move(physicsSimTime);
 		}
 
 		updatePlayerCollision();
