@@ -1064,8 +1064,6 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 		}
 	}
 
-	//memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(maxMetaballs, (int)metaballs.size()));
-	//metaballStruct.nSpheres = glm::min(maxMetaballs, (int)metaballs.size());
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, &metaballStruct, sizeof(MetaballStruct));
 	deviceContext->Unmap(metaballBuffer, 0);
