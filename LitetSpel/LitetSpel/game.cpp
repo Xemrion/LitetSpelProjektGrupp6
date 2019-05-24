@@ -902,6 +902,7 @@ void Game::updateGraphics() {
 			powerUpSphere.centerRadius.w = 10.0;
 			powerUpSphere.color = playerStatusColors[level.powerUps.at(i).getTypeAsInt()];
 			level.spheres.push_back(powerUpSphere);
+			animateSphere(powerUpSphere, glm::vec3(10, 10, 2));
 		}
 
 		//showHitboxes();
