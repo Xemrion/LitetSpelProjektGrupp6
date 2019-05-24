@@ -429,14 +429,13 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	
 		// if colliding with floor
 		if (minDistY.y > 0.0) {
-			//velocity.y = 0;
+			velocity.y = -15;
 			isStanding = true;
 			hasExtraJump = true;
 			isStuck = false;
 		}
 		//if colliding with ceiling
 		else {
-			velocity.y = 0;
 			velocity.y = min(0, velocity.y);
 		}
 	}
@@ -464,14 +463,13 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y > 0.0) {
-				//velocity.y = 0;
+				velocity.y = -15;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
 			}
 			//if colliding with ceiling
 			else {
-				velocity.y = 0;
 				velocity.y = min(0, velocity.y);
 			}
 		}
@@ -870,6 +868,7 @@ void Game::updateGraphics() {
 		{
 			level.player.blobs[i].blobSphere.color = playerSphere.color;
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
+			animateSphere(level.player.blobs[i].blobSphere, vec3(3.0, 3.0, 0.5));
 		}
 
 		for (int i = 0; i < level.powerUps.size(); ++i) {
