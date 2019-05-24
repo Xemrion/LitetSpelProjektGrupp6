@@ -349,8 +349,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				//game.animateVictory(game.playerSphere);
 			}
 			game.update(dt);
-			//graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
-			graphics.setCameraPos(game.getCameraPos(), false);
+			graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
 			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
 			graphics.castPlayerShadow(game.level.player.pos);
