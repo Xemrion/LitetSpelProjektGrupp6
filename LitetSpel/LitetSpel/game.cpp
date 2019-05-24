@@ -56,13 +56,22 @@ void Game::init() noexcept {
 		level.gates.push_back(editor.gates.at(i));
 		level.buttons.push_back(editor.buttons.at(i));
 	}
-	// Button and Gate hitboxes
+	// Button hitboxes
 	for (int i = 0; i < level.buttons.size(); i++)
 	{
 		level.gates.at(i).button = &level.buttons.at(i);
 
 		level.colManager.registerEntry(level.buttons.at(i), ColliderType::platform, level.buttons.at(i).hitbox, false);
+	}
+	//Gate hitboxes
+	for (int i = 0; i < level.gates.size(); i++)
+	{
 		level.colManager.registerEntry(level.gates.at(i), ColliderType::platform, level.gates.at(i).hitbox, true);
+	}
+	//Laser hitboxes
+	for (int i = 0; i < level.lasers.size(); i++)
+	{
+		level.colManager.registerEntry(level.lasers.at(i), ColliderType::damagePlatform, level.lasers.at(i).hitbox, true);
 	}
 	//Enemies
 	for (int i = 0; i < editor.enemies.size(); i++)
@@ -91,7 +100,8 @@ void Game::init() noexcept {
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
-	level.lasers.push_back(Laser(vec3(20, 80, 0), vec3(25, 0, 0), vec3(0,0,1), 50));
+	level.lasers.push_back(Laser(vec3(20, 40, 0), vec3(21, -40, 0), vec3(0,0,1), 50));
+	level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
 }
 
 void Game::reset()
@@ -777,7 +787,6 @@ void Game::updatePhysics() {
 			}
 		}
 
-
 		// blobs:
 		for (auto &blob : player.blobs) {
 			if (blob.getIsActive() && blob.getIsStuck() == false && !blob.getIsBeingRecalled())
@@ -796,7 +805,6 @@ void Game::updatePhysics() {
 		for (auto& Gates : level.gates)
 		{
 			Gates.move(physicsSimTime);
-			Gates.button->move(physicsSimTime);
 		}
 
 		updatePlayerCollision();
@@ -882,6 +890,7 @@ void Game::updateGraphics() {
 		for (int i = 0; i < level.lasers.size(); i++)
 		{
 			level.laserGraphics.push_back(level.lasers.at(i).visual);
+			level.movingBoxes.push_back(level.lasers.at(i).hitbox);
 		}
 
 		playerSphere.centerRadius = vec4(
@@ -911,6 +920,7 @@ void Game::updateGraphics() {
 			powerUpSphere.centerRadius.w = 10.0;
 			powerUpSphere.color = playerStatusColors[level.powerUps.at(i).getTypeAsInt()];
 			level.spheres.push_back(powerUpSphere);
+			animateSphere(powerUpSphere, glm::vec3(10, 10, 2));
 		}
 
 		//showHitboxes();

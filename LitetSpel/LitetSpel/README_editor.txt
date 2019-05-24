@@ -20,5 +20,5 @@ bouncy = (r,g,b,245)
 
 none = (r,g,b,244)
 
-laser = (r,g,b,243) (placera 5 pixlar vertikalt eller horisontalt) 
+laser = (r,g,x0..x9(index),243) (placera 5 pixlar vertikalt eller horisontalt) 
 

@@ -15,7 +15,7 @@
 #include"PowerUp.h"
 #include"Button.h"
 #include"Gate.h"
-
+#include"Laser.h"
 class Editor
 {
 
@@ -61,6 +61,7 @@ public:
 	std::vector<vec3> enemies;
 	std::vector<Gate> gates;
 	std::vector<Button> buttons;
+	std::vector<Laser> lasers;
 	int deathHeight;
 	void initialize(const char* filename);
 

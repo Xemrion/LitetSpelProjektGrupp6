@@ -34,5 +34,5 @@ void Gate::move(float dt)
 		this->hitbox.center.y += hitbox.halfLengths.y * 2 + 0.01;
 		isMoved = false;
 	}
-
+	button->move(dt);
 }
