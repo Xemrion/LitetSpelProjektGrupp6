@@ -18,8 +18,8 @@ void Editor::initialize(const char* filename)
 	int startPos = 0;
 	float startPosX = 0;
 	float startPosY = 0;
-	int endPosX = 0;
-	int endPosY = 0;
+	float endPosX = 0;
+	float endPosY = 0;
 	vec4 halfLength(0, 0, 10, 0);
 	vec4 center(0, 0, 0, 0);
 	bool foundEdge = false;
@@ -174,6 +174,7 @@ void Editor::initialize(const char* filename)
 				}
 
 				addBoxToUsed(startPosX, startPosY, endPosX, endPosY);
+				endPosX -= 1;
 				startPosX *= minimumBoxSize;
 				startPosY *= minimumBoxSize;
 				endPosY *= minimumBoxSize;
