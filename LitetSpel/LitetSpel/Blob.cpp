@@ -29,6 +29,7 @@ void Blob::absorb() noexcept
 	}
     isBeingRecalled = false;
     isActive        = false;
+	isStuck			= false;
 }
 
 void Blob::deactivateHitbox() noexcept {
@@ -141,7 +142,7 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
     }
 	if (!isActive) return;
 
-	if (other.colliderType == ColliderType::platform || other.colliderType == ColliderType::movingPlatform && !isBeingRecalled) {
+	if ((other.colliderType == ColliderType::platform || other.colliderType == ColliderType::movingPlatform) && !isBeingRecalled) {
 		if(hitbox.color.w == 0)
 		{
 			reactivateHitbox();
