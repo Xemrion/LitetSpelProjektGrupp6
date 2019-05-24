@@ -99,8 +99,7 @@ void Game::init() noexcept {
 	}
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
-
-	level.lasers.push_back(Laser(vec3(20, 40, 0), vec3(20, -40, 0), vec3(0,0,1), 50));
+	level.lasers.push_back(Laser(vec3(-20, 40, 0), vec3(20, 40, 0), vec3(0,0,1), 50));
 	level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
 }
 
@@ -890,7 +889,7 @@ void Game::updateGraphics() {
 		for (int i = 0; i < level.lasers.size(); i++)
 		{
 			level.laserGraphics.push_back(level.lasers.at(i).visual);
-			level.movingBoxes.push_back(level.lasers.at(i).hitbox);
+			//level.movingBoxes.push_back(level.lasers.at(i).hitbox);
 		}
 
 		playerSphere.centerRadius = vec4(
