@@ -6,14 +6,15 @@ Button::Button()
 	isMoved = false;
 }
 
-Button::Button(vec4 buttonCenter, vec2 halfLength, int index)
+Button::Button(vec4 buttonCenter, vec2 halfLength, vec4 color, float timerAdd, int index)
 {
 	this->hitbox.center = buttonCenter;
-	this->hitbox.halfLengths = vec4(halfLength,10,0);
-	this->hitbox.color = vec4(0.75f, 0.75f, 0.75f, 0);
+	this->hitbox.halfLengths = vec4(halfLength, 10, 0);
+	this->hitbox.color = color;
 	this->index = index;
 	isPressed = false;
 	isMoved = false;
+	this->timerAdd = timerAdd;
 }
 
 Button::~Button()
@@ -25,10 +26,37 @@ void Button::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 	if (other.colliderType == ColliderType::player && (other.hitbox->center.y >= hitbox.center.y) or other.colliderType == ColliderType::blob && (other.hitbox->center.y >= hitbox.center.y))
 	{
 		isPressed = true;
-		if (!isMoved && isPressed)
+		timer = timerAdd;
+	}
+}
+
+void Button::move(float dt)
+{
+	if (isPressed && !isMoved)
+	{
+		this->hitbox.center.y -= (hitbox.halfLengths.y * 2) + 0.01;
+		isMoved = true;
+		if (timerAdd > 0 && timer <= 0)
 		{
-			hitbox.center.y -= hitbox.halfLengths.y * 2;
-			isMoved = true;
+			timer = timerAdd;
+		}
+		
+	}
+	else if (!isPressed && isMoved)
+	{
+		this->hitbox.center.y += (hitbox.halfLengths.y * 2) + 0.01;
+		isMoved = false;
+	}
+	if (timerAdd > 0)
+	{
+		if (timer > 0)
+		{
+			timer -= dt / 10000;
+		}
+		else if (isPressed && timer < 0)
+		{
+			isPressed = false;
 		}
 	}
+
 }

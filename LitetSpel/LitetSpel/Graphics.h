@@ -36,9 +36,9 @@ private:
 	ID3D11InputLayout* quadVertexLayout;
 	ID3D11Buffer* quadBuffer;
 
-	static const int maxMetaballs = 15;
-	static const int maxLasers = 100;
-	static const int maxStaticBoxes = 300;
+	static const int maxMetaballs = 25;
+	static const int maxLasers = 50;
+	static const int maxStaticBoxes = 4096;
 	static const int maxMovingBoxes = 50;
 
 	ID3D11Buffer* staticBoxVertexBuffer;
@@ -62,8 +62,8 @@ private:
 	glm::vec3 cameraSpeed = glm::vec3(5.0, 5.0, 1.0);
 	glm::mat4 proj;
 	glm::mat4 invProj;
+	glm::mat4 invView;
 	glm::mat4 viewProj;
-	glm::mat4 invTransposedWVP;
 	glm::vec3 boxVertices[36 * 2]; // position + normals for 36 triangles
 	glm::vec4 frustumCorners[4];
 	Box cullingBox;
@@ -85,5 +85,6 @@ public:
 	void setCameraPos(glm::vec3 pos, bool panCamera); // Set camera position before setting boxes / metaballs
 	void castPlayerShadow(glm::vec3 playerPos); // Casts the player shadow on the currently loaded geometry
 	void swapBuffer();
+	glm::vec3 windowToWorldCoord(glm::vec2 windowCoord);
 	~Graphics();
 };

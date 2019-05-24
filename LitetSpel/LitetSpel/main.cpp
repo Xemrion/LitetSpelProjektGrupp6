@@ -9,10 +9,15 @@
 
 KeyboardInput keyboard;
 MouseInput mouse;
+Sounds gameSounds;
 Game game;
 Graphics graphics;
 
 double dt;
+
+bool playerMove;
+bool highlight;
+
 int xMus = 0;
 float powerCoolDown = 0.0;
 bool gameEnd = false;
@@ -129,7 +134,7 @@ void mouseFunc()
 		if (mouse.LeftIsPressed())
 		{
 			game.leftButtonDown = true;
-			game.mousePos = glm::vec3(mouse.GetXPos(), mouse.GetYPos(), 0);
+			game.mousePos = graphics.windowToWorldCoord(glm::vec2(mouse.GetXPos(), mouse.GetYPos()));
 		}
 		else
 			game.leftButtonDown = false;
@@ -139,12 +144,35 @@ void mouseFunc()
 		if (mouse.LeftIsPressed())
 		{
 			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
+				gameSounds.StopMenuMusic();
+				gameSounds.PlayMenuClickSound();
+				//gameSounds.StartGameMusic();
 				game.state = GameState::LevelState;
 			}
 			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
 			{
+				gameSounds.PlayMenuBackSound();
 				gameEnd = true;
 			}
+		}
+		if ((mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
+			if (highlight != true) {
+				gameSounds.PlayMenuHighlightSound();
+				game.MenuYes.color = yellow;
+				highlight = true;
+			}
+		}
+		else if((mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
+			if (highlight != true) {
+				gameSounds.PlayMenuHighlightSound();
+				game.MenuNo.color = yellow;
+				highlight = true;
+			}
+		}
+		else {
+			highlight = false;
+			game.MenuNo.color = red;
+			game.MenuYes.color = green;
 		}
 
 	}
@@ -154,117 +182,138 @@ void mouseFunc()
 void keyboardFunc()
 {
 	//Movement
-	if (game.level.player.knockBack == false && game.state == GameState::LevelState)
-	{
-		if (keyboard.KeyIsPressed('D') || keyboard.KeyIsPressed(VK_RIGHT))
+	if (game.state == GameState::LevelState) {
+		if (game.level.player.knockBack == false)
 		{
-			game.keys[Game::Keys::right] = true;
-		}
-		if (keyboard.KeyIsPressed('A') || keyboard.KeyIsPressed(VK_LEFT))
-		{
-			game.keys[Game::Keys::left] = true;
-		}
-		if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
-		{
-			game.keys[Game::Keys::up] = true;
-		}
-		if (keyboard.KeyIsPressed('S') || keyboard.KeyIsPressed(VK_DOWN))
-		{
-			game.keys[Game::Keys::down] = true;
-		}
+			if (keyboard.KeyIsPressed('D') || keyboard.KeyIsPressed(VK_RIGHT))
+			{
+				game.keys[Game::Keys::right] = true;
+			}
+			if (keyboard.KeyIsPressed('A') || keyboard.KeyIsPressed(VK_LEFT))
+			{
+				game.keys[Game::Keys::left] = true;
+			}
+			if (game.keys[Game::Keys::left] == true || game.keys[Game::Keys::right] == true) {
+				if (playerMove != true) {
+					gameSounds.StartPlayerMoveLoop();
+					playerMove = true;
+				}
+			}
+			if (game.keys[Game::Keys::left] != true && game.keys[Game::Keys::right] != true) {
+				if (playerMove != false) {
+					gameSounds.StopPlayerMoveLoop();
+					playerMove = false;
+				}
+			}
+			if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
+			{
+				game.keys[Game::Keys::up] = true;
+			}
+			if (keyboard.KeyIsPressed('S') || keyboard.KeyIsPressed(VK_DOWN))
+			{
+				game.keys[Game::Keys::down] = true;
+			}
 
-		if (keyboard.KeyIsPressed('B'))
-		{
-			if (powerCoolDown <= 0)
+			if (keyboard.KeyIsPressed('B'))
 			{
-				if (game.level.player.status == PlayerStatus::None)
+				if (powerCoolDown <= 0)
 				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					if (game.level.player.status == PlayerStatus::None)
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
+						}
+						game.level.player.status = PlayerStatus::Bouncy;
 					}
-					game.level.player.status = PlayerStatus::Bouncy;
-				}
-				else
-				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					else
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						}
+						game.level.player.status = PlayerStatus::None;
 					}
-					game.level.player.status = PlayerStatus::None;
+					powerCoolDown = 0.2f;
 				}
-				powerCoolDown = 0.2f;
 			}
-		}
-		if (keyboard.KeyIsPressed('H'))
-		{
-			if (powerCoolDown <= 0)
+			if (keyboard.KeyIsPressed('H'))
 			{
-				if (game.level.player.status == PlayerStatus::None)
+				if (powerCoolDown <= 0)
 				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					if (game.level.player.status == PlayerStatus::None)
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
+						}
+						game.level.player.status = PlayerStatus::Heavy;
 					}
-					game.level.player.status = PlayerStatus::Heavy;
-				}
-				else
-				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					else
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						}
+						game.level.player.status = PlayerStatus::None;
 					}
-					game.level.player.status = PlayerStatus::None;
+					powerCoolDown = 0.2f;
 				}
-				powerCoolDown = 0.2f;
 			}
-		}
-		if (keyboard.KeyIsPressed('Y'))
-		{
-			if (powerCoolDown <= 0)
+			if (keyboard.KeyIsPressed('Y'))
 			{
-				if (game.level.player.status == PlayerStatus::None)
+				if (powerCoolDown <= 0)
 				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					if (game.level.player.status == PlayerStatus::None)
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
+						}
+						game.level.player.status = PlayerStatus::Sticky;
 					}
-					game.level.player.status = PlayerStatus::Sticky;
-				}
-				else
-				{
-					for (int i = 0; i < game.level.player.blobCharges; i++)
+					else
 					{
-						game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						for (int i = 0; i < game.level.player.blobCharges; i++)
+						{
+							game.level.player.blobs[i].status = BlobStatus::Blob_None;
+						}
+						game.level.player.status = PlayerStatus::None;
 					}
-					game.level.player.status = PlayerStatus::None;
+					powerCoolDown = 0.2f;
 				}
-				powerCoolDown = 0.2f;
 			}
-		}
-		if (keyboard.KeyIsPressed('R'))
-			game.level.player.recallBlobs();
-		if (keyboard.KeyIsPressed('P')) {
-			graphics.createShaders();
-		}
-		if (keyboard.KeyIsPressed('K')) {
-			game.level.player.lifeCharges = 0;
+			if (keyboard.KeyIsPressed('R')) {
+				game.level.player.recallBlobs();
+			}
+			if (keyboard.KeyIsPressed('P')) {
+				graphics.createShaders();
+			}
+			if (keyboard.KeyIsPressed('K')) {
+				game.level.player.lifeCharges = 0;
+			}
+		} 
+		else if (game.level.player.knockBack == true && playerMove != false) {
+			gameSounds.StopPlayerMoveLoop();
+			playerMove = false;
 		}
 	}
-	
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
-	HWND wndHandle = InitWindow(hInstance, 1280, 720);
+	HWND wndHandle = InitWindow(hInstance, WINDOW_WIDTH, WINDOW_HEIGHT);
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
+	//if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
+	game.gameSounds = &gameSounds;
 
 	bool gameLoaded = false;
 	game.menuLoad();
 	ShowWindow(wndHandle, nCmdShow);
-
+	gameSounds.StartMenuMusic();
+	
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
 	{
@@ -288,7 +337,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			char title[64];
 			_itoa_s(1/dt, title, 64, 10);
 			SetWindowTextA(wndHandle, title);
-			
+
 			if (!game.level.player.levelCompleted) 
 			{
 				keyboardFunc();
@@ -300,7 +349,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				//game.animateVictory(game.playerSphere);
 			}
 			game.update(dt);
-			graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
+			//graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
+			graphics.setCameraPos(game.getCameraPos(), false);
 			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
 			graphics.castPlayerShadow(game.level.player.pos);
@@ -309,5 +359,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 	}
 
+	gameSounds.Shutdown();
 	return 0;
 }

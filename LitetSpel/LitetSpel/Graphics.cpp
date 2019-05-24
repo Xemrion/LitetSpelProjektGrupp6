@@ -1,3 +1,4 @@
+#include "Globals.h"
 #include "Graphics.h"
 #include "Collisions.h"
 
@@ -59,8 +60,9 @@ HRESULT Graphics::createDeviceContext(HWND wndHandle, bool windowed)
 {
 	DXGI_SWAP_CHAIN_DESC scd;
 	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
-
-	scd.BufferCount = 1;
+	
+	scd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+	scd.BufferCount = 2;
 	scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	scd.OutputWindow = wndHandle;
@@ -1058,7 +1060,7 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 
 		if (CollisionManager::intersect(boundingBox, cullingBox)) {
 			metaballStruct.spheres[structIndex++] = metaballs[i];
-			metaballStruct.nSpheres = glm::min(maxMetaballs, structIndex);
+			metaballStruct.nSpheres = min(maxMetaballs, structIndex);
 		}
 	}
 
@@ -1075,7 +1077,7 @@ void Graphics::setCameraPos(glm::vec3 pos, bool panCamera)
 	if (panCamera && pos != camera) {
 		glm::vec3 cameraDir = pos - camera;
 		glm::vec3 delta = glm::normalize(cameraDir) * glm::smoothstep(-10.f, 75.f, glm::length(cameraDir)) * cameraSpeed;
-		if (glm::length(delta) > glm::length(pos - camera)) {
+		if (glm::length(delta) > glm::length(cameraDir)) {
 			camera = pos;
 		}
 		else {
@@ -1220,4 +1222,14 @@ Graphics::~Graphics()
 	SAFE_RELEASE(viewProjBuffer);
 	SAFE_RELEASE(cameraBuffer);
 	SAFE_RELEASE(cornerBuffer);
+}
+
+glm::vec3 Graphics::windowToWorldCoord(glm::vec2 windowCoord) {
+	windowCoord.y = WINDOW_HEIGHT - windowCoord.y;
+	glm::vec4 projected = glm::transpose(viewProj) * glm::vec4(0.0, 0.0, 0.0, 1.0);
+	projected.x = ((windowCoord.x / WINDOW_WIDTH) * 2.0 - 1.0) * projected.w;
+	projected.y = ((windowCoord.y / WINDOW_HEIGHT) * 2.0 - 1.0) * projected.w;
+
+	glm::vec3 worldPos = glm::inverse(glm::transpose(viewProj)) * projected;
+	return worldPos;
 }

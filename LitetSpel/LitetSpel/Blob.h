@@ -26,6 +26,7 @@ public:
 	void move(double dt) noexcept;
 	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
 	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
+	void followPlayer();
 
 	void collide(ColliderType ownType, const HitboxEntry& other) noexcept override;
 
@@ -42,9 +43,12 @@ public:
 
 private:
     glm::vec3 const *parentPosition;
+	glm::vec3 followParentSpeed = glm::vec3(2.0, 2.0, 1.0);
+	glm::vec3 offsetFromParent;
     bool  isActive;
 	bool isStuck;
     bool  isBeingRecalled;
+	bool isLanding;
     float recallSpeed;
     float speed;
     float radius;

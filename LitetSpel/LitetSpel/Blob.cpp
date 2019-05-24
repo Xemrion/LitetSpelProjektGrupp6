@@ -1,6 +1,7 @@
 #include "Blob.h"
 #include <algorithm>
 
+
 Blob::Blob( glm::vec3 const &parentPosition ):
     parentPosition  ( &parentPosition ),
     pos             (  parentPosition ),
@@ -16,10 +17,16 @@ Blob::Blob( glm::vec3 const &parentPosition ):
     velocity        (   .0f)
 {
 	deactivateHitbox();
+
+	int hashVal = (int)this;
+	offsetFromParent = (glm::fract(glm::vec3(sin(hashVal) * 123987.f, sin(hashVal) * 97623.f, sin(hashVal) * 8911.f)) * 2.0f - 1.0f) * glm::vec3(2.0, 2.0, 1.0);
 }
 
 void Blob::absorb() noexcept
 {
+	if (isActive != false && isBeingRecalled != false) {
+		gameSounds->PlayAbsorbSound01();
+	}
     isBeingRecalled = false;
     isActive        = false;
 }
@@ -48,6 +55,7 @@ void Blob::shoot( glm::vec3 const &direction ) noexcept
 {
     if ( !isActive && !isBeingRecalled ) {
         isActive = true;
+		pos = *parentPosition;
         velocity = (status == BlobStatus::Blob_Heavy)?  direction * speed/3.0f  :  direction * speed;
 	}
 }
@@ -71,14 +79,14 @@ void Blob::update(double dt) noexcept
     if ( isBeingRecalled ) 
 	{
         float speed          = std::min( recallSpeed * float(dt), glm::distance(pos, *parentPosition) );
-        glm::vec3 direction  = glm::normalize( *parentPosition - pos );
-		pos                 += recallSpeed * direction *float(dt);
+        if (glm::length(*parentPosition - pos) > 0.0) {
+			glm::vec3 direction  = glm::normalize( *parentPosition - pos );
+			pos += recallSpeed * direction * float(dt);
+		}
 		isStuck              = false;
 	}
-    if (!isActive) {
-        pos = *parentPosition + glm::vec3(0.0, 2.0, 0.0);
-		setVelocity(glm::vec3(0.0));
-        blobSphere.centerRadius = glm::vec4(*parentPosition, 2);
+	if (!isActive) {
+		
     }
 	if (isStuck == true && status != BlobStatus::Blob_Sticky) 
 	{
@@ -87,6 +95,9 @@ void Blob::update(double dt) noexcept
 	if (!isActive) 
 	{
 		deactivateHitbox();
+	}
+	if (velocity.y > 4 || velocity.y < -4) {
+		isLanding = false;
 	}
 	blobSphere.centerRadius = glm::vec4( pos, radius );
 }
@@ -124,34 +135,53 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
          other.colliderType == ColliderType::player ))
     {
         absorb();
+		return;
     }
+	if (!isActive) return;
 
-	if (other.colliderType == ColliderType::platform && !isBeingRecalled) {
-		if (status == BlobStatus::Blob_Bouncy) 
-		{
-			this->velocity.y = -this->velocity.y;
-			this->velocity.x = 0;
-		}
-		else if (status == BlobStatus::Blob_Sticky) 
-		{
-			this->velocity = glm::vec3(0.0);
-			isStuck = true;
-		}
-		else 
-		{
-			this->velocity = glm::vec3(0.0);
-		}
+	if (other.colliderType == ColliderType::platform || other.colliderType == ColliderType::movingPlatform && !isBeingRecalled) {
 		if(hitbox.color.w == 0)
 		{
 			reactivateHitbox();
 		}
+		float eps = 0.1; // fixes some issues with platform edges
 		glm::vec3 pushUp    = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown  = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
 		glm::vec3 pushLeft  = glm::vec3(other.hitbox->center.x - other.hitbox->halfLengths.x + (-hitbox.center.x - hitbox.halfLengths.x), 0.0, 0.0);
 		glm::vec3 minDistY  = glm::length(pushUp)   < glm::length(pushDown)  ? pushUp   : pushDown;
 		glm::vec3 minDistX  = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
-		pos                += glm::length(minDistY) < glm::length(minDistX)  ? minDistY : minDistX;
+		// posDiff is the direction and amount to push the blob away from the platform
+		glm::vec3 posDiff   = glm::length(minDistY) < glm::length(minDistX) - eps ? minDistY : minDistX;
+		pos				   += posDiff;
+
+		// if a bouncy blob collides with a floor
+		if (status == BlobStatus::Blob_Bouncy && posDiff.y > 0.0)
+		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
+			this->velocity.y = -this->velocity.y;
+			this->velocity.x = 0;
+		}
+		else if (status == BlobStatus::Blob_Sticky) 
+		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
+			this->velocity = glm::vec3(0.0);
+			isStuck = true;
+		}
+		else 
+		{
+			if (isBeingRecalled == false && isLanding == false) {
+				gameSounds->PlayBlobSound02();
+				isLanding = true;
+			}
+			this->velocity = glm::vec3(0.0);
+		}
 	}
 	else if (isActive and other.colliderType == ColliderType::enemy)
 	{
@@ -195,4 +225,59 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 			pos += glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 		}	
 	}
+}
+
+void Blob::followPlayer() {
+	const auto random2 = [&](glm::vec2 xy) {
+		float hash = float(((int(this) * 987231) >> 4) & 0xFF) * float(((int(this) * 9102301) >> 3) & 0xFF);
+		xy = glm::vec2(
+			glm::dot(xy, glm::vec2(13.26, 17.97)),
+			glm::dot(xy, glm::vec2(19.29, 16.47))
+		);
+
+		return 1.0f - 2.0f * glm::fract(glm::sin(xy) * hash);
+	};
+
+	const auto perlinNoise = [&](glm::vec2 pos) {
+		glm::vec2 i = glm::floor(pos);
+		glm::vec2 f = glm::fract(pos);
+		glm::vec2 curve = 6.f *f*f*f*f*f - 15.f *f*f*f*f + 10.f *f*f*f;
+
+		glm::vec2 a = glm::vec2(0.0, 0.0);
+		glm::vec2 b = glm::vec2(1.0, 0.0);
+		glm::vec2 c = glm::vec2(0.0, 1.0);
+		glm::vec2 d = glm::vec2(1.0, 1.0);
+
+		float wa = glm::dot(random2(i + a), f - a);
+		float wb = glm::dot(random2(i + b), f - b);
+		float wc = glm::dot(random2(i + c), f - c);
+		float wd = glm::dot(random2(i + d), f - d);
+
+		return glm::mix(
+			glm::mix(wa, wb, curve.x),
+			glm::mix(wc, wd, curve.x),
+			curve.y
+		);
+	};
+
+	offsetFromParent = glm::vec3(
+		perlinNoise(glm::vec2(parentPosition->x, parentPosition->y) * 0.01f),
+		perlinNoise(glm::vec2(parentPosition->x + 111.1, parentPosition->y + 111.1) * 0.01f),
+		perlinNoise(glm::vec2(parentPosition->x - 123.4, parentPosition->y - 432.1) * 0.01f)) *
+		glm::vec3(11.0, 11.0, 5.0);
+	glm::vec3 targetPos = *parentPosition + offsetFromParent;
+	setVelocity(glm::vec3(0.0));
+
+	glm::vec3 moveDir = targetPos - pos;
+	if (glm::length(moveDir) > 0) {
+		glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(0.f, 12.0f, glm::length(moveDir)) * followParentSpeed;
+
+		if (glm::length(delta) > glm::length(moveDir)) {
+			pos = targetPos;
+		}
+		else {
+			pos += delta;
+		}
+	}
+
 }
