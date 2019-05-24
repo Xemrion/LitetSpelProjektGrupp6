@@ -196,7 +196,7 @@ void Player::update(double dt) noexcept {
 	if (velocity.y < -40 || velocity.y > 40) {
 		landing = false;
 	}
-	mass = (status == PlayerStatus::Heavy) ? 20.0f : 10.0f;
+	mass = (status == PlayerStatus::Heavy) ? 15.0f : 10.0f;
 	isStuck = false;
 	if (status != PlayerStatus::Sticky) {
 		isStuck = false;
@@ -452,7 +452,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		posDiff = minDistY;
 	
 		// if colliding with floor
-		if (minDistY.y >= 0.0) {
+		if (minDistY.y > 0.0) {
 			velocity.y = -15;
 			isStanding = true;
 			hasExtraJump = true;
@@ -718,6 +718,7 @@ void Game::handleInput() {
 			player.jumpCooldown = COOLDOWN_CONSTANT;
 			player.velocity.y = 0;
 			player.putForce(vec3(0.0, player.jumpForce, 0.0));
+			gameSounds->PlayJumpSound03();
 		}
 	}
 	if (keys[Keys::left]) {
@@ -963,7 +964,7 @@ Enemy::~Enemy() {}
 
 void Enemy::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 {
-	if (other.colliderType == ColliderType::platform || other.colliderType == ColliderType::damagePlatform) {
+	if (other.colliderType == ColliderType::platform) {
 		glm::vec3 pushUp = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushRight = glm::vec3(other.hitbox->center.x + other.hitbox->halfLengths.x + (-hitbox.center.x + hitbox.halfLengths.x), 0.0, 0.0);
