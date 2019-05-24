@@ -159,8 +159,8 @@ float4 main(VS_OUT input) : SV_Target
 			/* absorbtion diffuse */
 			float3 absorbed = exp2(-sphereColor * length(backp - p));
 			diffuseColor = absorbed;
-			float roughness = 1.0 - clamp(sphereColor.a, 0.01, 0.99);
-			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(0.2, 0.2, 0.2) - sphereColor.rgb, roughness);
+			float roughness = 1.0 - clamp(sphereColor.a, 0.04, 0.96);
+			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(0.5, 0.5, 0.5) - sphereColor.rgb, roughness);
 
 			/* refraction diffuse */
 			float3 refractColor = float3(0.0, 0.0, 0.0);
