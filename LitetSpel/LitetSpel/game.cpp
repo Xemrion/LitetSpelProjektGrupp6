@@ -894,7 +894,7 @@ void Game::updateGraphics() {
 		for (int i = 0; i < level.lasers.size(); i++)
 		{
 			level.laserGraphics.push_back(level.lasers.at(i).visual);
-			level.movingBoxes.push_back(level.lasers.at(i).hitbox);
+			//level.movingBoxes.push_back(level.lasers.at(i).hitbox);
 		}
 
 		playerSphere.centerRadius = vec4(
