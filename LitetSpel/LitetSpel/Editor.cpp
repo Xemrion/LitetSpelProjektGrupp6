@@ -61,7 +61,7 @@ void Editor::initialize(const char* filename)
 				startPosY /= pixelToUnitRatio;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->enemyPos.push_back(vec3(center));
+				this->enemies.push_back(center);
 			}
 			else if (isStartPoint(getAlpha(i)))
 			{
@@ -150,13 +150,13 @@ void Editor::initialize(const char* filename)
 				color /= 255;
 				this->buttons.push_back(Button(center, halfLength, color, int(getPixelColour(i).z) % 10, int(getPixelColour(i).y) % 10));
 			}
-			else if (isLaser(getPixelColour(i)))
+			else if (isLaser(getAlpha(i)))
 			{
 
 				bool edgeFound = false;
 				for (int j = 1; j < maxLaserLength && !edgeFound; j++)
 				{
-					if (!isLaser(getPixelColour(i + j)))
+					if (!isLaser(getAlpha(i + j)))
 					{
 						endPosX = startPosX + j;
 						endPosY = startPosY;
@@ -167,7 +167,7 @@ void Editor::initialize(const char* filename)
 				{
 					for (int j = 0; j < maxLaserLength && !edgeFound; j++)
 					{
-						if (!isLaser(getPixelColour(i + j * width)))
+						if (!isLaser(getAlpha(i + j * width)))
 						{
 							endPosX = startPosX;
 							endPosY = startPosY - j;
@@ -472,6 +472,10 @@ bool Editor::isMovingPlatform(int alpha)
 bool Editor::isButton(int alpha)
 {
 	return alpha == 251;
+}
+bool Editor::isLaser(int alpha)
+{
+	return alpha == 243;
 }
 bool Editor::isDoor(int alpha)
 {
