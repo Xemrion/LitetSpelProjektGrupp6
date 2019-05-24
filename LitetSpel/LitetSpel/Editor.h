@@ -61,6 +61,7 @@ public:
 	std::vector<vec3> enemies;
 	std::vector<Gate> gates;
 	std::vector<Button> buttons;
+	int deathHeight;
 	void initialize(const char* filename);
 
 };

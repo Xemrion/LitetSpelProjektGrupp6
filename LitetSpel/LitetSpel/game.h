@@ -63,9 +63,8 @@ public:
 	void putForce(vec3 const &force) noexcept;
 	void move(float dt) noexcept;
 
-    vec3 pos, velocity, controlDir, playerPos;
+    vec3 pos, velocity, controlDir;
     float moveSpeed, jumpForce, jumpCooldown, mass;
-	int enemyIndex;
     bool isStanding, alive, isDeregistered, isStuck;
     Box hitbox;
 };
@@ -136,6 +135,7 @@ public:
 	bool leftButtonDown = false;
 
 	void init() noexcept;
+	void reset();
 	void menuLoad();
 	void update(double dt);
 	void updatePhysics();
