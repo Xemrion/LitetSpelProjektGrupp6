@@ -310,12 +310,12 @@ void Editor::initialize(const char* filename)
 							if (getPixelColour(lowerHalf - j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf - j * width)))
 							{
 								MPstartPosX = (lowerHalf % width) - middleX;;
-								MPstartPosY = middleY - floor((lowerHalf + j * width) / width);
+								MPstartPosY = middleY - floor((lowerHalf - j * width) / width);
 							}
 							else if (getPixelColour(upperHalf - j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(upperHalf - j * width)))
 							{
 								MPstartPosX = (upperHalf % width) - middleX;;
-								MPstartPosY = middleY - floor((upperHalf + j * width) / width);
+								MPstartPosY = middleY - floor((upperHalf - j * width) / width);
 							}
 						}
 						//bottom side
@@ -327,12 +327,12 @@ void Editor::initialize(const char* filename)
 							if (getPixelColour(lowerHalf + j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf + j * width)))
 							{
 								MPendPosX = (lowerHalf % width) - middleX;;
-								MPendPosY = middleY - floor((lowerHalf - j * width) / width);
+								MPendPosY = middleY - floor((lowerHalf + j * width) / width);
 							}
 							else if (getPixelColour(upperHalf + j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(upperHalf + j * width)))
 							{
 								MPendPosX = (upperHalf % width) - middleX;;
-								MPendPosY = middleY - floor((upperHalf - j * width) / width);
+								MPendPosY = middleY - floor((upperHalf + j * width) / width);
 							}
 						}
 

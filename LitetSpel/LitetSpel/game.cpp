@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("test.png");
+	editor.initialize("David.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -935,7 +935,7 @@ void Game::updateGraphics() {
 			powerUpSphere.centerRadius.w = 10.0;
 			powerUpSphere.color = playerStatusColors[level.powerUps.at(i).getTypeAsInt()];
 			level.spheres.push_back(powerUpSphere);
-			animateSphere(powerUpSphere, glm::vec3(10, 10, 2));
+			animateSphere(powerUpSphere, glm::vec3(5, 5,1));
 		}
 
 		//showHitboxes();
