@@ -56,17 +56,19 @@ void Game::init() noexcept {
 		level.gates.push_back(editor.gates.at(i));
 		level.buttons.push_back(editor.buttons.at(i));
 	}
-	// Button and Gate hitboxes
+	// Button hitboxes
 	for (int i = 0; i < level.buttons.size(); i++)
 	{
 		level.gates.at(i).button = &level.buttons.at(i);
 
 		level.colManager.registerEntry(level.buttons.at(i), ColliderType::platform, level.buttons.at(i).hitbox, false);
 	}
+	//Gate hitboxes
 	for (int i = 0; i < level.gates.size(); i++)
 	{
 		level.colManager.registerEntry(level.gates.at(i), ColliderType::platform, level.gates.at(i).hitbox, true);
 	}
+	//Laser hitboxes
 	for (int i = 0; i < level.lasers.size(); i++)
 	{
 		level.colManager.registerEntry(level.lasers.at(i), ColliderType::damagePlatform, level.lasers.at(i).hitbox, true);
