@@ -42,29 +42,38 @@ void Game::init() noexcept {
 			break;
 		}
 	}
-	// Buttons and Gates
+	// Buttons
 	for (int i = 0; i < editor.buttons.size(); i++)
 	{
-		while (editor.buttons.at(i).index != i)
-		{
-			std::swap(editor.buttons.at(i), editor.buttons.at(editor.buttons.at(i).index));
-		}
-		while (editor.gates.at(i).index != i)
-		{
-			std::swap(editor.gates.at(i), editor.gates.at(editor.gates.at(i).index));
-		}
-		level.gates.push_back(editor.gates.at(i));
 		level.buttons.push_back(editor.buttons.at(i));
+
+	}
+	//Gates
+	for (int i = 0; i < editor.gates.size(); i++)
+	{
+		level.gates.push_back(editor.gates.at(i));
+		for (int j = 0; j < level.buttons.size(); j++)
+		{
+			if (editor.gates.at(i).index == level.buttons.at(j).index)
+			{
+				level.gates.at(i).buttons.push_back(&level.buttons.at(j));
+			}
+		}
 	}
 	for (int i = 0; i < editor.lasers.size(); i++)
 	{
 		level.lasers.push_back(editor.lasers.at(i));
+		for (int j = 0; j < level.buttons.size(); j++)
+		{
+			if (editor.lasers.at(i).index == level.buttons.at(j).index)
+			{
+				level.lasers.at(i).buttons.push_back(&level.buttons.at(j));
+			}
+		}
 	}
 	// Button hitboxes
 	for (int i = 0; i < level.buttons.size(); i++)
 	{
-		level.gates.at(i).button = &level.buttons.at(i);
-
 		level.colManager.registerEntry(level.buttons.at(i), ColliderType::platform, level.buttons.at(i).hitbox, false);
 	}
 	//Gate hitboxes
@@ -103,9 +112,6 @@ void Game::init() noexcept {
 	}
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
-
-	//level.lasers.push_back(Laser(vec3(20, 40, 0), vec3(20, -40, 0), vec3(0,0,1), 50));
-	//level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
 }
 
 void Game::reset()
@@ -884,11 +890,16 @@ void Game::updateGraphics() {
 		{
 			level.movingBoxes.push_back(level.movingPlatforms.at(i).hitbox);
 		}
-		// Gates & buttons
+		// Gates
 		for (int i = 0; i < level.gates.size(); i++)
 		{
 			level.movingBoxes.push_back(level.gates.at(i).hitbox);
+		}
+		//Buttons
+		for (int i = 0; i < level.buttons.size(); i++)
+		{
 			level.movingBoxes.push_back(level.buttons.at(i).hitbox);
+
 		}
 		// Lasers
 		for (int i = 0; i < level.lasers.size(); i++)

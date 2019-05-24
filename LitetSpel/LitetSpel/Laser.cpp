@@ -14,7 +14,7 @@ Laser::Laser(vec3 start, vec3 end, vec3 color, int index)
 
 	//hitbox.center = vec4(start,0);
 	//hitbox.center = vec4(start + end/vec3(2), 0);
-	hitbox.center = vec4((start.x + end.x)/2, (start.y + end.y)/2, 0, 0);
+	hitbox.center = vec4((start.x + end.x) / 2, (start.y + end.y) / 2, 0, 0);
 	//hitbox.halfLengths = vec4(0.1, 20, 5 ,0);
 	//hitbox.halfLengths = vec4((start-end)/vec3(2),0);
 	hitbox.halfLengths = vec4(vec3(
@@ -39,15 +39,35 @@ void Laser::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 
 void Laser::move(float dt)
 {
-	if (button->isMoved && !isMoved)
+	bool activateLaser;
+	bool deactivateLaser;
+	for (int i = 0; i < buttons.size(); i++)
 	{
-		//hitbox.center = vec4(0, -1000, 0, 0);
-		//isMoved = true;
+		for (int i = 0; i < buttons.size(); i++)
+		{
+			if (buttons.at(i)->isMoved && !isMoved)
+			{
+				deactivateLaser = true;
+			}
+			else if (!buttons.at(i)->isMoved && isMoved)
+			{
+				activateLaser = true;
+			}
+			buttons.at(i)->move(dt);
+
+		}
+		if (deactivateLaser)
+		{
+			//hitbox.center = vec4(0, -1000, 0, 0);
+			//isMoved = true;
+
+		}
+		else if (activateLaser)
+		{
+			//hitbox.center = vec4(visual.start - (visual.end / vec3(2)), 0);
+			//isMoved = false;
+		}
+		buttons.at(i)->move(dt);
 	}
-	else if (!button->isMoved && isMoved)
-	{
-		//hitbox.center = vec4(visual.start - (visual.end / vec3(2)), 0);
-		//isMoved = false;
-	}
-	button->move(dt);
+
 }

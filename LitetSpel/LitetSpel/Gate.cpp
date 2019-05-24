@@ -24,15 +24,30 @@ void Gate::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 
 void Gate::move(float dt)
 {
-	if(button->isMoved && !isMoved)
+	bool gateMoveDown;
+	bool gateMoveUp = false;                    
+	for (int i = 0; i < buttons.size(); i++)
+	{
+		if (buttons.at(i)->isMoved && !isMoved)
+		{
+			gateMoveDown = true;
+		}
+		else if (!buttons.at(i)->isMoved && isMoved)
+		{
+			gateMoveUp = true;
+		}
+		buttons.at(i)->move(dt);
+
+	}
+	if (gateMoveDown)
 	{
 		this->hitbox.center.y -= hitbox.halfLengths.y * 2 + 0.01;
 		isMoved = true;
+
 	}
-	else if(!button->isMoved && isMoved)
+	else if(gateMoveUp)
 	{
 		this->hitbox.center.y += hitbox.halfLengths.y * 2 + 0.01;
 		isMoved = false;
 	}
-	button->move(dt);
 }

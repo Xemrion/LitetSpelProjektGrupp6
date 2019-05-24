@@ -14,7 +14,7 @@ public:
 
 	Line visual;
 	Box hitbox;
-	Button* button;
+	std::vector<Button*> buttons;
 	bool isMoved;
 	int index;
 
