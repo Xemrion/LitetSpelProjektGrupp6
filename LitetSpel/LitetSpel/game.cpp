@@ -93,11 +93,11 @@ void Game::init() noexcept {
 	}
 
 	// Lasers
-	level.lasers.push_back(Laser(vec3(0,-80,0), vec3(1000, 0,0), vec3(cyan), 50));
-	level.buttons.push_back(Button(vec4(50,0,0,0), vec4(2,2,2,0), vec4(1,1,1,0), 20, 50));
-	level.lasers.at(0).button = &level.buttons.at(level.buttons.size()-1);
+	level.lasers.push_back(Laser(vec3(0,40,0), vec3(1000, 0,0), vec3(cyan), 50));
+	//level.buttons.push_back(Button(vec4(50,0,0,0), vec4(2,2,2,0), vec4(1,1,1,0), 20, 50));
+	//level.lasers.at(0).button = &level.buttons.at(level.buttons.size()-1);
 	level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
-	level.colManager.registerEntry(level.buttons.at(level.buttons.size()-1), ColliderType::movingPlatform, level.buttons.at(level.buttons.size()-1).hitbox, false);
+	//level.colManager.registerEntry(level.buttons.at(level.buttons.size()-1), ColliderType::movingPlatform, level.buttons.at(level.buttons.size()-1).hitbox, false);
 }
 
 void Game::menuLoad()
