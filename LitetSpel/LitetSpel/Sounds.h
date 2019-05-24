@@ -63,9 +63,6 @@ public:
 	bool StartPlayerMoveLoop();
 	bool StopPlayerMoveLoop();
 
-	bool PlayEnemyJumpSound(int index, float distance);
-	bool InitializeEnemySounds(int nrOfEnemies);
-
 	void setLimits(float inner, float outer);
 	void setMasterVolume(UINT master);
 	void setSFXVolume(UINT sfx);
@@ -107,7 +104,6 @@ private:
 	bool SetVolume(IDirectSoundBuffer8* sound, LONG volume);
 	bool StopSFX(IDirectSoundBuffer8* sound);
 	bool ContinueSFX(IDirectSoundBuffer8* sound);
-	void ShutdownEnemySounds();
 
 private:
 	UINT masterVolume;
@@ -160,8 +156,6 @@ private:
 	IDirectSoundBuffer8* menuClickButton;
 	IDirectSoundBuffer8* menuBack;
 
-	std::vector<IDirectSoundBuffer8*> enemies;
-	int nrOfEnemies;
 
 };
 
