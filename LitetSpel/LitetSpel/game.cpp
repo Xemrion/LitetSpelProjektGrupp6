@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("test.png");
+	editor.initialize("prototypeThree.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -90,6 +90,21 @@ void Game::init() noexcept {
 	}
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
+}
+
+void Game::reset()
+{
+	level.spheres = vector<Sphere>();
+	level.movingBoxes = vector<Box>();
+	level.buttons = vector<Button>();
+	level.enemies = vector<Enemy>();
+	level.gates = vector<Gate>();
+	level.movingPlatforms = vector<MovingPlatform>();
+	level.powerUps = vector<PowerUp>();
+	level.staticBoxes = vector<Box>();
+	//TODO:
+	//Deregister hitboxes
+	init();
 }
 
 void Game::menuLoad()

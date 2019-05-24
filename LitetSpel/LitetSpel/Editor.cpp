@@ -29,7 +29,7 @@ void Editor::initialize(const char* filename)
 	int middleX = width / 2;
 	int middleY = height / 2;
 	int pixelUsedIndex = 0;
-
+	this->deathHeight = -height / 2;
 	for (int i = 0; i < width * height; i++)
 	{
 		if (!isBackground(getAlpha(i)) && isPixelUsed(i) == -1)

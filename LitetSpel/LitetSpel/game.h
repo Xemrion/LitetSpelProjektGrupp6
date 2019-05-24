@@ -136,6 +136,7 @@ public:
 	bool leftButtonDown = false;
 
 	void init() noexcept;
+	void reset();
 	void menuLoad();
 	void update(double dt);
 	void updatePhysics();
