@@ -420,27 +420,26 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
-		// if colliding in Y-axis
-		if (glm::length(minDistY) < glm::length(minDistX)) {
-			posDiff = minDistY;
-
-			// if colliding with floor
-			if (minDistY.y > 0.0) {
-				//velocity.y = 0;
-				isStanding = true;
-				hasExtraJump = true;
-				isStuck = false;
-			}
-			//if colliding with ceiling
-			else {
-				velocity.y = 0;
-				velocity.y = min(0, velocity.y);
-			}
+	// if colliding in Y-axis
+	if (glm::length(minDistY) < glm::length(minDistX)) {
+		posDiff = minDistY;
+	
+		// if colliding with floor
+		if (minDistY.y > 0.0) {
+			velocity.y = -15;
+			isStanding = true;
+			hasExtraJump = true;
+			isStuck = false;
 		}
-		// if colliding in X-axis
+		//if colliding with ceiling
 		else {
-			posDiff = minDistX;
+			velocity.y = min(0, velocity.y);
 		}
+	}
+	// if colliding in X-axis
+	else {
+		posDiff = minDistX;
+	}
 
 		pos += posDiff;
 	}
@@ -461,14 +460,13 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y > 0.0) {
-				//velocity.y = 0;
+				velocity.y = -15;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
 			}
 			//if colliding with ceiling
 			else {
-				velocity.y = 0;
 				velocity.y = min(0, velocity.y);
 			}
 		}
@@ -867,6 +865,7 @@ void Game::updateGraphics() {
 		{
 			level.player.blobs[i].blobSphere.color = playerSphere.color;
 			level.spheres.push_back(level.player.blobs[i].blobSphere);
+			animateSphere(level.player.blobs[i].blobSphere, vec3(3.0, 3.0, 0.5));
 		}
 
 		for (int i = 0; i < level.powerUps.size(); ++i) {
