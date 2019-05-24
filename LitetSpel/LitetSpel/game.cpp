@@ -64,7 +64,7 @@ void Game::init() noexcept {
 		level.colManager.registerEntry(level.buttons.at(i), ColliderType::platform, level.buttons.at(i).hitbox, false);
 		level.colManager.registerEntry(level.gates.at(i), ColliderType::platform, level.gates.at(i).hitbox, true);
 	}
-	// LevelGaol
+	// LevelGoal
 	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
 	level.staticBoxes.push_back(level.goal->representation);
 	// player & blobs:
@@ -93,11 +93,11 @@ void Game::init() noexcept {
 	}
 
 	// Lasers
-	level.lasers.push_back(Laser(vec3(0,0,0), vec3(1000,-80,0), vec3(0,0,1), 50));
-	//level.buttons.push_back(Button(vec4(50,0,0,0), vec4(2,2,2,0), vec4(1,1,1,0), 20, 50));
-	//level.lasers.at(0).button = &level.buttons.at(6);
-	//level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
-	//level.colManager.registerEntry(level.buttons.at(6), ColliderType::platform, level.buttons.at(6).hitbox, false);
+	level.lasers.push_back(Laser(vec3(0,-80,0), vec3(1000, 0,0), vec3(cyan), 50));
+	level.buttons.push_back(Button(vec4(50,0,0,0), vec4(2,2,2,0), vec4(1,1,1,0), 20, 50));
+	level.lasers.at(0).button = &level.buttons.at(level.buttons.size()-1);
+	level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
+	level.colManager.registerEntry(level.buttons.at(level.buttons.size()-1), ColliderType::movingPlatform, level.buttons.at(level.buttons.size()-1).hitbox, false);
 }
 
 void Game::menuLoad()
