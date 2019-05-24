@@ -187,7 +187,7 @@ void Editor::initialize(const char* filename)
 				startPosY /= pixelToUnitRatio;
 				endPosY /= pixelToUnitRatio;
 				halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio * doorHeight;
-
+				lasers.push_back(Laser(vec3(startPosX,startPosY,0),vec3(endPosX,endPosY,0), getPixelColour(i), int(getPixelColour(i).z) % 10));
 			}
 			else
 			{
@@ -328,7 +328,7 @@ void Editor::initialize(const char* filename)
 						for (int j = 1; j < maxMovingPlatformLength && MPstartPosX != 10000 && MPendPosX == 10000; j++)
 						{
 							//TODO: add check for edge of png
-							if (getPixelColour(lowerHalf + j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf+ j * width)))
+							if (getPixelColour(lowerHalf + j * width) == getPixelColour(i) && isMovingPlatform(getAlpha(lowerHalf + j * width)))
 							{
 								MPendPosX = (lowerHalf % width) - middleX;;
 								MPendPosY = middleY - floor((lowerHalf - j * width) / width);
