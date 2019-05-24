@@ -30,6 +30,7 @@ void Editor::initialize(const char* filename)
 	int middleY = height / 2;
 	int pixelUsedIndex = 0;
 	this->deathHeight = -height / 2;
+	vec4 color;
 	for (int i = 0; i < width * height; i++)
 	{
 		if (!isBackground(getAlpha(i)) && isPixelUsed(i) == -1)
@@ -132,7 +133,7 @@ void Editor::initialize(const char* filename)
 
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				vec4 color = vec4(getPixelColour(i), 0);
+				color = vec4(getPixelColour(i), 0);
 				color /= 255;
 				this->gates.push_back(Gate(center, halfLength, color, int(getPixelColour(i).y) % 10));
 			}
@@ -146,7 +147,7 @@ void Editor::initialize(const char* filename)
 				halfLength.x = minimumBoxSize / 2 / pixelToUnitRatio * buttonWidth;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				vec4 color = vec4(getPixelColour(i), 0);
+				color = vec4(getPixelColour(i), 0);
 				color /= 255;
 				this->buttons.push_back(Button(center, halfLength, color, int(getPixelColour(i).z) % 10, int(getPixelColour(i).y) % 10));
 			}
@@ -263,7 +264,7 @@ void Editor::initialize(const char* filename)
 						startPosY /= pixelToUnitRatio;
 						center.x = startPosX + halfLength.x;
 						center.y = startPosY - halfLength.y;
-						vec4 color = vec4(getPixelColour(startPos), 0);
+						color = vec4(getPixelColour(startPos), 0);
 						color /= 255;
 						platforms.push_back(Platform(center, halfLength, color));
 					}
@@ -360,7 +361,7 @@ void Editor::initialize(const char* filename)
 
 						center.x = startPosX + halfLength.x;
 						center.y = startPosY - halfLength.y;
-						vec4 color = vec4(getPixelColour(startPos), 0);
+						color = vec4(getPixelColour(startPos), 0);
 						color /= 255;
 						this->movingPlatforms.push_back(MovingPlatform(vec3(MPstartPosX, MPstartPosY, 0),
 							vec3(MPendPosX, MPendPosY, 0),
