@@ -15,6 +15,7 @@
 #include "Graphics.h"
 #include "Editor.h"
 #include "Gate.h"
+#include "Laser.h"
 
 using namespace glm;
 enum PlayerStatus {
@@ -95,10 +96,12 @@ struct LevelData { // POD
 	vector<PowerUp>  powerUps;
 	std::unique_ptr<LevelGoal> goal;
 	vector<MovingPlatform> movingPlatforms;
+	vector<Line>     laserGraphics;
     vector<Box>      staticBoxes;
 	vector<Box>      movingBoxes;
     vector<Sphere>   spheres;
 	vector<Gate>     gates;
+	vector<Laser>    lasers;
 	vector<Button>   buttons;
     CollisionManager colManager;
 };

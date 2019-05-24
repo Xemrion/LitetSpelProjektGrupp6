@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("prototypeThree.png");
+	editor.initialize("PrototypeThree.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -90,6 +90,8 @@ void Game::init() noexcept {
 	}
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
+
+	level.lasers.push_back(Laser(vec3(20, 80, 0), vec3(25, 0, 0), vec3(0,0,1), 50));
 }
 
 void Game::reset()
@@ -846,6 +848,7 @@ void Game::updateEnemyCollision()
 void Game::updateGraphics() {
 	level.spheres = vector<Sphere>();
 	level.movingBoxes = vector<Box>();
+	level.laserGraphics = vector<Line>();
 
 	if (state == GameState::LevelState)
 	{
@@ -873,6 +876,11 @@ void Game::updateGraphics() {
 		{
 			level.movingBoxes.push_back(level.gates.at(i).hitbox);
 			level.movingBoxes.push_back(level.buttons.at(i).hitbox);
+		}
+		// Lasers
+		for (int i = 0; i < level.lasers.size(); i++)
+		{
+			level.laserGraphics.push_back(level.lasers.at(i).visual);
 		}
 
 		playerSphere.centerRadius = vec4(

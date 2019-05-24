@@ -352,6 +352,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
 			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
+			graphics.setLasers(game.level.laserGraphics);
 			graphics.castPlayerShadow(game.level.player.pos);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;

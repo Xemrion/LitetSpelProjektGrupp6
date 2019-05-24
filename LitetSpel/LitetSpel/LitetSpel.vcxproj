@@ -128,6 +128,7 @@
     <ClCompile Include="Gate.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="KeyboardInput.cpp" />
+    <ClCompile Include="Laser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MouseInput.cpp" />
     <ClCompile Include="MovingPlatform.cpp" />
@@ -150,6 +151,7 @@
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="KeyboardInput.h" />
     <ClInclude Include="Globals.h" />
+    <ClInclude Include="Laser.h" />
     <ClInclude Include="MouseInput.h" />
     <ClInclude Include="MovingPlatform.h" />
     <ClInclude Include="Platform.h" />
