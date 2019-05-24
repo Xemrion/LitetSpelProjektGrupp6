@@ -28,6 +28,8 @@ static const glm::vec4 white	= glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 static const glm::vec4 grey		= glm::vec4(0.77f, 0.77f, 0.77f, 1.0f);
 static const glm::vec4 olive	= glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
 
+static const glm::vec4 enemyColor = glm::vec4(0.5, 0.8, 1.0, 0.0);
+
 //Use player.status as index
 static const glm::vec4 playerStatusColors[4] = {
 	glm::vec4(0.85, 0.05, 0.75, 0.0),

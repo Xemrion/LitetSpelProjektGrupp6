@@ -440,7 +440,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		posDiff = minDistY;
 	
 		// if colliding with floor
-		if (minDistY.y > 0.0) {
+		if (minDistY.y >= 0.0) {
 			velocity.y = -15;
 			isStanding = true;
 			hasExtraJump = true;
@@ -849,11 +849,18 @@ void Game::updateGraphics() {
 
 	if (state == GameState::LevelState)
 	{
+		// Enemies
 		for (int i = 0; i < level.enemies.size(); i++)
 		{
 			level.enemies.at(i).hitbox.color = vec4((float)level.enemies.at(i).isStanding, 1.0 - (float)level.enemies.at(i).isStanding, 0.0, 0.0);
 			if (level.enemies.at(i).alive) {
-				level.movingBoxes.push_back(level.enemies.at(i).hitbox);
+				//level.movingBoxes.push_back(level.enemies.at(i).hitbox);
+
+				Sphere s;
+				s.centerRadius = level.enemies.at(i).hitbox.center;
+				s.centerRadius.w = 5;
+				s.color = enemyColor;
+				level.spheres.push_back(s);
 			}
 		}
 		// Moving platforms
@@ -868,8 +875,6 @@ void Game::updateGraphics() {
 			level.movingBoxes.push_back(level.buttons.at(i).hitbox);
 		}
 
-
-		level.spheres = vector<Sphere>();
 		playerSphere.centerRadius = vec4(
 			level.player.pos.x,
 			level.player.pos.y,

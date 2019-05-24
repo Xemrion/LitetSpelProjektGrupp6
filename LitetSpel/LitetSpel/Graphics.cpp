@@ -249,6 +249,7 @@ HRESULT Graphics::createResources(HWND wndHandle)
 		D3D11_TEXTURE2D_DESC texDesc;
 		backBuffer->GetDesc(&texDesc);
 		texDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		
 		texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
 		device->CreateTexture2D(&texDesc, NULL, &geometryBuffer);
@@ -1029,7 +1030,7 @@ void Graphics::setLasers(const vector<Line>& lines)
 		glm::mat4 t = glm::mat4(1.0);
 		t = glm::translate(t, (lines[i].start + lengths) / 2.f);
 		t = glm::rotate(t, atan2f(lengths.y, lengths.x), glm::vec3(0.0, 0.0, 1.0));
-		t = glm::scale(t, glm::vec3(lengths.x, 0.5, 0.01));
+		t = glm::scale(t, glm::vec3(lengths.x, 1.5, 0.01));
 
 		transforms.WVP[i] = transpose(t) * viewProj;
 		transforms.color[i] = glm::vec4(lines[i].color, 0.0);
@@ -1064,8 +1065,6 @@ void Graphics::setMetaballs(const vector<Sphere>& metaballs)
 		}
 	}
 
-	//memcpy(metaballStruct.spheres, metaballs.data(), sizeof(Sphere) * glm::min(maxMetaballs, (int)metaballs.size()));
-	//metaballStruct.nSpheres = glm::min(maxMetaballs, (int)metaballs.size());
 	deviceContext->Map(metaballBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
 	memcpy(mr.pData, &metaballStruct, sizeof(MetaballStruct));
 	deviceContext->Unmap(metaballBuffer, 0);
@@ -1151,16 +1150,16 @@ void Graphics::swapBuffer()
 	deviceContext->PSSetConstantBuffers(0, 1, &shadowBuffer);
 
 	deviceContext->IASetVertexBuffers(0, 1, &staticBoxVertexBuffer, &vertexSize, &offset);
-	//deviceContext->DrawInstanced(36, staticBoxInstances, 0, 0);
 	deviceContext->Draw(36 * staticBoxInstances, 0);
 
 	// draw lasers
 	deviceContext->VSSetShader(laserVertexShader, nullptr, 0);
 	deviceContext->PSSetShader(laserPixelShader, nullptr, 0);
-	
+
 	deviceContext->OMSetBlendState(blendState, 0, UINT_MAX);
-	deviceContext->VSSetConstantBuffers(0, 1, &laserTransformBuffer);
+	deviceContext->IASetVertexBuffers(0, 1, &boxVertexBuffer, &vertexSize, &offset);
 	deviceContext->IASetInputLayout(laserVertexLayout);
+	deviceContext->VSSetConstantBuffers(0, 1, &laserTransformBuffer);
 	deviceContext->DrawInstanced(36, laserInstances, 0, 0);
 
 	// lighting / metaball pass
