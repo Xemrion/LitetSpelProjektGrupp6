@@ -193,13 +193,13 @@ void keyboardFunc()
 			{
 				game.keys[Game::Keys::left] = true;
 			}
-			if ((game.keys[Game::Keys::left] == true || game.keys[Game::Keys::right] == true) && !game.level.player.isStuck) {
+			if (game.keys[Game::Keys::left] == true || game.keys[Game::Keys::right] == true) {
 				if (playerMove != true) {
 					gameSounds.StartPlayerMoveLoop();
 					playerMove = true;
 				}
 			}
-			if (game.keys[Game::Keys::left] != true && game.keys[Game::Keys::right] != true || game.level.player.isStuck) {
+			if (game.keys[Game::Keys::left] != true && game.keys[Game::Keys::right] != true) {
 				if (playerMove != false) {
 					gameSounds.StopPlayerMoveLoop();
 					playerMove = false;
@@ -310,7 +310,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	game.gameSounds = &gameSounds;
 
 	bool gameLoaded = false;
-	game.menuLoad();
+	game.state = GameState::LevelState;
+	//game.menuLoad();
 	ShowWindow(wndHandle, nCmdShow);
 	gameSounds.StartMenuMusic();
 	
@@ -349,9 +350,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				//game.animateVictory(game.playerSphere);
 			}
 			game.update(dt);
-			graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
+			//graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
+			graphics.setCameraPos(game.getCameraPos(), false);
 			graphics.setMovingBoxes(game.level.movingBoxes);
 			graphics.setMetaballs(game.level.spheres);
+			graphics.setLasers(game.level.laserGraphics);
 			graphics.castPlayerShadow(game.level.player.pos);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;

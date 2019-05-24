@@ -15,6 +15,7 @@
 #include "Graphics.h"
 #include "Editor.h"
 #include "Gate.h"
+#include "Laser.h"
 
 using namespace glm;
 enum PlayerStatus {
@@ -63,8 +64,9 @@ public:
 	void putForce(vec3 const &force) noexcept;
 	void move(float dt) noexcept;
 
-    vec3 pos, velocity, controlDir;
+    vec3 pos, velocity, controlDir, playerPos;
     float moveSpeed, jumpForce, jumpCooldown, mass;
+	int enemyIndex;
     bool isStanding, alive, isDeregistered, isStuck;
     Box hitbox;
 };
@@ -95,11 +97,13 @@ struct LevelData { // POD
 	vector<PowerUp>  powerUps;
 	std::unique_ptr<LevelGoal> goal;
 	vector<MovingPlatform> movingPlatforms;
+	vector<Line>     laserGraphics;
     vector<Box>      staticBoxes;
 	vector<Box>      movingBoxes;
     vector<Sphere>   spheres;
 	vector<Gate>     gates;
 	vector<Button>   buttons;
+	vector<Laser>    lasers;
     CollisionManager colManager;
 };
 
@@ -135,7 +139,6 @@ public:
 	bool leftButtonDown = false;
 
 	void init() noexcept;
-	void reset();
 	void menuLoad();
 	void update(double dt);
 	void updatePhysics();

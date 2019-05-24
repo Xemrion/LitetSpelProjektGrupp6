@@ -15,7 +15,7 @@
 #include"PowerUp.h"
 #include"Button.h"
 #include"Gate.h"
-
+using namespace glm;
 class Editor
 {
 
@@ -36,7 +36,6 @@ private:
 	bool isMovingPlatform(int alpha);
 	bool isDoor(int alpha);
 	bool isButton(int alpha);
-	bool isLaser(int alpha);
 	vec3 getPixelColour(int index);
 	int getAlpha(int index);
 	int isPixelUsed(int index);
@@ -48,7 +47,6 @@ private:
 	int doorHeight = 5;
 	int buttonWidth = 5;
 	int maxMovingPlatformLength = 100;
-	int maxLaserLength = 100;
 
 public:
 	Editor();
@@ -58,10 +56,9 @@ public:
 	vec3 goalPos;
 	vec3 startPos;
 	std::vector<PowerUp> powerups;
-	std::vector<vec3> enemies;
+	std::vector<vec3> enemyPos;
 	std::vector<Gate> gates;
 	std::vector<Button> buttons;
-	int deathHeight;
 	void initialize(const char* filename);
 
 };

@@ -62,10 +62,8 @@ void Blob::shoot( glm::vec3 const &direction ) noexcept
 
 void Blob::recall() noexcept
 {
-	if (isActive) {
-		deactivateHitbox();
-		isBeingRecalled = true;
-	}
+    deactivateHitbox();
+    isBeingRecalled = true;
 }
 
 bool Blob::getIsActive()        const noexcept { return isActive; }
@@ -230,7 +228,6 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 }
 
 void Blob::followPlayer() {
-	// gradient noise for offsets to target position
 	const auto random2 = [&](glm::vec2 xy) {
 		float hash = float(((int(this) * 987231) >> 4) & 0xFF) * float(((int(this) * 9102301) >> 3) & 0xFF);
 		xy = glm::vec2(
@@ -271,10 +268,9 @@ void Blob::followPlayer() {
 	glm::vec3 targetPos = *parentPosition + offsetFromParent;
 	setVelocity(glm::vec3(0.0));
 
-	// smooth move to target position
 	glm::vec3 moveDir = targetPos - pos;
 	if (glm::length(moveDir) > 0) {
-		glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(0.f, 25.0f, glm::length(moveDir)) * followParentSpeed;
+		glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(0.f, 12.0f, glm::length(moveDir)) * followParentSpeed;
 
 		if (glm::length(delta) > glm::length(moveDir)) {
 			pos = targetPos;

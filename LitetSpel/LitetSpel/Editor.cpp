@@ -29,7 +29,7 @@ void Editor::initialize(const char* filename)
 	int middleX = width / 2;
 	int middleY = height / 2;
 	int pixelUsedIndex = 0;
-	this->deathHeight = -height / 2;
+
 	for (int i = 0; i < width * height; i++)
 	{
 		if (!isBackground(getAlpha(i)) && isPixelUsed(i) == -1)
@@ -61,7 +61,7 @@ void Editor::initialize(const char* filename)
 				startPosY /= pixelToUnitRatio;
 				center.x = startPosX + halfLength.x;
 				center.y = startPosY - halfLength.y;
-				this->enemies.push_back(center);
+				this->enemyPos.push_back(vec3(center));
 			}
 			else if (isStartPoint(getAlpha(i)))
 			{
@@ -149,44 +149,6 @@ void Editor::initialize(const char* filename)
 				vec4 color = vec4(getPixelColour(i), 0);
 				color /= 255;
 				this->buttons.push_back(Button(center, halfLength, color, int(getPixelColour(i).z) % 10, int(getPixelColour(i).y) % 10));
-			}
-			else if (isLaser(getAlpha(i)))
-			{
-
-				bool edgeFound = false;
-				for (int j = 1; j < maxLaserLength && !edgeFound; j++)
-				{
-					if (!isLaser(getAlpha(i + j)))
-					{
-						endPosX = startPosX + j;
-						endPosY = startPosY;
-						edgeFound = true;
-					}
-				}
-				if (!edgeFound)
-				{
-					for (int j = 0; j < maxLaserLength && !edgeFound; j++)
-					{
-						if (!isLaser(getAlpha(i + j * width)))
-						{
-							endPosX = startPosX;
-							endPosY = startPosY - j;
-							edgeFound = true;
-
-						}
-					}
-				}
-				addBoxToUsed(startPosX, startPosY, endPosX, endPosY);
-				startPosX *= minimumBoxSize;
-				startPosY *= minimumBoxSize;
-				endPosY *= minimumBoxSize;
-				endPosX *= minimumBoxSize;
-				startPosX /= pixelToUnitRatio;
-				endPosX /= pixelToUnitRatio;
-				startPosY /= pixelToUnitRatio;
-				endPosY /= pixelToUnitRatio;
-				halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio * doorHeight;
-
 			}
 			else
 			{
@@ -472,10 +434,6 @@ bool Editor::isMovingPlatform(int alpha)
 bool Editor::isButton(int alpha)
 {
 	return alpha == 251;
-}
-bool Editor::isLaser(int alpha)
-{
-	return alpha == 243;
 }
 bool Editor::isDoor(int alpha)
 {
