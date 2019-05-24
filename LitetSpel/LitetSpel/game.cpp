@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("PrototypeThree.png");
+	editor.initialize("test.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -56,6 +56,10 @@ void Game::init() noexcept {
 		level.gates.push_back(editor.gates.at(i));
 		level.buttons.push_back(editor.buttons.at(i));
 	}
+	for (int i = 0; i < editor.lasers.size(); i++)
+	{
+		level.lasers.push_back(editor.lasers.at(i));
+	}
 	// Button hitboxes
 	for (int i = 0; i < level.buttons.size(); i++)
 	{
@@ -100,8 +104,8 @@ void Game::init() noexcept {
 	updatePlayerCollision();
 	level.colManager.registerEntry(player, ColliderType::player, player.hitbox, false);
 
-	level.lasers.push_back(Laser(vec3(20, 40, 0), vec3(20, -40, 0), vec3(0,0,1), 50));
-	level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
+	//level.lasers.push_back(Laser(vec3(20, 40, 0), vec3(20, -40, 0), vec3(0,0,1), 50));
+	//level.colManager.registerEntry(level.lasers.at(0), ColliderType::damagePlatform, level.lasers.at(0).hitbox, true);
 }
 
 void Game::reset()

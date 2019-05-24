@@ -153,30 +153,26 @@ void Editor::initialize(const char* filename)
 			}
 			else if (isLaser(getAlpha(i)))
 			{
-
 				bool edgeFound = false;
 				for (int j = 1; j < maxLaserLength && !edgeFound; j++)
 				{
 					if (!isLaser(getAlpha(i + j)))
 					{
 						endPosX = startPosX + j;
-						endPosY = startPosY;
 						edgeFound = true;
 					}
 				}
-				if (!edgeFound)
+				edgeFound = false;
+				for (int j = 0; j < maxLaserLength && !edgeFound; j++)
 				{
-					for (int j = 0; j < maxLaserLength && !edgeFound; j++)
+					if (!isLaser(getAlpha(i + j * width)))
 					{
-						if (!isLaser(getAlpha(i + j * width)))
-						{
-							endPosX = startPosX;
-							endPosY = startPosY - j;
-							edgeFound = true;
+						endPosY = startPosY - j;
+						edgeFound = true;
 
-						}
 					}
 				}
+
 				addBoxToUsed(startPosX, startPosY, endPosX, endPosY);
 				startPosX *= minimumBoxSize;
 				startPosY *= minimumBoxSize;
@@ -186,8 +182,7 @@ void Editor::initialize(const char* filename)
 				endPosX /= pixelToUnitRatio;
 				startPosY /= pixelToUnitRatio;
 				endPosY /= pixelToUnitRatio;
-				halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio * doorHeight;
-				lasers.push_back(Laser(vec3(startPosX,startPosY,0),vec3(endPosX,endPosY,0), getPixelColour(i), int(getPixelColour(i).z) % 10));
+				lasers.push_back(Laser(vec3(startPosX, startPosY, 0), vec3(endPosX, endPosY, 0), getPixelColour(i), int(getPixelColour(i).z) % 10));
 			}
 			else
 			{
