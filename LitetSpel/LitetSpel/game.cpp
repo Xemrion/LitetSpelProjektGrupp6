@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("David.png");
+	editor.initialize("Level.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -459,26 +459,26 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 		glm::vec3 minDistX = glm::length(pushLeft) < glm::length(pushRight) ? pushLeft : pushRight;
 		glm::vec3 posDiff = glm::length(minDistY) < glm::length(minDistX) ? minDistY : minDistX;
 
-	// if colliding in Y-axis
-	if (glm::length(minDistY) < glm::length(minDistX)) {
-		posDiff = minDistY;
-	
-		// if colliding with floor
-		if (minDistY.y > 0.0) {
-			velocity.y = -15;
-			isStanding = true;
-			hasExtraJump = true;
-			isStuck = false;
+		// if colliding in Y-axis
+		if (glm::length(minDistY) < glm::length(minDistX)) {
+			posDiff = minDistY;
+
+			// if colliding with floor
+			if (minDistY.y > 0.0) {
+				velocity.y = -15;
+				isStanding = true;
+				hasExtraJump = true;
+				isStuck = false;
+			}
+			//if colliding with ceiling
+			else {
+				velocity.y = min(0, velocity.y);
+			}
 		}
-		//if colliding with ceiling
+		// if colliding in X-axis
 		else {
-			velocity.y = min(0, velocity.y);
+			posDiff = minDistX;
 		}
-	}
-	// if colliding in X-axis
-	else {
-		posDiff = minDistX;
-	}
 
 		pos += posDiff;
 	}
@@ -675,7 +675,7 @@ void Game::update(double dt) {
 
 		handleInput();
 		level.player.isStanding = false;
-		
+
 		level.player.update(dt);
 		for (int i = 0; i < level.enemies.size(); i++)
 		{
@@ -912,7 +912,7 @@ void Game::updateGraphics() {
 		// Lasers
 		for (int i = 0; i < level.lasers.size(); i++)
 		{
-			if(!level.lasers.at(i).isMoved)
+			if (!level.lasers.at(i).isMoved)
 			{
 				level.laserGraphics.push_back(level.lasers.at(i).visual);
 				//level.movingBoxes.push_back(level.lasers.at(i).hitbox);
@@ -946,7 +946,7 @@ void Game::updateGraphics() {
 			powerUpSphere.centerRadius.w = 10.0;
 			powerUpSphere.color = playerStatusColors[level.powerUps.at(i).getTypeAsInt()];
 			level.spheres.push_back(powerUpSphere);
-			animateSphere(powerUpSphere, glm::vec3(5, 5,1));
+			animateSphere(powerUpSphere, glm::vec3(5, 5, 1));
 		}
 
 		//showHitboxes();
