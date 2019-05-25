@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("David.png");
+	editor.initialize("OscarTest.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -820,6 +820,11 @@ void Game::updatePhysics() {
 		{
 			Gates.move(physicsSimTime);
 		}
+		//gates
+		for (auto& Lasers : level.lasers)
+		{
+			Lasers.move(physicsSimTime);
+		}
 
 		updatePlayerCollision();
 		updateEnemyCollision();
@@ -907,8 +912,11 @@ void Game::updateGraphics() {
 		// Lasers
 		for (int i = 0; i < level.lasers.size(); i++)
 		{
-			level.laserGraphics.push_back(level.lasers.at(i).visual);
-			//level.movingBoxes.push_back(level.lasers.at(i).hitbox);
+			if(!level.lasers.at(i).isMoved)
+			{
+				level.laserGraphics.push_back(level.lasers.at(i).visual);
+				//level.movingBoxes.push_back(level.lasers.at(i).hitbox);
+			}
 		}
 
 		playerSphere.centerRadius = vec4(
