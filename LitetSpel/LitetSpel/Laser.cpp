@@ -54,20 +54,18 @@ void Laser::move(float dt)
 				activateLaser = true;
 			}
 			buttons.at(i)->move(dt);
-
-		}
-		if (deactivateLaser)
-		{
-			hitbox.center = vec4(0, -1000, 0, 0);
-			isMoved = true;
-
-		}
-		else if (activateLaser)
-		{
-			hitbox.center = vec4(visual.start - (visual.end / vec3(2)), 0);
-			isMoved = false;
 		}
 		buttons.at(i)->move(dt);
 	}
+	if (deactivateLaser)
+	{
+		hitbox.center = vec4(0, -1000, 0, 0);
+		isMoved = true;
 
+	}
+	else if (activateLaser)
+	{
+		hitbox.center = vec4((visual.start.x + visual.end.x) / 2, (visual.start.y + visual.end.y) / 2, 0, 0);
+		isMoved = false;
+	}
 }
