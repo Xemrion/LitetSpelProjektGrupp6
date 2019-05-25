@@ -200,6 +200,7 @@ void Player::update(double dt) noexcept {
 	jumpCooldown -= float(dt);
 	shootCooldown -= float(dt);
 	takeDamageCooldown -= float(dt);
+	collidingMovingPlatform = nullptr;
 
 	if (isStanding)
 		hasExtraJump = true;
@@ -218,8 +219,9 @@ void Player::update(double dt) noexcept {
 	else
 		hitbox.color.w = 0;
 
-	for (auto &blob : blobs)
+	for (auto &blob : blobs) {
 		blob.update(dt);
+	}
 }
 
 void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
@@ -673,7 +675,7 @@ void Game::update(double dt) {
 
 		handleInput();
 		level.player.isStanding = false;
-		level.player.collidingMovingPlatform = nullptr;
+		
 		level.player.update(dt);
 		for (int i = 0; i < level.enemies.size(); i++)
 		{
@@ -769,8 +771,6 @@ void Game::handleInput() {
 // Call last of all logic updates (but before graphics)
 void Game::updatePhysics() {
 	float timestep = PHYSICS_TIME_STEP;
-
-
 	auto &player = level.player;
 
 	while (physicsSimTime + timestep < time) {
@@ -803,6 +803,10 @@ void Game::updatePhysics() {
 			{
 				blob.addVelocity(vec3(0.0, -GRAVITY_CONSTANT * timestep, 0.0));
 			}
+			if (blob.collidingMovingPlatform != nullptr) {
+				blob.pos += blob.collidingMovingPlatform->moveFunction(physicsSimTime) - blob.collidingMovingPlatform->moveFunction(physicsSimTime - timestep);
+			}
+
 			blob.move(timestep);
 		}
 
@@ -820,7 +824,6 @@ void Game::updatePhysics() {
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();
-
 		physicsSimTime += timestep;
 	}
 }
