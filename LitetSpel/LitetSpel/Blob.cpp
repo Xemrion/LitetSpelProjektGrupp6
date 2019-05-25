@@ -79,6 +79,8 @@ bool Blob::getIsStuck() const noexcept { return isStuck; }
 void Blob::update(double dt) noexcept
 {
     #undef min
+	collidingMovingPlatform = nullptr;
+
     if ( isBeingRecalled ) 
 	{
         float speed          = std::min( recallSpeed * float(dt), glm::distance(pos, *parentPosition) );
@@ -147,6 +149,9 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 		{
 			reactivateHitbox();
 		}
+
+		MovingPlatform* platformPtr = dynamic_cast<MovingPlatform*>(other.object);
+
 		float eps = 0.1; // fixes some issues with platform edges
 		glm::vec3 pushUp    = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);
 		glm::vec3 pushDown  = glm::vec3(0.0, other.hitbox->center.y - other.hitbox->halfLengths.y + (-hitbox.center.y - hitbox.halfLengths.y), 0.0);
@@ -158,15 +163,21 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 		glm::vec3 posDiff   = glm::length(minDistY) < glm::length(minDistX) - eps ? minDistY : minDistX;
 		pos				   += posDiff;
 
-		// if a bouncy blob collides with a floor
-		if (status == BlobStatus::Blob_Bouncy && posDiff.y > 0.0)
+		// if blob collides with a floor
+		if (posDiff.y > 0.0)
 		{
-			if (isBeingRecalled == false && isLanding == false) {
-				gameSounds->PlayBlobSound02();
-				isLanding = true;
+			if (status == BlobStatus::Blob_Bouncy) {
+				if (isBeingRecalled == false && isLanding == false) {
+					gameSounds->PlayBlobSound02();
+					isLanding = true;
+				}
+				this->velocity.y = -this->velocity.y;
+				this->velocity.x = 0;
 			}
-			this->velocity.y = -this->velocity.y;
-			this->velocity.x = 0;
+			else {
+				this->velocity = glm::vec3(0.0, -15, 0.0);
+			}
+			collidingMovingPlatform = platformPtr;
 		}
 		else if (status == BlobStatus::Blob_Sticky) 
 		{
@@ -176,6 +187,21 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 			}
 			this->velocity = glm::vec3(0.0);
 			isStuck = true;
+			collidingMovingPlatform = platformPtr;
+
+			//push the blob slightly into the platform to ensure that it collides next physics update
+			if (posDiff.y < 0.0) {
+				pos.y += 0.015f;
+			}
+			else if (posDiff.y > 0.0) {
+				pos.y -= 0.015f;
+			}
+			else if (posDiff.x < 0.0) {
+				pos.x += 0.015f;
+			}
+			else if (posDiff.x > 0.0) {
+				pos.x -= 0.015f;
+			}
 		}
 		else 
 		{

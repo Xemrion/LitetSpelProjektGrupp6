@@ -6,6 +6,7 @@
 #include "Geometry.h"
 #include "globals.h"
 #include "Collisions.h"
+#include "MovingPlatform.h"
 
 // TODO: improve encapsulation by reducing public exposure
 
@@ -58,4 +59,5 @@ public:
     Box       hitbox;
     Sphere    blobSphere;
 	int status;
+	const MovingPlatform* collidingMovingPlatform = nullptr;
 };

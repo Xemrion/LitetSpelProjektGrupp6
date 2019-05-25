@@ -34,7 +34,8 @@ void Button::move(float dt)
 {
 	if (isPressed && !isMoved)
 	{
-		this->hitbox.center.y -= (hitbox.halfLengths.y * 2) + 0.01;
+		this->hitbox.halfLengths.y /= 2;
+		this->hitbox.center.y -= hitbox.halfLengths.y;
 		isMoved = true;
 		if (timerAdd > 0 && timer <= 0)
 		{
@@ -44,14 +45,15 @@ void Button::move(float dt)
 	}
 	else if (!isPressed && isMoved)
 	{
-		this->hitbox.center.y += (hitbox.halfLengths.y * 2) + 0.01;
+		this->hitbox.center.y += hitbox.halfLengths.y;
+		this->hitbox.halfLengths.y *= 2;
 		isMoved = false;
 	}
 	if (timerAdd > 0)
 	{
 		if (timer > 0)
 		{
-			timer -= dt / 10000;
+			timer -= dt / 50000;
 		}
 		else if (isPressed && timer < 0)
 		{
