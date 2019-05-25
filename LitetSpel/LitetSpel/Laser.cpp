@@ -39,8 +39,8 @@ void Laser::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 
 void Laser::move(float dt)
 {
-	bool activateLaser;
-	bool deactivateLaser;
+	bool activateLaser = false;
+	bool deactivateLaser = false;
 	for (int i = 0; i < buttons.size(); i++)
 	{
 		for (int i = 0; i < buttons.size(); i++)
