@@ -24,7 +24,7 @@ void Gate::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
 
 void Gate::move(float dt)
 {
-	bool gateMoveDown;
+	bool gateMoveDown = false;
 	bool gateMoveUp = false;                    
 	for (int i = 0; i < buttons.size(); i++)
 	{

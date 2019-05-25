@@ -135,7 +135,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				color = vec4(getPixelColour(i), 0);
 				color /= 255;
-				this->gates.push_back(Gate(center, halfLength, color, int(getPixelColour(i).y) % 10));
+				this->gates.push_back(Gate(center, halfLength, color, int(getPixelColour(i).y) % 40));
 			}
 			else if (isButton(getAlpha(i)))
 			{
@@ -149,7 +149,7 @@ void Editor::initialize(const char* filename)
 				center.y = startPosY - halfLength.y;
 				color = vec4(getPixelColour(i), 0);
 				color /= 255;
-				this->buttons.push_back(Button(center, halfLength, color, int(getPixelColour(i).z) % 10, int(getPixelColour(i).y) % 10));
+				this->buttons.push_back(Button(center, halfLength, color, int(getPixelColour(i).z) % 10, int(getPixelColour(i).y) % 40));
 			}
 			else if (isLaser(getAlpha(i)))
 			{
@@ -183,7 +183,7 @@ void Editor::initialize(const char* filename)
 				endPosX /= pixelToUnitRatio;
 				startPosY /= pixelToUnitRatio;
 				endPosY /= pixelToUnitRatio;
-				lasers.push_back(Laser(vec3(startPosX, startPosY, 0), vec3(endPosX, endPosY, 0), getPixelColour(i), int(getPixelColour(i).z) % 10));
+				lasers.push_back(Laser(vec3(startPosX, startPosY, 0), vec3(endPosX, endPosY, 0), getPixelColour(i), int(getPixelColour(i).z) % 40));
 			}
 			else
 			{

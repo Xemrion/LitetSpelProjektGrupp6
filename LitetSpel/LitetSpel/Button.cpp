@@ -51,7 +51,7 @@ void Button::move(float dt)
 	{
 		if (timer > 0)
 		{
-			timer -= dt / 10000;
+			timer -= dt / 50000;
 		}
 		else if (isPressed && timer < 0)
 		{
