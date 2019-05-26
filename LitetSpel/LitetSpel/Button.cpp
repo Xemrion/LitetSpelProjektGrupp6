@@ -22,14 +22,7 @@ void Button::link( IActivable *target ) noexcept {
     targets.push_back( target );
 }
 
-void Button::collide( ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other ) noexcept {
-	auto &hitbox = hitboxes[0].box;
-    if ( otherHitbox == ColliderType::player ) {
-        auto &player = dynamic_cast<IActor&>( other );
-        if ( player.getPosition().y >= hitbox.center.y )
-            trigger();
-	}
-}
+void Button::collide( ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other ) noexcept {}
 
 void Button::updateLogic( double dt_s ) noexcept {
     bool wasActive = timer_s > .0f;

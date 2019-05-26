@@ -13,16 +13,18 @@ Player::Player( Graphics         &graphics,
             PLAYER_SPEED,
             position
     ),
+    IDamagable( 3 ),
     colMan        ( &colMan         ), // hacky evil to deal with blob registration
     graphics      ( &graphics       ),
-    hasExtraJump  ( true            ),
+    hasExtraJump  ( false           ),
     isStuck       ( false           ),
     hasWon        ( false           ),
     status        ( PowerType::none ),
     blobCharges   ( 5               ),
     shootCooldown ( SHOOT_CD        ),
     powerCooldown ( POWER_CD        ),
-    radius        ( 5.0f            )
+    radius        ( 5.0f            ),
+    camera        ( nullptr         )
 {
     blobs.reserve( blobCharges );
     assert( this->graphics and "Graphics mustn't be null!" );
@@ -71,18 +73,17 @@ void Player::processMouse() noexcept {
 // TODO:  Map<char,ActionEnum> keybindings
 void Player::processKeyboard() noexcept {
     // Movement
-    if ( keyboard->KeyIsPressed('D') ) {
+    if ( keyboard->KeyIsPressed('D') )
         input.isPressed[Input::Key::right] = true;
-    }
-    if ( keyboard->KeyIsPressed('A') ) {
+    if ( keyboard->KeyIsPressed('A') )
         input.isPressed[Input::Key::left]  = true;
-    }
-    if ( keyboard->KeyIsPressed('W') ) {
+    if ( keyboard->KeyIsPressed('W') )
         input.isPressed[Input::Key::up]    = true;
-    }
-    if ( keyboard->KeyIsPressed('S') ) {
+    if ( keyboard->KeyIsPressed('S') )
         input.isPressed[Input::Key::down]  = true;
-    }
+    // TEMP:
+    if ( keyboard->KeyIsPressed('K') )
+        input.isPressed[Input::Key::take_damage] = true;
 
     // TODO: trim code duplication in blobs branches
     if ( keyboard->KeyIsPressed('B') ) {
@@ -151,37 +152,42 @@ void Player::updateGraphics() noexcept {
     blobSphere.centerRadius = {position, radius};
     for ( auto &blob : blobs )
         blob.updateGraphics();
- 
 }
 
 // TODO: refactor blob code
 void Player::updateHitboxes() noexcept {
     // account for charge count decreasing
-    while ( hitboxes.size() > blobCharges ) {
-        blobs.pop_back();
-        // TODO: unregister
-    }
-    // account for charge count increasing
-    while ( blobs.size() != blobCharges ) {
-        blobs.push_back( Blob(position) );
-        colMan->add( *(blobs.end()-1) );
+    if ( hitboxes.size() != blobCharges ) {
+        while ( hitboxes.size() > blobCharges ) {
+            blobs.pop_back();
+            // TODO: unregister
+        }
+        // account for charge count increasing
+        while ( blobs.size() != blobCharges ) {
+            blobs.push_back( Blob(position) );
+            colMan->add( *(blobs.end()-1) );
+        }
     }
     assert(  blobs.size() == blobCharges );
     auto &hitbox = hitboxes[0].box;
     hitbox.center = glm::vec4( position, .0f );
-    hitbox.halfLengths = { glm::vec3(radius/2), .0f };
+    hitbox.halfLengths = { glm::vec3( .5f * radius/2 ), .0f };
 }
 
 Player::~Player() {}
 
 // Updates logic, call once per frame
 void Player::updateLogic(double dt_s) noexcept {
+    if ( isAlive() )
+        snprintf( titleMsg, sizeof(titleMsg)/sizeof(char), "Health: %d/%d", getHealth(), getMaxHealth() );
+    else snprintf( titleMsg, sizeof(titleMsg)/sizeof(char), "DEAD!" );
+
+    updateCamera(); // TODO: better placement?
+
     jumpCooldown  -= (float)dt_s;
     shootCooldown -= (float)dt_s;
     powerCooldown -= (float)dt_s;
 
-    if ( isStanding )
-        hasExtraJump = true;
     mass = (status == PowerType::heavy)?  20.0f : 10.0f;
 
     if ( status != PowerType::sticky )
@@ -262,37 +268,36 @@ void Player::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &
 
     if ( otherHitbox == ColliderType::button ) {
         auto &button = dynamic_cast<Button&>( other );
-        collidedBox = &button.getHitboxes()[0].box;
+        collidedBox  = &button.getHitboxes()[0].box;
+        if ( position.y >= collidedBox->center.y )
+            button.trigger();
     }
 
     if ( collidedBox ) {
         auto dtPos = glm::vec3(collidedBox->center) - position;
 
-        if ( dtPos.x > collidedBox->halfLengths.x ) { // player is to the left
-            hasExtraJump  = true;
+        if ( dtPos.x > collidedBox->halfLengths.x - EPSILON ) { // player is to the left
             // TODO: y friction?
             velocity.x    = 0;
             position.x    = collidedBox->center.x
                             - collidedBox->halfLengths.x
                             - radius/2;
         }
-        else if ( dtPos.x < -collidedBox->halfLengths.x ) { // player is to the right
-            hasExtraJump  = true;
+        else if ( dtPos.x < -collidedBox->halfLengths.x + EPSILON ) { // player is to the right
             // TODO: y friction?
             velocity.x    = 0;
             position.x    = collidedBox->center.x
                             + collidedBox->halfLengths.x
                             + radius/2;
         }
-        if ( dtPos.y > collidedBox->halfLengths.y ) { // player is below
+        else if ( dtPos.y > collidedBox->halfLengths.y - EPSILON ) { // player is below
             velocity.y    = 0;
             position.y    = collidedBox->center.y
                             - collidedBox->halfLengths.y
                             - radius/2;
         }
-        else if ( dtPos.y < -collidedBox->halfLengths.y ) { // player is above
+        else if ( dtPos.y < -collidedBox->halfLengths.y + EPSILON ) { // player is above
             isStanding    = true;
-            hasExtraJump  = true;
             velocity.y    = 0;
             velocity.x   *= friction;
             position.y    = collidedBox->center.y
@@ -419,27 +424,25 @@ void Player::handleInput() noexcept {
     }
     if ( input.isPressed[Input::Key::up] ) {
         if ( isStanding ) {
-            isStanding   = false;
+            isStanding = false;
+            if ( status == PowerType::bouncy )
+                hasExtraJump = true;
             jumpCooldown = JUMP_CD;
             putForce(glm::vec3(.0f, jumpForce, .0f));
         }
-        else if ( status == PowerType::bouncy
-                  and hasExtraJump
-                  and jumpCooldown <= .0f )
-        {
+        else if ( hasExtraJump and jumpCooldown <= .0f ) {
             hasExtraJump = false;
             jumpCooldown = JUMP_CD;
-            velocity.y   = .0f;
+            //velocity.y   = .0f;
             putForce(glm::vec3(.0f, jumpForce, .0f));
         }
     }
     if ( input.isPressed[Input::Key::down] ) {
-        if ( status == PowerType::sticky ) {
+        if ( status == PowerType::sticky and isStuck )
             isStuck = false;
-            //if ( !isStanding )
-            //    ;/// addVelocity(glm::vec3(0.0, -GRAVITY_CONSTANT, 0.0)); // wot?
-        }
     }
+    if ( input.isPressed[Input::Key::take_damage] )
+         takeDamage(1);
     // clear input
     for ( auto &b : input.isPressed )
         b = false;
@@ -466,27 +469,25 @@ void Player::animateVictory( double dt_s, double t_s ) noexcept {
     auto  rotationSpeed = glm::vec3{ 4.8f, 5.3f, .9f };
     auto  offset        = glm::vec3( distance );
 
-    { // blob 1
-        auto timeSin = (float)sin(5.f * t_s);
-        auto timeCos = (float)cos(5.f * t_s);
-        animSphere1.centerRadius = {                                                                                 
-            blobSphere.centerRadius.x + (distance * timeCos),
-            blobSphere.centerRadius.y + (distance * timeSin),
-            blobSphere.centerRadius.z + (distance * (timeSin+timeCos)/2),
-            blobSphere.centerRadius.w / (3.f + .6f * (timeSin + .7f))
-        };
-    }
+    // blob 1
+    auto timeSin = (float)sin(5.f * t_s);
+    auto timeCos = (float)cos(5.f * t_s);
+    animSphere1.centerRadius = {                                                                                 
+        blobSphere.centerRadius.x + (distance * timeCos),
+        blobSphere.centerRadius.y + (distance * timeSin),
+        blobSphere.centerRadius.z + (distance * (timeSin+timeCos)/2),
+        blobSphere.centerRadius.w / (3.f + .6f * (timeSin + .7f))
+    };
 
-    { // blob 2
-        auto timeSin = (float)sin(7.f * t_s + 3.7f);
-        auto timeCos = (float)cos(7.f * t_s + 3.7f);
-        animSphere2.centerRadius = {                                                                                 
-            blobSphere.centerRadius.x - (distance * timeSin),
-            blobSphere.centerRadius.y - (distance * timeCos),
-            blobSphere.centerRadius.z - (distance * (timeSin+timeCos)/2),
-            blobSphere.centerRadius.w / (2.f + .3f * (timeCos + .5f))
-        };
-    }
+    // blob 2
+    timeSin = (float)sin(7.f * t_s + 3.7f);
+    timeCos = (float)cos(7.f * t_s + 3.7f);
+    animSphere2.centerRadius = {                                                                                 
+        blobSphere.centerRadius.x - (distance * timeSin),
+        blobSphere.centerRadius.y - (distance * timeCos),
+        blobSphere.centerRadius.z - (distance * (timeSin+timeCos)/2),
+        blobSphere.centerRadius.w / (2.f + .3f * (timeCos + .5f))
+    };
 
     animateColor( t_s );
 }
@@ -498,3 +499,17 @@ void Player::win( std::function<void(void)> f ) {
     recallBlobs();
     status = PowerType::none;
 }
+
+void Player::attachCamera( CameraData &camera ) noexcept {
+    this->camera = &camera;
+}
+
+void Player::updateCamera() noexcept {
+    assert( camera and "Must have a camera attached!" );
+    if ( isStanding and keyboard->KeyIsPressed('S') )
+         camera->position = this->position + camera->lookDownOffset;
+    else camera->position = this->position + camera->offset;
+    camera->isPanning = true;
+}
+
+char Player::titleMsg[32] = "";

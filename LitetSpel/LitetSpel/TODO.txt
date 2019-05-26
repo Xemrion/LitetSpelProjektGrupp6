@@ -1,15 +1,7 @@
-blob collide, mid section!
-
+***blob collide, mid section!
 bool gameEnd i main
 
-main loop
-
-all of game
-
-interface editor with level::add
-
 Player knockback
-TODO: set static boxes from level
 
 RESERVE!
 
@@ -18,5 +10,11 @@ wrap in handle class
 use tombstone markers
 
 // logik collide()
-// gate/button
+
 mergea plattformar i andra ledet
+
+// TODO assert camera != nullptr
+
+
+TODO: hitbox for button that accumulates mass when collided with
+and resets each frame. if mass is greater than threshold, trigger button

@@ -21,8 +21,9 @@ public:
     std::unique_ptr<Level> load( const char* filename );
 
     // TODO: privatize?
-	glm::vec3                    goalPos,
-                                 startPos;
+	glm::vec3  goalPos,
+               startPos;
+
 
 private:
     [[nodiscard]] inline bool isWhite(          glm::vec3 const &pixelColour ) const noexcept;
@@ -45,11 +46,9 @@ private:
 
     Graphics        *graphics;
 
-    int              minimumBoxSize          = 30,
+    int              minimumBoxSize          = 60,
                      width                   =  0,
                      height                  =  0,
-                     doorHeight              =  5,
-                     buttonWidth             =  5,
                      maxMovingPlatformLength = 30;
 
     std::vector<int> LeftSide,

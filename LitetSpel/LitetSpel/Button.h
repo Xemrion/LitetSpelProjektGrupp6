@@ -20,10 +20,9 @@ public:
     virtual void updateGraphics() noexcept override {} // stub
     virtual void updateAnimations( double dt_s, double t_s ) noexcept override {} // stub
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
-
-private:
     void trigger() noexcept;
 
+private:
     std::vector<IActivable*> targets;
 
 	double activeTime_s,

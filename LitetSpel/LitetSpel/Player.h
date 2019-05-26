@@ -9,7 +9,7 @@
 #include "MouseInput.h"
 #include "Graphics.h"
 
-class Player : public IActor, public IInputListener {
+class Player : public IActor, public IInputListener, public IDamagable {
     using Blobs = std::vector<Blob>;
 public:
     Player( Graphics &, CollisionManager &, glm::vec3 position );
@@ -17,6 +17,7 @@ public:
     [[nodiscard]] virtual std::variant<Boxes,Spheres> getRepresentation() const noexcept override;
     void          shoot(glm::vec2 const &mousePos) noexcept;
     void          recallBlobs() noexcept;
+    void          updateCamera() noexcept;
     virtual void  updateGraphics() noexcept override;
     virtual void  updateHitboxes() noexcept override;
     virtual void  updateInput() noexcept override;
@@ -30,6 +31,9 @@ public:
     void          animateVictory( double dt_s, double t_s ) noexcept; // Merge with updateAnimations
     [[nodiscard]] Sphere const *getSphere() const noexcept;
     void win( std::function<void(void)> f );
+    void attachCamera( CameraData &camera ) noexcept;
+
+    static char titleMsg[32];
 
 private:
     void processMouse()    noexcept;
@@ -44,10 +48,11 @@ private:
     PowerType         status;
     int               blobCharges;
     float             shootCooldown,
-                      powerCooldown,
+                      powerCooldown, 
                       radius;
     Blobs             blobs;
     Sphere            blobSphere,
                       animSphere1,
                       animSphere2;
+    CameraData       *camera;
 };

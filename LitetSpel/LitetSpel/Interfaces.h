@@ -91,6 +91,7 @@ struct Input {
                up,
                down,
                shoot,
+               take_damage,
                SIZE }; // NOTE: 'SIZE' must be last!
     bool isPressed[Key::SIZE] {};
     bool shootPressed         { false };
@@ -149,13 +150,51 @@ public:
     {}
 
     virtual ~IActor() noexcept {}
-    virtual void die() noexcept = 0;
 
 protected:
     bool                isStanding;
     float               jumpForce,
                         jumpCooldown,
                         moveSpeed;
+};
+
+class IDamagable {
+public:
+    IDamagable( int maxHealth = 1, bool isInvulnerable = false ):
+        maxHealth      ( maxHealth      ),
+        health         ( maxHealth      ),
+        isInvulnerable ( isInvulnerable )
+    {}
+
+    virtual void takeDamage( unsigned n ) noexcept {
+        if ( isInvulnerable )
+            return;
+        health -= int(n);
+        if ( !isAlive() )
+            die();
+    }
+
+    virtual void heal( unsigned n ) noexcept {
+        health += int(n);
+        if ( health > maxHealth ) health = maxHealth;
+    }
+
+    virtual void die() noexcept = 0;
+
+    inline bool isAlive() const noexcept { return health > 0; }
+
+    inline int getHealth() const noexcept { return health; }
+    inline int getMaxHealth() const noexcept { return maxHealth; }
+    
+    void setMaxHealth( unsigned n ) noexcept {
+        assert( n > 0 );
+        maxHealth = int(n);
+    }
+
+private:
+    int maxHealth,
+        health;
+    bool isInvulnerable;
 };
 
 class IActivable : public IObject {

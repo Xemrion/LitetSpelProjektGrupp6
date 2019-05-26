@@ -21,8 +21,8 @@ public:
     virtual void updateAnimations( double dt_s, double t_s ) noexcept override {} // stub
 
 private:
-    Box box;
-	float period; // time in seconds that the full path takes
+    Box       box;
+	float     period; // time in seconds that the full path takes
     glm::vec3 startPos,
               endPos;
 };

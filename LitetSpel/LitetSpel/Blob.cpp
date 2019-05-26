@@ -1,6 +1,9 @@
 #include <algorithm>
 #include "Blob.h"
 #include "Platform.h"
+#include "Button.h"
+#include "Gate.h"
+#include "Player.h"
 
 // The unused fields can be removed by inheriting from an
 // intermediate class (IMobile, situated between IObject and IActor)
@@ -109,7 +112,6 @@ void Blob::updatePhysics( double dt_s ) noexcept {
     move( dt_s );
 }
 void Blob::updateAnimations( double dt_s, double t_s ) noexcept {}; // stub
-void Blob::die() noexcept {}; // stub
 
 [[nodiscard]]
 std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Blob::getRepresentation() const noexcept {
@@ -120,62 +122,79 @@ std::variant<IRepresentable::Boxes,IRepresentable::Spheres> Blob::getRepresentat
 
 void Blob::collide(ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other) noexcept {
     Box const *collidedBox = nullptr;
-    float friction = 1.0f;
+    float      friction    = DEFAULT_FRICTION;
     
     if ( isBeingRecalled ) {
         if ( otherHitbox == ColliderType::player )
             absorb();
         else return; // early exit to avoid colliding with the level
     }
-    
+
     if ( !isActive )
         return; // early exit to avoid colliding with the player?
 
-    // not being recalled:
   	if ( otherHitbox == ColliderType::platform ) {
         auto const *box = dynamic_cast<Platform*>(&other);
         friction        =  box->getFriction();
         collidedBox     = &box->getBox();
-
-  		if ( status == PowerType::bouncy )
-  			velocity *= -0.95f;
-  		else {
-            velocity.x = .0f;
-            if ( status == PowerType::sticky )
-  			    isStuck  = true;
-  		}
     }
+
+    else if ( otherHitbox == ColliderType::gate ) {
+        auto &gate  = dynamic_cast<Gate&>( other );
+        collidedBox = &gate.getHitboxes()[0].box;
+    }
+
+    else if ( otherHitbox == ColliderType::button ) {
+        auto &button = *dynamic_cast<Button*>(&other);
+        collidedBox  = &button.getHitboxes()[0].box;
+        if ( status == PowerType::heavy )
+            button.trigger();
+    }
+
+    // else if ( hasCollided and otherHitbox == ColliderType::player ) {
+    //     auto &player = *dynamic_cast<Player*>(&other);
+    //     collidedBox  = &player.getHitboxes()[0].box;
+    // }
+
+
 
     if ( collidedBox ) {
         auto dtPos = glm::vec3(collidedBox->center) - position;
 
-        if ( dtPos.x > collidedBox->halfLengths.x ) { // blob hit left side
-            // TODO: y friction?
-            velocity.x    = 0;
-            position.x    = collidedBox->center.x
-                            - collidedBox->halfLengths.x
-                            - radius/2;
+        if ( status == PowerType::bouncy )
+            velocity *= -0.95f;
+        else {
+            if ( dtPos.x > collidedBox->halfLengths.x ) { // blob hit left side
+                // TODO: y friction?
+                velocity.x    = 0;
+                position.x    = collidedBox->center.x
+                                - collidedBox->halfLengths.x
+                                - radius/2;
+            }
+            else if ( dtPos.x < -collidedBox->halfLengths.x ) { // blob hit right side
+                // TODO: y friction?
+                velocity.x    = 0;
+                position.x    = collidedBox->center.x
+                                + collidedBox->halfLengths.x
+                                + radius/2;
+            }
+            else if ( dtPos.y > collidedBox->halfLengths.y ) { // blob hit bottom
+                velocity.x    = 0;
+                velocity.y    = 0;
+                position.y    = collidedBox->center.y
+                                - collidedBox->halfLengths.y
+                                - radius/2;
+            }
+            else if ( dtPos.y < -collidedBox->halfLengths.y ) { // blob hit top
+                velocity.y    = 0;
+                velocity.x   *= friction;
+                position.y    = collidedBox->center.y
+                                + collidedBox->halfLengths.y
+                                + radius/2;
+            }
         }
-        else if ( dtPos.x < -collidedBox->halfLengths.x ) { // blob hit right side
-            // TODO: y friction?
-            velocity.x    = 0;
-            position.x    = collidedBox->center.x
-                            + collidedBox->halfLengths.x
-                            + radius/2;
-        }
-        if ( dtPos.y > collidedBox->halfLengths.y ) { // blob hit bottom
-            velocity.y    = 0;
-            position.y    = collidedBox->center.y
-                            - collidedBox->halfLengths.y
-                            - radius/2;
-        }
-        else if ( dtPos.y < -collidedBox->halfLengths.y ) { // blob hit top
-            velocity.y    = 0;
-            velocity.x   *= friction;
-            position.y    = collidedBox->center.y
-                            + collidedBox->halfLengths.y
-                            + radius/2;
-        }
+        if ( status == PowerType::sticky )
+            isStuck  = true;
     }
 
   		//glm::vec3 pushUp    = glm::vec3(0.0, other.hitbox->center.y + other.hitbox->halfLengths.y + (-hitbox.center.y + hitbox.halfLengths.y), 0.0);

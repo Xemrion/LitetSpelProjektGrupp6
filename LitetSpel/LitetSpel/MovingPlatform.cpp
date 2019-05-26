@@ -1,11 +1,11 @@
 #include "MovingPlatform.h"
 
 MovingPlatform::MovingPlatform( glm::vec3 startPos, glm::vec3 endPos, Box box ):
-    IMobile  ( 1.0f, startPos ),
-    box      ( box ),
-    period   ( glm::length( endPos - startPos) ),
-    startPos ( startPos ),
-    endPos   ( endPos )
+    IMobile  ( 1.0f, startPos               ),
+    box      ( box                          ),
+    period   ( glm::length(endPos-startPos) ),
+    startPos ( startPos                     ),
+    endPos   ( endPos                       )
 {
     // register hitbox:
     hitboxes.push_back({

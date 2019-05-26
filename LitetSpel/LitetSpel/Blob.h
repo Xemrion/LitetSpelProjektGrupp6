@@ -44,8 +44,6 @@ public:
         return volume;
     }
 
-    virtual void die() noexcept override;
-
 private:
     glm::vec3 const *parentPosition;
     bool             isActive,

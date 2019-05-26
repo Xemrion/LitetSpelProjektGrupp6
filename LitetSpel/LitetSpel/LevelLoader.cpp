@@ -80,18 +80,18 @@ std::unique_ptr<Level> LevelLoader::load(const char* filename) {
                 level->add( std::make_unique<PowerUp>(glm::vec3(center), PowerType::none) );
 			}
 			else if ( isDoor(getPixelColour(i)) ) {
-				addBoxToUsed(int(startPosX), int(startPosY), int(startPosX) + 1, int(startPosY) - doorHeight);
-				halfLength.y = minimumBoxSize / 2 / pixelToUnitRatio * doorHeight;
-                int id       = int(getPixelColour(i).y) % 10;
-                activableMap[id].push_back( level->add( std::make_unique<Gate>( Box{center,halfLength,{}} ) ) );
+				addBoxToUsed(int(startPosX), int(startPosY), int(startPosX) + 1, int(startPosY) - DOOR_HEIGHT);
+                glm::vec4 dimensions = { halfLength.x, minimumBoxSize / 2 / pixelToUnitRatio * DOOR_HEIGHT, 9.f, .0f };
+                int       id         = int(getPixelColour(i).y) % 10;
+                activableMap[id].push_back( level->add( std::make_unique<Gate>( Box{center, dimensions, {.43f, .32f, .18f, .0f}} ) ) );
                 // will be linked at the end
 			}
 			else if ( isButton(getPixelColour(i)) ) {
-				addBoxToUsed(int(startPosX), int(startPosY), int(startPosX) + buttonWidth, int(startPosY) - 1);
-				halfLength.x   = minimumBoxSize / 2 / pixelToUnitRatio * buttonWidth;
-                int   id       = int(getPixelColour(i).y) % 10;
-                float duration = 500.f;  // <-- TEMP    getPixelColour(i).z;
-                buttonMap[id].push_back( level->add( std::make_unique<Button>( Box{center,halfLength,{}}, duration ) ) );
+				addBoxToUsed(int(startPosX), int(startPosY), int(startPosX) + BUTTON_WIDTH, int(startPosY) - 1);
+                int       id         = int(getPixelColour(i).y) % 10;
+                float     duration   = 500.f;  // <-- TEMP    getPixelColour(i).z;
+                glm::vec4 dimensions = { minimumBoxSize / 2 / pixelToUnitRatio * BUTTON_WIDTH, halfLength.y, 8.f, .0f };
+                buttonMap[id].push_back( level->add( std::make_unique<Button>( Box{center, dimensions, {.6f, .4f, .4f, .0f}}, duration ) ) );
                 // will be linked at the end
 			}
 			else {
@@ -102,7 +102,7 @@ std::unique_ptr<Level> LevelLoader::load(const char* filename) {
 					if ( startPosY - j <= (-height / 2)
                          or !isPlatform(getPixelColour(startPos + (width * j))) )
                     {
-						endPosY = int(startPosY) - j;
+						endPosY   = int(startPosY) - j;
 						foundEdge = true;
 					}
 				}

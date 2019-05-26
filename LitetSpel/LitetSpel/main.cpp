@@ -10,10 +10,12 @@
 #include "game.h"
 #include "KeyboardInput.h"
 #include "MouseInput.h"
+#include "Player.h"
 
 // TODO: refactor into the class hierarchy!
 KeyboardInput  keyboard{};
 MouseInput     mouse{};
+
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
@@ -153,7 +155,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
             dt_s = std::chrono::duration<double>(elapsedTime).count();
 			
 			char title[64];
-            snprintf( title, sizeof(title)/sizeof(char), "%5.1f FPS (%5.1fms/frame)", 1.0/dt_s, dt_s*1000 );
+            snprintf( title, sizeof(title)/sizeof(char), "%5.1f FPS (%5.1fms/frame)  --   %s", 1.0/dt_s, dt_s*1000, Player::titleMsg );
 			SetWindowTextA(wndHandle, title);
 
             // TODO
@@ -168,7 +170,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
             // }
 
 			game.update( dt_s );
-			graphics.setCameraPos( game.getLevel().getPlayer().getPosition() + glm::vec3(.0f, 20.0f, -100.0f));
+            auto const &camera = game.getCamera();
+            graphics.setCameraPos( camera.position, camera.isPanning );
+			//graphics.setCameraPos( game.getLevel().getPlayer().getPosition() + glm::vec3(.0f, 20.0f, -100.0f));
 			graphics.setMovingBoxes( game.getLevel().getDynamicBoxes() );
 			graphics.setMetaballs( game.getLevel().getSpheres() );
             graphics.castPlayerShadow( game.getLevel().getPlayer().getPosition() );

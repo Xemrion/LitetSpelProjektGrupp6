@@ -17,6 +17,7 @@ char const * const getNextLevelName() {
 void Game::loadLevel() { // temp
     level = levelLoader.load( getNextLevelName() );
     level->getPlayer().attachInput(keyboard, mouse);
+    level->getPlayer().attachCamera( camera );
     state = State::level;
     level->setLevelChangeFunction( std::bind(&Game::loadLevel, this) );
 }

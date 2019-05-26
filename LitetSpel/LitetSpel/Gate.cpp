@@ -24,7 +24,7 @@ void Gate::updateLogic( double dt_s ) noexcept {
 
 void Gate::updateHitboxes() noexcept {
     auto    &box = hitboxes[0].box;
-    box.center.y = position.y + (openFactor * box.halfLengths.y * 2.0f );
+    box.center.y = position.y - (openFactor * box.halfLengths.y * 2.75f );
 }
 
 Gate::~Gate() {}

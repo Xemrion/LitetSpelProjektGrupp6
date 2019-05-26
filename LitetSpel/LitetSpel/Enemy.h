@@ -3,7 +3,7 @@
 #include "Globals.h"
 #include "Interfaces.h"
 
-class Enemy : public IActor {
+class Enemy : public IActor, public IDamagable {
 public:
     Enemy(glm::vec3 position={.0f,.0f,.0f});
     virtual ~Enemy() noexcept;

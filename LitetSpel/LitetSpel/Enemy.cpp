@@ -13,9 +13,10 @@ Enemy::Enemy(glm::vec3 position):
             950.0f,  // jumpForce
             JUMP_CD, // jumpCooldown
             10.0f,   // mass
-            20.0f,   // moveSpe:ed
+            20.0f,   // moveSpeed
             position
     ),      // center      h-lenghts  colour
+    IDamagable( 1 ),
     volume( {{position,0}, {3,3,3,0}, {0,1,0,0} } )
 {
     // register hitboxex:

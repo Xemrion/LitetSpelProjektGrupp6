@@ -6,8 +6,11 @@
 
 // TODO: put global constants and config values in a global namespace
 
+float constexpr EPSILON = 0.05f;
+
 char const * const LEVELS[] = { "test2.png",
-                                "test.png",
+                                "test3.png",
+                                "test2.png",
                                 "test3.png"  };
 size_t constexpr NUMBER_OF_LEVELS = sizeof(LEVELS)/sizeof(*LEVELS);
 
@@ -20,16 +23,20 @@ bool  constexpr SHOW_HITBOXES        = false;
 struct BLOB_ANIM_AMPLITUDE { static constexpr float X=2.4f, Y=1.7f, Z=.8f; };
 float constexpr PLAYER_JUMP_FORCE    = 4000.00f;
 float constexpr PLAYER_MASS          =   50.00f;
-float constexpr PLAYER_SPEED         =  200.00f;
+float constexpr PLAYER_SPEED         =  120.00f;
 
 // movement constants
 float constexpr GRAVITY_CONSTANT     =  150.00f;
 float constexpr MAX_SPEED            =  100.00f;
 float constexpr FLOAT_REDUCTION      =     .05f; // lower = more reduction
-float constexpr DEFAULT_FRICTION     =     .90f; // higher = less
+float constexpr DEFAULT_FRICTION     =     .20f; // higher = less
 
 // door
 float constexpr DOOR_MOVEMENT_SPEED  = .5f; // higher = faster
+float constexpr DOOR_HEIGHT          = 5.0f;
+
+//  button
+float constexpr BUTTON_WIDTH         = 5.0f;
 
 // blob constants
 float constexpr BLOB_SHOOT_SPEED     =  150.00f;
@@ -38,7 +45,7 @@ float constexpr BLOB_ACTIVE_RADIUS   =    2.00f;
 float constexpr BLOB_INACTIVE_RADIUS =    2.00f;
 
 // cooldown constants
-float constexpr  JUMP_CD = .3f;
+float constexpr  JUMP_CD = .5f;
 float constexpr POWER_CD = .2f;
 float constexpr SHOOT_CD = .5f;
 
@@ -84,4 +91,11 @@ const glm::vec4 PowerTypeColor[] = {
     glm::vec4( 1.00f, 0.75f, 0.05f, 0.0f ),
     glm::vec4( 0.75f, 0.75f, 0.75f, 0.1f ),
     glm::vec4( 0.05f, 0.05f, 1.00f, 0.0f )
+};
+
+struct CameraData {
+    glm::vec3  offset         { .0f,  20.f, -150.f },
+               lookDownOffset { .0f, -20.f, -150.f },
+               position       { .0f,  20.f, -100.f };
+    bool       isPanning      { false };
 };

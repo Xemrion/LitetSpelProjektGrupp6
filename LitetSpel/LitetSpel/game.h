@@ -32,6 +32,8 @@ public:
     Level& getLevel() noexcept; // temp
     State  getState() const noexcept;
 
+    CameraData const & getCamera() const noexcept { return camera; }
+
 private:
     void updateInput();
     void updateLogic(double dt_s);
@@ -40,15 +42,16 @@ private:
     void updateGraphics();
     void showHitboxes() noexcept;
 
-    double                  physicsSimTime  { .0 },
-                            time            { .0 };
+    double                  physicsSimTime { .0 },
+                            time           { .0 };
     std::unique_ptr<Level>  level;
     KeyboardInput          *keyboard;
     MouseInput             *mouse;
     Graphics               *graphics;
-    LevelLoader             levelLoader{ *graphics }; // temp hack
+    LevelLoader             levelLoader    { *graphics }; // temp hack
     Box                     menuBg,
                             menuYes,
                             menuNo;
     State                   state;
+    CameraData              camera;
 };

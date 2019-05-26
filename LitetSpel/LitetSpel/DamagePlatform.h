@@ -1,17 +1,10 @@
 #pragma once
 
-#include"Geometry.h"
-#include "Collisions.h"
+#include "Platform.h"
 
-class DamagePlatform : public CollisionObject {
+class DamagePlatform : public Platform {
 public:
-	DamagePlatform();
-	DamagePlatform(glm::vec4 center, glm::vec4 halfLengths, glm::vec4 color);
-	virtual ~DamagePlatform() noexcept;
-	//Box& getPlatformBox() const { return this->hitbox; };
-	void collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept override {}
-	Box hitbox;
-
-private:
-	//Hitbox
+    DamagePlatform( Box box, float friction=DEFAULT_FRICTION );
+    virtual ~DamagePlatform();
+    virtual void collide( ColliderType ownHitbox, ColliderType otherHitbox, IUnique &other ) noexcept override;
 };
