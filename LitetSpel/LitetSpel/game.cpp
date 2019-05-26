@@ -829,6 +829,10 @@ void Game::updatePhysics(double dt) {
 		{
 			Gates.move(dt);
 		}
+		for (auto& Buttons : level.buttons)
+		{
+			Buttons.move(dt);
+		}
 		//gates
 		for (auto& Lasers : level.lasers)
 		{

@@ -36,7 +36,6 @@ void Gate::move(float dt)
 		{
 			gateMoveUp = false;
 		}
-		buttons.at(i)->move(dt);
 
 	}
 	if (gateMoveDown)
