@@ -209,7 +209,7 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 				gameSounds->PlayBlobSound02();
 				isLanding = true;
 			}
-			this->velocity = glm::vec3(0.0);
+			this->velocity.x = 0.0;
 		}
 	}
 	else if (isActive and other.colliderType == ColliderType::enemy)

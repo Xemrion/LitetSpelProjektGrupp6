@@ -48,7 +48,6 @@ void Button::move(float dt)
 	{
 		if (timer > 0)
 		{
-			counter++;
 			timer -= dt;
 		}
 		else if (isPressed && timer < 0)
