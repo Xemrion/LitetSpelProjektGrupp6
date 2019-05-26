@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("David.png");
+	editor.initialize("Level.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
