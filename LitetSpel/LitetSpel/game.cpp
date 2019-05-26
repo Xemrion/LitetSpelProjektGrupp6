@@ -98,6 +98,9 @@ void Game::init() noexcept {
 		level.enemies.at(i).hitbox.color = vec4(1, 0, 0, 0);
 		level.colManager.registerEntry(level.enemies.at(i), ColliderType::enemy, level.enemies.at(i).hitbox, false);
 	}
+	level.goal = std::make_unique<LevelGoal>(level.colManager, editor.goalPos, 12.0f);
+	level.staticBoxes.push_back(level.goal->representation);
+
 	// player & blobs:
 	auto &player = level.player;
 	player.gameSounds = gameSounds;
