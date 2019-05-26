@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("Level.png");
+	editor.initialize("David.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -690,7 +690,7 @@ void Game::update(double dt) {
 			}
 		}
 
-		updatePhysics();
+		updatePhysics(dt);
 		level.player.addVelocity(temp, true);
 
 		for (Blob& b : level.player.blobs) {
@@ -769,7 +769,7 @@ void Game::handleInput() {
 
 // Catches up the physics simulation time to the actual game time
 // Call last of all logic updates (but before graphics)
-void Game::updatePhysics() {
+void Game::updatePhysics(double dt) {
 	float timestep = PHYSICS_TIME_STEP;
 	auto &player = level.player;
 
@@ -815,22 +815,22 @@ void Game::updatePhysics() {
 		{
 			movingPlatform.move(physicsSimTime);
 		}
-		//gates
-		for (auto& Gates : level.gates)
-		{
-			Gates.move(physicsSimTime);
-		}
-		//gates
-		for (auto& Lasers : level.lasers)
-		{
-			Lasers.move(physicsSimTime);
-		}
 
 		updatePlayerCollision();
 		updateEnemyCollision();
 		level.colManager.update();
 		physicsSimTime += timestep;
 	}
+		//gates
+		for (auto& Gates : level.gates)
+		{
+			Gates.move(dt);
+		}
+		//gates
+		for (auto& Lasers : level.lasers)
+		{
+			Lasers.move(dt);
+		}
 }
 
 void Game::updatePlayerCollision()

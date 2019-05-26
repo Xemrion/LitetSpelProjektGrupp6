@@ -19,6 +19,7 @@ public:
 	int index;
 	Box hitbox;
 	bool isPressed;
+	int counter = 0;
 	bool isMoved;
 	float timer;
 	float timerAdd;

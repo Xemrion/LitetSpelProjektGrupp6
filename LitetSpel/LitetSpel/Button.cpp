@@ -15,6 +15,7 @@ Button::Button(vec4 buttonCenter, vec2 halfLength, vec4 color, float timerAdd, i
 	isPressed = false;
 	isMoved = false;
 	this->timerAdd = timerAdd;
+	this->timer = 0;
 }
 
 Button::~Button()
@@ -43,21 +44,19 @@ void Button::move(float dt)
 		}
 		
 	}
-	else if (!isPressed && isMoved)
-	{
-		this->hitbox.center.y += hitbox.halfLengths.y;
-		this->hitbox.halfLengths.y *= 2;
-		isMoved = false;
-	}
 	if (timerAdd > 0)
 	{
 		if (timer > 0)
 		{
-			timer -= dt / 25000;
+			counter++;
+			timer -= dt;
 		}
 		else if (isPressed && timer < 0)
 		{
 			isPressed = false;
+			this->hitbox.center.y += hitbox.halfLengths.y;
+			this->hitbox.halfLengths.y *= 2;
+			isMoved = false;
 		}
 	}
 

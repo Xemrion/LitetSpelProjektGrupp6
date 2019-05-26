@@ -141,7 +141,7 @@ public:
 	void reset();
 	void menuLoad();
 	void update(double dt);
-	void updatePhysics();
+	void updatePhysics(double dt);
 	void updatePlayerCollision();
 	void updateEnemyCollision();
 	void showHitboxes();
