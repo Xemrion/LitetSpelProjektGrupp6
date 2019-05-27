@@ -43,7 +43,23 @@ void CollisionManager::update() noexcept {
 				m.object->collide(m.colliderType, environment);
         // test against all other mobile hitboxes (that belong to another object)
         for (auto &other : mobileBoxes)
-            if (*(m.object) != *(other.object) and intersect((*m.hitbox), (*other.hitbox)))
+            if (glm::distance(m.hitbox->center, other.hitbox->center) < 40.0 && *(m.object) != *(other.object) and intersect((*m.hitbox), (*other.hitbox)))
                 m.object->collide(m.colliderType, other);
     }
+}
+
+void CollisionManager::clean()
+{
+	for(int i = 0; i < mobileBoxes.size(); i++)
+	{
+		delete mobileBoxes.at(i).hitbox;
+		delete mobileBoxes.at(i).object;
+	}
+	mobileBoxes = std::vector<HitboxEntry>();
+	for (int i = 0; i < staticBoxes.size(); i++)
+	{
+		delete staticBoxes.at(i).hitbox;
+		delete staticBoxes.at(i).object;
+	}
+	staticBoxes = std::vector<HitboxEntry>();
 }

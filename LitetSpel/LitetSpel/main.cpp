@@ -315,6 +315,18 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	game.init();
 	graphics.setStaticBoxes(game.level.staticBoxes);
 	graphics.setCameraPos((game.level.player.pos + vec3(0, 20, -150)), false);
+	//game.update(0.00001);
+	//graphics.setMovingBoxes(game.level.movingBoxes);
+	//graphics.setMetaballs(game.level.spheres);
+	//graphics.setLasers(game.level.laserGraphics);
+	//graphics.castPlayerShadow(game.level.player.pos);
+	//graphics.swapBuffer();
+
+	//while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+	//{
+	//	TranslateMessage(&msg);
+	//	DispatchMessage(&msg);
+	//}
 
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)

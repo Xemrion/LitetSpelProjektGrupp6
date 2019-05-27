@@ -12,7 +12,6 @@ Editor::~Editor()
 
 void Editor::initialize(const char* filename)
 {
-
 	int bpp = 0;
 	rgba = stbi_load(filename, &width, &height, &bpp, 4);
 	int startPos = 0;
