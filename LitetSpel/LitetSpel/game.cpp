@@ -851,9 +851,9 @@ void Game::updatePlayerCollision()
 		player.pos.z,
 		0);
 	player.hitbox.halfLengths = vec4(
-		player.radius,
-		player.radius,
-		player.radius,
+		player.radius * 0.9,
+		player.radius * 0.9,
+		player.radius * 0.9,
 		0);
 }
 
