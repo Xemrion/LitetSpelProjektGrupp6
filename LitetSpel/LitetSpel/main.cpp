@@ -310,7 +310,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	game.gameSounds = &gameSounds;
 
 	bool gameLoaded = false;
-	game.menuLoad();
+	game.state == GameState::LevelState;
+	//game.menuLoad();
 	ShowWindow(wndHandle, nCmdShow);
 	gameSounds.StartMenuMusic();
 	
