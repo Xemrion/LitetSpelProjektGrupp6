@@ -293,7 +293,7 @@ void keyboardFunc()
 				game.level.player.lifeCharges = 0;
 			}
 		} 
-		else if (game.level.player.knockBack == true && playerMove != false) {
+		else if ((game.level.player.levelCompleted == true || game.level.player.knockBack == true) && playerMove != false) {
 			gameSounds.StopPlayerMoveLoop();
 			playerMove = false;
 		}
@@ -310,7 +310,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	game.gameSounds = &gameSounds;
 
 	ShowWindow(wndHandle, nCmdShow);
-	gameSounds.StartMenuMusic();
+	//gameSounds.StartMenuMusic();
 
 	game.init();
 	graphics.setStaticBoxes(game.level.staticBoxes);

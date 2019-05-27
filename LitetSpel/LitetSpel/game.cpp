@@ -632,8 +632,10 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	}
 	if (other.colliderType == ColliderType::level_goal)
 	{
-		levelCompleted = true;
-		gameSounds->PlayEndOfLevelSound();
+		if (levelCompleted != true) {
+			levelCompleted = true;
+			gameSounds->PlayEndOfLevelSound();
+		}
 	}
 }
 
