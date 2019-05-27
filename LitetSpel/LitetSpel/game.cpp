@@ -1,7 +1,8 @@
 #include "game.h"
+#include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("David.png");
+	editor.initialize("Level.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -109,6 +110,7 @@ void Game::init() noexcept {
 		player.blobs.push_back(Blob(player.pos));
 		level.spheres.push_back(player.blobs[i].blobSphere);
 	}
+	playerExist = true;
 	for (auto &b : player.blobs) {
 		b.gameSounds = gameSounds;
 		level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
@@ -128,7 +130,8 @@ void Game::reset()
 	level.powerUps = vector<PowerUp>();
 	level.staticBoxes = vector<Box>();
 	//TODO:
-	//Deregister hitboxes
+	level.colManager.clean();//Deregisters hitboxes
+	// Clean Editor
 	init();
 }
 
@@ -158,6 +161,7 @@ Player::Player(vec3 position) :
 	moveSpeed(75.0f),
 	mass(10.0),
 	blobCharges(5),
+	lifeCharges(3),
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
@@ -386,8 +390,6 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y >= 0.0) {
-				putForce(vec3(0, jumpForce / 2, 0));
-				knockBack = false;
 				if (takeDamageCooldown <= 0) {
 					if (lifeCharges >= 2) {
 						gameSounds->PlayDamagedSound01();
@@ -395,7 +397,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 
@@ -411,7 +413,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 			}
@@ -428,7 +430,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 			}
@@ -442,7 +444,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 			}
@@ -468,7 +470,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y > 0.0) {
-				velocity.y = -15;
+				//velocity.y = -15;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
@@ -633,8 +635,10 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	}
 	if (other.colliderType == ColliderType::level_goal)
 	{
-		levelCompleted = true;
-		gameSounds->PlayEndOfLevelSound();
+		if (levelCompleted != true) {
+			levelCompleted = true;
+			gameSounds->PlayEndOfLevelSound();
+		}
 	}
 }
 
@@ -668,6 +672,9 @@ void Game::update(double dt) {
 	if (state == GameState::LevelState)
 	{
 		time += dt;
+		if (level.player.lifeCharges <= 0 && playerExist == true) {
+			//Reset
+		}
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 		if (!level.player.knockBack)
 		{
@@ -678,6 +685,11 @@ void Game::update(double dt) {
 
 		handleInput();
 		level.player.isStanding = false;
+		if(level.player.lifeCharges <= 0)
+		{
+			// Reset
+			// level.player.pos = vec3(100, -1000, 0);
+		}
 
 		level.player.update(dt);
 		for (int i = 0; i < level.enemies.size(); i++)
@@ -824,16 +836,21 @@ void Game::updatePhysics(double dt) {
 		level.colManager.update();
 		physicsSimTime += timestep;
 	}
-		//gates
-		for (auto& Gates : level.gates)
-		{
-			Gates.move(dt);
-		}
-		//gates
-		for (auto& Lasers : level.lasers)
-		{
-			Lasers.move(dt);
-		}
+	
+	//gates
+	for (auto& Gates : level.gates)
+	{
+		Gates.move(dt);
+	}
+	for (auto& Buttons : level.buttons)
+	{
+		Buttons.move(dt);
+	}
+	//gates
+	for (auto& Lasers : level.lasers)
+	{
+		Lasers.move(dt);
+	}
 }
 
 void Game::updatePlayerCollision()
@@ -847,9 +864,9 @@ void Game::updatePlayerCollision()
 		player.pos.z,
 		0);
 	player.hitbox.halfLengths = vec4(
-		player.radius,
-		player.radius,
-		player.radius,
+		player.radius * 0.9,
+		player.radius * 0.9,
+		player.radius * 0.9,
 		0);
 }
 
