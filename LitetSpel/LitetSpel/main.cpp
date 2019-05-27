@@ -330,7 +330,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				game.init();
 				graphics.setStaticBoxes(game.level.staticBoxes);
 				gameLoaded = true;
-				graphics.setCameraPos((game.level.player.pos+vec3(0,0,-150)), false);
+				graphics.setCameraPos((game.level.player.pos+vec3(0,20,-150)), false);
 			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
