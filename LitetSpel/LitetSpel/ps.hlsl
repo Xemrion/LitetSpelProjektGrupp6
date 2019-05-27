@@ -173,7 +173,7 @@ float4 main(VS_OUT input) : SV_Target
 			/* specular */
 			float3 reflectDir = reflect(rd, normal);
 			if (reflectDir.z > 0.010) {
-				float3 reflectSamplePoint = p + reflectDir * 300.0;
+				float3 reflectSamplePoint = reflectDir * 300.0;
 				reflectSamplePoint.xy = (reflectSamplePoint.xy / resolution) + 0.5;
 				reflectSamplePoint.y = 1 - reflectSamplePoint.y;
 				specularColor = geometryTexture.Sample(samp, reflectSamplePoint.xy);

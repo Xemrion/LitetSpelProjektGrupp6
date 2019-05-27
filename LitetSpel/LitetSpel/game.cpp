@@ -1,4 +1,5 @@
 #include "game.h"
+#include <thread>
 
 void Game::init() noexcept {
 	editor.initialize("Level.png");
@@ -109,6 +110,7 @@ void Game::init() noexcept {
 		player.blobs.push_back(Blob(player.pos));
 		level.spheres.push_back(player.blobs[i].blobSphere);
 	}
+	playerExist = true;
 	for (auto &b : player.blobs) {
 		b.gameSounds = gameSounds;
 		level.colManager.registerEntry(b, ColliderType::blob, b.hitbox, false);
@@ -668,6 +670,9 @@ void Game::update(double dt) {
 	if (state == GameState::LevelState)
 	{
 		time += dt;
+		if (level.player.lifeCharges <= 0 && playerExist == true) {
+			//Reset
+		}
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 		if (!level.player.knockBack)
 		{
@@ -829,20 +834,21 @@ void Game::updatePhysics(double dt) {
 		level.colManager.update();
 		physicsSimTime += timestep;
 	}
-		//gates
-		for (auto& Gates : level.gates)
-		{
-			Gates.move(dt);
-		}
-		for (auto& Buttons : level.buttons)
-		{
-			Buttons.move(dt);
-		}
-		//gates
-		for (auto& Lasers : level.lasers)
-		{
-			Lasers.move(dt);
-		}
+	
+	//gates
+	for (auto& Gates : level.gates)
+	{
+		Gates.move(dt);
+	}
+	for (auto& Buttons : level.buttons)
+	{
+		Buttons.move(dt);
+	}
+	//gates
+	for (auto& Lasers : level.lasers)
+	{
+		Lasers.move(dt);
+	}
 }
 
 void Game::updatePlayerCollision()
