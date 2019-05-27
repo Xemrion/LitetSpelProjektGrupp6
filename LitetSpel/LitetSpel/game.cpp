@@ -129,8 +129,6 @@ void Game::reset()
 	level.movingPlatforms = vector<MovingPlatform>();
 	level.powerUps = vector<PowerUp>();
 	level.staticBoxes = vector<Box>();
-	//TODO:
-	level.colManager.clean();//Deregisters hitboxes
 	// Clean Editor
 	init();
 }
