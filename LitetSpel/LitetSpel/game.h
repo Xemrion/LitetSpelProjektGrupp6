@@ -122,7 +122,7 @@ public:
 	double physicsSimTime = 0.0;
 	double time = 0.0;
 	GameState state;
-	
+	bool playerExist;
 
 	enum Keys {
 		left,
