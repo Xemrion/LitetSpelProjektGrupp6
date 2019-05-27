@@ -387,8 +387,6 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y >= 0.0) {
-				putForce(vec3(0, jumpForce / 2, 0));
-				knockBack = false;
 				if (takeDamageCooldown <= 0) {
 					if (lifeCharges >= 2) {
 						gameSounds->PlayDamagedSound01();
@@ -396,7 +394,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 
@@ -412,7 +410,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 			}
@@ -429,7 +427,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 			}
@@ -443,7 +441,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 					else if (lifeCharges = 1) {
 						gameSounds->PlayDamagedSound02();
 					}
-					lifeCharges -= 1;
+					lifeCharges = 0;
 					takeDamageCooldown = 3.0f;
 				}
 			}
@@ -682,6 +680,10 @@ void Game::update(double dt) {
 
 		handleInput();
 		level.player.isStanding = false;
+		if(level.player.lifeCharges >= 0)
+		{
+			// Reset
+		}
 
 		level.player.update(dt);
 		for (int i = 0; i < level.enemies.size(); i++)
