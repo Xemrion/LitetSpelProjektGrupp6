@@ -47,3 +47,19 @@ void CollisionManager::update() noexcept {
                 m.object->collide(m.colliderType, other);
     }
 }
+
+void CollisionManager::clean()
+{
+	for(int i = 0; i < mobileBoxes.size(); i++)
+	{
+		delete mobileBoxes.at(i).hitbox;
+		delete mobileBoxes.at(i).object;
+	}
+	mobileBoxes = std::vector<HitboxEntry>();
+	for (int i = 0; i < staticBoxes.size(); i++)
+	{
+		delete staticBoxes.at(i).hitbox;
+		delete staticBoxes.at(i).object;
+	}
+	staticBoxes = std::vector<HitboxEntry>();
+}

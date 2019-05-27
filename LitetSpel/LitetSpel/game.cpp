@@ -128,7 +128,8 @@ void Game::reset()
 	level.powerUps = vector<PowerUp>();
 	level.staticBoxes = vector<Box>();
 	//TODO:
-	//Deregister hitboxes
+	level.colManager.clean();//Deregisters hitboxes
+	// Clean Editor
 	init();
 }
 
@@ -158,6 +159,7 @@ Player::Player(vec3 position) :
 	moveSpeed(75.0f),
 	mass(10.0),
 	blobCharges(5),
+	lifeCharges(3),
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
@@ -676,9 +678,10 @@ void Game::update(double dt) {
 
 		handleInput();
 		level.player.isStanding = false;
-		if(level.player.lifeCharges >= 0)
+		if(level.player.lifeCharges <= 0)
 		{
 			// Reset
+			// level.player.pos = vec3(100, -1000, 0);
 		}
 
 		level.player.update(dt);

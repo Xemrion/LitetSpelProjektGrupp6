@@ -15,6 +15,7 @@ Gate::Gate(glm::vec4 center, glm::vec2 halfLength, vec4 color, int index)
 
 Gate::~Gate()
 {
+	
 }
 
 void Gate::collide(ColliderType ownHitbox, const HitboxEntry & other) noexcept
