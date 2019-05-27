@@ -64,6 +64,7 @@ public:
 	std::vector<Laser> lasers;
 	int deathHeight;
 	void initialize(const char* filename);
+	void Reset();
 
 };
 #endif
