@@ -2,7 +2,7 @@
 #include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("Level.png");
+	editor.initialize("Marco.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
