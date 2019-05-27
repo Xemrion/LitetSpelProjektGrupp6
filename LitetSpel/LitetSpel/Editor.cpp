@@ -12,7 +12,6 @@ Editor::~Editor()
 
 void Editor::initialize(const char* filename)
 {
-
 	int bpp = 0;
 	rgba = stbi_load(filename, &width, &height, &bpp, 4);
 	int startPos = 0;
@@ -376,6 +375,17 @@ void Editor::initialize(const char* filename)
 
 	}
 
+}
+
+void Editor::Reset()
+{
+	this->platforms = std::vector<Platform>();
+	this->movingPlatforms = std::vector<MovingPlatform>();
+	this->powerups = std::vector<PowerUp>();
+	this->enemies = std::vector<vec3>();
+	this->gates = std::vector<Gate>();
+	this->buttons = std::vector<Button>();
+	this->lasers = std::vector<Laser>();
 }
 
 

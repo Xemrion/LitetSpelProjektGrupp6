@@ -171,7 +171,7 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 					gameSounds->PlayBlobSound02();
 					isLanding = true;
 				}
-				this->velocity.y = -this->velocity.y;
+				this->velocity.y = 150;
 				this->velocity.x = 0;
 			}
 			else {

@@ -293,7 +293,7 @@ void keyboardFunc()
 				game.level.player.lifeCharges = 0;
 			}
 		} 
-		else if (game.level.player.knockBack == true && playerMove != false) {
+		else if ((game.level.player.levelCompleted == true || game.level.player.knockBack == true) && playerMove != false) {
 			gameSounds.StopPlayerMoveLoop();
 			playerMove = false;
 		}
@@ -309,11 +309,25 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	//if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game.gameSounds = &gameSounds;
 
-	bool gameLoaded = false;
-	game.menuLoad();
 	ShowWindow(wndHandle, nCmdShow);
-	gameSounds.StartMenuMusic();
-	
+	//gameSounds.StartMenuMusic();
+
+	game.init();
+	graphics.setStaticBoxes(game.level.staticBoxes);
+	graphics.setCameraPos((game.level.player.pos + vec3(0, 20, -150)), false);
+	//game.update(0.00001);
+	//graphics.setMovingBoxes(game.level.movingBoxes);
+	//graphics.setMetaballs(game.level.spheres);
+	//graphics.setLasers(game.level.laserGraphics);
+	//graphics.castPlayerShadow(game.level.player.pos);
+	//graphics.swapBuffer();
+
+	//while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+	//{
+	//	TranslateMessage(&msg);
+	//	DispatchMessage(&msg);
+	//}
+
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
 	{
@@ -324,12 +338,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 		else
 		{
-			if (game.state == GameState::LevelState && !gameLoaded) 
-			{
-				game.init();
-				graphics.setStaticBoxes(game.level.staticBoxes);
-				gameLoaded = true;
-			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
