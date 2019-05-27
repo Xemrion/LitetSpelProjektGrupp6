@@ -43,7 +43,7 @@ void CollisionManager::update() noexcept {
 				m.object->collide(m.colliderType, environment);
         // test against all other mobile hitboxes (that belong to another object)
         for (auto &other : mobileBoxes)
-            if (*(m.object) != *(other.object) and intersect((*m.hitbox), (*other.hitbox)))
+            if (glm::distance(m.hitbox->center, other.hitbox->center) < 40.0 && *(m.object) != *(other.object) and intersect((*m.hitbox), (*other.hitbox)))
                 m.object->collide(m.colliderType, other);
     }
 }

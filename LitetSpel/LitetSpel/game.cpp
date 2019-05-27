@@ -1,4 +1,5 @@
 #include "game.h"
+#include <thread>
 
 void Game::init() noexcept {
 	editor.initialize("Level.png");
@@ -826,20 +827,21 @@ void Game::updatePhysics(double dt) {
 		level.colManager.update();
 		physicsSimTime += timestep;
 	}
-		//gates
-		for (auto& Gates : level.gates)
-		{
-			Gates.move(dt);
-		}
-		for (auto& Buttons : level.buttons)
-		{
-			Buttons.move(dt);
-		}
-		//gates
-		for (auto& Lasers : level.lasers)
-		{
-			Lasers.move(dt);
-		}
+	
+	//gates
+	for (auto& Gates : level.gates)
+	{
+		Gates.move(dt);
+	}
+	for (auto& Buttons : level.buttons)
+	{
+		Buttons.move(dt);
+	}
+	//gates
+	for (auto& Lasers : level.lasers)
+	{
+		Lasers.move(dt);
+	}
 }
 
 void Game::updatePlayerCollision()
