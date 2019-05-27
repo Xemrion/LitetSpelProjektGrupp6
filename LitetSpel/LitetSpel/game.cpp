@@ -468,7 +468,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 
 			// if colliding with floor
 			if (minDistY.y > 0.0) {
-				velocity.y = -15;
+				//velocity.y = -15;
 				isStanding = true;
 				hasExtraJump = true;
 				isStuck = false;
