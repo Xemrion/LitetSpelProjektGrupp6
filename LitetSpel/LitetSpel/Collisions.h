@@ -30,6 +30,7 @@ public:
     virtual ~CollisionObject() noexcept {}
     virtual void collide(ColliderType ownType, const HitboxEntry& otherCollider) = 0;
     size_t getID() const noexcept { return id; }
+    bool operator==(CollisionObject const &other) const noexcept;
     bool operator!=(CollisionObject const &other) const noexcept;
 	Sounds* gameSounds;
 
@@ -54,7 +55,7 @@ public:
     CollisionManager();
     // registers a new hitbox
     void registerEntry(CollisionObject &parent, ColliderType id, Box const &hitbox, bool isStatic ) noexcept;
-    bool unregisterEntry(CollisionObject const &parent) noexcept;
+    void unregisterEntry(CollisionObject const &target) noexcept;
     static bool intersect(Box const &a, Box const &b) noexcept;
     // checks if any of the mobiles have collided,
     // and if so calls their collide function

@@ -2,6 +2,10 @@
 #include <cassert>
 #include <algorithm>
 
+bool CollisionObject::operator==(CollisionObject const &other) const noexcept {
+    return id == other.id;
+}
+
 bool CollisionObject::operator!=(CollisionObject const &other) const noexcept {
     return id != other.id;
 }
@@ -20,11 +24,18 @@ void CollisionManager::registerEntry(CollisionObject &parent, ColliderType id, B
         mobileBoxes.push_back(e);
 }
 
-bool CollisionManager::unregisterEntry(CollisionObject const &parent) noexcept {
-    auto unary_predicate = [&parent]( auto const &e ) { return !((e.object) != &parent); };
-    return std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate ) != staticBoxes.end()
-        or std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate ) != staticBoxes.end();
+// bool CollisionManager::unregisterEntry(CollisionObject const &parent) noexcept {
+//     auto unary_predicate = [&parent]( auto const &e ) { return !((e.object) != &parent); };
+//     return std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate ) != staticBoxes.end()
+//         or std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate ) != staticBoxes.end();
+// }
+
+void CollisionManager::unregisterEntry( CollisionObject const &target ) noexcept {
+    auto unary_predicate = [&target]( HitboxEntry const &e ) { return *(e.object) == target; };
+    mobileBoxes.erase( std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate ) );
+    staticBoxes.erase( std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate ) );
 }
+
 
 bool CollisionManager::intersect(Box const &a, Box const &b) noexcept {
     float const dx      = fabsf(a.center.x - b.center.x); // midpoint delta x
