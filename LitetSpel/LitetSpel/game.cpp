@@ -129,6 +129,8 @@ void Game::reset()
 	level.movingPlatforms = vector<MovingPlatform>();
 	level.powerUps = vector<PowerUp>();
 	level.staticBoxes = vector<Box>();
+	//TODO:
+	level.colManager.clean();//Deregisters hitboxes
 	// Clean Editor
 	init();
 }
@@ -696,10 +698,8 @@ void Game::update(double dt) {
 			{
 				level.enemies.at(i).update(dt);
 			}
-			else if (!level.enemies.at(i).alive && !level.enemies.at(i).isDeregistered)
-			{
-				level.enemies.at(i).isDeregistered = true;
-				level.enemies.at(i).pos = vec3(0, -1000, 0);
+			else {
+				level.colManager.unregisterEntry( level.enemies.at(i) );
 			}
 		}
 

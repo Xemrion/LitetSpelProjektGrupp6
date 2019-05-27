@@ -60,8 +60,10 @@ public:
     // checks if any of the mobiles have collided,
     // and if so calls their collide function
     void update() noexcept;
-
+	// cleans out box vectors
+	void clean();
 private:
+
     std::vector<HitboxEntry> mobileBoxes;
     std::vector<HitboxEntry> staticBoxes;
 };

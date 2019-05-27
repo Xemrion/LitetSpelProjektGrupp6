@@ -26,9 +26,16 @@ void CollisionManager::registerEntry(CollisionObject &parent, ColliderType id, B
 
 void CollisionManager::unregisterEntry( CollisionObject const &target ) noexcept {
     auto unary_predicate = [&target]( HitboxEntry const &e ) { return *(e.object) == target; };
-    mobileBoxes.erase( std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate ) );
-    staticBoxes.erase( std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate ) );
+    auto mobileTarget = std::remove_if( mobileBoxes.begin(), mobileBoxes.end(), unary_predicate );
+    if ( mobileTarget != mobileBoxes.end() )
+        mobileBoxes.erase( mobileTarget );
+    else {
+        auto staticTarget = std::remove_if( staticBoxes.begin(), staticBoxes.end(), unary_predicate );
+        if ( staticTarget != staticBoxes.end() )
+            staticBoxes.erase( staticTarget );
+    }
 }
+
 
 bool CollisionManager::intersect(Box const &a, Box const &b) noexcept {
     float const dx      = fabsf(a.center.x - b.center.x); // midpoint delta x
@@ -52,3 +59,18 @@ void CollisionManager::update() noexcept {
     }
 }
 
+void CollisionManager::clean()
+{
+	for(int i = 0; i < mobileBoxes.size(); i++)
+	{
+		delete mobileBoxes.at(i).hitbox;
+		delete mobileBoxes.at(i).object;
+	}
+	mobileBoxes = std::vector<HitboxEntry>();
+	for (int i = 0; i < staticBoxes.size(); i++)
+	{
+		delete staticBoxes.at(i).hitbox;
+		delete staticBoxes.at(i).object;
+	}
+	staticBoxes = std::vector<HitboxEntry>();
+}
