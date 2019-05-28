@@ -20,6 +20,7 @@ bool highlight;
 
 int xMus = 0;
 float powerCoolDown = 0.0;
+float mouseCoolDown = 0.0;
 bool gameEnd = false;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -141,7 +142,7 @@ void mouseFunc()
 	}
 	else 
 	{
-		if (mouse.LeftIsPressed())
+		if (mouse.LeftIsPressed() && mouseCoolDown <= 0.0)
 		{
 			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
 				gameSounds.StopMenuMusic();
@@ -176,7 +177,6 @@ void mouseFunc()
 		}
 
 	}
-
 }
 
 void keyboardFunc()
@@ -287,8 +287,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				graphics.setCameraPos(vec3(0, 0, -150), false);
 				game->state = GameState::MenuState;
 				gameLoaded = false;
-				game->menuLoad();
 				game->leftButtonDown = false;
+				game->menuLoad();
+				mouseCoolDown = 1.0;
 			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
@@ -306,6 +307,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.castPlayerShadow(game->level.player.pos);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;
+			mouseCoolDown -= (float)dt;
 		}
 	}
 	delete game;

@@ -1,7 +1,7 @@
 #include "game.h"
 
 void Game::init() noexcept {
-	editor.initialize("Falklevel.png");
+	editor.initialize("level.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -984,6 +984,12 @@ void Game::updateGraphics() {
 		}
 
 		//showHitboxes();
+	}
+	else
+	{
+		level.movingBoxes.push_back(MenuBG);
+		level.movingBoxes.push_back(MenuYes);
+		level.movingBoxes.push_back(MenuNo);
 	}
 }
 
