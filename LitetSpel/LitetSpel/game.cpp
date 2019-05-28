@@ -2,7 +2,7 @@
 #include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("Level.png");
+	editor.initialize("Falklevel.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -163,7 +163,7 @@ Player::Player(vec3 position) :
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
-	takeDamageCooldown(3.0f),
+	takeDamageCooldown(INVINCIBILITY_TIME),
 	hasExtraJump(true),
 	isStanding(false),
 	isStuck(false),
@@ -396,7 +396,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 						gameSounds->PlayDamagedSound02();
 					}
 					lifeCharges = 0;
-					takeDamageCooldown = 3.0f;
+					takeDamageCooldown = INVINCIBILITY_TIME;
 				}
 
 			}
@@ -412,7 +412,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 						gameSounds->PlayDamagedSound02();
 					}
 					lifeCharges = 0;
-					takeDamageCooldown = 3.0f;
+					takeDamageCooldown = INVINCIBILITY_TIME;
 				}
 			}
 		}
