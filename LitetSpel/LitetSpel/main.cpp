@@ -339,11 +339,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				keyboardFunc();
 				mouseFunc();
 			}
-			else 
-			{
-				//game.animateColor(graphics);
-				//game.animateVictory(game.playerSphere);
-			}
+
 			game.update(dt);
 			graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
 			graphics.setMovingBoxes(game.level.movingBoxes);

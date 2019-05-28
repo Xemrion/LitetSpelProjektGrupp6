@@ -19,7 +19,7 @@ Blob::Blob( glm::vec3 const &parentPosition ):
 	deactivateHitbox();
 
 	int hashVal = (int)this;
-	offsetFromParent = (glm::fract(glm::vec3(sin(hashVal) * 123987.f, sin(hashVal) * 97623.f, sin(hashVal) * 8911.f)) * 2.0f - 1.0f) * glm::vec3(2.0, 2.0, 1.0);
+	offsetFromTarget = (glm::fract(glm::vec3(sin(hashVal) * 123987.f, sin(hashVal) * 97623.f, sin(hashVal) * 8911.f)) * 2.0f - 1.0f) * glm::vec3(2.0, 2.0, 1.0);
 }
 
 void Blob::absorb() noexcept
@@ -256,7 +256,7 @@ void Blob::collide(ColliderType ownType, const HitboxEntry& other) noexcept
 	}
 }
 
-void Blob::followPlayer() {
+void Blob::moveTowards(glm::vec3 target) {
 	// gradient noise for offsets to target position
 	const auto random2 = [&](glm::vec2 xy) {
 		float hash = float(((int(this) * 987231) >> 4) & 0xFF) * float(((int(this) * 9102301) >> 3) & 0xFF);
@@ -290,18 +290,18 @@ void Blob::followPlayer() {
 		);
 	};
 
-	offsetFromParent = glm::vec3(
-		perlinNoise(glm::vec2(parentPosition->x, parentPosition->y) * 0.01f),
-		perlinNoise(glm::vec2(parentPosition->x + 111.1, parentPosition->y + 111.1) * 0.01f),
-		perlinNoise(glm::vec2(parentPosition->x - 123.4, parentPosition->y - 432.1) * 0.01f)) *
+	offsetFromTarget = glm::vec3(
+		perlinNoise(glm::vec2(target.x, target.y) * 0.01f),
+		perlinNoise(glm::vec2(target.x + 111.1, target.y + 111.1) * 0.01f),
+		perlinNoise(glm::vec2(target.x - 123.4, target.y - 432.1) * 0.01f)) *
 		glm::vec3(11.0, 11.0, 5.0);
-	glm::vec3 targetPos = *parentPosition + offsetFromParent;
+	glm::vec3 targetPos = target + offsetFromTarget;
 	setVelocity(glm::vec3(0.0));
 
 	// smooth move to target position
 	glm::vec3 moveDir = targetPos - pos;
 	if (glm::length(moveDir) > 0) {
-		glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(0.f, 25.0f, glm::length(moveDir)) * followParentSpeed;
+		glm::vec3 delta = glm::normalize(moveDir) * glm::smoothstep(0.f, 25.0f, glm::length(moveDir)) * followTargetSpeed;
 
 		if (glm::length(delta) > glm::length(moveDir)) {
 			pos = targetPos;

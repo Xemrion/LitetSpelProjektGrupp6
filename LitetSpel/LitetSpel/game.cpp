@@ -1,8 +1,7 @@
 #include "game.h"
-#include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("Marco.png");
+	editor.initialize("Level.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -708,7 +707,7 @@ void Game::update(double dt) {
 
 		for (Blob& b : level.player.blobs) {
 			if (!b.getIsActive()) {
-				b.followPlayer();
+				b.moveTowards(level.player.pos);
 			}
 		}
 	}
@@ -937,25 +936,44 @@ void Game::updateGraphics() {
 			}
 		}
 
-		playerSphere.centerRadius = vec4(
-			level.player.pos.x,
-			level.player.pos.y,
-			level.player.pos.z,
-			level.player.radius);
-		playerSphere.color = playerStatusColors[level.player.status];
-		level.spheres.push_back(playerSphere);
 
-		if (level.player.levelCompleted == false)
-		{
+		if (level.player.levelCompleted == false) {
+			playerSphere.centerRadius = vec4(
+				level.player.pos.x,
+				level.player.pos.y,
+				level.player.pos.z,
+				level.player.radius);
+			playerSphere.color = playerStatusColors[level.player.status];
+			level.spheres.push_back(playerSphere);
 			animateSphere(playerSphere, vec3(3.0, 3.0, 0.5));
+			for (int i = 0; i < level.player.blobs.size(); i++)
+			{
+				level.player.blobs[i].blobSphere.color = playerSphere.color;
+				level.spheres.push_back(level.player.blobs[i].blobSphere);
+			}
 		}
 		else
-			animateVictory(playerSphere);
-
-		for (int i = 0; i < level.player.blobs.size(); i++)
 		{
-			level.player.blobs[i].blobSphere.color = playerSphere.color;
-			level.spheres.push_back(level.player.blobs[i].blobSphere);
+			playerSphere.centerRadius = vec4(
+				level.player.pos.x,
+				level.player.pos.y,
+				level.player.pos.z,
+				level.player.radius);
+			playerSphere.color = playerStatusColors[level.player.status];
+			
+			animateColor(playerSphere, time*0.3);
+			animateVictory(level.player);
+			
+			double offset = 10.0;
+			for (Blob& b : level.player.blobs) {
+				animateColor(b.blobSphere, time + offset);
+				offset += 15.0;
+				glm::vec3 targetOffsets = glm::vec3(float(sin(time * 4.0 + offset) * 10.f), float(cos(time * 4.0 + offset) * 10.f), 0.0);
+				b.moveTowards(level.player.pos + targetOffsets);
+				level.spheres.push_back(b.blobSphere);
+			}
+
+			level.spheres.push_back(playerSphere);
 		}
 
 		for (int i = 0; i < level.powerUps.size(); ++i) {
@@ -968,12 +986,6 @@ void Game::updateGraphics() {
 		}
 
 		//showHitboxes();
-	}
-	else
-	{
-		level.movingBoxes.push_back(MenuBG);
-		level.movingBoxes.push_back(MenuYes);
-		level.movingBoxes.push_back(MenuNo);
 	}
 }
 
@@ -1209,38 +1221,15 @@ void Game::animateSphere(Sphere const &sphere, vec3 const &amplitude) {
 	level.spheres.push_back(sphere2);
 }
 
-void Game::animateColor(Graphics& graphics)
+void Game::animateColor(Sphere& s, double offset)
 {
-	//graphics.setMetaballColorAbsorb(vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
+	s.color = sin(glm::vec4(20.7 * offset, 18.8 * offset, 22.75 * offset, 10.1 * offset) * 0.3f + 0.3f);
 }
 
-void Game::animateVictory(Sphere const & sphere)
+void Game::animateVictory(Player& player)
 {
-	float distance = 2;
-	float orbit = 8;
-	vec3 rotationSpeed = vec3(0.81, 0.53, 0.1);
-	// Offset the start rotation of the spheres to avoid them all starting at the same place
-	vec3 offset = vec3(distance, distance, 2.0);
+	//playerSphere.centerRadius += glm::vec4(sin(time*10) * 20.f, (cos(time*10) + 1.0) * 20.f, 0.0, 0.0);
 
-	Sphere sphere1(vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
-		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
-		sphere.centerRadius.w / 2
-	));
-	sphere1.color = sphere.color;
-	level.spheres.push_back(sphere1);
-
-	rotationSpeed = -rotationSpeed;
-	offset = vec3(-distance, -distance, -2.0);
-	Sphere sphere2(vec4(
-		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
-		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
-		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
-		sphere.centerRadius.w / 2
-	));
-	sphere2.color = sphere.color;
-	level.spheres.push_back(sphere2);
 }
 
 // TODO: commented lines
