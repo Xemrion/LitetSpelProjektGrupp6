@@ -193,7 +193,7 @@ void keyboardFunc()
 			{
 				game->keys[Game::Keys::left] = true;
 			}
-			if ((game->keys[Game::Keys::left] == true || game->keys[Game::Keys::right] == true) && !game->level.player.isStuck) {
+			if ((game->keys[Game::Keys::left] == true || game->keys[Game::Keys::right] == true) && !game->level.player.isStuck && game->level.player.levelCompleted != true) {
 				if (playerMove != true) {
 					gameSounds.StartPlayerMoveLoop();
 					playerMove = true;
@@ -223,7 +223,7 @@ void keyboardFunc()
 				game->level.player.lifeCharges = 0;
 			}
 		} 
-		else if ((game->level.player.levelCompleted == true || game->level.player.knockBack == true) && playerMove != false) {
+		else if ((game->level.player.knockBack == true) && playerMove != false) {
 			gameSounds.StopPlayerMoveLoop();
 			playerMove = false;
 		}
@@ -288,6 +288,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			{
 				keyboardFunc();
 				mouseFunc();
+			}
+			else if (game->level.player.levelCompleted && playerMove != false) {
+				gameSounds.StopPlayerMoveLoop();
+				playerMove = false;
 			}
 
 			game->update(dt);
