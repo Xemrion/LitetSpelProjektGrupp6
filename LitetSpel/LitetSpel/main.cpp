@@ -279,6 +279,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				gameLoaded = false;
 				game->menuLoad();
 			}
+			if (game->level.player.levelCompleted && playerMove) {
+				gameSounds.StopPlayerMoveLoop();
+				gameSounds.StopGameMusic();
+				playerMove = false;
+			}
 			if (game->level.player.levelCompleted && game->leftButtonDown)
 			{
 				delete game;
