@@ -259,6 +259,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	//	DispatchMessage(&msg);
 	//}
 	bool gameLoaded = false;
+	game->setCameraPan(false);
 	game->state = GameState::MenuState;
 	game->menuLoad();
 
@@ -279,10 +280,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				graphics.setStaticBoxes(game->level.staticBoxes);
 				graphics.setCameraPos((game->level.player.pos + vec3(0, 20, -150)), false);
 				gameLoaded = true;
+				game->setCameraPan(true);
 			}
 			if (game->level.player.lifeCharges <= 0 && game->playerExist == true) {
 				delete game;
 				game = new Game;
+				game->setCameraPan(false);
 				graphics.setCameraPos(vec3(0,0,-150), false);
 				game->state = GameState::MenuState;
 				gameLoaded = false;

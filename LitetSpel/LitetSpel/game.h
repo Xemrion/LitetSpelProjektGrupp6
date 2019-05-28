@@ -155,6 +155,7 @@ public:
 
 	glm::vec3 getCameraPos() { return cameraPos; };
 	bool getCameraPan() { return panCamera; };
+	void setCameraPan(bool change) { this->panCamera = change; };
 
 	Sounds* gameSounds;
 	Box      EnemyBox;
