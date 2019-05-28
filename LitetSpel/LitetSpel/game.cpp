@@ -1,7 +1,8 @@
 #include "game.h"
+#include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("level.png");
+	editor.initialize("Level.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -120,15 +121,17 @@ void Game::init() noexcept {
 
 void Game::reset()
 {
-	vector<Enemy>    enemies = vector<Enemy>();
-	vector<PowerUp>  powerUps = vector<PowerUp>();
-	vector<MovingPlatform> movingPlatforms = vector<MovingPlatform>();
-	vector<Gate>     gates = vector<Gate>();
-	vector<Laser>    lasers = vector<Laser>();
-	vector<Button>   buttons = vector<Button>();
+	level.spheres = vector<Sphere>();
+	level.movingBoxes = vector<Box>();
+	level.buttons = vector<Button>();
+	level.enemies = vector<Enemy>();
+	level.gates = vector<Gate>();
+	level.movingPlatforms = vector<MovingPlatform>();
+	level.powerUps = vector<PowerUp>();
+	level.staticBoxes = vector<Box>();
 	//TODO:
-	level.colManager.clean(); //Deregisters hitboxes
-	editor.Reset(); // Clean Editor
+	level.colManager.clean();//Deregisters hitboxes
+	// Clean Editor
 	init();
 }
 
@@ -162,7 +165,7 @@ Player::Player(vec3 position) :
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
-	takeDamageCooldown(INVINCIBILITY_TIME),
+	takeDamageCooldown(3.0f),
 	hasExtraJump(true),
 	isStanding(false),
 	isStuck(false),
@@ -395,7 +398,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 						gameSounds->PlayDamagedSound02();
 					}
 					lifeCharges = 0;
-					takeDamageCooldown = INVINCIBILITY_TIME;
+					takeDamageCooldown = 3.0f;
 				}
 
 			}
@@ -411,7 +414,7 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 						gameSounds->PlayDamagedSound02();
 					}
 					lifeCharges = 0;
-					takeDamageCooldown = INVINCIBILITY_TIME;
+					takeDamageCooldown = 3.0f;
 				}
 			}
 		}
@@ -669,6 +672,9 @@ void Game::update(double dt) {
 	if (state == GameState::LevelState)
 	{
 		time += dt;
+		if (level.player.lifeCharges <= 0 && playerExist == true) {
+			//Reset
+		}
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 		if (!level.player.knockBack)
 		{
@@ -702,7 +708,7 @@ void Game::update(double dt) {
 
 		for (Blob& b : level.player.blobs) {
 			if (!b.getIsActive()) {
-				b.moveTowards(level.player.pos);
+				b.followPlayer();
 			}
 		}
 	}
@@ -711,69 +717,66 @@ void Game::update(double dt) {
 
 // Call first of all per frame updates
 void Game::handleInput() {
-	if(!level.player.levelCompleted)
-	{
-		auto &player = level.player;
-		player.controlDir = glm::vec3(keys[Keys::right] - keys[Keys::left], keys[Keys::up] - keys[Keys::down], 0.0);
-		if (leftButtonDown) {
-			player.shoot(mousePos);
-		}
-		if (keys[Keys::up]) {
-			if (player.isStanding) {
-				player.isStanding = false;
-				player.jumpCooldown = COOLDOWN_CONSTANT;
-				player.velocity.y = 0;
-				player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
-				if (player.status == PlayerStatus::Bouncy) {
-					gameSounds->PlayJumpSound03();
-				}
-				else if (player.status == PlayerStatus::Heavy) {
-					gameSounds->PlayJumpSound02();
-				}
-				else {
-					gameSounds->PlayJumpSound01();
-				}
-			}
-			else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
-				player.hasExtraJump = false;
-				player.jumpCooldown = COOLDOWN_CONSTANT;
-				player.velocity.y = 0;
-				player.putForce(vec3(0.0, player.jumpForce, 0.0));
+	auto &player = level.player;
+	player.controlDir = glm::vec3(keys[Keys::right] - keys[Keys::left], keys[Keys::up] - keys[Keys::down], 0.0);
+	if (leftButtonDown) {
+		player.shoot(mousePos);
+	}
+	if (keys[Keys::up]) {
+		if (player.isStanding) {
+			player.isStanding = false;
+			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.velocity.y = 0;
+			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
+			if (player.status == PlayerStatus::Bouncy) {
 				gameSounds->PlayJumpSound03();
 			}
-		}
-		if (keys[Keys::left]) {
-			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
-				//player.isStuck = false;
-				//player.pos.x -= 0.001;
+			else if (player.status == PlayerStatus::Heavy) {
+				gameSounds->PlayJumpSound02();
 			}
 			else {
-				player.addVelocity(vec3(-1, 0, 0), true);
+				gameSounds->PlayJumpSound01();
 			}
 		}
-		if (keys[Keys::right]) {
+		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
+			player.hasExtraJump = false;
+			player.jumpCooldown = COOLDOWN_CONSTANT;
+			player.velocity.y = 0;
+			player.putForce(vec3(0.0, player.jumpForce, 0.0));
+			gameSounds->PlayJumpSound03();
+		}
+	}
+	if (keys[Keys::left]) {
+		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
+			//player.isStuck = false;
+			//player.pos.x -= 0.001;
+		}
+		else {
+			player.addVelocity(vec3(-1, 0, 0), true);
+		}
+	}
+	if (keys[Keys::right]) {
 
-			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
-				player.isStuck = false;
-				//player.pos.x += 0.001;
-			}
-			else {
-				player.addVelocity(vec3(1, 0, 0), true);
-			}
+		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
+			player.isStuck = false;
+			//player.pos.x += 0.001;
 		}
-		if (keys[Keys::down]) {
-			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
-				player.isStuck = false;
-				//player.pos.y -= 0.001;
-			}
-			else {
-				cameraPos = level.player.pos + cameraLookDownOffset;
-			}
+		else {
+			player.addVelocity(vec3(1, 0, 0), true);
 		}
+	}
+	if (keys[Keys::down]) {
+		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
+			player.isStuck = false;
+			//player.pos.y -= 0.001;
+		}
+		else {
+			cameraPos = level.player.pos + cameraLookDownOffset;
+		}
+	}
 
-		for (int i = 0; i < 4; ++i) {
-			keys[i] = false;
-		}
+	for (int i = 0; i < 4; ++i) {
+		keys[i] = false;
 	}
 }
 
@@ -934,44 +937,25 @@ void Game::updateGraphics() {
 			}
 		}
 
+		playerSphere.centerRadius = vec4(
+			level.player.pos.x,
+			level.player.pos.y,
+			level.player.pos.z,
+			level.player.radius);
+		playerSphere.color = playerStatusColors[level.player.status];
+		level.spheres.push_back(playerSphere);
 
-		if (level.player.levelCompleted == false) {
-			playerSphere.centerRadius = vec4(
-				level.player.pos.x,
-				level.player.pos.y,
-				level.player.pos.z,
-				level.player.radius);
-			playerSphere.color = playerStatusColors[level.player.status];
-			level.spheres.push_back(playerSphere);
+		if (level.player.levelCompleted == false)
+		{
 			animateSphere(playerSphere, vec3(3.0, 3.0, 0.5));
-			for (int i = 0; i < level.player.blobs.size(); i++)
-			{
-				level.player.blobs[i].blobSphere.color = playerSphere.color;
-				level.spheres.push_back(level.player.blobs[i].blobSphere);
-			}
 		}
 		else
-		{
-			playerSphere.centerRadius = vec4(
-				level.player.pos.x,
-				level.player.pos.y,
-				level.player.pos.z,
-				level.player.radius);
-			playerSphere.color = playerStatusColors[level.player.status];
-			
-			animateColor(playerSphere, time*0.3);
-			animateVictory(level.player);
-			
-			double offset = 10.0;
-			for (Blob& b : level.player.blobs) {
-				animateColor(b.blobSphere, time + offset);
-				offset += 15.0;
-				glm::vec3 targetOffsets = glm::vec3(float(sin(time * 4.0 + offset) * 10.f), float(cos(time * 4.0 + offset) * 10.f), 0.0);
-				b.moveTowards(level.player.pos + targetOffsets);
-				level.spheres.push_back(b.blobSphere);
-			}
+			animateVictory(playerSphere);
 
-			level.spheres.push_back(playerSphere);
+		for (int i = 0; i < level.player.blobs.size(); i++)
+		{
+			level.player.blobs[i].blobSphere.color = playerSphere.color;
+			level.spheres.push_back(level.player.blobs[i].blobSphere);
 		}
 
 		for (int i = 0; i < level.powerUps.size(); ++i) {
@@ -1225,15 +1209,38 @@ void Game::animateSphere(Sphere const &sphere, vec3 const &amplitude) {
 	level.spheres.push_back(sphere2);
 }
 
-void Game::animateColor(Sphere& s, double offset)
+void Game::animateColor(Graphics& graphics)
 {
-	s.color = sin(glm::vec4(20.7 * offset, 18.8 * offset, 22.75 * offset, 10.1 * offset) * 0.3f + 0.3f);
+	//graphics.setMetaballColorAbsorb(vec3(sin(float(time)), -sin(float(time)), cos(float(time))));
 }
 
-void Game::animateVictory(Player& player)
+void Game::animateVictory(Sphere const & sphere)
 {
-	//playerSphere.centerRadius += glm::vec4(sin(time*10) * 20.f, (cos(time*10) + 1.0) * 20.f, 0.0, 0.0);
+	float distance = 2;
+	float orbit = 8;
+	vec3 rotationSpeed = vec3(0.81, 0.53, 0.1);
+	// Offset the start rotation of the spheres to avoid them all starting at the same place
+	vec3 offset = vec3(distance, distance, 2.0);
 
+	Sphere sphere1(vec4(
+		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
+		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
+		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
+		sphere.centerRadius.w / 2
+	));
+	sphere1.color = sphere.color;
+	level.spheres.push_back(sphere1);
+
+	rotationSpeed = -rotationSpeed;
+	offset = vec3(-distance, -distance, -2.0);
+	Sphere sphere2(vec4(
+		sphere.centerRadius.x + sin(float(time) * (rotationSpeed.x * sin(float(time)) + offset.x))*orbit,
+		sphere.centerRadius.y + sin(float(time) * (rotationSpeed.y * sin(float(time)) + offset.y))*orbit,
+		sphere.centerRadius.z + sin(float(time) * rotationSpeed.z + offset.z)*orbit,
+		sphere.centerRadius.w / 2
+	));
+	sphere2.color = sphere.color;
+	level.spheres.push_back(sphere2);
 }
 
 // TODO: commented lines
