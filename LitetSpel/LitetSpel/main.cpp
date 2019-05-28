@@ -20,6 +20,7 @@ bool highlight;
 
 int xMus = 0;
 float powerCoolDown = 0.0;
+float mouseCoolDown = 0.0;
 bool gameEnd = false;
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -141,7 +142,7 @@ void mouseFunc()
 	}
 	else 
 	{
-		if (mouse.LeftIsPressed())
+		if (mouse.LeftIsPressed() && mouseCoolDown <= 0.0)
 		{
 			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
 				gameSounds.StopMenuMusic();
@@ -176,7 +177,6 @@ void mouseFunc()
 		}
 
 	}
-
 }
 
 void keyboardFunc()
@@ -258,6 +258,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 		else
 		{
+			mouseFunc();
+			keyboardFunc();
+
 			if (game->state == GameState::LevelState && !gameLoaded)
 			{
 				game->gameSounds = &gameSounds;
@@ -271,10 +274,22 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				delete game;
 				game = new Game;
 				game->setCameraPan(false);
-				graphics.setCameraPos(vec3(0,0,-150), false);
+				graphics.setCameraPos(vec3(0, 0, -150), false);
 				game->state = GameState::MenuState;
 				gameLoaded = false;
 				game->menuLoad();
+			}
+			if (game->level.player.levelCompleted && game->leftButtonDown)
+			{
+				delete game;
+				game = new Game;
+				game->setCameraPan(false);
+				graphics.setCameraPos(vec3(0, 0, -150), false);
+				game->state = GameState::MenuState;
+				gameLoaded = false;
+				game->leftButtonDown = false;
+				game->menuLoad();
+				mouseCoolDown = 1.0;
 			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
@@ -284,16 +299,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			_itoa_s(1/dt, title, 64, 10);
 			SetWindowTextA(wndHandle, title);
 
-			if (!game->level.player.levelCompleted)
-			{
-				keyboardFunc();
-				mouseFunc();
-			}
-			else if (game->level.player.levelCompleted && playerMove != false) {
-				gameSounds.StopPlayerMoveLoop();
-				playerMove = false;
-			}
-
 			game->update(dt);
 			graphics.setCameraPos(game->getCameraPos(), game->getCameraPan());
 			graphics.setMovingBoxes(game->level.movingBoxes);
@@ -302,6 +307,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			graphics.castPlayerShadow(game->level.player.pos);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;
+			mouseCoolDown -= (float)dt;
 		}
 	}
 	delete game;
