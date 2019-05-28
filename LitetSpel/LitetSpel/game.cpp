@@ -2,7 +2,7 @@
 #include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("Level.png");
+	editor.initialize("Marco.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -130,7 +130,8 @@ void Game::reset()
 	level.powerUps = vector<PowerUp>();
 	level.staticBoxes = vector<Box>();
 	//TODO:
-	//Deregister hitboxes
+	level.colManager.clean();//Deregisters hitboxes
+	// Clean Editor
 	init();
 }
 
@@ -160,6 +161,7 @@ Player::Player(vec3 position) :
 	moveSpeed(75.0f),
 	mass(10.0),
 	blobCharges(5),
+	lifeCharges(3),
 	shootCooldown(1.0f),
 	jumpForce(1200.0f),
 	jumpCooldown(.0f),
@@ -633,8 +635,10 @@ void Player::collide(ColliderType ownHitbox, const HitboxEntry& other) noexcept
 	}
 	if (other.colliderType == ColliderType::level_goal)
 	{
-		levelCompleted = true;
-		gameSounds->PlayEndOfLevelSound();
+		if (levelCompleted != true) {
+			levelCompleted = true;
+			gameSounds->PlayEndOfLevelSound();
+		}
 	}
 }
 
@@ -681,9 +685,10 @@ void Game::update(double dt) {
 
 		handleInput();
 		level.player.isStanding = false;
-		if(level.player.lifeCharges >= 0)
+		if(level.player.lifeCharges <= 0)
 		{
 			// Reset
+			// level.player.pos = vec3(100, -1000, 0);
 		}
 
 		level.player.update(dt);
@@ -693,10 +698,8 @@ void Game::update(double dt) {
 			{
 				level.enemies.at(i).update(dt);
 			}
-			else if (!level.enemies.at(i).alive && !level.enemies.at(i).isDeregistered)
-			{
-				level.enemies.at(i).isDeregistered = true;
-				level.enemies.at(i).pos = vec3(0, -1000, 0);
+			else {
+				level.colManager.unregisterEntry( level.enemies.at(i) );
 			}
 		}
 
