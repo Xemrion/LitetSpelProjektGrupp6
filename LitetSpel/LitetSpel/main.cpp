@@ -10,7 +10,7 @@
 KeyboardInput keyboard;
 MouseInput mouse;
 Sounds gameSounds;
-Game game;
+Game* game;
 Graphics graphics;
 
 double dt;
@@ -129,15 +129,15 @@ HWND InitWindow(HINSTANCE hInstance, int width, int height)
 
 void mouseFunc() 
 {
-	if (game.state == GameState::LevelState) 
+	if (game->state == GameState::LevelState) 
 	{
 		if (mouse.LeftIsPressed())
 		{
-			game.leftButtonDown = true;
-			game.mousePos = graphics.windowToWorldCoord(glm::vec2(mouse.GetXPos(), mouse.GetYPos()));
+			game->leftButtonDown = true;
+			game->mousePos = graphics.windowToWorldCoord(glm::vec2(mouse.GetXPos(), mouse.GetYPos()));
 		}
 		else
-			game.leftButtonDown = false;
+			game->leftButtonDown = false;
 	}
 	else 
 	{
@@ -147,7 +147,7 @@ void mouseFunc()
 				gameSounds.StopMenuMusic();
 				gameSounds.PlayMenuClickSound();
 				//gameSounds.StartGameMusic();
-				game.state = GameState::LevelState;
+				game->state = GameState::LevelState;
 			}
 			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
 			{
@@ -158,21 +158,21 @@ void mouseFunc()
 		if ((mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
 			if (highlight != true) {
 				gameSounds.PlayMenuHighlightSound();
-				game.MenuYes.color = yellow;
+				game->MenuYes.color = yellow;
 				highlight = true;
 			}
 		}
 		else if((mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)) {
 			if (highlight != true) {
 				gameSounds.PlayMenuHighlightSound();
-				game.MenuNo.color = yellow;
+				game->MenuNo.color = yellow;
 				highlight = true;
 			}
 		}
 		else {
 			highlight = false;
-			game.MenuNo.color = red;
-			game.MenuYes.color = green;
+			game->MenuNo.color = red;
+			game->MenuYes.color = green;
 		}
 
 	}
@@ -182,24 +182,24 @@ void mouseFunc()
 void keyboardFunc()
 {
 	//Movement
-	if (game.state == GameState::LevelState) {
-		if (game.level.player.knockBack == false)
+	if (game->state == GameState::LevelState) {
+		if (game->level.player.knockBack == false)
 		{
 			if (keyboard.KeyIsPressed('D') || keyboard.KeyIsPressed(VK_RIGHT))
 			{
-				game.keys[Game::Keys::right] = true;
+				game->keys[Game::Keys::right] = true;
 			}
 			if (keyboard.KeyIsPressed('A') || keyboard.KeyIsPressed(VK_LEFT))
 			{
-				game.keys[Game::Keys::left] = true;
+				game->keys[Game::Keys::left] = true;
 			}
-			if ((game.keys[Game::Keys::left] == true || game.keys[Game::Keys::right] == true) && !game.level.player.isStuck) {
+			if ((game->keys[Game::Keys::left] == true || game->keys[Game::Keys::right] == true) && !game->level.player.isStuck) {
 				if (playerMove != true) {
 					gameSounds.StartPlayerMoveLoop();
 					playerMove = true;
 				}
 			}
-			if (game.keys[Game::Keys::left] != true && game.keys[Game::Keys::right] != true || game.level.player.isStuck) {
+			if (game->keys[Game::Keys::left] != true && game->keys[Game::Keys::right] != true || game->level.player.isStuck) {
 				if (playerMove != false) {
 					gameSounds.StopPlayerMoveLoop();
 					playerMove = false;
@@ -207,93 +207,23 @@ void keyboardFunc()
 			}
 			if (keyboard.KeyIsPressed('W') || keyboard.KeyIsPressed(VK_UP))
 			{
-				game.keys[Game::Keys::up] = true;
+				game->keys[Game::Keys::up] = true;
 			}
 			if (keyboard.KeyIsPressed('S') || keyboard.KeyIsPressed(VK_DOWN))
 			{
-				game.keys[Game::Keys::down] = true;
-			}
-
-			if (keyboard.KeyIsPressed('B'))
-			{
-				if (powerCoolDown <= 0)
-				{
-					if (game.level.player.status == PlayerStatus::None)
-					{
-						for (int i = 0; i < game.level.player.blobCharges; i++)
-						{
-							game.level.player.blobs[i].status = BlobStatus::Blob_Bouncy;
-						}
-						game.level.player.status = PlayerStatus::Bouncy;
-					}
-					else
-					{
-						for (int i = 0; i < game.level.player.blobCharges; i++)
-						{
-							game.level.player.blobs[i].status = BlobStatus::Blob_None;
-						}
-						game.level.player.status = PlayerStatus::None;
-					}
-					powerCoolDown = 0.2f;
-				}
-			}
-			if (keyboard.KeyIsPressed('H'))
-			{
-				if (powerCoolDown <= 0)
-				{
-					if (game.level.player.status == PlayerStatus::None)
-					{
-						for (int i = 0; i < game.level.player.blobCharges; i++)
-						{
-							game.level.player.blobs[i].status = BlobStatus::Blob_Heavy;
-						}
-						game.level.player.status = PlayerStatus::Heavy;
-					}
-					else
-					{
-						for (int i = 0; i < game.level.player.blobCharges; i++)
-						{
-							game.level.player.blobs[i].status = BlobStatus::Blob_None;
-						}
-						game.level.player.status = PlayerStatus::None;
-					}
-					powerCoolDown = 0.2f;
-				}
-			}
-			if (keyboard.KeyIsPressed('Y'))
-			{
-				if (powerCoolDown <= 0)
-				{
-					if (game.level.player.status == PlayerStatus::None)
-					{
-						for (int i = 0; i < game.level.player.blobCharges; i++)
-						{
-							game.level.player.blobs[i].status = BlobStatus::Blob_Sticky;
-						}
-						game.level.player.status = PlayerStatus::Sticky;
-					}
-					else
-					{
-						for (int i = 0; i < game.level.player.blobCharges; i++)
-						{
-							game.level.player.blobs[i].status = BlobStatus::Blob_None;
-						}
-						game.level.player.status = PlayerStatus::None;
-					}
-					powerCoolDown = 0.2f;
-				}
+				game->keys[Game::Keys::down] = true;
 			}
 			if (keyboard.KeyIsPressed('R')) {
-				game.level.player.recallBlobs();
+				game->level.player.recallBlobs();
 			}
 			if (keyboard.KeyIsPressed('P')) {
 				graphics.createShaders();
 			}
 			if (keyboard.KeyIsPressed('K')) {
-				game.level.player.lifeCharges = 0;
+				game->level.player.lifeCharges = 0;
 			}
 		} 
-		else if ((game.level.player.levelCompleted == true || game.level.player.knockBack == true) && playerMove != false) {
+		else if ((game->level.player.levelCompleted == true || game->level.player.knockBack == true) && playerMove != false) {
 			gameSounds.StopPlayerMoveLoop();
 			playerMove = false;
 		}
@@ -302,19 +232,20 @@ void keyboardFunc()
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
 {
+	game = new Game();
 	HWND wndHandle = InitWindow(hInstance, WINDOW_WIDTH, WINDOW_HEIGHT);
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
 	//if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
-	game.gameSounds = &gameSounds;
+	game->gameSounds = &gameSounds;
 
 	ShowWindow(wndHandle, nCmdShow);
 	//gameSounds.StartMenuMusic();
 
-	game.init();
-	graphics.setStaticBoxes(game.level.staticBoxes);
-	graphics.setCameraPos((game.level.player.pos + vec3(0, 20, -150)), false);
+	game->init();
+	graphics.setStaticBoxes(game->level.staticBoxes);
+	graphics.setCameraPos((game->level.player.pos + vec3(0, 20, -150)), false);
 	//game.update(0.00001);
 	//graphics.setMovingBoxes(game.level.movingBoxes);
 	//graphics.setMetaballs(game.level.spheres);
@@ -338,6 +269,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 		else
 		{
+			if (game->level.player.lifeCharges <= 0 && game->playerExist == true) {
+				delete game;
+				game = new Game;
+				game->gameSounds = &gameSounds;
+				game->init();
+				graphics.setStaticBoxes(game->level.staticBoxes);
+				graphics.setCameraPos((game->level.player.pos + vec3(0, 20, -150)), false);
+			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
 			prevFrameTime = currentFrameTime;
@@ -346,7 +285,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			_itoa_s(1/dt, title, 64, 10);
 			SetWindowTextA(wndHandle, title);
 
-			if (!game.level.player.levelCompleted) 
+			if (!game->level.player.levelCompleted)
 			{
 				keyboardFunc();
 				mouseFunc();
@@ -356,17 +295,17 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				//game.animateColor(graphics);
 				//game.animateVictory(game.playerSphere);
 			}
-			game.update(dt);
-			graphics.setCameraPos(game.getCameraPos(), game.getCameraPan());
-			graphics.setMovingBoxes(game.level.movingBoxes);
-			graphics.setMetaballs(game.level.spheres);
-			graphics.setLasers(game.level.laserGraphics);
-			graphics.castPlayerShadow(game.level.player.pos);
+			game->update(dt);
+			graphics.setCameraPos(game->getCameraPos(), game->getCameraPan());
+			graphics.setMovingBoxes(game->level.movingBoxes);
+			graphics.setMetaballs(game->level.spheres);
+			graphics.setLasers(game->level.laserGraphics);
+			graphics.castPlayerShadow(game->level.player.pos);
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;
 		}
 	}
-
+	delete game;
 	gameSounds.Shutdown();
 	return 0;
 }

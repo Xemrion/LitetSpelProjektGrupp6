@@ -2,7 +2,7 @@
 #include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("Marco.png");
+	editor.initialize("ResetTest.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -121,17 +121,15 @@ void Game::init() noexcept {
 
 void Game::reset()
 {
-	level.spheres = vector<Sphere>();
-	level.movingBoxes = vector<Box>();
-	level.buttons = vector<Button>();
-	level.enemies = vector<Enemy>();
-	level.gates = vector<Gate>();
-	level.movingPlatforms = vector<MovingPlatform>();
-	level.powerUps = vector<PowerUp>();
-	level.staticBoxes = vector<Box>();
+	vector<Enemy>    enemies = vector<Enemy>();
+	vector<PowerUp>  powerUps = vector<PowerUp>();
+	vector<MovingPlatform> movingPlatforms = vector<MovingPlatform>();
+	vector<Gate>     gates = vector<Gate>();
+	vector<Laser>    lasers = vector<Laser>();
+	vector<Button>   buttons = vector<Button>();
 	//TODO:
-	level.colManager.clean();//Deregisters hitboxes
-	// Clean Editor
+	level.colManager.clean(); //Deregisters hitboxes
+	editor.Reset(); // Clean Editor
 	init();
 }
 
@@ -672,9 +670,6 @@ void Game::update(double dt) {
 	if (state == GameState::LevelState)
 	{
 		time += dt;
-		if (level.player.lifeCharges <= 0 && playerExist == true) {
-			//Reset
-		}
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 		if (!level.player.knockBack)
 		{
