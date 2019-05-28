@@ -243,9 +243,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	ShowWindow(wndHandle, nCmdShow);
 	//gameSounds.StartMenuMusic();
 
-	game->init();
-	graphics.setStaticBoxes(game->level.staticBoxes);
-	graphics.setCameraPos((game->level.player.pos + vec3(0, 20, -150)), false);
+	//game->init();
+	//graphics.setStaticBoxes(game->level.staticBoxes);
+	//graphics.setCameraPos((game->level.player.pos + vec3(0, 20, -150)), false);
 	//game.update(0.00001);
 	//graphics.setMovingBoxes(game.level.movingBoxes);
 	//graphics.setMetaballs(game.level.spheres);
@@ -258,6 +258,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	//	TranslateMessage(&msg);
 	//	DispatchMessage(&msg);
 	//}
+	bool gameLoaded = false;
+	game->state = GameState::MenuState;
+	game->menuLoad();
 
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
@@ -269,13 +272,21 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 		}
 		else
 		{
-			if (game->level.player.lifeCharges <= 0 && game->playerExist == true) {
-				delete game;
-				game = new Game;
+			if (game->state == GameState::LevelState && !gameLoaded)
+			{
 				game->gameSounds = &gameSounds;
 				game->init();
 				graphics.setStaticBoxes(game->level.staticBoxes);
 				graphics.setCameraPos((game->level.player.pos + vec3(0, 20, -150)), false);
+				gameLoaded = true;
+			}
+			if (game->level.player.lifeCharges <= 0 && game->playerExist == true) {
+				delete game;
+				game = new Game;
+				graphics.setCameraPos(vec3(0,0,-150), false);
+				game->state = GameState::MenuState;
+				gameLoaded = false;
+				game->menuLoad();
 			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
 			dt = (double)std::chrono::duration_cast<std::chrono::microseconds>(currentFrameTime - prevFrameTime).count() / 1000000;
