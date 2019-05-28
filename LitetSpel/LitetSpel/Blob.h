@@ -27,7 +27,7 @@ public:
 	void move(double dt) noexcept;
 	void setVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
 	void addVelocity(glm::vec3 const &velocity, bool useSpeed = false) noexcept;
-	void followPlayer();
+	void moveTowards(glm::vec3 target);
 
 	void collide(ColliderType ownType, const HitboxEntry& other) noexcept override;
 
@@ -42,10 +42,11 @@ public:
     [[nodiscard]] bool getIsBeingRecalled() const noexcept;
 	[[nodiscard]] bool getIsStuck() const noexcept;
 
+	void setOffsetFromParent(glm::vec3 offset) { offsetFromTarget = offset; };
 private:
     glm::vec3 const *parentPosition;
-	glm::vec3 followParentSpeed = glm::vec3(15.0, 15.0, 1.0);
-	glm::vec3 offsetFromParent;
+	glm::vec3 followTargetSpeed = glm::vec3(15.0, 15.0, 1.0);
+	glm::vec3 offsetFromTarget;
     bool  isActive;
 	bool isStuck;
     bool  isBeingRecalled;

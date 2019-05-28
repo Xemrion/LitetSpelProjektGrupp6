@@ -150,11 +150,12 @@ public:
 
 	void animateSphere( Sphere    const &sphere,
                         vec3 const &amplitude = {2.4f, 1.7f, 0.8f} );
-	void animateColor(Graphics& graphics);
-	void animateVictory(Sphere    const &sphere);
+	void animateColor(Sphere& s, double offset);
+	void animateVictory(Player& player);
 
 	glm::vec3 getCameraPos() { return cameraPos; };
 	bool getCameraPan() { return panCamera; };
+	void setCameraPan(bool change) { this->panCamera = change; };
 
 	Sounds* gameSounds;
 	Box      EnemyBox;

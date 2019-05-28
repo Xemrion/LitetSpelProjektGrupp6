@@ -4,6 +4,7 @@
 const float GRAVITY_CONSTANT = 200.f;
 const float COOLDOWN_CONSTANT = 0.3f;
 const float PHYSICS_TIME_STEP = 0.0001f;
+const float INVINCIBILITY_TIME = 1.5f;
 
 const int WINDOW_WIDTH = 1280;
 const int WINDOW_HEIGHT = 720;
