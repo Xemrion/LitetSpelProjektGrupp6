@@ -712,66 +712,69 @@ void Game::update(double dt) {
 
 // Call first of all per frame updates
 void Game::handleInput() {
-	auto &player = level.player;
-	player.controlDir = glm::vec3(keys[Keys::right] - keys[Keys::left], keys[Keys::up] - keys[Keys::down], 0.0);
-	if (leftButtonDown) {
-		player.shoot(mousePos);
-	}
-	if (keys[Keys::up]) {
-		if (player.isStanding) {
-			player.isStanding = false;
-			player.jumpCooldown = COOLDOWN_CONSTANT;
-			player.velocity.y = 0;
-			player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
-			if (player.status == PlayerStatus::Bouncy) {
+	if(!level.player.levelCompleted)
+	{
+		auto &player = level.player;
+		player.controlDir = glm::vec3(keys[Keys::right] - keys[Keys::left], keys[Keys::up] - keys[Keys::down], 0.0);
+		if (leftButtonDown) {
+			player.shoot(mousePos);
+		}
+		if (keys[Keys::up]) {
+			if (player.isStanding) {
+				player.isStanding = false;
+				player.jumpCooldown = COOLDOWN_CONSTANT;
+				player.velocity.y = 0;
+				player.putForce(vec3(0.0, level.player.jumpForce, 0.0));
+				if (player.status == PlayerStatus::Bouncy) {
+					gameSounds->PlayJumpSound03();
+				}
+				else if (player.status == PlayerStatus::Heavy) {
+					gameSounds->PlayJumpSound02();
+				}
+				else {
+					gameSounds->PlayJumpSound01();
+				}
+			}
+			else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
+				player.hasExtraJump = false;
+				player.jumpCooldown = COOLDOWN_CONSTANT;
+				player.velocity.y = 0;
+				player.putForce(vec3(0.0, player.jumpForce, 0.0));
 				gameSounds->PlayJumpSound03();
 			}
-			else if (player.status == PlayerStatus::Heavy) {
-				gameSounds->PlayJumpSound02();
+		}
+		if (keys[Keys::left]) {
+			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
+				//player.isStuck = false;
+				//player.pos.x -= 0.001;
 			}
 			else {
-				gameSounds->PlayJumpSound01();
+				player.addVelocity(vec3(-1, 0, 0), true);
 			}
 		}
-		else if (player.status == PlayerStatus::Bouncy && player.hasExtraJump && player.jumpCooldown <= 0) {
-			player.hasExtraJump = false;
-			player.jumpCooldown = COOLDOWN_CONSTANT;
-			player.velocity.y = 0;
-			player.putForce(vec3(0.0, player.jumpForce, 0.0));
-			gameSounds->PlayJumpSound03();
-		}
-	}
-	if (keys[Keys::left]) {
-		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
-			//player.isStuck = false;
-			//player.pos.x -= 0.001;
-		}
-		else {
-			player.addVelocity(vec3(-1, 0, 0), true);
-		}
-	}
-	if (keys[Keys::right]) {
+		if (keys[Keys::right]) {
 
-		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
-			player.isStuck = false;
-			//player.pos.x += 0.001;
+			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
+				player.isStuck = false;
+				//player.pos.x += 0.001;
+			}
+			else {
+				player.addVelocity(vec3(1, 0, 0), true);
+			}
 		}
-		else {
-			player.addVelocity(vec3(1, 0, 0), true);
+		if (keys[Keys::down]) {
+			if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
+				player.isStuck = false;
+				//player.pos.y -= 0.001;
+			}
+			else {
+				cameraPos = level.player.pos + cameraLookDownOffset;
+			}
 		}
-	}
-	if (keys[Keys::down]) {
-		if (player.status == PlayerStatus::Sticky && player.isStuck == true) {
-			player.isStuck = false;
-			//player.pos.y -= 0.001;
-		}
-		else {
-			cameraPos = level.player.pos + cameraLookDownOffset;
-		}
-	}
 
-	for (int i = 0; i < 4; ++i) {
-		keys[i] = false;
+		for (int i = 0; i < 4; ++i) {
+			keys[i] = false;
+		}
 	}
 }
 
