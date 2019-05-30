@@ -2,7 +2,7 @@
 #include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("Level.png");
+	editor.initialize("ResetTest.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
@@ -672,9 +672,6 @@ void Game::update(double dt) {
 	if (state == GameState::LevelState)
 	{
 		time += dt;
-		if (level.player.lifeCharges <= 0 && playerExist == true) {
-			//Reset
-		}
 		vec3 temp = vec3(float(keys[Keys::left]) - float(keys[Keys::right]), 0.0, 0.0);
 		if (!level.player.knockBack)
 		{
@@ -685,11 +682,6 @@ void Game::update(double dt) {
 
 		handleInput();
 		level.player.isStanding = false;
-		if(level.player.lifeCharges <= 0)
-		{
-			// Reset
-			// level.player.pos = vec3(100, -1000, 0);
-		}
 
 		level.player.update(dt);
 		for (int i = 0; i < level.enemies.size(); i++)
