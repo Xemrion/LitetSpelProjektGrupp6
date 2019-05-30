@@ -2,7 +2,7 @@
 #include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("ResetTest.png");
+	editor.initialize("test.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{
