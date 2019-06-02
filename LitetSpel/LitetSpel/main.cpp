@@ -147,7 +147,7 @@ void mouseFunc()
 			if (mouse.GetXPos() >= 720 && mouse.GetXPos() <= 1080 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620) {
 				gameSounds.StopMenuMusic();
 				gameSounds.PlayMenuClickSound();
-				//gameSounds.StartGameMusic();
+				gameSounds.StartGameMusic();
 				game->state = GameState::LevelState;
 			}
 			else if (mouse.GetXPos() < 560 && mouse.GetXPos() >= 200 && mouse.GetYPos() > 270 && mouse.GetYPos() < 620)
@@ -237,7 +237,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	MSG msg = { 0 };
 	HRESULT hr = graphics.init(wndHandle, true);
 	if (FAILED(hr)) return 2;
-	//if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
+	if (!gameSounds.InitializeSound(wndHandle)) return 3; //Sounds failed
 	game->gameSounds = &gameSounds;
 
 	ShowWindow(wndHandle, nCmdShow);
@@ -269,6 +269,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				graphics.setCameraPos((game->level.player.pos + vec3(0, 20, -150)), false);
 				gameLoaded = true;
 				game->setCameraPan(true);
+				gameSounds.PlayStartOfLevelSound();
 			}
 			if (game->level.player.lifeCharges <= 0 && game->playerExist == true) {
 				delete game;
@@ -277,6 +278,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				graphics.setCameraPos(vec3(0, 0, -150), false);
 				game->state = GameState::MenuState;
 				gameLoaded = false;
+				gameSounds.PlayPlayerDeathSound();
 				game->menuLoad();
 			}
 			if (game->level.player.levelCompleted && playerMove) {

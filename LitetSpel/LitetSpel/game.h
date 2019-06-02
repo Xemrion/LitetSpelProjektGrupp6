@@ -158,11 +158,11 @@ public:
 	void setCameraPan(bool change) { this->panCamera = change; };
 
 	Sounds* gameSounds;
-	Box      EnemyBox;
-    Sphere   playerSphere;
+	Sphere   playerSphere;
+	/*Box      EnemyBox;
     Platform groundBox;
 	Platform testPlat;
-	Platform testplat2;
+	Platform testplat2;*/
 
 	Box      MenuBG;
 	Box      MenuYes;
