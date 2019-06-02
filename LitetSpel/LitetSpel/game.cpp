@@ -96,6 +96,7 @@ void Game::init() noexcept {
 	for (int i = 0; i < editor.enemies.size(); i++)
 	{
 		level.enemies.at(i).hitbox.halfLengths = vec4(3, 3, 3, 0);
+		level.enemies.at(i).gameSounds = gameSounds;
 		level.enemies.at(i).hitbox.color = vec4(1, 0, 0, 0);
 		level.colManager.registerEntry(level.enemies.at(i), ColliderType::enemy, level.enemies.at(i).hitbox, false);
 	}
