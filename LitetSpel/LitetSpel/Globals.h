@@ -39,10 +39,10 @@ float constexpr DOOR_HEIGHT          = 5.0f;
 float constexpr BUTTON_WIDTH         = 5.0f;
 
 // blob constants
-float constexpr BLOB_SHOOT_SPEED     =  150.00f;
-float constexpr BLOB_RECALL_SPEED    =  800.00f;
-float constexpr BLOB_ACTIVE_RADIUS   =    2.00f;
-float constexpr BLOB_INACTIVE_RADIUS =    2.00f;
+float constexpr BLOB_SHOOT_SPEED     = 150.00f;
+float constexpr BLOB_RECALL_SPEED    = 800.00f;
+float constexpr BLOB_ACTIVE_RADIUS   =   2.00f;
+float constexpr BLOB_INACTIVE_RADIUS =   2.00f;
 
 // cooldown constants
 float constexpr  JUMP_CD = .5f;
@@ -86,12 +86,10 @@ enum class PowerType { none,
 
 
 // Use player.status as index
-const glm::vec4 PowerTypeColor[] = {
-    glm::vec4( 0.85f, 0.05f, 0.75f, 0.0f ),
-    glm::vec4( 1.00f, 0.75f, 0.05f, 0.0f ),
-    glm::vec4( 0.75f, 0.75f, 0.75f, 0.1f ),
-    glm::vec4( 0.05f, 0.05f, 1.00f, 0.0f )
-};
+const glm::vec4 PowerTypeColor[] = { glm::vec4( 0.85f, 0.05f, 0.75f, 0.0f ),
+                                     glm::vec4( 1.00f, 0.75f, 0.05f, 0.0f ),
+                                     glm::vec4( 0.75f, 0.75f, 0.75f, 0.1f ),
+                                     glm::vec4( 0.05f, 0.05f, 1.00f, 0.0f ) };
 
 struct CameraData {
     glm::vec3  offset         { .0f,  20.f, -150.f },
