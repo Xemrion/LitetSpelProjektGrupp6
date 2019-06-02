@@ -1,8 +1,7 @@
 #include "game.h"
-#include <thread>
 
 void Game::init() noexcept {
-	editor.initialize("Level.png");
+	editor.initialize("0.png");
 	// Platforms
 	for (int i = 0; i < editor.platforms.size(); i++)
 	{

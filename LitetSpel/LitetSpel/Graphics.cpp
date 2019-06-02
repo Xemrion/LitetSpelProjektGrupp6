@@ -306,16 +306,6 @@ HRESULT Graphics::createResources(HWND wndHandle)
 			return hr;
 		}
 
-		hr = DirectX::CreateDDSTextureFromFile(device, L"output_skybox.dds", nullptr, &skyboxResourceView);
-		if (FAILED(hr)) {
-			if (errorBlob)
-			{
-				OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-				errorBlob->Release();
-			}
-			return hr;
-		}
-
 		hr = DirectX::CreateDDSTextureFromFile(device, L"radiance.dds", nullptr, &radianceResourceView);
 		if (FAILED(hr)) {
 			if (errorBlob)
@@ -1181,9 +1171,8 @@ void Graphics::swapBuffer()
 	deviceContext->IASetInputLayout(quadVertexLayout);
 	deviceContext->PSSetShaderResources(0, 1, &geometryResourceView);
 	deviceContext->PSSetShaderResources(1, 1, &depthResourceView);
-	deviceContext->PSSetShaderResources(2, 1, &skyboxResourceView);
-	deviceContext->PSSetShaderResources(3, 1, &radianceResourceView);
-	deviceContext->PSSetShaderResources(4, 1, &irradianceResourceView);
+	deviceContext->PSSetShaderResources(2, 1, &radianceResourceView);
+	deviceContext->PSSetShaderResources(3, 1, &irradianceResourceView);
 	deviceContext->PSSetSamplers(0, 1, &samplerState);
 
 	deviceContext->Draw(6, 0);

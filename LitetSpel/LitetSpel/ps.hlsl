@@ -1,8 +1,7 @@
 Texture2D geometryTexture : register(t0);
 Texture2D depthbuffer : register(t1);
-TextureCube skybox : register(t2);
-TextureCube radianceMap : register(t3);
-TextureCube irradianceMap : register(t4);
+TextureCube radianceMap : register(t2);
+TextureCube irradianceMap : register(t3);
 SamplerState samp;
 
 struct VS_OUT
@@ -53,18 +52,16 @@ float testScene(float3 p)
 	return (2.5) - mbDist;
 }
 
-float castRay(float3 ro, float3 rd, out float minDist)
+float castRay(float3 ro, float3 rd, float startDist, float maxDist, out float minDist)
 {
-	float dist = (-15 - ro.z) / rd.z;
+	float dist = startDist;
 	float i;
-	float maxDist = (15 - ro.z) / rd.z;
 	minDist = 1000000.0;
 
 	/* calculate ray entry */
 	for (i = 0.0; i < 20; i += 1.0)
 	{
 		float currentDist = testScene(ro + rd * dist);
-		//currentDist = min(currentDist, (ro + rd * dist).z + 100);
 		dist += currentDist + 0.1;
 		minDist = min(currentDist, minDist);
 
@@ -117,7 +114,7 @@ float4 main(VS_OUT input) : SV_Target
 		uv.x));
 
 	float minDist;
-	float dist = castRay(ro, rd, minDist);
+	float dist = castRay(ro, rd, ((-ro.z - 15) / rd.z), ((-ro.z + 15) / rd.z), minDist);
 	float4 color = float4(0.0, 0.0, 0.0, 0.0);
 	float3 parallax = (ro * 0.0005);
 
@@ -142,31 +139,23 @@ float4 main(VS_OUT input) : SV_Target
 			float3 p = ro + rd * dist;
 			float3 normal = calcNormal(p);
 			float4 sphereColor = calcColor(p);
-			float3 objectColor = float3(1.0, 1.0, 1.0);
-			//objectColor = float3(1, 1, 1) - sphereColor.rgb;
 			float3 specularity;
-			float3 diffuseColor = float3(0, 0, 0);
 			float3 specularColor = float3(0, 0, 0);
 			float refractiveIndex = 1.5;
 			float3 refractDir = refract(rd, normal, 1.00029 / refractiveIndex);
-			float3 backRayOrigin = p + refractDir * 15;
-			float back = castRay(backRayOrigin, -refractDir, minDist);
-			float3 backp = backRayOrigin - (refractDir * back);
-			float3 backNormal = calcNormal(backp);
-			float3 backSample = refract(refractDir, backNormal, refractiveIndex / 1.00029);
-			float3 irradiance = irradianceMap.Sample(samp, backSample);
+			float3 backRayOrigin = p + refractDir * 20.0;
+			float back = castRay(backRayOrigin, -refractDir, 0, 20, minDist);
+			float3 backp = backRayOrigin + (-refractDir * back);
 			
 			/* absorbtion diffuse */
 			float3 absorbed = exp2(-sphereColor * length(backp - p));
-			diffuseColor = absorbed;
 			float roughness = 1.0 - clamp(sphereColor.a, 0.04, 0.96);
 			specularity = fresnelSchlickRoughness(max(dot(normal, rd), 0.0), float3(0.5, 0.5, 0.5) - sphereColor.rgb, roughness);
 
 			/* refraction diffuse */
 			float3 refractColor = float3(0.0, 0.0, 0.0);
 			if (length(refractColor) <= 0.00001) {
-				refractColor = irradianceMap.Sample(samp, backSample + parallax);
-				refractColor *= irradiance;
+				refractColor = irradianceMap.Sample(samp, rd + parallax);
 				refractColor *= absorbed;
 			}
 
@@ -180,13 +169,11 @@ float4 main(VS_OUT input) : SV_Target
 			}
 			if (length(specularColor) <= 0.00001) {
 				specularColor += radianceMap.Sample(samp, reflectDir + parallax);
-				//specularColor *= 2.0;
 				specularColor *= irradianceMap.Sample(samp, reflectDir + parallax);
 			}
 
 			/* final color */
 			color.rgb = (1.0 - specularity) * (refractColor) + specularity * specularColor;
-			//color.rgb = refractColor;
 		}
 	}
 	

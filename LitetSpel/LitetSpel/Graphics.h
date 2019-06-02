@@ -17,7 +17,6 @@ private:
 	ID3D11DepthStencilView* depthStencilView;
 	ID3D11ShaderResourceView* depthResourceView;
 	ID3D11ShaderResourceView* geometryResourceView;
-	ID3D11ShaderResourceView* skyboxResourceView;
 	ID3D11ShaderResourceView* radianceResourceView;
 	ID3D11ShaderResourceView* irradianceResourceView;
 	ID3D11SamplerState* samplerState;
