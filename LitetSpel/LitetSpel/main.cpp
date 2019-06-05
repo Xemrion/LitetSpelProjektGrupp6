@@ -241,12 +241,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	game->gameSounds = &gameSounds;
 
 	ShowWindow(wndHandle, nCmdShow);
-	//gameSounds.StartMenuMusic();
 
 	bool gameLoaded = false;
 	game->setCameraPan(false);
 	game->state = GameState::MenuState;
 	game->menuLoad();
+	gameSounds.StartMenuMusic();
 
 	auto prevFrameTime = std::chrono::steady_clock::now();
 	while (WM_QUIT != msg.message && gameEnd == false)
@@ -280,6 +280,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				gameLoaded = false;
 				gameSounds.PlayPlayerDeathSound();
 				game->menuLoad();
+				gameSounds.StopGameMusic();
+				gameSounds.StartMenuMusic();
 			}
 			if (game->level.player.levelCompleted && playerMove) {
 				gameSounds.StopPlayerMoveLoop();
@@ -296,6 +298,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 				gameLoaded = false;
 				game->leftButtonDown = false;
 				game->menuLoad();
+				gameSounds.StopGameMusic();
+				gameSounds.StartMenuMusic();
 				mouseCoolDown = 1.0;
 			}
 			auto currentFrameTime = std::chrono::steady_clock::now();
