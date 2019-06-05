@@ -313,9 +313,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 			game->update(dt);
 			graphics.setCameraPos(game->getCameraPos(), game->getCameraPan());
 			graphics.setMovingBoxes(game->level.movingBoxes);
-			graphics.setMetaballs(game->level.spheres);
-			graphics.setLasers(game->level.laserGraphics);
-			graphics.castPlayerShadow(game->level.player.pos);
+			if (game->state == GameState::LevelState) {
+				graphics.setMetaballs(game->level.spheres);
+				graphics.setLasers(game->level.laserGraphics);
+				graphics.castPlayerShadow(game->level.player.pos);
+			}
 			graphics.swapBuffer();
 			powerCoolDown -= (float)dt;
 			mouseCoolDown -= (float)dt;
